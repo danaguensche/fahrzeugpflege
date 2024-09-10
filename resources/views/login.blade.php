@@ -7,15 +7,10 @@
 
     <title>Home</title>
 
-    @vite(['resources/js/app.js', '../resources/css/app.css'])
+    @vite(['resources/js/app.js', 'resources/css/main.css'])
 
 </head>
 
 <body>
-    <h1>TEST</h1>
-
-    <div id="app">
-        <mainapp />
-    </div>
-
+    <h1 class="rubik-font">Login</h1>
 </body </html>

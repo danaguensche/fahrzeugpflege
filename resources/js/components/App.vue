@@ -1,13 +1,14 @@
 <template>
   <div id="app">
     <div id="sidebar">
+      <h1>component</h1>
       <MainSidebar />
     </div>
   </div>
 </template>
 
 <script>
-import MainSidebar from "./components/sidebar/MainSidebar.vue";
+import MainSidebar from "../components/sidebar/MainSidebar.vue";
 
 export default {
   name: "App",
