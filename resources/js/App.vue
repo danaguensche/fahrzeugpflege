@@ -21,5 +21,3 @@ export default {
 <style>
 @import url("../../resources/css/main.css");
 </style>
-
-<!-- test -->
