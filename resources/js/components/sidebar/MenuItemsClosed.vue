@@ -38,7 +38,7 @@ export default {
 
     methods: {
         getImageSrc(iconName) {
-            return require(`../../img/sidebar-img/${iconName}-icon.png`);
+            return require(`../../../img/sidebar-img/${iconName}-icon.png`);
         }
     }
 }

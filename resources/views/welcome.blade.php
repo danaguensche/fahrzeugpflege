@@ -7,15 +7,18 @@
 
     <title>Home</title>
 
-    @vite(['resources/js/app.js', '../resources/css/app.css'])
+    @vite(['resources/js/app.js'])
 
 </head>
 
 <body>
-    <h1>TEST</h1>
-
+    <h1>welcome.blade.php</h1>
     <div id="app">
-        <mainapp />
+        <mainapp></mainapp>
     </div>
 
-</body </html>
+</body>
+
+<script src="{{mix('/js/app.js')}}"></script>
+
+</html>

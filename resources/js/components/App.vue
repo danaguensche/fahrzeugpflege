@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div id="sidebar">
-      <h1>component</h1>
+      <h2>component</h2>
       <MainSidebar />
     </div>
   </div>
@@ -20,5 +20,5 @@ export default {
 </script>
 
 <style>
-@import url("../../resources/css/main.css");
+@import url("../../css/main.css");
 </style>
