@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <div id="sidebar">
-      <h2>component</h2>
       <MainSidebar />
     </div>
   </div>

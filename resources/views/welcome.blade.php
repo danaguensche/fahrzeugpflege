@@ -7,12 +7,9 @@
 
     <title>Home</title>
 
-    @vite(['resources/js/app.js'])
-
 </head>
 
 <body>
-    <h1>welcome.blade.php</h1>
     <div id="app">
         <mainapp></mainapp>
     </div>
