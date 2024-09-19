@@ -48,7 +48,7 @@ export default {
         },
 
         removeUmlauts(str) {
-            const umlautMap = {
+            const umlaute = {
                 'ä': 'ae',
                 'ö': 'oe',
                 'ü': 'ue',
@@ -59,7 +59,7 @@ export default {
             };
 
             return str.replace(/[äöüßÄÖÜ]/g, function (match) {
-                return umlautMap[match];
+                return umlaute[match];
             });
         }
     }
