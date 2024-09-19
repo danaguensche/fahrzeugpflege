@@ -22,7 +22,6 @@
     align-items: center;
     justify-content: center;
     width: 9ovh;
-
     margin-top: 10vh;
     margin-bottom: 10vh;
 }
@@ -41,7 +40,7 @@
     font-size: 18px;
     padding: 10px 15px;
     text-decoration: none;
-    color: black;
+    color: black; /* Standard Textfarbe */
     transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -54,13 +53,17 @@
     margin-top: 50px;
 }
 
+/* Hover-Effekt für .sidebar-button */
 .sidebar-button:hover {
     background-color: darkslategray;
     transform: scale(1.05);
+    color: whitesmoke; /* Ändert die Textfarbe auf weiß */
 }
 
-.sidebar-button:hover .sidebar_textContent {
-    color: whitesmoke;
+/* Ändert die Farbe des Textinhalts auf Weiß beim Hover */
+.sidebar-button:hover .sidebar_textContent,
+.sidebar-button:hover a {
+    color: whitesmoke; /* Sicherstellen, dass der Textinhalt weiß wird */
 }
 
 .sidebar-button:hover img {
@@ -73,21 +76,13 @@
     margin-right: 15px;
 }
 
-.sidebar_textContent {
+.sidebar-textContent a {
     font-size: 18px;
     color: black;
     text-align: left;
     font-family: "Rubik", sans-serif;
-}
-
-.sidebar_textContent {
-    color: black;
     text-decoration: none;
     transition: color 0.3s ease;
-}
-
-.sidebar_textContent a:hover {
-    color: whitesmoke;
 }
 
 .rubik-font {
@@ -111,7 +106,7 @@
         height: 24px;
     }
 
-    .sidebar_textContent {
+    .sidebar-textContent {
         font-size: 15px;
     }
 

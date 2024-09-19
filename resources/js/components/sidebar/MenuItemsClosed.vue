@@ -1,11 +1,11 @@
 <template>
     <div v-for="(menuitem, index) in menuitems" :key="menuitem.id"
         :class="['sidebar-button closed', { 'profile-spacing closed': menuitem.name === 'Profil' }]">
-        <img :src="getImageSrc(icons[index].name)" class="icon closed" />
-        <a href="#"></a>
+        <a :href="getRoute(menuitem.name)">
+            <img :src="getImageSrc(icons[index].name)" class="icon closed" />
+        </a>
     </div>
 </template>
-
 
 <script>
 export default {
@@ -28,7 +28,7 @@ export default {
             { id: 2, name: 'calendar' },
             { id: 3, name: 'cars' },
             { id: 4, name: 'jobs' },
-            { id: 5, name: 'berichte' },
+            { id: 5, name: 'reports' },
             { id: 6, name: 'chat' },
             { id: 7, name: 'profile' },
             { id: 8, name: 'settings' },
@@ -38,12 +38,34 @@ export default {
 
     methods: {
         getImageSrc(iconName) {
-            return require(`../../../img/sidebar-img/${iconName}-icon.png`);
+            return import(`../../../img/sidebar-img/${iconName}-icon.png`);
+        },
+
+        getRoute(pageName) {
+            let pageName_lowerCase = pageName.toLowerCase();
+            let pageName_formatted = this.removeUmlauts(pageName_lowerCase);
+            return `http://localhost:8000/${pageName_formatted}`;
+        },
+
+        removeUmlauts(str) {
+            const umlautMap = {
+                'ä': 'ae',
+                'ö': 'oe',
+                'ü': 'ue',
+                'ß': 'ss',
+                'Ä': 'Ae',
+                'Ö': 'Oe',
+                'Ü': 'Ue'
+            };
+
+            return str.replace(/[äöüßÄÖÜ]/g, function (match) {
+                return umlautMap[match];
+            });
         }
     }
 }
 </script>
 
 <style scoped>
-@import url(../../../css/sidebar/main-sidebar-closed.css)
+@import url(../../../css/sidebar/main-sidebar-closed.css);
 </style>
