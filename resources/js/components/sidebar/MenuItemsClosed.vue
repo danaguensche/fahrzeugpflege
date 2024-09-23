@@ -5,6 +5,7 @@
             <img :src="getImageSrc(icons[index].name)" class="icon closed" />
         </a>
     </div>
+    <h1>miau</h1>
 </template>
 
 <script>
