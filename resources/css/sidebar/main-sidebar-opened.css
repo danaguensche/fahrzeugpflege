@@ -1,0 +1,116 @@
+.sidebar-full {}
+
+.sidebar-container {
+    width: 260px;
+    height: 98vh;
+    background-color: #f5f5f5;
+    color: #333;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    border-radius: 10px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-buttons-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 9ovh;
+    margin-top: 10vh;
+    margin-bottom: 10vh;
+}
+
+.sidebar-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    margin-bottom: 2vh;
+    background-color: whitesmoke;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: black; /* Standard Textfarbe */
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+::selection {
+    background-color: transparent;
+}
+
+.sidebar-button.profile-spacing {
+    margin-top: 50px;
+}
+
+/* Hover-Effekt für .sidebar-button */
+.sidebar-button:hover {
+    background-color: darkslategray;
+    transform: scale(1.05);
+    color: whitesmoke; /* Ändert die Textfarbe auf weiß */
+}
+
+/* Ändert die Farbe des Textinhalts auf Weiß beim Hover */
+.sidebar-button:hover .sidebar_textContent,
+.sidebar-button:hover a {
+    color: whitesmoke; /* Sicherstellen, dass der Textinhalt weiß wird */
+}
+
+.sidebar-button:hover img {
+    filter: brightness(200%);
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 15px;
+}
+
+.sidebar-textContent a {
+    font-size: 18px;
+    color: black;
+    text-align: left;
+    font-family: "Rubik", sans-serif;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.rubik-font {
+    font-family: "Rubik", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .sidebar-container {
+        width: 220px;
+    }
+
+    .sidebar-button {
+        width: 160px;
+    }
+
+    .icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .sidebar-textContent {
+        font-size: 15px;
+    }
+
+    .sidebar-button.profile-spacing {
+        margin-top: 5vh;
+    }
+}
