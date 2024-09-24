@@ -1,18 +1,29 @@
 <template>
-    <div class="sidebar-textContent rubik-font">
-        <div v-for="(menuitem, index) in menuitems" :key="menuitem.id"
-            :class="['sidebar-button', { 'profile-spacing': menuitem.name === 'Profil' }]">
-            <img :src="getImageSrc(icons[index].name)" class="icon" />
-            <a :href="getRoute(menuitem.name)">{{ menuitem.name }}</a>
+    <div class="sidebar-container">
+        <div class="sidebar-textContent rubik-font">
+            <div class="sidebar-buttons-wrapper">
+                <div v-for="(menuitem, index) in menuitems" :key="menuitem.id"
+                    :class="['sidebar-button', { 'profile-spacing': menuitem.name === 'Profil' }]">
+
+                    <div v-if="iconPaths[index]" class="icon-wrapper">
+                        <img :src="iconPaths[index].name" class="icon" />
+                    </div>
+
+                    <a :href="getRoute(menuitem.name)">{{ menuitem.name }}</a>
+                </div>
+            </div>
         </div>
     </div>
 </template>
+
 
 <script>
 export default {
     name: 'MenuItemsOpened',
 
     data: () => ({
+
+        //Text-Inhalte der Sidebar
         menuitems: [
             { id: 1, name: 'Dashboard' },
             { id: 2, name: 'Kalender' },
@@ -24,31 +35,33 @@ export default {
             { id: 8, name: 'Einstellungen' },
             { id: 9, name: 'Abmelden' },
         ],
-        icons: [
-            { id: 1, name: 'dashboard' },
-            { id: 2, name: 'calendar' },
-            { id: 3, name: 'cars' },
-            { id: 4, name: 'jobs' },
-            { id: 5, name: 'reports' },
-            { id: 6, name: 'chat' },
-            { id: 7, name: 'profile' },
-            { id: 8, name: 'settings' },
-            { id: 9, name: 'logout' },
+
+        //Bildnamen
+        iconPaths: [
+            { id: 1, name: new URL('@/img/sidebar-img/dashboard-icon.png', import.meta.url).href },
+            { id: 2, name: new URL('@/img/sidebar-img/calendar-icon.png', import.meta.url).href },
+            { id: 3, name: new URL('@/img/sidebar-img/cars-icon.png', import.meta.url).href },
+            { id: 4, name: new URL('@/img/sidebar-img/jobs-icon.png', import.meta.url).href },
+            { id: 5, name: new URL('@/img/sidebar-img/reports-icon.png', import.meta.url).href },
+            { id: 6, name: new URL('@/img/sidebar-img/chat-icon.png', import.meta.url).href },
+            { id: 7, name: new URL('@/img/sidebar-img/profile-icon.png', import.meta.url).href },
+            { id: 8, name: new URL('@/img/sidebar-img/settings-icon.png', import.meta.url).href },
+            { id: 9, name: new URL('@/img/sidebar-img/logout-icon.png', import.meta.url).href },
         ]
     }),
 
     methods: {
-        getImageSrc(iconName) {
-            return import(`../../../img/sidebar-img/${iconName}-icon.png`);
-        },
 
+        //Formatiert Einträge aus dem menuitems Array und gibt die Route zu der dazugehörigen Seite zurück
         getRoute(pageName) {
-            let pageName_lowerCase = pageName.toLowerCase();
-            let pageName_formatted = this.removeUmlauts(pageName_lowerCase);
-            return `http://localhost:8000/${pageName_formatted}`;
+            let pageName_lowerCase = pageName.toLowerCase()
+            let pageName_formatted = this.removeUmlaute(pageName_lowerCase)
+            return `http://localhost:8000/${pageName_formatted}`
         },
 
-        removeUmlauts(str) {
+
+        //Entfernt Umlaute aus einem String
+        removeUmlaute(str) {
             const umlaute = {
                 'ä': 'ae',
                 'ö': 'oe',
@@ -60,13 +73,13 @@ export default {
             };
 
             return str.replace(/[äöüßÄÖÜ]/g, function (match) {
-                return umlaute[match];
-            });
+                return umlaute[match]
+            })
         }
     }
 }
 </script>
 
 <style scoped>
-@import url(../../../css/sidebar/main-sidebar-opened.css);
+@import url(../../../css/sidebar/main-sidebar-opened.css)
 </style>

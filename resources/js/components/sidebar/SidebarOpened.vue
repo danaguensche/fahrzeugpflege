@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import MenuItemsOpened from "./MenuItemsOpened.vue";
+import MenuItemsOpened from "./MenuItemsOpened.vue"
 
 export default {
     name: 'SidebarOpened',

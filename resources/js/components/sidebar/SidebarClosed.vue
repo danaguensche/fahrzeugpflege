@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import MenuItemsClosed from './MenuItemsClosed.vue';
+import MenuItemsClosed from './MenuItemsClosed.vue'
 
 export default {
     name: 'SidebarClosed',

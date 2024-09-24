@@ -14,6 +14,10 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
+    # Serve static assets (images, css, js) directly if they exist
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^(.*)\.(jpg|jpeg|png|gif|css|js|svg|webp|woff|woff2|ttf|eot)$ - [L]
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f

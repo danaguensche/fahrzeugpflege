@@ -8,10 +8,10 @@
 </template>
 
 <script>
-import SidebarButtonClosed from "./SidebarButtonClosed.vue";
-import SidebarButtonOpened from "./SidebarButtonOpened.vue";
-import SidebarOpened from "./SidebarOpened.vue";
-import SidebarClosed from "./SidebarClosed.vue";
+import SidebarButtonClosed from "./SidebarButtonClosed.vue"
+import SidebarButtonOpened from "./SidebarButtonOpened.vue"
+import SidebarOpened from "./SidebarOpened.vue"
+import SidebarClosed from "./SidebarClosed.vue"
 
 export default {
   name: "MainSidebar",
@@ -28,8 +28,8 @@ export default {
 
   methods: {
     toggleSidebar() {
-      this.isSidebarOpen = !this.isSidebarOpen;
+      this.isSidebarOpen = !this.isSidebarOpen
     },
   },
-};
+}
 </script>

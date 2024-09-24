@@ -40,7 +40,7 @@
     font-size: 18px;
     padding: 10px 15px;
     text-decoration: none;
-    color: black; /* Standard Textfarbe */
+    color: black;
     transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -53,17 +53,15 @@
     margin-top: 50px;
 }
 
-/* Hover-Effekt für .sidebar-button */
 .sidebar-button:hover {
     background-color: darkslategray;
     transform: scale(1.05);
-    color: whitesmoke; /* Ändert die Textfarbe auf weiß */
+    color: whitesmoke; 
 }
 
-/* Ändert die Farbe des Textinhalts auf Weiß beim Hover */
 .sidebar-button:hover .sidebar_textContent,
 .sidebar-button:hover a {
-    color: whitesmoke; /* Sicherstellen, dass der Textinhalt weiß wird */
+    color: whitesmoke;
 }
 
 .sidebar-button:hover img {

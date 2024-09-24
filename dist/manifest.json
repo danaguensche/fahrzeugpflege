@@ -1,0 +1,73 @@
+{
+  "resources/css/main.css": {
+    "file": "assets/main-Dpie5UZ5.css",
+    "src": "resources/css/main.css",
+    "isEntry": true
+  },
+  "resources/img/sidebar-img/calendar-icon.png": {
+    "file": "assets/calendar-icon-CmEiUby_.png",
+    "src": "resources/img/sidebar-img/calendar-icon.png"
+  },
+  "resources/img/sidebar-img/cars-icon.png": {
+    "file": "assets/cars-icon-DzkOgjAL.png",
+    "src": "resources/img/sidebar-img/cars-icon.png"
+  },
+  "resources/img/sidebar-img/chat-icon.png": {
+    "file": "assets/chat-icon-D9dKKZes.png",
+    "src": "resources/img/sidebar-img/chat-icon.png"
+  },
+  "resources/img/sidebar-img/dashboard-icon.png": {
+    "file": "assets/dashboard-icon-CAIXilEl.png",
+    "src": "resources/img/sidebar-img/dashboard-icon.png"
+  },
+  "resources/img/sidebar-img/increase-icon.png": {
+    "file": "assets/increase-icon-CAm9xdJu.png",
+    "src": "resources/img/sidebar-img/increase-icon.png"
+  },
+  "resources/img/sidebar-img/jobs-icon.png": {
+    "file": "assets/jobs-icon-B_GHknOh.png",
+    "src": "resources/img/sidebar-img/jobs-icon.png"
+  },
+  "resources/img/sidebar-img/logout-icon.png": {
+    "file": "assets/logout-icon-h9aPZeif.png",
+    "src": "resources/img/sidebar-img/logout-icon.png"
+  },
+  "resources/img/sidebar-img/profile-icon.png": {
+    "file": "assets/profile-icon-Djnr2mpq.png",
+    "src": "resources/img/sidebar-img/profile-icon.png"
+  },
+  "resources/img/sidebar-img/reduce-icon.png": {
+    "file": "assets/reduce-icon-ByljPm_f.png",
+    "src": "resources/img/sidebar-img/reduce-icon.png"
+  },
+  "resources/img/sidebar-img/reports-icon.png": {
+    "file": "assets/reports-icon-N2rV8TTf.png",
+    "src": "resources/img/sidebar-img/reports-icon.png"
+  },
+  "resources/img/sidebar-img/settings-icon.png": {
+    "file": "assets/settings-icon-D4GeoFNu.png",
+    "src": "resources/img/sidebar-img/settings-icon.png"
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-CoAglfaK.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "css": [
+      "assets/app-DGBX6tZA.css"
+    ],
+    "assets": [
+      "assets/increase-icon-CAm9xdJu.png",
+      "assets/reduce-icon-ByljPm_f.png",
+      "assets/dashboard-icon-CAIXilEl.png",
+      "assets/calendar-icon-CmEiUby_.png",
+      "assets/cars-icon-DzkOgjAL.png",
+      "assets/jobs-icon-B_GHknOh.png",
+      "assets/reports-icon-N2rV8TTf.png",
+      "assets/chat-icon-D9dKKZes.png",
+      "assets/profile-icon-Djnr2mpq.png",
+      "assets/settings-icon-D4GeoFNu.png",
+      "assets/logout-icon-h9aPZeif.png"
+    ]
+  }
+}
