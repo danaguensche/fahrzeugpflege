@@ -3,6 +3,7 @@
         <h1>ANMELDEN</h1>
         <input type="text" id="email" placeholder="Email">
         <input type="password" id="password" placeholder="Passwort">
+        <a href="#" id="forgot-password">Passwort vergessen?</a>
 
     </div>
 </template>

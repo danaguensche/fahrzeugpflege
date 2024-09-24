@@ -8,6 +8,8 @@ import ChatPage from './components/pages/ChatPage.vue';
 import ProfilePage from './components/pages/ProfilePage.vue';
 import SettingsPage from './components/pages/SettingsPage.vue';
 import LogoutPage from './components/pages/LogoutPage.vue';
+import LoginPage from './components/pages/LoginPage.vue';
+import WelcomePage from './components/pages/WelcomePage.vue';
 
 const routes = [
     {
@@ -45,6 +47,14 @@ const routes = [
     {
         path: '/abmelden',
         component: LogoutPage
+    },
+    {
+        path: '/login',
+        component: LoginPage
+    },
+    {
+        path: '/',
+        component: WelcomePage
     }
 ];
 

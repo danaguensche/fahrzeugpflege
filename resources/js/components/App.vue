@@ -2,7 +2,6 @@
   <div id="app">
     <div id="sidebar">
       <router-view></router-view>
-      <p>hello world</p>
     </div>
   </div>
 </template>
