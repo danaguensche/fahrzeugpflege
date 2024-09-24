@@ -11,5 +11,8 @@
 </head>
 
 <body>
-    <h1 class="rubik-font">Login</h1>
-</body </html>
+    <div id="app">
+        <app/>
+    </div>
+</body>
+</html>

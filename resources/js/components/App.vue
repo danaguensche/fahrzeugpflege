@@ -2,18 +2,16 @@
   <div id="app">
     <div id="sidebar">
       <router-view></router-view>
-      <MainSidebar />
+      <p>hello world</p>
     </div>
   </div>
 </template>
 
 <script>
-import MainSidebar from "../components/sidebar/MainSidebar.vue";
 
 export default {
   name: "App",
   components: {
-    MainSidebar
   }
 };
 
