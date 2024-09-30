@@ -1,5 +1,8 @@
-.sidebar-full {}
-
+:root {
+  --clr-light: whitesmoke;
+  --clr-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  --clr-hover: darkslategray;
+}
 .sidebar-container {
     width: 260px;
     height: 98vh;

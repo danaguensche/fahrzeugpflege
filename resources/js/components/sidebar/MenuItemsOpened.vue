@@ -4,11 +4,9 @@
             <div class="sidebar-buttons-wrapper">
                 <div v-for="(menuitem, index) in menuitems" :key="menuitem.id"
                     :class="['sidebar-button', { 'profile-spacing': menuitem.name === 'Profil' }]">
-
                     <div v-if="iconPaths[index]" class="icon-wrapper">
                         <img :src="iconPaths[index].name" class="icon" />
                     </div>
-
                     <a :href="getRoute(menuitem.name)">{{ menuitem.name }}</a>
                 </div>
             </div>

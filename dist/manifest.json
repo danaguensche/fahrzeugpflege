@@ -49,12 +49,12 @@
     "src": "resources/img/sidebar-img/settings-icon.png"
   },
   "resources/js/app.js": {
-    "file": "assets/app-D9NUQCo0.js",
+    "file": "assets/app-Ex9PO7g7.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "css": [
-      "assets/app-Bj9BMrfX.css"
+      "assets/app-DTuCdeBj.css"
     ],
     "assets": [
       "assets/increase-icon-CAm9xdJu.png",
