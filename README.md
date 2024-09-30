@@ -7,6 +7,73 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Installation
+
+1. Voraussetzungen:
+    - Node.js
+    - Laravel
+    - Vite
+    - Vue
+
+2. Schritte:
+    - `php artisan migrate` -> in Konsole eingeben um Datenbank zu migrieren (mySQL Server in xampp starten)
+    - Klone das Repository: `git clone https://dac-gitea01.bbw-hof.de/dana.guensche/fahrzeugpflege-laravel-vue.git`
+      oder Projekt als ZIP herunterladen
+    - Installiere die Abhängigkeiten: `npm install`
+    - Projekt starten: `php artisan serve` -> in Konsole eingeben um Server zu starten
+    - Entwicklungsserver: `npm run dev` | `npm run watch` (macht aktuell noch Probleme)
+    
+
+## Projektstand
+1. Resources:
+    - CSS -> Enthält alle CSS Dateien
+    - IMG -> Enthält alle Bilddateien
+    - JS -> Enthält alle Javascript und Vue JS Dateien
+        -> router.js
+            enthält alle Vue Routen, Vue Komponenten werden zusammengeführt und in den jeweiligen Views implementiert
+        -> app.js
+            stellt die App Komponente für die Views zur Verfügung
+        -> bootstrap.js
+            war einfach dabei, ich weiß noch nicht genau was ich damit anfangen soll
+
+        -> components
+            hier sind alle Vue JS Komponenten organisiert
+                - Login
+                - Sidebar
+                - Pages
+            
+            enthält HTML, Style und die Logik des Frontends
+
+2. Views:
+    Hier sind alle Seiten und deren Inhalte verstaut, enthalten PHP Logik und die App.vue 
+
+    auth -> soll die Login/Registrierung enthalten, Authentifierzungslogik und Frontend kommen hier zusammen und werden
+            dann im Browser bereit gestellt
+
+    layouts -> enthält simple layouts die immer wieder verwendet werden können:
+        einfach über z.B. @extends("layouts.default") aufrufbar 
+
+    routes -> web.php legt die Routen für die Views fest, Logik für Routen kann näher in Controllern definiert werden,
+    dazu `php artisan make:controller "CONTROLLER-NAME"` verwenden -> erstellt neuen Controller in app\Http\Controllers
+
+
+## Aktuelles:
+
+30.09.2024
+
+- implementieren einer Login/Registration Logik
+- Design für Login Page 
+
+## Probleme
+
+- Sidebar-Button Links funktionieren nicht richtig (hatte noch keine Lust mich darum zu kümmern, ist ein Design Problem)
+- Bilder für die Sidebar laden nicht im `npm run watch` modus
+
+## To-Dos/Nicht vergessen
+
+- UserController schreiben, der prüft, ob man als Benutzer angemeldet ist und dann die user.`...`.blade.php Views zurückgibt 
+
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

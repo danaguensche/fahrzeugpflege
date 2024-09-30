@@ -20,6 +20,7 @@
 }
 
 .user-options-container {
+    background-color: var(--clr-bg);
 }
 
 .user-options-text {

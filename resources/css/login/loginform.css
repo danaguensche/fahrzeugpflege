@@ -19,25 +19,6 @@
     text-decoration: none;
 }
 
-.user-options-container {
-    background-color: var(--clr-bg);
-}
-
-.user-options-text {
-}
-
-.user-options-registred {}
-
-.user-registred-title {}
-
-.user-registred-login {}
-
-
-
-.user-options-forms {}
-
-.user-forms-login {}
-
 .forms-title {}
 
 .forms-form {}
