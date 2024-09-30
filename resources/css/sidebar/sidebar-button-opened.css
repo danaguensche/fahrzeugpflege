@@ -20,12 +20,18 @@
     background-color: transparent;
 }
 
+.img{
+    transform: rotate(180deg);
+}
+
 .reduce-button:hover {
     background-color: darkslategray;
     transform: scale(1.05);
+    transform: rotate(-360deg);
 }
 
 .reduce-button:hover img {
+    filter: brightness(200%);
     transform: scale(1.05);
 }
 

@@ -17,3 +17,7 @@ export default {
 }
 
 </script>
+
+<style>
+@import url(../../../css/sidebar/main-sidebar-closed.css);
+</style>

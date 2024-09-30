@@ -1,6 +1,6 @@
 <template>
     <button class="reduce-button">
-        <img src="../../../img/sidebar-img/reduce-icon.png">
+        <img class="img" src="../../../img/sidebar-img/menu_arrow.png">
     </button>
 </template>
 

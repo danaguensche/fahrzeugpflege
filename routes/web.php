@@ -7,7 +7,7 @@ Route::get('/', function () {
 });
 
 Route::get('login', function () {
-    return view('login');
+    return view('auth/login');
 });
 
 
@@ -16,35 +16,35 @@ Route::get('/test', function () {
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    return view('pages/dashboard');
 });
 
 Route::get('/kalender', function () {
-    return view('calendar');
+    return view('pages/calendar');
 });
 
 Route::get('/fahrzeuge', function () {
-    return view('cars');
+    return view('pages/cars');
 });
 
 Route::get('/auftraege', function () {
-    return view('jobs');
+    return view('pages/jobs');
 });
 
 Route::get('/berichte', function () {
-    return view('reports');
+    return view('pages/reports');
 });
 
 Route::get('/chat', function () {
-    return view('chat');
+    return view('/pageschat');
 });
 
 Route::get('/profil', function () {
-    return view('profile');
+    return view('pages/profile');
 });
 
 Route::get('/einstellungen', function () {
-    return view('settings');
+    return view('pages/settings');
 });
 
 Route::get('/abmelden', function () {
