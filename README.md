@@ -57,13 +57,6 @@
     dazu `php artisan make:controller "CONTROLLER-NAME"` verwenden -> erstellt neuen Controller in app\Http\Controllers  
 
 
-## Aktuelles:
-
-30.09.2024  
-  
-- implementieren einer Login/Registration Logik  
-- Design für Login Page   
-
 ## Probleme
   
 - Sidebar-Button Links funktionieren nicht richtig (hatte noch keine Lust mich darum zu kümmern, ist ein Design Problem)  
@@ -72,6 +65,15 @@
 ## To-Dos/Nicht vergessen  
 
 - UserController schreiben, der prüft, ob man als Benutzer angemeldet ist und dann die user.`...`.blade.php Views   zurückgibt  
+
+
+## Aktuelles
+
+30.09.2024  
+  
+- implementieren einer Login/Registration Logik  
+- Design für Login Page   
+
 
 
 ## About Laravel
