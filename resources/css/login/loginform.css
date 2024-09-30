@@ -1,0 +1,55 @@
+:root {
+    --clr-light: whitesmoke;
+    --clr-dark: #333;
+    --clr-hover: darkslategray;
+    --clr-button-text: black;
+    --clr-link: black;
+    --clr-hover-text: whitesmoke;
+    --clr-bg: aqua;
+    --clr-box-shadow: rgba(0, 0, 0, 0.1);
+}
+
+.login {}
+
+.rubik-font {
+    font-size: 18px;
+    color: var(--clr-link);
+    text-align: center;
+    font-family: "Rubik", sans-serif;
+    text-decoration: none;
+}
+
+.user-options-container {
+    background-color: var(--clr-bg);
+}
+
+.user-options-text {
+}
+
+.user-options-registred {}
+
+.user-registred-title {}
+
+.user-registred-login {}
+
+
+
+.user-options-forms {}
+
+.user-forms-login {}
+
+.forms-title {}
+
+.forms-form {}
+
+.forms-fieldset {}
+
+.forms-field {}
+
+.forms-field-input {}
+
+.forms-buttons {}
+
+.forms-buttons-forgot {}
+
+.forms-buttons-action {}

@@ -14,29 +14,26 @@
 
         <div class="user-forms-signup">
             <h2 class="forms-title">Registrieren</h2>
-            <form class="forms-form">
-                <fieldset class="forms-fieldset">
-                    <div class="forms-field">
-                        <input type="text" placeholder="Vorname" class="forms-field-input" required />
-                    </div>
-                    <div class="forms-field">
-                        <input type="text" placeholder="Nachname" class="forms-field-input" required />
-                    </div>
-                    <div class="forms-field">
-                        <input type="email" placeholder="Email" class="forms-field-input" required />
-                    </div>
-                    <div class="forms-field">
-                        <input type="password" placeholder="Passwort" class="forms-field-input" required />
-                    </div>
-                </fieldset>
-                <div class="forms-buttons">
-                    <input type="submit" value="Registrieren" class="forms-buttons-action">
-                </div>
+            <form method="POST" class="forms-form">
+                <SignUpForm></SignUpForm>
             </form>
         </div>
 
     </section>
 </template>
+
+<script>
+
+import SignUpForm from './SignUpForm.vue';
+
+export default {
+    name: "SignUp",
+    components: {
+        SignUpForm
+    }
+}
+
+</script>
 
 <style scoped>
 @import url(../../../css/login/signup.css);

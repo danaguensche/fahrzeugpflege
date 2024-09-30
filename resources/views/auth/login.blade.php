@@ -1,18 +1,18 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends("layouts.default")
+@section("title", "Anmelden")
+@section("content")
+<div id="app">
+    <app />
+    @if ($errors->has("email"))
+    <span class="warning">
+        {{$errors->first("email")}}
+    </span>
+    @endif
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    @vite(['resources/css/main.css', 'resources/js/app.js']) 
-    <title>Anmelden</title>
-
-</head>
-
-<body>
-    <div id="app">
-        <app/>
-    </div>
-</body>
-</html>
+    @if ($errors->has("password"))
+    <span class="warning">
+        {{$errors->first("password")}}
+    </span>
+    @endif
+</div>
+@endsection

@@ -1,20 +1,19 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('login', function () {
-    return view('auth/login');
-});
+//Login Routes
+Route::get('/login', [AuthController::class, "login" ]);
+Route::post("/login", [AuthController::class, "loginPost"])
+->name("login.post");
 
 
-Route::get('/test', function () {
-    return view('test');
-});
-
+//User-Pages
 Route::get('/dashboard', function () {
     return view('pages/dashboard');
 });
@@ -51,7 +50,6 @@ Route::get('/abmelden', function () {
     return view('logout');
 });
 
-
-
-
 Route::get('/new', 'TestController@controllerMethod');
+
+
