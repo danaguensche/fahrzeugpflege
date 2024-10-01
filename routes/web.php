@@ -8,9 +8,17 @@ Route::get('/', function () {
 });
 
 //Login Routes
-Route::get('/login', [AuthController::class, "login" ]);
+Route::get('/login', [AuthController::class, "login"])
+    ->name("login");
 Route::post("/login", [AuthController::class, "loginPost"])
-->name("login.post");
+    ->name("login.post");
+
+
+//Registration Routes
+Route::get('/signup', [AuthController::class, "signup"])
+    ->name("signup");
+Route::post("/signup", [AuthController::class, "signupPost"])
+    ->name("signup.post");
 
 
 //User-Pages
@@ -51,5 +59,3 @@ Route::get('/abmelden', function () {
 });
 
 Route::get('/new', 'TestController@controllerMethod');
-
-

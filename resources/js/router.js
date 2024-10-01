@@ -9,6 +9,7 @@ import ProfilePage from './components/pages/ProfilePage.vue';
 import SettingsPage from './components/pages/SettingsPage.vue';
 import LogoutPage from './components/pages/LogoutPage.vue';
 import LoginPage from './components/pages/LoginPage.vue';
+import SignUpPage from './components/pages/SignUpPage.vue';
 import WelcomePage from './components/pages/WelcomePage.vue';
 
 const routes = [
@@ -51,6 +52,10 @@ const routes = [
     {
         path: '/login',
         component: LoginPage
+    },
+    {
+        path: '/signup',
+        component: SignUpPage
     },
     {
         path: '/',

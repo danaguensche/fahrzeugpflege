@@ -14,5 +14,7 @@
         {{$errors->first("password")}}
     </span>
     @endif
+
+    <login :action="{{ route('login.post') }}"></login>
 </div>
 @endsection
