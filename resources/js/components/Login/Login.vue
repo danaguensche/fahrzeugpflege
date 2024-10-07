@@ -1,10 +1,10 @@
 <template>
     <section class="login rubik-font">
-        <div class="user-options-container">
+        <div class="user user-options-container">
             <div class="user-options-unregistered">
                 <h2 class="user-unregistered-title">Haben Sie noch keinen Account?</h2>
                 <p>Hier können Sie sich einen Account erstellen</p>
-                <button class="user-unregistered-signup" id="signup-button">Registrieren</button>
+                <button @click="redirectToSignup" class="user-unregistered-signup" id="signup-button">Registrieren</button>
             </div>
         </div>
         <div class="user-options-forms" id="user-options-forms">
@@ -23,10 +23,16 @@ export default {
     name: "Login",
     components: {
         LoginForm
+    },
+
+    methods: {
+        redirectToSignup(){
+                window.location.href = "/signup"
+        }
     }
 }
 
 </script>
-<style scoped>
+<style>
 @import url(../../../css/login/login.css);
 </style>

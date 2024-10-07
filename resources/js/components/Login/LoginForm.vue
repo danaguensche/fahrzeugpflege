@@ -9,8 +9,9 @@
             </div>
         </fieldset>
         <div class="forms-buttons">
-            <input type="submit" value="Anmelden" class="forms-buttons-action">
             <a href="#" class="forms-buttons-forgot">Passwort vergessen?</a>
+            <button type="submit" class="forms-buttons-action">Anmelden</button>
+            
         </div>
     </form>
 
@@ -24,6 +25,6 @@ export default {
 
 </script>
 
-<style scoped>
-@import url(../../../css/login/loginform.css);
+<style>
+@import url(../../../css/login/login.css);
 </style>

@@ -1,5 +1,4 @@
 <template>
-    <MainSidebar></MainSidebar>
 </template>
 
 <script>
