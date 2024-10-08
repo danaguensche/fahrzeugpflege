@@ -11,7 +11,7 @@
         <div class="forms-buttons">
             <a href="#" class="forms-buttons-forgot">Passwort vergessen?</a>
             <button type="submit" class="forms-buttons-action">Anmelden</button>
-            
+
         </div>
     </form>
 
@@ -24,7 +24,3 @@ export default {
 }
 
 </script>
-
-<style>
-@import url(../../../css/login/login.css);
-</style>

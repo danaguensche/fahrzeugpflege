@@ -1,23 +1,12 @@
 <template>
     <section class="registration rubik-font">
-        <div class="user user-options-container">
-            <div class="user-options-text">
-                <div class="user-options-text">
-                    <div class="user-options-registered">
-                        <h2 class="user-registered-title">Haben Sie schon einen Account?</h2>
-                        <p>Hier kommen Sie zur Anmeldung</p>
-                        <button @click="redirectToLogin" class="user-registered-login"
-                            id="login-button">Anmelden</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <UserRegistered></UserRegistered>
         <div class="user-options-forms">
             <div class="user-forms-signup">
                 <h2 class="forms-title">Registrieren</h2>
                 <form method="POST" class="forms-form">
                     <SignUpForm></SignUpForm>
+                    
                 </form>
             </div>
         </div>
@@ -29,11 +18,13 @@
 <script>
 
 import SignUpForm from './SignUpForm.vue';
+import UserRegistered from './UserRegistered.vue';
 
 export default {
     name: "SignUp",
     components: {
-        SignUpForm
+        SignUpForm,
+        UserRegistered
     },
     methods: {
         redirectToLogin() {
@@ -43,7 +34,3 @@ export default {
 }
 
 </script>
-
-<style>
-@import url(../../../css/login/login.css);
-</style>

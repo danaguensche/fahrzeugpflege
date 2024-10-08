@@ -1,4 +1,4 @@
-:root{
+:root {
     /* Farben */
     --bg-light: #f0f0f0;
     --bg-dark: #333;
@@ -9,50 +9,50 @@
     --fc-link: #999;
     --fc-link-hover: #666;
     --form-border: #ccc;
+
+    /* Breakpoints */
+    --breakpoint-mobile: 990px;
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    border: none;
 }
 
-.rubik-font {
-    font-family: "Rubik", sans-serif;
-    font-weight: 400;
-    font-style: normal;
-}
-
-body {
+.login-page {
     font-family: 'Rubik', sans-serif;
     font-size: 14px;
     line-height: 1.5;
     background-color: var(--bg-light);
     display: flex;
     justify-content: center;
+    user-select: none;
 }
 
-button {
+button,
+input[type="submit"] {
     background-color: var(--salmon);
-    border: 0;
-    outline: 0;
+    border: none;
+    outline: none;
     cursor: pointer;
+    color: var(--white);
+}
+
+button:hover,
+input[type="submit"]:hover {
+    background-color: var(--salmon-hover);
 }
 
 input {
     background-color: transparent;
-    padding: 0;
-    border: 0;
-    outline: 0;
-}
-
-input[type="submit"] {
-    cursor: pointer;
+    border: none;
+    outline: none;
 }
 
 input::placeholder {
     font-size: 0.9rem;
-    font-family: 'Rubik', sans-serif;
     font-weight: 300;
     letter-spacing: .05rem;
     color: var(--fc-placeholder);
@@ -61,7 +61,6 @@ input::placeholder {
 .user {
     display: flex;
     flex-direction: column;
-    justify-content: top;
     align-items: center;
     width: 100%;
     height: 50vh;
@@ -71,11 +70,11 @@ input::placeholder {
 }
 
 .user-options-container {
-    width: 110%;
+    width: 100%;
     max-width: 1100px;
-    margin-bottom: 30px;
     height: 100vh;
     background-color: var(--bg-dark);
+    margin-bottom: 30px;
     position: relative;
 }
 
@@ -99,8 +98,8 @@ input::placeholder {
 .user-unregistered-title {
     margin-bottom: 20px;
     font-size: 2rem;
-    line-height: 1.2;
     font-weight: 500;
+    line-height: 1.2;
 }
 
 .user-unregistered-text,
@@ -117,48 +116,43 @@ input::placeholder {
     padding: 12px 35px;
     color: var(--white);
     text-transform: uppercase;
-    line-height: 1.2;
     letter-spacing: .2rem;
-    transition: background-color .2s ease-in-out, color .2s ease-in-out;
+    transition: background-color 0.2s, color 0.2s;
+    text-align: center;
 }
 
 .user-registered-login:hover,
 .user-unregistered-signup:hover {
-    color: var(--salmon);
     background-color: var(--white);
+    color: var(--salmon);
     transform: scale(1.05);
 }
 
 .user-options-forms {
     position: absolute;
-    top: 350px; 
+    top: 350px;
     left: 50%;
-    transform: translateX(-50%); 
+    transform: translateX(-50%);
     width: 90%;
     max-width: 700px;
     background-color: var(--white);
     border-radius: 10px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
     padding: 40px;
-    z-index: 10; 
+    z-index: 10;
 }
 
 .forms-title {
     margin-bottom: 50px;
     font-size: 1.8rem;
     font-weight: 500;
-    line-height: 1.2;
-    text-transform: uppercase;
     color: var(--salmon);
-    letter-spacing: .15rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15rem;
 }
 
 .forms-field:not(:last-of-type) {
     margin-bottom: 25px;
-}
-
-.forms-fieldset {
-    border: none;
 }
 
 .forms-field-input {
@@ -169,7 +163,7 @@ input::placeholder {
     font-size: 1rem;
     font-weight: 300;
     color: var(--bg-dark);
-    transition: border-color .2s ease-in-out;
+    transition: border-color 0.2s;
 }
 
 .forms-field-input:focus {
@@ -183,11 +177,9 @@ input::placeholder {
 }
 
 .forms-buttons-forgot {
-    font-family: 'Rubik', sans-serif;
-    letter-spacing: .05rem;
     color: var(--fc-link);
     text-decoration: underline;
-    transition: color .2s ease-in-out;
+    transition: color 0.2s;
 }
 
 .forms-buttons-forgot:hover {
@@ -201,10 +193,9 @@ input::placeholder {
     font-size: 1rem;
     font-family: 'Rubik', sans-serif;
     font-weight: 400;
-    color: var(--white);
     text-transform: uppercase;
-    letter-spacing: .1rem;
-    transition: background-color .2s ease-in-out;
+    letter-spacing: 0.1rem;
+    transition: background-color 0.2s;
 }
 
 .forms-buttons-action:hover {
@@ -212,7 +203,27 @@ input::placeholder {
     transform: scale(1.05);
 }
 
-@media screen and (max-width: 990px) {
+@keyframes slideTop {
+    from {
+        transform: translateY(-300px);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+} 
+@keyframes slideDown {
+    from {
+        transform: translateY(300px);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: var(--breakpoint-mobile)) {
     .user-options-container {
         width: 100%;
     }

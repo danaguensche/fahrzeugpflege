@@ -1,16 +1,10 @@
 <template>
     <section class="login rubik-font">
-        <div class="user user-options-container">
-            <div class="user-options-unregistered">
-                <h2 class="user-unregistered-title">Haben Sie noch keinen Account?</h2>
-                <p>Hier können Sie sich einen Account erstellen</p>
-                <button @click="redirectToSignup" class="user-unregistered-signup" id="signup-button">Registrieren</button>
-            </div>
-        </div>
+        <UserUnregistered></UserUnregistered>
         <div class="user-options-forms" id="user-options-forms">
             <div class="user-forms-login">
                 <h2 class="forms-title">Anmelden</h2>
-                    <LoginForm></LoginForm>
+                <LoginForm></LoginForm>
             </div>
         </div>
     </section>
@@ -19,20 +13,20 @@
 <script>
 
 import LoginForm from './LoginForm.vue';
+import UserUnregistered from './UserUnregistered.vue';
 export default {
     name: "Login",
     components: {
-        LoginForm
+        LoginForm,
+        UserUnregistered
     },
 
     methods: {
-        redirectToSignup(){
-                window.location.href = "/signup"
+        redirectToSignup() {
+            window.location.href = "/signup"
         }
     }
 }
 
 </script>
-<style>
-@import url(../../../css/login/login.css);
-</style>
+
