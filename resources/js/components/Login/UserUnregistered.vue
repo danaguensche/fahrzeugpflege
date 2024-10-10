@@ -3,24 +3,33 @@
         <div class="user-options-unregistered">
             <h2 class="user-unregistered-title">Haben Sie noch keinen Account?</h2>
             <p>Hier können Sie sich einen Account erstellen</p>
-            <UnregisteredButton></UnregisteredButton>
+            <RegisteredButton :buttonLabel="'Registrieren'"></RegisteredButton>
         </div>
     </div>
-
 </template>
 
 <script>
-import UnregisteredButton from './Slots/UnregisteredButton.vue';
+import RegisteredButton from './Slots/RegisteredButton.vue';
 
 export default {
     name: "UserUnregistered",
     components: {
-        UnregisteredButton
+        RegisteredButton
     },
     data() {
         return {
-            signup_isActive: false
+            isActive: false,
+            ButtonLabel: "Registrieren"
         };
+    },
+
+    methods: {
+        update_ButtonLabel(newName) {
+            this.ButtonLabel = newName;
+        },
+        update_isActive() {
+            this.isActive = false;
+        }
     }
 }
 </script>

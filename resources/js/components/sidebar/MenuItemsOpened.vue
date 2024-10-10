@@ -77,7 +77,6 @@ export default {
     }
 }
 </script>
-
 <style scoped>
 @import url(../../../css/sidebar/main-sidebar-opened.css)
 </style>

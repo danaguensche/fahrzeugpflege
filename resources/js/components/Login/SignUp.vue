@@ -6,7 +6,7 @@
                 <h2 class="forms-title">Registrieren</h2>
                 <form method="POST" class="forms-form">
                     <SignUpForm></SignUpForm>
-                    
+
                 </form>
             </div>
         </div>

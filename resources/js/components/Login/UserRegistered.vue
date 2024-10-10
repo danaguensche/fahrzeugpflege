@@ -5,7 +5,7 @@
                 <div class="user-options-registered">
                     <h2 class="user-registered-title">Haben Sie schon einen Account?</h2>
                     <p>Hier kommen Sie zur Anmeldung</p>
-                    <RegisteredButton></RegisteredButton>
+                    <RegisteredButton :buttonLabel="'Anmelden'"></RegisteredButton>
                 </div>
             </div>
         </div>
@@ -23,8 +23,18 @@ export default {
 
     data() {
         return {
-            login_isActive: false
+            login_isActive: false,
+            buttonLabel: "Anmelden",
         };
+    },
+
+    methods: {
+        update_ButtonLabel(newName) {
+            this.buttonLabel = newName;
+        },
+        update_isActive() {
+            this.login_isActive = false;
+        }
     }
 }
 </script>

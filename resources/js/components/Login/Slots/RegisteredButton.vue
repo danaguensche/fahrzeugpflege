@@ -1,5 +1,5 @@
 <template>
-    <button @click="goToLogin" class="user-registered-login" id="login-button">Anmelden
+    <button @click="goToLogin" class="user-registered-login" id="login-button">{{ buttonLabel }}
         <slot></slot>
     </button>
 
@@ -9,14 +9,16 @@
 
 export default {
     name: "RegisteredButton",
-    
-    props: {
-        login_isActive: Boolean
-    },
 
-    data(){
-        return {
-            login_isActive: false
+    props: {
+        isActive: {
+            type: Boolean,
+            default: false
+        },
+
+        buttonLabel: {
+            type: String,
+            default: ""
         }
     },
 
@@ -24,10 +26,16 @@ export default {
         goToLogin() {
             this.login_isActive = !this.login_isActive;
             console.log(this.login_isActive);
+        },
+
+        setButtonLabel(name) {
+            this.buttonLabel = name;
+        },
+
+        set_isActive() {
+            this.isActive = false;
         }
     }
 }
 
 </script>
-
-

@@ -203,6 +203,12 @@ input::placeholder {
     transform: scale(1.05);
 }
 
+.error-message {
+    color: red;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
 @keyframes slideTop {
     from {
         transform: translateY(-300px);
