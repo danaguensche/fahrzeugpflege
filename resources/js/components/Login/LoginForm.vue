@@ -10,17 +10,13 @@
         </fieldset>
         <div class="forms-buttons">
             <a href="#" class="forms-buttons-forgot">Passwort vergessen?</a>
-            <SubmitButton :buttonLabel="'Anmelden'"></SubmitButton>
-
-
+            <SubmitButton :buttonLabel="buttonLabel"></SubmitButton>
         </div>
     </form>
-
 </template>
 
 <script>
 import SubmitButton from './Slots/SubmitButton.vue';
-
 
 export default {
     name: "LoginForm",
@@ -32,12 +28,10 @@ export default {
             buttonLabel: "Anmelden"
         }
     },
-
     methods: {
-        update_buttonLabel(newName){
+        update_buttonLabel(newName) {
             this.buttonLabel = newName
         }
     }
 }
-
 </script>

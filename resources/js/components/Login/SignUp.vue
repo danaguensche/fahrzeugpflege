@@ -1,30 +1,22 @@
 <template>
-    <section class="registration rubik-font">
-        <UserRegistered></UserRegistered>
-        <div class="user-options-forms">
+    <section class="login-page">
+        <UserButtons></UserButtons>
+        <div class="user-options-forms user-options-forms-unregistered">
             <div class="user-forms-signup">
                 <h2 class="forms-title">Registrieren</h2>
-                <form method="POST" class="forms-form">
-                    <SignUpForm></SignUpForm>
-
-                </form>
+                <SignUpForm></SignUpForm>
             </div>
         </div>
-
-
     </section>
 </template>
 
 <script>
-
 import SignUpForm from './SignUpForm.vue';
-import UserRegistered from './UserRegistered.vue';
 
 export default {
     name: "SignUp",
     components: {
-        SignUpForm,
-        UserRegistered
+        SignUpForm
     },
     methods: {
         redirectToLogin() {
@@ -32,5 +24,4 @@ export default {
         }
     }
 }
-
 </script>

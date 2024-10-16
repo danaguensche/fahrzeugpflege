@@ -1,31 +1,29 @@
 <template>
-    <section class="login rubik-font">
-        <UserUnregistered></UserUnregistered>
-        <div class="user-options-forms" id="user-options-forms">
-            <div class="user-forms-login">
-                <h2 class="forms-title">Anmelden</h2>
-                <LoginForm></LoginForm>
-            </div>
-        </div>
-    </section>
+  <section class="login-page">
+    <UserButtons></UserButtons>
+    <div class="user-options-forms user-options-forms-registered">
+      <div class="user-forms-login">
+        <h2 class="forms-title">Anmelden</h2>
+        <LoginForm></LoginForm>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script>
-
 import LoginForm from './LoginForm.vue';
-import UserUnregistered from './UserUnregistered.vue';
+import UserButtons from './UserButtons.vue';
+
 export default {
-    name: "Login",
-    components: {
-        LoginForm,
-        UserUnregistered
-    },
-
-    methods: {
-        redirectToSignup() {
-            window.location.href = "/signup"
-        }
+  name: "Login",
+  components: {
+    LoginForm,
+    UserButtons
+  },
+  methods: {
+    redirectToSignup() {
+      window.location.href = "/signup"
     }
+  }
 }
-
 </script>

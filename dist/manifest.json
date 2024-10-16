@@ -45,12 +45,12 @@
     "src": "resources/img/sidebar-img/settings-icon.png"
   },
   "resources/js/app.js": {
-    "file": "assets/app-BeyIE3vM.js",
+    "file": "assets/app-D1BBJTek.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "css": [
-      "assets/app-CHMiKAxG.css"
+      "assets/app-Bj-Pj5sy.css"
     ],
     "assets": [
       "assets/menu_arrow-Dq7yKVRX.png",

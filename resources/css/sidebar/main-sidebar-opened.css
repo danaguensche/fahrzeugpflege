@@ -48,7 +48,7 @@
       border-radius: 10px;
       cursor: pointer;
       font-family: Arial, sans-serif;
-      font-size: 18px;
+      font-size: 1.125rem;
       padding: 10px 15px;
       text-decoration: none;
       color: var(--clr-button-text);
@@ -82,7 +82,7 @@
   }
   
   .sidebar-textContent a {
-      font-size: 18px;
+      font-size: 1.125rem;
       color: var(--clr-link);
       text-align: center;
       font-family: "Rubik", sans-serif;
@@ -112,7 +112,7 @@
       }
   
       .sidebar-textContent {
-          font-size: 15px;
+          font-size: 0.938rem;
       }
   
       .sidebar-button.profile-spacing {
