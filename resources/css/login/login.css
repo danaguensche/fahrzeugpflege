@@ -1,3 +1,20 @@
+/* CSS-Variablen für Wiederverwendbarkeit */
+:root {
+    --primary-color: #ff6f61;
+    --primary-color-hover: #ff4a3d;
+    --secondary-color: #333;
+    --background-color: #fafafa;
+    --text-color-light: #fff;
+    --text-color-dark: #333;
+    --placeholder-color: #aaa;
+    --border-radius: 10px;
+    --box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    --transition-speed: 0.3s;
+    --font-family: 'Rubik', sans-serif;
+    --box-width: 700px;
+}
+
+/* Grundlegende Reset-Styles */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -5,169 +22,153 @@
     border: none;
 }
 
+/* Allgemeine Körper-Styles */
 body {
-    font-family: 'Rubik', sans-serif;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    background-color: #f0f0f0;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    line-height: 1.6;
+    background-color: var(--background-color);
+    color: var(--text-color-dark);
+    padding: 2rem 1rem;
 }
 
+/* Login-Seite Layout */
 .login-page {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: top-center;
     align-items: center;
-    user-select: none;
     min-height: 100vh;
+    padding: 1rem;
 }
 
-button,
-input[type="submit"] {
-    background-color: #e8716d;
-    color: #fff;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-button:hover,
-input[type="submit"]:hover {
-    background-color: #d65b5b;
-}
-
-input {
-    background-color: transparent;
-    border: none;
-    outline: none;
-    font-family: inherit;
-}
-
-input::placeholder {
-    font-size: 0.9rem;
-    font-weight: 300;
-    letter-spacing: 0.05rem;
-    color: #aaa;
-}
-
-.user {
-    width: 100%;
-    background-color: #f0f0f0;
-    background-size: cover;
-    padding: 1.25rem;
-    margin-top: 0;
-}
-
+/* Benutzerbereich-Styles */
 .user-options-container {
-    width: 100%;
-    max-width: 68.75rem;
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
     align-items: center;
+    justify-content: center;
+    width: var(--box-width); /* Einheitliche Box-Breite */
     margin: 0 auto;
 }
 
+/* Benutzeroptionen Text-Bereich */
 .user-options-text {
     display: flex;
-    justify-content: sa;
+    justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: #333;
-    padding: 2.5rem;
-    width: 100%;
-    margin-bottom: 2rem;
+    background-color: var(--secondary-color);
+    padding: 1.5rem;
+    width: 100%; /* Box füllt die gesamte Breite aus */
+    box-shadow: var(--box-shadow);
 }
 
+/* Benutzeroptionen */
 .user-options {
     width: 100%;
-    color: #fff;
+    color: var(--text-color-light);
     font-weight: 300;
+    text-align: center;
 }
 
+/* Titel und Text */
 .user-title {
     margin-bottom: 1.25rem;
     font-size: 2rem;
     font-weight: 500;
     line-height: 1.2;
+    color: var(--primary-color);
 }
 
 .user-text {
-    font-size: 0.95rem;
-    line-height: 1.6;
+    font-size: 1rem;
+    line-height: 1.8;
     margin-bottom: 1.5rem;
 }
 
+/* Benutzeraktion Styles */
 .user-action {
     display: inline-block;
     margin-top: 1rem;
-    border: 0.0625rem solid #e8716d;
-    border-radius: 0.3125rem;
-    padding: 0.75rem 2.1875rem;
-    min-width: 15rem;
-    color: #fff;
+    margin-right: 0.25rem;
+    margin-left: 0.25rem;
+    border: 0.0625rem solid var(--primary-color);
+    border-radius: var(--border-radius);
+    padding: 0.75rem 2rem;
+    color: var(--text-color-light);
     text-transform: uppercase;
     letter-spacing: 0.2rem;
-    transition: background-color 0.2s, color 0.2s;
+    transition: background-color var(--transition-speed), color var(--transition-speed), transform var(--transition-speed);
     text-align: center;
     text-decoration: none;
+    background-color: var(--primary-color);
+    box-shadow: var(--box-shadow);
+    width: 250px;
 }
 
 .user-action:hover {
-    background-color: #fff;
-    color: #e8716d;
+    background-color: var(--text-color-light);
+    color: var(--primary-color);
     transform: scale(1.05);
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
 }
 
+/* Formular-Bereich */
 .user-options-forms {
     width: 100%;
-    max-width: 50rem;
-    background-color: #fff;
-    border-radius: 0.3125rem;
-    box-shadow: 0 0.3125rem 1.25rem rgba(0, 0, 0, 0.2);
-    padding: 2.5rem;
-    transition: all 0.2s ease;
+    background-color: var(--text-color-light);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 3rem;
+    transition: all var(--transition-speed) ease;
     opacity: 1;
-    visibility: visible;
+    margin-bottom: 2rem;
 }
 
+/* Formular-Titel */
 .forms-title {
     margin-bottom: 3.125rem;
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 500;
-    color: #e8716d;
+    color: var(--primary-color);
     text-transform: uppercase;
     letter-spacing: 0.15rem;
+    text-align: center;
 }
 
+/* Formular-Feld */
 .forms-field:not(:last-of-type) {
-    margin-bottom: 1.5625rem;
+    margin-bottom: 1.875rem;
 }
 
 .forms-field-input {
     width: 100%;
-    border-bottom: 0.0625rem solid #ccc;
-    padding: 0.5rem 0;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    padding: 0.75rem;
     font-size: 1rem;
     font-weight: 300;
-    color: #333;
-    transition: border-color 0.2s;
+    color: var(--text-color-dark);
+    transition: border-color var(--transition-speed);
 }
 
 .forms-field-input:focus {
-    border-color: #e8716d;
+    border-color: var(--primary-color);
 }
 
+/* Formular-Buttons */
 .forms-buttons {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 2.5rem;
+    margin-top: 3rem;
 }
 
 .forms-buttons-forgot {
     color: #999;
     text-decoration: underline;
-    transition: color 0.2s;
+    transition: color var(--transition-speed);
 }
 
 .forms-buttons-forgot:hover {
@@ -175,37 +176,42 @@ input::placeholder {
 }
 
 .forms-buttons-action {
-    background-color: #e8716d;
-    border-radius: 0.3125rem;
+    background-color: var(--primary-color);
+    border-radius: var(--border-radius);
     padding: 0.75rem 2.5rem;
     font-size: 1rem;
     font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.1rem;
-    transition: background-color 0.2s, transform 0.2s;
+    transition: background-color var(--transition-speed), transform var(--transition-speed);
+    box-shadow: var(--box-shadow);
+    color:  var(--text-color-light);
 }
 
 .forms-buttons-action:hover {
-    background-color: #d65b5b;
+    background-color: var(--primary-color-hover);
     transform: scale(1.05);
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
 }
 
+/* Fehlermeldung */
 .error-message {
     color: red;
     font-size: 0.875rem;
     margin-top: 0.25rem;
 }
 
-@media screen and (max-width: 61.875rem) {
+/* Medienabfragen für Responsive Design */
+@media screen and (max-width: 768px) {
     .user-options-container {
         width: 100%;
     }
 
-    .user-options-forms {
-        padding: 1.875rem;
+    .user-options-text, .user-options-forms {
+        width: 100%;
     }
 
-    .user-options {
-        padding: 2.5rem 1.25rem;
+    .user-action {
+        width: 200px;
     }
 }
