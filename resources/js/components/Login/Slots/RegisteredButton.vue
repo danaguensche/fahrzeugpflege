@@ -1,5 +1,5 @@
 <template>
-    <button @click="goToLogin" class="user-registered-login" id="login-button">{{ buttonLabel }}
+    <button @click="switchForms" class="user-registered-login" id="login-button">{{ buttonLabel }}
         <slot></slot>
     </button>
 
@@ -23,9 +23,7 @@ export default {
     },
 
     methods: {
-        goToLogin() {
-            this.login_isActive = !this.login_isActive;
-            console.log(this.login_isActive);
+        switchForms() {
         },
 
         setButtonLabel(name) {
@@ -39,3 +37,7 @@ export default {
 }
 
 </script>
+
+<style>
+@import url("../../../../css/login/user-options-buttons.css");
+</style>

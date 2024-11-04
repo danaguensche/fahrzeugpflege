@@ -7,14 +7,14 @@
     --text-color-light: #fff;
     --text-color-dark: #333;
     --placeholder-color: #aaa;
-    --border-radius: 10px;
+    --border-radius: 5px;
     --box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     --transition-speed: 0.3s;
     --font-family: 'Rubik', sans-serif;
-    --box-width: 700px;
+    --box-width: 43.75rem;
 }
 
-/* Grundlegende Reset-Styles */
+/* Grundlegende Styles */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -38,7 +38,6 @@ body {
     flex-direction: column;
     justify-content: top-center;
     align-items: center;
-    min-height: 100vh;
     padding: 1rem;
 }
 
@@ -48,7 +47,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: var(--box-width); /* Einheitliche Box-Breite */
+    width: var(--box-width);
     margin: 0 auto;
 }
 
@@ -60,7 +59,7 @@ body {
     flex-direction: column;
     background-color: var(--secondary-color);
     padding: 1.5rem;
-    width: 100%; /* Box füllt die gesamte Breite aus */
+    width: 100%;
     box-shadow: var(--box-shadow);
 }
 
@@ -72,51 +71,10 @@ body {
     text-align: center;
 }
 
-/* Titel und Text */
-.user-title {
-    margin-bottom: 1.25rem;
-    font-size: 2rem;
-    font-weight: 500;
-    line-height: 1.2;
-    color: var(--primary-color);
-}
-
-.user-text {
-    font-size: 1rem;
-    line-height: 1.8;
-    margin-bottom: 1.5rem;
-}
-
-/* Benutzeraktion Styles */
-.user-action {
-    display: inline-block;
-    margin-top: 1rem;
-    margin-right: 0.25rem;
-    margin-left: 0.25rem;
-    border: 0.0625rem solid var(--primary-color);
-    border-radius: var(--border-radius);
-    padding: 0.75rem 2rem;
-    color: var(--text-color-light);
-    text-transform: uppercase;
-    letter-spacing: 0.2rem;
-    transition: background-color var(--transition-speed), color var(--transition-speed), transform var(--transition-speed);
-    text-align: center;
-    text-decoration: none;
-    background-color: var(--primary-color);
-    box-shadow: var(--box-shadow);
-    width: 250px;
-}
-
-.user-action:hover {
-    background-color: var(--text-color-light);
-    color: var(--primary-color);
-    transform: scale(1.05);
-    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
-}
-
 /* Formular-Bereich */
-.user-options-forms {
-    width: 100%;
+.user-options-forms-registered,
+.user-options-forms-unregistered {
+    width: 43.75rem;
     background-color: var(--text-color-light);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
@@ -157,13 +115,7 @@ body {
     border-color: var(--primary-color);
 }
 
-/* Formular-Buttons */
-.forms-buttons {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 3rem;
-}
+/* Passwort vergessen */
 
 .forms-buttons-forgot {
     color: #999;
@@ -173,25 +125,7 @@ body {
 
 .forms-buttons-forgot:hover {
     color: #666;
-}
-
-.forms-buttons-action {
-    background-color: var(--primary-color);
-    border-radius: var(--border-radius);
-    padding: 0.75rem 2.5rem;
-    font-size: 1rem;
-    font-weight: 400;
-    text-transform: uppercase;
-    letter-spacing: 0.1rem;
-    transition: background-color var(--transition-speed), transform var(--transition-speed);
-    box-shadow: var(--box-shadow);
-    color:  var(--text-color-light);
-}
-
-.forms-buttons-action:hover {
-    background-color: var(--primary-color-hover);
-    transform: scale(1.05);
-    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
 }
 
 /* Fehlermeldung */
@@ -207,7 +141,8 @@ body {
         width: 100%;
     }
 
-    .user-options-text, .user-options-forms {
+    .user-options-text,
+    .user-options-forms {
         width: 100%;
     }
 

@@ -22,3 +22,7 @@ export default {
 }
 
 </script>
+
+<style>
+@import url("../../../../css/login/submit-button.css");
+</style>
