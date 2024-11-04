@@ -1,7 +1,7 @@
 /* CSS-Variablen für Wiederverwendbarkeit */
 :root {
     --primary-color: #ff4c02;
-    --primary-color-hover: #ff6f3c ;
+    --primary-color-hover: #ff6f3c;
     --secondary-color: #333;
     --background-color: #fafafa;
     --text-color-light: #fff;
@@ -39,6 +39,9 @@ body {
     justify-content: top-center;
     align-items: center;
     padding: 1rem;
+     position: relative;
+    width: var(--box-width);
+    margin: 0 auto;
 }
 
 /* Benutzerbereich-Styles */
@@ -74,21 +77,28 @@ body {
 /* Formular-Bereich */
 .user-options-forms-registered,
 .user-options-forms-unregistered {
-    width: 43.75rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
     background-color: var(--text-color-light);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
     padding: 3rem;
     transition: all var(--transition-speed) ease;
-    opacity: 1;
-    margin-bottom: 2rem;
+    opacity: 0;
     visibility: hidden;
 }
 
+.user-options-forms-unregistered {
+    top: -28px;
+}
+
 .user-options-forms-registered.active,
-.user-options-forms-unregistered.active
-{
+.user-options-forms-unregistered.active {
+    opacity: 1;
     visibility: visible;
+    z-index: 1;
 }
 
 
@@ -157,5 +167,14 @@ body {
 
     .user-action {
         width: 200px;
+    }
+
+    .login-page {
+        width: 100%;
+    }
+
+    .user-options-forms-registered,
+    .user-options-forms-unregistered {
+        width: 100%;
     }
 }

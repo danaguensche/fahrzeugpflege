@@ -78,7 +78,7 @@
 
 - neues Package installiert `npm install vuex@next --save`  
    -> VueX ist eine Bibilothek für State-Managment  
-   -> Bietet die Möglichkeit einen zentralen, reaktiven Datenspeicher anzulegen -> store.js  
+   -> Bietet die Möglichkeit einen zentralen, reaktiven Datenspeicher anzulegen -> storage/index.js  
    -> ist geplant um auf bestimmte Daten von einem Ort zugreifen zu können  
 
 

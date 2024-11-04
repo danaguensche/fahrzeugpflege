@@ -2,9 +2,15 @@
     <div class="user-options-container user-options-container-registered">
         <div class="user-options-text">
             <div class="user-options">
-                <RegisteredButton :buttonLabel="'Anmelden'" :class="buttonClass" @click="switchToLogin">
+                <RegisteredButton 
+                    :buttonLabel="'Anmelden'" 
+                    :class="['user-action', { 'active': activeForm === 'login' }]" 
+                    @click="switchToLogin">
                 </RegisteredButton>
-                <RegisteredButton :buttonLabel="'Registrieren'" :class="buttonClass" @click="switchToSignup">
+                <RegisteredButton 
+                    :buttonLabel="'Registrieren'" 
+                    :class="['user-action', { 'active': activeForm === 'signup' }]" 
+                    @click="switchToSignup">
                 </RegisteredButton>
             </div>
         </div>
@@ -13,24 +19,23 @@
 
 <script>
 import RegisteredButton from './Slots/RegisteredButton.vue';
-
+import { mapState, mapActions } from 'vuex';
 
 export default {
     name: "UserRegistered",
     components: {
         RegisteredButton
     },
-    data() {
-        return {
-            buttonClass: "user-action"
-        };
+    computed: {
+        ...mapState(['activeForm'])
     },
     methods: {
+        ...mapActions(['switchForm']),
         switchToLogin() {
-            console.log("Wechsel zum Login");
+            this.switchForm('login');
         },
         switchToSignup() {
-            console.log("Wechsel zur Registrierung");
+            this.switchForm('signup');
         }
     }
 }

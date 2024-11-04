@@ -2,7 +2,7 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
-    activeForm: null
+    activeForm: 'login'
   },
   mutations: {
     setActiveForm(state, formName) {
@@ -10,7 +10,7 @@ export default createStore({
     }
   },
   actions: {
-    updateActiveForm({ commit }, formName) {
+    switchForm({ commit }, formName) {
       commit('setActiveForm', formName)
     }
   }

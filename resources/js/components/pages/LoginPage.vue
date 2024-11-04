@@ -1,5 +1,6 @@
 <template>
     <div class="login-page">
+        <UserButtons></UserButtons>
         <Login></Login>
         <SignUp></SignUp>
     </div>
@@ -8,13 +9,15 @@
 <script>
 
 import Login from '../Login/Login.vue';
-import SignUp from '../Login/SignUp.vue'
+import SignUp from '../Login/SignUp.vue';
+import UserButtons from '../Login/UserButtons.vue';
 
 export default {
     name: "LoginPage",
     components: {
         Login,
-        SignUp
+        SignUp,
+        UserButtons
     }
 }
 
