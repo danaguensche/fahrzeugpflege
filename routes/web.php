@@ -1,61 +1,34 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-//Login Routes
-Route::get('/login', [AuthController::class, "login"])
-    ->name("login");
-Route::post("/login", [AuthController::class, "loginPost"])
-    ->name("login.post");
-
-
-//Registration Routes
-Route::get('/signup', [AuthController::class, "signup"])
-    ->name("signup");
-Route::post("/signup", [AuthController::class, "signupPost"])
-    ->name("signup.post");
-
-
-//User-Pages
-Route::get('/dashboard', function () {
-    return view('pages/dashboard');
+// Auth Routes
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/login', 'login')->name('login');
+    Route::post('/login', 'loginPost')->name('login.post');
+    Route::get('/signup', 'signup')->name('signup');
+    Route::post('/signup', 'signupPost')->name('signup.post');
+    Route::post('/logout', 'logout')->name('logout');
 });
 
-Route::get('/kalender', function () {
-    return view('pages/calendar');
-});
-
-Route::get('/fahrzeuge', function () {
-    return view('pages/cars');
-});
-
-Route::get('/auftraege', function () {
-    return view('pages/jobs');
-});
-
-Route::get('/berichte', function () {
-    return view('pages/reports');
-});
-
-Route::get('/chat', function () {
-    return view('/pageschat');
-});
-
-Route::get('/profil', function () {
-    return view('pages/profile');
-});
-
-Route::get('/einstellungen', function () {
-    return view('pages/settings');
-});
-
-Route::get('/abmelden', function () {
-    return view('logout');
+// Protected Routes
+Route::middleware(['auth'])->group(function () {
+    Route::controller(PageController::class)->group(function () {
+        Route::get('/dashboard', 'dashboard');
+        Route::get('/kalender', 'calendar');
+        Route::get('/fahrzeuge', 'cars');
+        Route::get('/auftraege', 'jobs');
+        Route::get('/berichte', 'reports');
+        Route::get('/chat', 'chat');
+        Route::get('/profil', 'profile');
+        Route::get('/einstellungen', 'settings');
+    });
 });
 
 Route::get('/new', 'TestController@controllerMethod');

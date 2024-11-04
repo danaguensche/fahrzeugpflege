@@ -41,6 +41,6 @@ class AuthController extends Controller
             return redirect(route("login"))->with("success", "User created successfully");
         }
 
-        return redirect(route("signup"))->with("error", "failed to create User");
+        return redirect(route("login"))->with("error", "failed to create User");
     }
 }

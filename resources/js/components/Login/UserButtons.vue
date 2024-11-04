@@ -2,15 +2,11 @@
     <div class="user-options-container user-options-container-registered">
         <div class="user-options-text">
             <div class="user-options">
-                <RegisteredButton 
-                    :buttonLabel="'Anmelden'" 
-                    :class="['user-action', { 'active': activeForm === 'login' }]" 
-                    @click="switchToLogin">
+                <RegisteredButton :buttonLabel="'Anmelden'"
+                    :class="['user-action', { 'active': activeForm === 'login' }]" @click="switchToLogin">
                 </RegisteredButton>
-                <RegisteredButton 
-                    :buttonLabel="'Registrieren'" 
-                    :class="['user-action', { 'active': activeForm === 'signup' }]" 
-                    @click="switchToSignup">
+                <RegisteredButton :buttonLabel="'Registrieren'"
+                    :class="['user-action', { 'active': activeForm === 'signup' }]" @click="switchToSignup">
                 </RegisteredButton>
             </div>
         </div>

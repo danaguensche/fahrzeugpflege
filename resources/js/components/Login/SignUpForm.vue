@@ -3,7 +3,7 @@
     <fieldset class="forms-fieldset">
       <div v-for="field in formFields" :key="field.id" class="forms-field">
         <input :type="field.type" :id="field.id" :placeholder="field.placeholder" v-model="formData[field.id]"
-          class="forms-field-input"  />
+          class="forms-field-input" />
         <span v-if="errors[field.id]" class="error-message">{{ errors[field.id] }}</span>
       </div>
     </fieldset>
@@ -37,11 +37,11 @@ export default {
       errors: {},
 
       formFields: [
-        { id: 'firstname', type: 'text', placeholder: 'Vorname *' },
-        { id: 'lastname', type: 'text', placeholder: 'Nachname *' },
-        { id: 'email', type: 'email', placeholder: 'Email *' },
-        { id: 'password', type: 'password', placeholder: 'Passwort *' },
-        { id: 'passwordRepeat', type: 'password', placeholder: 'Passwort wiederholen *' },
+        { id: 'firstname', name: 'firstname', type: 'text', placeholder: 'Vorname *' },
+        { id: 'lastname', name: 'lastname', type: 'text', placeholder: 'Nachname *' },
+        { id: 'email', name: 'email', type: 'email', placeholder: 'Email *' },
+        { id: 'password', name: 'password', type: 'password', placeholder: 'Passwort *' },
+        { id: 'passwordRepeat', name: 'passwordRepeat', type: 'password', placeholder: 'Passwort wiederholen *' },
       ],
 
     };
