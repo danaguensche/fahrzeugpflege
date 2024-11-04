@@ -13,6 +13,7 @@ export default defineConfig({
     resolve: {
         alias: {
             '@': '/resources',
+             'vuex': 'vuex/dist/vuex.esm-bundler.js'
         },
     },
     build: {
@@ -26,5 +27,5 @@ export default defineConfig({
     },
     server: {
         cors: true,
-    }
+    },
 });

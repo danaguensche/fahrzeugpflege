@@ -1,7 +1,7 @@
 /* CSS-Variablen für Wiederverwendbarkeit */
 :root {
-    --primary-color: #ff6f61;
-    --primary-color-hover: #ff4a3d;
+    --primary-color: #ff4c02;
+    --primary-color-hover: #ff6f3c ;
     --secondary-color: #333;
     --background-color: #fafafa;
     --text-color-light: #fff;
@@ -82,7 +82,16 @@ body {
     transition: all var(--transition-speed) ease;
     opacity: 1;
     margin-bottom: 2rem;
+    visibility: hidden;
 }
+
+.user-options-forms-registered.active,
+.user-options-forms-unregistered.active
+{
+    visibility: visible;
+}
+
+
 
 /* Formular-Titel */
 .forms-title {
