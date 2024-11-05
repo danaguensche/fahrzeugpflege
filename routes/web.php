@@ -20,7 +20,7 @@ Route::controller(AuthController::class)->group(function () {
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
     Route::controller(PageController::class)->group(function () {
-        Route::get('/dashboard', 'dashboard');
+        Route::get('/dashboard', 'dashboard')->name('dashboard');
         Route::get('/kalender', 'calendar');
         Route::get('/fahrzeuge', 'cars');
         Route::get('/auftraege', 'jobs');

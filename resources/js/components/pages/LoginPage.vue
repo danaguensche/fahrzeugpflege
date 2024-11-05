@@ -1,13 +1,12 @@
 <template>
     <div class="login-page">
         <UserButtons></UserButtons>
-        <Login></Login>
-        <SignUp></SignUp>
+        <Login :action="loginAction"></Login>
+        <SignUp :action="signupAction"></SignUp>
     </div>
 </template>
 
 <script>
-
 import Login from '../Login/Login.vue';
 import SignUp from '../Login/SignUp.vue';
 import UserButtons from '../Login/UserButtons.vue';
@@ -18,9 +17,12 @@ export default {
         Login,
         SignUp,
         UserButtons
+    },
+    props: {
+        loginAction: String,
+        signupAction: String
     }
 }
-
 </script>
 
 <style>

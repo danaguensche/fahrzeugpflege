@@ -4,7 +4,7 @@
       <div v-for="field in formFields" :key="field.id" class="forms-field">
         <input :type="field.type" :id="field.id" :placeholder="field.placeholder" v-model="formData[field.id]"
           class="forms-field-input" />
-        <span v-if="errors[field.id]" class="error-message">{{ errors[field.id] }}</span>
+        <span v-if="errors[field.id]" class="alert error">{{ errors[field.id] }}</span>
       </div>
     </fieldset>
     <div class="forms-buttons">
@@ -29,7 +29,7 @@ export default {
         lastname: "",
         email: "",
         password: "",
-        passwordRepeat: "",
+        password_confirmation: "",
       },
 
       buttonLabel: "Registrieren",
@@ -41,7 +41,7 @@ export default {
         { id: 'lastname', name: 'lastname', type: 'text', placeholder: 'Nachname *' },
         { id: 'email', name: 'email', type: 'email', placeholder: 'Email *' },
         { id: 'password', name: 'password', type: 'password', placeholder: 'Passwort *' },
-        { id: 'passwordRepeat', name: 'passwordRepeat', type: 'password', placeholder: 'Passwort wiederholen *' },
+        { id: 'password_confirmation', name: 'password_confirmation', type: 'password', placeholder: 'Passwort wiederholen *' },
       ],
 
     };
@@ -61,7 +61,7 @@ export default {
         lastname: this.validateLastname,
         email: this.validateEmail,
         password: this.validatePassword,
-        passwordRepeat: this.validatePasswordRepeat,
+        password_confirmation: this.validatePassword_confirmation,
       };
 
       return Object.keys(validators).every(field => validators[field]());
@@ -100,13 +100,43 @@ export default {
       return true;
     },
 
-    validatePasswordRepeat() {
-      if (this.formData.password !== this.formData.passwordRepeat) {
-        this.errors.passwordRepeat = "Die Passwörter stimmen nicht überein.";
+    validatePassword_confirmation() {
+      if (this.formData.password !== this.formData.password_confirmation) {
+        this.errors.password_confirmation = "Die Passwörter stimmen nicht überein.";
         return false;
       }
       return true;
-    }
+    },
+
+
+    //ChatGPT hat hier geregelt, danke Sklave 
+
+    async submitForm() {
+      this.errors = {};
+      if (this.validateForm()) {
+        try {
+          const response = await axios.post('/signup', this.formData);
+          
+          if (response.data.success) {
+            // Erfolgreiche Registrierung
+            console.log('Registrierung erfolgreich', response.data);
+          } else {
+            // Unerwarteter Erfolgsfall
+            console.error('Unerwarteter Erfolgsfall:', response.data);
+          }
+        } catch (error) {
+          // Fehlerbehandlung
+          if (error.response && error.response.data && error.response.data.errors) {
+            // Validierungsfehler vom Server
+            this.errors = error.response.data.errors;
+          } else {
+            // Allgemeiner Fehler
+            console.error('Registrierungsfehler:', error);
+            this.errors.general = 'Ein Fehler ist bei der Registrierung aufgetreten. Bitte versuchen Sie es später erneut.';
+          }
+        }
+      }
+    },
   }
 };
 </script>

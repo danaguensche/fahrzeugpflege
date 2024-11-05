@@ -11,6 +11,8 @@ const app = createApp(App);
 app.component('main-sidebar', MainSidebar);
 app.component('login-component', Login);
 
+app.config.globalProperties.$http = axios;
+
 app.use(Router);
 app.use(store);
 
