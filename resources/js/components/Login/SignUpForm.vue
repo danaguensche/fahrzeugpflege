@@ -1,4 +1,5 @@
 <template>
+  <!-- submit prevent verhindert, dass die Seite neu geladen wird, wenn das Formular abgeschickt wird -->
   <form class="forms-form" @submit.prevent="submitForm">
     <fieldset class="forms-fieldset">
       <div v-for="field in formFields" :key="field.id" class="forms-field">
@@ -116,7 +117,7 @@ export default {
       if (this.validateForm()) {
         try {
           const response = await axios.post('/signup', this.formData);
-          
+
           if (response.data.success) {
             // Erfolgreiche Registrierung
             console.log('Registrierung erfolgreich', response.data);

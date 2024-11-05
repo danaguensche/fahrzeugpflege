@@ -90,6 +90,16 @@
   Registrieren angegeben werden müssen  
   -> aktuelle Registrierungslogik lässt das Registrieren von jedem Benutzer zu und jeder kann auf die Webseite zugreifen :(  
 
+## Wissenswertes
+
+Axios -> JS Bibilothek für HTTP-Anfragen  
+Promise-basierter HTTP-CLient zum einfachen HTTP-Anfragen versenden und verarbeiten  
+-> kann automatisch JSON Dateien verarbeiten  
+-> Abfangen unf modifizieren von Anfragen und Antworten  
+
+Axios Dokumentation:  
+https://axios-http.com/docs/intro  
+
 
 
 

@@ -1,4 +1,7 @@
 <template>
+
+    <!-- submit prevent verhindert, dass die Seite neu geladen wird, wenn das Formular abgeschickt wird -->
+
     <form @submit.prevent="submitForm" class="forms-form">
         <fieldset class="forms-fieldset">
             <div class="forms-field">
@@ -30,6 +33,7 @@ export default {
     data() {
         return {
             buttonLabel: "Anmelden",
+
             formData: {
                 email: '',
                 password: ''
@@ -41,6 +45,8 @@ export default {
         update_buttonLabel(newName) {
             this.buttonLabel = newName
         },
+
+        //Wird beim Absenden des Formulars aufgerufen
         async submitForm() {
             this.error = null;
             try {
