@@ -59,13 +59,12 @@
 
 ## Probleme
   
-- Sidebar-Button Links funktionieren nicht richtig (hatte noch keine Lust mich darum zu kümmern, ist ein Design Problem)  
-- Bilder für die Sidebar laden nicht im `npm run watch` modus  
+- Sidebar-Button Links funktionieren nicht richtig (hatte noch keine Lust mich darum zu kümmern, ist ein Design Problem)   
 
 ## To-Dos/Nicht vergessen  
 
-- UserController schreiben, der prüft, ob man als Benutzer angemeldet ist und dann die user.`...`.blade.php Views   zurückgibt  
-
+- Sidebar anpassen, Komponenten-Struktur verbessern  
+  -> Logout Button programmieren  
 
 ## Aktuelles
 
@@ -80,6 +79,16 @@
    -> VueX ist eine Bibilothek für State-Managment  
    -> Bietet die Möglichkeit einen zentralen, reaktiven Datenspeicher anzulegen -> storage/index.js  
    -> ist geplant um auf bestimmte Daten von einem Ort zugreifen zu können  
+
+05.11.2024
+
+- Login/Registrierungs Frontend gefixt  
+- Registrierung und Login ist möglich  
+- Middleware zum kontrollieren der Zugriffe für eingeloggte Benutzer  
+  -> für später: wir müssen eine Möglichkeit finden wie wir Kunden und Mitarbeitern unterteilen,  
+  vielleicht kann ein Mitarbeiter Konten erstellen mit zufällig erstellten Passwörtern o.ä. die dann beim  
+  Registrieren angegeben werden müssen  
+  -> aktuelle Registrierungslogik lässt das Registrieren von jedem Benutzer zu und jeder kann auf die Webseite zugreifen :(  
 
 
 
