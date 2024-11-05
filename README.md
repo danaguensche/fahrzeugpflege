@@ -13,7 +13,9 @@
     - Node.js  
     - Laravel  
     - Vite  
-    - Vue  
+    - Vue 
+    - VueX   
+    - Axios  
 
 2. Schritte:  
     - `php artisan migrate` -> in Konsole eingeben um Datenbank zu migrieren (mySQL Server in xampp starten)  
@@ -21,7 +23,9 @@
       oder Projekt als ZIP herunterladen  
     - Installiere die Abhängigkeiten: `npm install`  
     - Projekt starten: `php artisan serve` -> in Konsole eingeben um Server zu starten  
-    - Entwicklungsserver: `npm run dev` | `npm run watch` (macht aktuell noch Probleme)  
+    - Entwicklungsserver: `npm run dev` | `npm run watch` (macht aktuell noch Probleme) 
+    - Axios installieren: `npm install axios `  
+    - VueX installieren: `npm install vuex@next --save`
     
 
 ## Projektstand
@@ -66,6 +70,8 @@
 - Sidebar anpassen, Komponenten-Struktur verbessern  
   -> Logout Button programmieren  
 
+- lang\en Validierung anpassen, auf Deutsch übersetzen  
+
 ## Aktuelles
 
 30.09.2024  
@@ -96,6 +102,7 @@ Axios -> JS Bibilothek für HTTP-Anfragen
 Promise-basierter HTTP-CLient zum einfachen HTTP-Anfragen versenden und verarbeiten  
 -> kann automatisch JSON Dateien verarbeiten  
 -> Abfangen unf modifizieren von Anfragen und Antworten  
+Axios installieren: `npm install axios `  
 
 Axios Dokumentation:  
 https://axios-http.com/docs/intro  
