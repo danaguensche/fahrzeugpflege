@@ -63,7 +63,7 @@
 
 ## Probleme
   
-- Sidebar-Button Links funktionieren nicht richtig (hatte noch keine Lust mich darum zu kümmern, ist ein Design Problem)   
+ 
 
 ## To-Dos/Nicht vergessen  
 
