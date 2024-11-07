@@ -4,6 +4,14 @@
     "src": "resources/css/main.css",
     "isEntry": true
   },
+  "resources/img/sidebar-img/arrow-icon-mirrored.png": {
+    "file": "assets/arrow-icon-mirrored-BY0Ho_NH.png",
+    "src": "resources/img/sidebar-img/arrow-icon-mirrored.png"
+  },
+  "resources/img/sidebar-img/arrow-icon.png": {
+    "file": "assets/arrow-icon-BOHLJTC6.png",
+    "src": "resources/img/sidebar-img/arrow-icon.png"
+  },
   "resources/img/sidebar-img/calendar-icon.png": {
     "file": "assets/calendar-icon-CmEiUby_.png",
     "src": "resources/img/sidebar-img/calendar-icon.png"
@@ -28,10 +36,6 @@
     "file": "assets/logout-icon-h9aPZeif.png",
     "src": "resources/img/sidebar-img/logout-icon.png"
   },
-  "resources/img/sidebar-img/menu_arrow.png": {
-    "file": "assets/menu_arrow-Dq7yKVRX.png",
-    "src": "resources/img/sidebar-img/menu_arrow.png"
-  },
   "resources/img/sidebar-img/profile-icon.png": {
     "file": "assets/profile-icon-Djnr2mpq.png",
     "src": "resources/img/sidebar-img/profile-icon.png"
@@ -45,15 +49,14 @@
     "src": "resources/img/sidebar-img/settings-icon.png"
   },
   "resources/js/app.js": {
-    "file": "assets/app-UJlKt-27.js",
+    "file": "assets/app-IaN-YY_P.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "css": [
-      "assets/app-DAwZqGzq.css"
+      "assets/app-DzJrZ9pz.css"
     ],
     "assets": [
-      "assets/menu_arrow-Dq7yKVRX.png",
       "assets/dashboard-icon-CAIXilEl.png",
       "assets/calendar-icon-CmEiUby_.png",
       "assets/cars-icon-DzkOgjAL.png",
@@ -62,7 +65,9 @@
       "assets/chat-icon-D9dKKZes.png",
       "assets/profile-icon-Djnr2mpq.png",
       "assets/settings-icon-D4GeoFNu.png",
-      "assets/logout-icon-h9aPZeif.png"
+      "assets/logout-icon-h9aPZeif.png",
+      "assets/arrow-icon-BOHLJTC6.png",
+      "assets/arrow-icon-mirrored-BY0Ho_NH.png"
     ]
   }
 }

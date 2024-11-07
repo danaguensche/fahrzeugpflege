@@ -25,7 +25,7 @@ class PageController extends Controller
     {
         return view('pages.jobs');
     }
-
+ 
     public function reports()
     {
         return view('pages.reports');

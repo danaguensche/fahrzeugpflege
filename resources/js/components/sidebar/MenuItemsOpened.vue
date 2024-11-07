@@ -1,19 +1,18 @@
 <template>
     <div class="sidebar-container">
-        <div class="sidebar-textContent rubik-font">
-            <div class="sidebar-buttons-wrapper">
-                <div v-for="(menuitem, index) in menuitems" :key="menuitem.id"
-                    :class="['sidebar-button', { 'profile-spacing': menuitem.name === 'Profil' }]">
-                    <div v-if="iconPaths[index]" class="icon-wrapper">
-                        <img :src="iconPaths[index].name" class="icon" />
-                    </div>
-                    <a :href="getRoute(menuitem.name)">{{ menuitem.name }}</a>
-                </div>
+        <div v-for="(menuitem, index) in menuitems" :key="menuitem.id"
+            :class="['sidebar-button', { 'profile-spacing': menuitem.name === 'Profil' }]">
+            <div class="sidebar-buttons-wrapper" @click="redirectToView(menuitem)">
+                <MenuButton @click="redirectToView(menuitem)" class="menu-button-content">
+                    <img v-if="iconPaths[index]" :src="iconPaths[index].name" class="icon"
+                        alt="Icon for {{ menuitem.name }}">
+                    <span class="sidebar-textContent">{{ menuitem.name }}</span>
+                </MenuButton>
             </div>
         </div>
     </div>
-</template>
 
+</template>
 
 <script>
 export default {
@@ -54,7 +53,7 @@ export default {
         getRoute(pageName) {
             let pageName_lowerCase = pageName.toLowerCase()
             let pageName_formatted = this.removeUmlaute(pageName_lowerCase)
-            return `http://localhost:8000/${pageName_formatted}`
+            return `/${pageName_formatted}`
         },
 
 
@@ -73,6 +72,10 @@ export default {
             return str.replace(/[äöüßÄÖÜ]/g, function (match) {
                 return umlaute[match]
             })
+        },
+
+        redirectToView(menuitem) {
+            this.$router.push(this.getRoute(menuitem.name));
         }
     }
 }

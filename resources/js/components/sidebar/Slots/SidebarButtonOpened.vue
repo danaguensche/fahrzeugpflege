@@ -1,6 +1,6 @@
 <template>
     <button class="reduce-button">
-        <img class="img" src="../../../img/sidebar-img/menu_arrow.png">
+        <slot></slot>
     </button>
 </template>
 
@@ -11,5 +11,5 @@ export default {
 </script>
 
 <style scoped>
-@import url(../../../css/sidebar/sidebar-button-opened.css)
+@import url(../../../../css/sidebar/sidebar-button-opened.css)
 </style>

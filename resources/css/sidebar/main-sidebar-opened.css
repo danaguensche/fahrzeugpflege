@@ -7,116 +7,116 @@
     --clr-hover-text: whitesmoke;
     --clr-bg-sidebar: #f5f5f5;
     --clr-box-shadow: rgba(0, 0, 0, 0.1);
+}
+
+/* Main Sidebar Styles */
+.sidebar-container {
+    width: 260px;
+    height: 100vh;
+    background-color: var(--clr-bg-sidebar);
+    color: var(--clr-dark);
+    padding: 2.5vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    border-radius: 10px;
+    box-shadow: 2px 0 5px var(--clr-box-shadow);
+    user-select: none;
+}
+
+.sidebar-buttons-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 200px;
+    margin: 0;
+}
+
+.sidebar-button {
+    width: 100%;
+    margin-bottom: 2vh;
+}
+
+.sidebar-button.profile-spacing {
+    margin-top: 50px;
+}
+
+.menu-button-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    background-color: var(--clr-light);
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: var(--clr-button-text);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px var(--clr-box-shadow);
+}
+
+.menu-button-content:hover {
+    background-color: var(--clr-hover);
+    transform: scale(1.05);
+    color: var(--clr-light);
+}
+
+.menu-button-content:hover .sidebar-textContent {
+    color: var(--clr-hover-text);
+}
+
+.menu-button-content:hover .icon {
+    filter: brightness(200%);
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.sidebar-textContent {
+    flex-grow: 1;
+    font-size: 16px;
+    color: var(--clr-link);
+    font-family: "Rubik", sans-serif;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.rubik-font {
+    font-family: "Rubik", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.sidebar-button.profile-spacing {
+    margin-top: 50px;
   }
-  
-  /* Main Sidebar Styles */
-  .sidebar-container {
-      width: 260px;
-      height: 98vh;
-      background-color: var(--clr-bg-sidebar);
-      color: var(--clr-dark);
-      padding: 20px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: fixed;
-      border-radius: 10px;
-      box-shadow: 2px 0 5px var(--clr-box-shadow);
-      user-select: none;
-  }
-  
-  .sidebar-buttons-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 200px;
-      margin-top: 10vh;
-      margin-bottom: 10vh;
-  }
-  
-  .sidebar-button {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: flex-start;
-      width: 100%;
-      margin-bottom: 2vh;
-      background-color: var(--clr-light);
-      border-radius: 10px;
-      cursor: pointer;
-      font-family: Arial, sans-serif;
-      font-size: 16px;
-      padding: 10px 15px;
-      text-decoration: none;
-      color: var(--clr-button-text);
-      transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
-      box-shadow: 0 2px 5px var(--clr-box-shadow);
-  }
-  
-  .sidebar-button.profile-spacing {
-      margin-top: 50px;
-  }
-  
-  .sidebar-button:hover {
-      background-color: var(--clr-hover);
-      transform: scale(1.05);
-      color: var(--clr-light); 
-  }
-  
-  .sidebar-button:hover .sidebar_textContent,
-  .sidebar-button:hover a {
-      color: var(--clr-hover-text);
-  }
-  
-  .sidebar-button:hover img {
-      filter: brightness(200%);
-  }
-  
-  .icon {
-      width: 24px;
-      height: 24px;
-      margin-right: 15px;
-  }
-  
-  .sidebar-textContent a {
-      font-size: 16px;
-      color: var(--clr-link);
-      text-align: center;
-      font-family: "Rubik", sans-serif;
-      text-decoration: none;
-      transition: color 0.3s ease;
-  }
-  
-  .rubik-font {
-      font-family: "Rubik", sans-serif;
-      font-weight: 400;
-      font-style: normal;
-  }
-  
-  /* Responsive Adjustments */
-  @media (max-width: 768px) {
-      .sidebar-container {
-          width: 220px;
-      }
-  
-      .sidebar-button {
-          width: 160px;
-      }
-  
-      .icon {
-          width: 24px;
-          height: 24px;
-      }
-  
-      .sidebar-textContent {
-          font-size: 14px;
-      }
-  
-      .sidebar-button.profile-spacing {
-          margin-top: 5vh;
-      }
-  }
-  
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .sidebar-container {
+        width: 220px;
+    }
+
+    .sidebar-buttons-wrapper {
+        width: 160px;
+    }
+
+    .sidebar-textContent {
+        font-size: 14px;
+    }
+
+    .sidebar-button.profile-spacing {
+        margin-top: 5vh;
+    }
+}

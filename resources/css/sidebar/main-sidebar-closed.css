@@ -12,10 +12,10 @@
 /* Closed Sidebar Styles */
 .sidebar-container.closed {
   width: 100px;
-  height: 98vh;
+  height: 100vh;
   background-color: var(--clr-bg-sidebar);
   color: var(--clr-dark);
-  padding: 20px;
+  padding: 2.5vh;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -37,6 +37,8 @@
   margin-bottom: 10vh;
 }
 
+
+
 .sidebar-button.closed {
   display: flex;
   flex-direction: row;
@@ -47,7 +49,7 @@
   background-color: var(--clr-light);
   border-radius: 10px;
   cursor: pointer;
-  padding: 10px 15px;
+  padding: 10px 15px 10px 15px;
   transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
   box-shadow: 0 2px 5px var(--clr-box-shadow);
 }
@@ -58,7 +60,7 @@
 
 .sidebar-button.closed:hover {
   background-color: var(--clr-hover);
-  transform: scale(1.07);
+  transform: scale(1.06);
 }
 
 .sidebar-button.closed:hover img {

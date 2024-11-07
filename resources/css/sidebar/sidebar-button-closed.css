@@ -1,41 +1,35 @@
 .reduce-button.closed {
     display: flex;
     align-items: center;
+    justify-content: center;
     position: sticky;
     left: 85px;
-
-    justify-content: center;
     width: 50px;
     height: 50px;
-
     background-color: whitesmoke;
-    border: 0px;
+    border: none;
     border-radius: 50%;
     cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-
+    transition: all 0.3s ease; 
 }
 
 ::selection {
     background-color: transparent;
 }
 
-
 .reduce-button.closed:hover {
     background-color: darkslategray;
-    transform: scale(1.05);
-    transform: rotate(180deg);
+    transform: scale(1.05) rotate(180deg); 
 }
 
 .reduce-button.closed:hover img {
     filter: brightness(200%);
-    transform: scale(1.05);
+    transform: scale(0.7);
 }
 
 @media (max-width: 768px) {
-
     .reduce-button.closed {
-        left: 85px;
+        left: 85px; 
     }
 }
