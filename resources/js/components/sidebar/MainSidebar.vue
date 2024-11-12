@@ -17,6 +17,7 @@ import SidebarButtonClosed from "./Slots/SidebarButtonClosed.vue"
 import SidebarButtonOpened from "./Slots/SidebarButtonOpened.vue"
 import SidebarOpened from "./SidebarOpened.vue"
 import SidebarClosed from "./SidebarClosed.vue"
+import { mapState, mapMutations } from "vuex";
 
 export default {
   name: "MainSidebar",
@@ -27,14 +28,12 @@ export default {
     SidebarButtonClosed,
   },
 
-  data: () => ({
-    isSidebarOpen: true,
-  }),
+  computed: {
+    ...mapState(['isSidebarOpen'])
+  },
 
   methods: {
-    toggleSidebar() {
-      this.isSidebarOpen = !this.isSidebarOpen
-    },
+    ...mapMutations(['toggleSidebar'])
   },
 }
 </script>

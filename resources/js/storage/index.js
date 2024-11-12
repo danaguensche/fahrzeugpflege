@@ -2,11 +2,20 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
-    activeForm: 'login'
+    //Login
+    activeForm: 'login',
+
+    //Sidebar
+    isSidebarOpen: false
   },
   mutations: {
+    //Login
     setActiveForm(state, formName) {
       state.activeForm = formName
+    },
+
+    toggleSidebar(state){
+      state.isSidebarOpen = !state.isSidebarOpen
     }
   },
   actions: {
