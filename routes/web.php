@@ -15,6 +15,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('/signup', 'signup')->name('signup');
     Route::post('/signup', 'signupPost')->name('signup.post');
     Route::post('/logout', 'logout')->name('logout');
+    Route::get('/abmelden', 'logout')->name('logout');
 });
 
 // Protected Routes

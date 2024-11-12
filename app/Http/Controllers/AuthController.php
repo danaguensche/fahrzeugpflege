@@ -19,6 +19,11 @@ class AuthController extends Controller
         return view("auth.signup");
     }
 
+    public function logout() {
+        Auth::logout();
+        return redirect('/login');
+    }
+
     function loginPost(Request $request)
     {
         $request->validate([
