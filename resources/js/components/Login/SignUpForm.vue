@@ -119,10 +119,8 @@ export default {
           const response = await axios.post('/signup', this.formData);
 
           if (response.data.success) {
-            // Erfolgreiche Registrierung
             console.log('Registrierung erfolgreich', response.data);
           } else {
-            // Unerwarteter Erfolgsfall
             console.error('Unerwarteter Erfolgsfall:', response.data);
           }
         } catch (error) {

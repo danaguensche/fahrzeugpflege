@@ -96,12 +96,17 @@
   Registrieren angegeben werden müssen  
   -> aktuelle Registrierungslogik lässt das Registrieren von jedem Benutzer zu und jeder kann auf die Webseite zugreifen :(  
 
+12.11.2024  
+
+-Kalenderbibilothek FullCalender installiert zum implementieren eines Terminkalenders  
+    -> `npm install --save @fullcalendar/vue3 @fullcalendar/core @fullcalendar/daygrid @fullcalendar/timegrid @fullcalendar/interaction`
+
 ## Wissenswertes
 
 Axios -> JS Bibilothek für HTTP-Anfragen  
 Promise-basierter HTTP-CLient zum einfachen HTTP-Anfragen versenden und verarbeiten  
 -> kann automatisch JSON Dateien verarbeiten  
--> Abfangen unf modifizieren von Anfragen und Antworten  
+-> Abfangen und modifizieren von Anfragen und Antworten  
 Axios installieren: `npm install axios `  
 
 Axios Dokumentation:  

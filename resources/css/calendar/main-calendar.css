@@ -1,0 +1,10 @@
+/* Kalender-Container */
+.fc {
+    width: 80%;
+    display: flexbox;
+    align-items: left;
+    height: fit-content;
+    margin-left: 300px;
+    margin-bottom: 5vh;
+
+}
