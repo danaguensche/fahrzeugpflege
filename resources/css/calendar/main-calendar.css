@@ -4,7 +4,11 @@
     display: flexbox;
     align-items: left;
     height: fit-content;
-    margin-left: 300px;
-    margin-bottom: 5vh;
-
+    margin-left: 150px ;
 }
+
+.calender-sidebar-opened {
+    margin-left: 150px;
+}
+
+

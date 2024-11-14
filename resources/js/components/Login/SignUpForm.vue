@@ -109,9 +109,6 @@ export default {
       return true;
     },
 
-
-    //ChatGPT hat hier geregelt, danke Sklave 
-
     async submitForm() {
       this.errors = {};
       if (this.validateForm()) {
@@ -119,6 +116,7 @@ export default {
           const response = await axios.post('/signup', this.formData);
 
           if (response.data.success) {
+            alert("Registrierung erfolgreich! Sie können sich jetzt anmelden.");
             console.log('Registrierung erfolgreich', response.data);
           } else {
             console.error('Unerwarteter Erfolgsfall:', response.data);

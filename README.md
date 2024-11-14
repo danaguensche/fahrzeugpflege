@@ -62,13 +62,13 @@
 
 
 ## Probleme
-  
+ 
  
 
 ## To-Dos/Nicht vergessen  
 
-- Sidebar anpassen, Komponenten-Struktur verbessern  
-  -> Logout Button programmieren  
+- CSRF-Token Fehlermeldung anpassen -> User soll Seite neu laden
+- VueCal anschauen/implementieren
 
 - lang\en Validierung anpassen, auf Deutsch übersetzen  
 

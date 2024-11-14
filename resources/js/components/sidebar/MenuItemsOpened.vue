@@ -15,6 +15,9 @@
 </template>
 
 <script>
+import { error } from 'laravel-mix/src/Log';
+import axios from 'axios';
+
 export default {
     name: 'MenuItemsOpened',
 
@@ -75,8 +78,31 @@ export default {
         },
 
         redirectToView(menuitem) {
-            this.$router.push(this.getRoute(menuitem.name));
+            if (menuitem.name === 'Abmelden') {
+                this.logout();
+            } else {
+                this.$router.push(this.getRoute(menuitem.name));
+            }
+        },
+
+        logout() {
+            if (confirm("Wollen Sie sich abmelden?") == true) {
+                axios.post('/logout', {}, {
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                }).then(() => {
+                    localStorage.removeItem('auth_token');
+                    this.$router.push('/login');
+                }).catch(error => {
+                    console.error('Logout fehlgeschlagen', error);
+                    alert('Logout fehlgeschlagen. Bitte versuchen Sie es erneut.');
+                });
+            }
         }
+
+
+
     }
 }
 </script>

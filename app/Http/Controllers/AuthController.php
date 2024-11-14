@@ -19,9 +19,11 @@ class AuthController extends Controller
         return view("auth.signup");
     }
 
-    public function logout() {
+    public function logout(Request $request) {
         Auth::logout();
-        return redirect('/login');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return response()->json(['message' => 'Sie wurden erfolgreich abgemeldet.']);
     }
 
     function loginPost(Request $request)
@@ -54,9 +56,9 @@ class AuthController extends Controller
         $user->password = Hash::make($request->password);
 
         if ($user->save()) {
-            return response()->json(['success' => true, 'message' => 'User created successfully']);
+            return response()->json(['success' => true, 'message' => 'Benutzer wurde erfolgreich erstellt.']);
         } else {
-            return response()->json(['success' => false, 'message' => 'Failed to create user'], 500);
+            return response()->json(['success' => false, 'message' => 'Beim Erstellen des Benutzers ist ein Fehler aufgetreten.'], 500);
         }
     }
 }

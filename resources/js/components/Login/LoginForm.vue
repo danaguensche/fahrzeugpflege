@@ -5,6 +5,7 @@
     <form @submit.prevent="submitForm" class="forms-form">
         <fieldset class="forms-fieldset">
             <div class="forms-field">
+                <input type="hidden" name="_token" :value="csrf_token" />
                 <input v-model="formData.email" type="email" name="email" id="email" placeholder="Email"
                     class="forms-field-input" required autofocus />
             </div>
@@ -38,7 +39,9 @@ export default {
                 email: '',
                 password: ''
             },
-            error: null
+            error: null,
+
+            csrf_token: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
         }
     },
     methods: {

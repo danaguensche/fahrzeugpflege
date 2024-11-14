@@ -14,8 +14,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/login', 'loginPost')->name('login.post');
     Route::get('/signup', 'signup')->name('signup');
     Route::post('/signup', 'signupPost')->name('signup.post');
-    Route::post('/logout', 'logout')->name('logout');
-    Route::get('/abmelden', 'logout')->name('logout');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
 // Protected Routes
@@ -29,6 +28,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/chat', 'chat');
         Route::get('/profil', 'profile');
         Route::get('/einstellungen', 'settings');
+        
     });
 });
 

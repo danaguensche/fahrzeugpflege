@@ -1,6 +1,8 @@
 <template>
+<div class="calender-page">
     <MainSidebar></MainSidebar>
     <FullCalender></FullCalender>
+</div>
 </template>
 
 <script>
@@ -17,3 +19,7 @@ export default {
 }
 
 </script>
+
+<style scoped>
+@import url("../../../css/calendar/page-calender.css");
+</style>
