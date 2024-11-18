@@ -122,12 +122,9 @@ export default {
             console.error('Unerwarteter Erfolgsfall:', response.data);
           }
         } catch (error) {
-          // Fehlerbehandlung
           if (error.response && error.response.data && error.response.data.errors) {
-            // Validierungsfehler vom Server
             this.errors = error.response.data.errors;
           } else {
-            // Allgemeiner Fehler
             console.error('Registrierungsfehler:', error);
             this.errors.general = 'Ein Fehler ist bei der Registrierung aufgetreten. Bitte versuchen Sie es später erneut.';
           }

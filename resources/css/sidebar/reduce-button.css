@@ -1,8 +1,9 @@
 .reduce-button {
     display: flex;
     align-items: center;
-    position: sticky;
+    position: fixed;
     left: 240px;
+    margin-top: 44px;
 
     justify-content: center;
     width: 50px;

@@ -1,22 +1,19 @@
 <template>
-<div class="calender-page">
     <MainSidebar></MainSidebar>
-        <FullCalender></FullCalender>
-</div>
+    <FullCalendar></FullCalendar>
 </template>
-
 <script>
 
 
 import MainSidebar from '../sidebar/MainSidebar.vue';
-import FullCalender from '../Calendar/FullCalender.vue';
+import FullCalendar from '../Calendar/FullCalendar.vue';
 
 
 export default {
     name: "CalendarPage",
     components: {
         MainSidebar,
-        FullCalender
+        FullCalendar
 
     },
 

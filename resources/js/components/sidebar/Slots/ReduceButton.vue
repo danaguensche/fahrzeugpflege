@@ -5,11 +5,13 @@
 </template>
 
 <script>
+
 export default {
-    name: 'SidebarButtonOpened'
+    name: 'ReduceButton'
 }
+
 </script>
 
 <style scoped>
-@import url(../../../../css/sidebar/sidebar-button-opened.css)
+@import url(../../../../css/sidebar/reduce-button.css);
 </style>

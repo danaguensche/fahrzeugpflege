@@ -22,8 +22,7 @@
     border: none;
 }
 
-/* Allgemeine Körper-Styles */
-body {
+.general {
     font-family: var(--font-family);
     font-size: 1rem;
     line-height: 1.6;
@@ -34,12 +33,14 @@ body {
 
 /* Login-Seite Layout */
 .login-page {
+
+
     display: flex;
     flex-direction: column;
     justify-content: top-center;
     align-items: center;
     padding: 1rem;
-     position: relative;
+    position: relative;
     width: var(--box-width);
     margin: 0 auto;
 }

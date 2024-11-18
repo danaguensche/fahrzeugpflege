@@ -2,7 +2,6 @@
     <button @click="switchForms" class="user-registered-login" id="login-button">{{ buttonLabel }}
         <slot></slot>
     </button>
-
 </template>
 
 <script>

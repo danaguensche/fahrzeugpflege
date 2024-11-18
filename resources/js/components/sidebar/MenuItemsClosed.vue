@@ -18,7 +18,9 @@ import axios from 'axios';
 export default {
     name: 'MenuItemsClosed',
 
-    components: MenuButton,
+    components: {
+        MenuButton
+    },
 
     data: () => ({
         //Text-Inhalte der Sidebar
@@ -81,7 +83,7 @@ export default {
         },
 
         logout() {
-            
+
             if (confirm("Wollen Sie sich abmelden?") == true) {
                 axios.post('/logout', {}, {
                     headers: {
@@ -89,7 +91,7 @@ export default {
                     }
                 }).then(() => {
                     localStorage.removeItem('auth_token');
-                    this.$router.push('/login');
+                    this.$router.push('/');
                 }).catch(error => {
                     console.error('Logout fehlgeschlagen', error);
                     alert('Logout fehlgeschlagen. Bitte versuchen Sie es erneut.');
@@ -100,6 +102,6 @@ export default {
 }
 </script>
 
-<style scoped>
+<style >
 @import url(../../../css/sidebar/main-sidebar-closed.css);
 </style>

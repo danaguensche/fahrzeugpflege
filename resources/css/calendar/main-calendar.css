@@ -1,11 +1,14 @@
 
-.calender {
-    width: 90%;
-    margin-top: -40px;
-    margin-left: 135px;
-    margin-right: 50px;
+.calendar {
+    width: calc(100% + 260px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    margin-top: 50px;
 }
 
-.calender-sidebar-opened {
+/* .calender-sidebar-opened {
     margin-left: 160px;
-}
+} */

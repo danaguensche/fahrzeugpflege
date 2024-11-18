@@ -9,7 +9,6 @@
     --clr-box-shadow: rgba(0, 0, 0, 0.1);
 }
 
-/* Main Sidebar Styles */
 .sidebar-container {
     width: 260px;
     height: 100vh;
@@ -33,13 +32,9 @@
     align-items: center;
     justify-content: center;
     width: 200px;
-    margin: 0;
+    transform: scale(1.05);
 }
 
-.sidebar-button {
-    width: 100%;
-    margin-bottom: 2vh;
-}
 
 .sidebar-button.profile-spacing {
     margin-top: 50px;
@@ -94,15 +89,8 @@
 
 .rubik-font {
     font-family: "Rubik", sans-serif;
-    font-weight: 400;
-    font-style: normal;
 }
 
-.sidebar-button.profile-spacing {
-    margin-top: 50px;
-  }
-
-/* Responsive Adjustments */
 @media (max-width: 768px) {
     .sidebar-container {
         width: 220px;
@@ -116,7 +104,7 @@
         font-size: 14px;
     }
 
-    .sidebar-button.profile-spacing {
-        margin-top: 5vh;
-    }
+   .sidebar-button.profile-spacing {
+        margin-top: 5vh; 
+   }
 }

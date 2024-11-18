@@ -2,30 +2,33 @@
   <div id="sidebar">
     <SidebarOpened v-if="isSidebarOpen" />
     <SidebarClosed v-if="!isSidebarOpen" />
-    <SidebarButtonOpened v-if="isSidebarOpen" @click="toggleSidebar">
+
+    <ReduceButton v-if="isSidebarOpen" @click="toggleSidebar">
       <img class="arrow" src="../../../img/sidebar-img/arrow-icon.png">
-      
-    </SidebarButtonOpened>
-    <SidebarButtonClosed v-else @click="toggleSidebar">
+    </ReduceButton>
+    <ExpandButton v-else @click="toggleSidebar">
       <img class="arrow" src="../../../img/sidebar-img/arrow-icon-mirrored.png">
-    </SidebarButtonClosed>
+    </ExpandButton>
+    
   </div>
 </template>
 
 <script>
-import SidebarButtonClosed from "./Slots/SidebarButtonClosed.vue"
-import SidebarButtonOpened from "./Slots/SidebarButtonOpened.vue"
+
 import SidebarOpened from "./SidebarOpened.vue"
 import SidebarClosed from "./SidebarClosed.vue"
 import { mapState, mapMutations } from "vuex"
+import ReduceButton from "./Slots/ReduceButton.vue";
+import ExpandButton from "./Slots/ExpandButton.vue";
 
 export default {
   name: "MainSidebar",
   components: {
     SidebarOpened,
-    SidebarButtonOpened,
     SidebarClosed,
-    SidebarButtonClosed,
+
+    ReduceButton,
+    ExpandButton,
   },
 
   computed: {
@@ -39,6 +42,6 @@ export default {
 </script>
 
 <style> 
-@import url("../../../css/sidebar/sidebar-button-closed.css");
-@import url("../../../css/sidebar/sidebar-button-opened.css");
+@import url(../../../css/sidebar/reduce-button.css);
+@import url(../../../css/sidebar/expand-button.css);
 </style>

@@ -1,9 +1,7 @@
 <template>
-    <div class="calender-page">
-        <div class="calender">
-            <div :class="{ 'calender-sidebar-opened': isSidebarOpen }">
-                <VueCal :time="false" small active-view="year" locale="de" style="height: 750px;" />
-            </div>
+    <div class="calendar">
+        <div :class="{ 'calendar-sidebar-opened': isSidebarOpen }">
+            <VueCal :time="false" small active-view="year" locale="de" style="height: 750px;" />
         </div>
     </div>
 </template>

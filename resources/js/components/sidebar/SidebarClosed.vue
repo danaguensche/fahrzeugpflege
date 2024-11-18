@@ -19,6 +19,4 @@ export default {
 
 </script>
 
-<style scoped>
-@import url(../../../css/sidebar/main-sidebar-closed.css)
-</style>
+

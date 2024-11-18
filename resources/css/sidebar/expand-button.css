@@ -1,8 +1,11 @@
-.reduce-button.closed {
+.expand-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    position: sticky;
+    position: fixed;
+
+    margin-top: 44px;
+
     left: 85px;
     width: 50px;
     height: 50px;
@@ -18,18 +21,18 @@
     background-color: transparent;
 }
 
-.reduce-button.closed:hover {
+.expand-button:hover {
     background-color: darkslategray;
     transform: scale(1.05) rotate(180deg); 
 }
 
-.reduce-button.closed:hover img {
+.expand-button:hover img {
     filter: brightness(200%);
     transform: scale(0.7);
 }
 
 @media (max-width: 768px) {
-    .reduce-button.closed {
+    .expand-button {
         left: 85px; 
     }
 }

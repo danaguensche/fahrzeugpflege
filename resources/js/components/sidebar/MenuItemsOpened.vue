@@ -2,7 +2,7 @@
     <div class="sidebar-container">
         <div v-for="(menuitem, index) in menuitems" :key="menuitem.id"
             :class="['sidebar-button', { 'profile-spacing': menuitem.name === 'Profil' }]">
-            <div class="sidebar-buttons-wrapper" @click="redirectToView(menuitem)">
+            <div class="sidebar-buttons-wrapper">
                 <MenuButton @click="redirectToView(menuitem)" class="menu-button-content">
                     <img v-if="iconPaths[index]" :src="iconPaths[index].name" class="icon"
                         alt="Icon for {{ menuitem.name }}">
@@ -11,15 +11,19 @@
             </div>
         </div>
     </div>
-
 </template>
 
+
 <script>
-import { error } from 'laravel-mix/src/Log';
+import MenuButton from './Slots/MenuButton.vue';
 import axios from 'axios';
 
 export default {
     name: 'MenuItemsOpened',
+
+    components: {
+     MenuButton
+    },
 
     data: () => ({
 
@@ -93,7 +97,7 @@ export default {
                     }
                 }).then(() => {
                     localStorage.removeItem('auth_token');
-                    this.$router.push('/login');
+                    this.$router.push('/');
                 }).catch(error => {
                     console.error('Logout fehlgeschlagen', error);
                     alert('Logout fehlgeschlagen. Bitte versuchen Sie es erneut.');
@@ -106,6 +110,6 @@ export default {
     }
 }
 </script>
-<style scoped>
+<style scoped >
 @import url(../../../css/sidebar/main-sidebar-opened.css)
 </style>

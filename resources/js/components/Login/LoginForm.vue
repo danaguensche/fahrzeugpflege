@@ -55,9 +55,7 @@ export default {
             try {
                 const response = await axios.post('/login', this.formData);
                 if (response.data.success) {
-                    // Erfolgreicher Login
                     console.log('Login erfolgreich', response.data);
-                    // Weiterleitung zum Dashboard oder zur Hauptseite
                     window.location.href = response.data.redirect;
                 }
             } catch (error) {

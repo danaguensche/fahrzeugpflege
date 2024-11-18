@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +20,7 @@ class AuthController extends Controller
         return view("auth.signup");
     }
 
-    public function logout(Request $request) {
+    public function logout(Request $request): JsonResponse {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

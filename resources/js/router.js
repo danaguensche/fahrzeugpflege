@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import CalenderPage from './components/pages/CalendarPage.vue';
+import CalendarPage from './components/pages/CalendarPage.vue';
 import DashboardPage from './components/pages/DashboardPage.vue';
 import CarsPage from './components/pages/CarsPage.vue';
 import JobsPage from './components/pages/JobsPage.vue';
@@ -19,7 +19,7 @@ const routes = [
     },
     {
         path: '/kalender',
-        component: CalenderPage
+        component: CalendarPage
     },
     {
         path: '/fahrzeuge',
