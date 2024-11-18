@@ -1,14 +1,11 @@
-/* Kalender-Container */
-.fc {
-    width: 80%;
-    display: flexbox;
-    align-items: left;
-    height: fit-content;
-    margin-left: 150px ;
+
+.calender {
+    width: 90%;
+    margin-top: -40px;
+    margin-left: 135px;
+    margin-right: 50px;
 }
 
 .calender-sidebar-opened {
-    margin-left: 150px;
+    margin-left: 160px;
 }
-
-

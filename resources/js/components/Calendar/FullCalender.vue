@@ -1,16 +1,16 @@
 <template>
-    <div :class="{ 'calender-sidebar-opened': isSidebarOpen }">
-        <FullCalendar :options="calendarOptions" />
+    <div class="calender-page">
+        <div class="calender">
+            <div :class="{ 'calender-sidebar-opened': isSidebarOpen }">
+                <VueCal :time="false" small active-view="year" locale="de" style="height: 750px;" />
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
-import FullCalendar from '@fullcalendar/vue3'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import interactionPlugin from '@fullcalendar/interaction'
-
-import deLocale from '@fullcalendar/core/locales/de'
+import VueCal from 'vue-cal';
+import 'vue-cal/dist/vuecal.css';
 
 import axios from 'axios';
 
@@ -18,7 +18,7 @@ import { mapState } from "vuex"
 
 export default {
     components: {
-        FullCalendar
+        VueCal
     },
 
     computed: {
@@ -27,18 +27,6 @@ export default {
 
     data() {
         return {
-            calendarOptions: {
-                plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-                initialView: 'dayGridMonth',
-                locale: deLocale,
-                locales: [deLocale],
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                events: []
-            }
         }
     },
     methods: {

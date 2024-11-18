@@ -32,13 +32,12 @@
         "vue-template-compiler": "^2.7.16"
     },
     "dependencies": {
-        "@fullcalendar/core": "^6.1.15",
-        "@fullcalendar/daygrid": "^6.1.15",
         "@fullcalendar/interaction": "^6.1.15",
         "@fullcalendar/timegrid": "^6.1.15",
         "@fullcalendar/vue3": "^6.1.15",
         "@vue/compiler-sfc": "^3.5.4",
         "vue": "^3.2.36",
+        "vue-cal": "^4.10.0",
         "vue-router": "^4.4.5",
         "vuex": "^4.1.0"
     }
