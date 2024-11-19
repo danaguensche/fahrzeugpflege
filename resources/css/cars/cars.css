@@ -1,0 +1,21 @@
+:root {
+    --font-family: 'Rubik', sans-serif;
+    --clr-box-shadow: rgba(0, 0, 0, 0.1);
+}
+
+
+.form-wrapper {
+    position: fixed;
+    top: 5%;
+    bottom: 5%;
+    left: 20%;
+    right: 10%;
+    transition: left 0.3s ease;
+    font-family: var(--font-family);
+    
+}
+
+.page-form {
+
+}
+
