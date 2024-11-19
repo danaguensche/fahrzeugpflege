@@ -25,6 +25,7 @@
   border-radius: 10px;
   box-shadow: 2px 0 5px var(--clr-box-shadow);
   user-select: none;
+  transition: left 0.6s ease;
 }
 
 .sidebar-button.closed {
@@ -49,6 +50,7 @@
 
 .sidebar-button.closed:hover .icon.closed {
   filter: brightness(200%);
+  transform: scale(1.06);
 }
 
 /* Menu Button Styles */
