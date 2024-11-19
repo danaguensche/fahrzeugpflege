@@ -5,7 +5,7 @@
       <div v-for="field in formFields" :key="field.id" class="forms-field">
         <input :type="field.type" :id="field.id" :placeholder="field.placeholder" v-model="formData[field.id]"
           class="forms-field-input" />
-        <span v-if="errors[field.id]" class="alert error">{{ errors[field.id] }}</span>
+        <span v-if="errors[field.id]" class="alert error">{{ errors[field.id][0] }}</span>
       </div>
     </fieldset>
     <div class="forms-buttons">
