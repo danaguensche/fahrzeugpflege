@@ -1,14 +1,20 @@
-
-.calendar {
-    width: calc(100% + 260px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-
-    margin-top: 50px;
+:root {
+    --font-family: 'Rubik', sans-serif;
+    --clr-box-shadow: rgba(0, 0, 0, 0.1);
 }
 
-/* .calender-sidebar-opened {
-    margin-left: 160px;
-} */
+.calendar {
+    position: fixed;
+    top: 5%;
+    bottom: 5%;
+    left: 15%;
+    right: 10%;
+    transition: left 0.3s ease;
+    font-family: var(--font-family);
+    box-shadow: 2px 0 5px var(--clr-box-shadow);
+}
+
+.calendar-sidebar-opened {
+    left: calc(15% + 10%);
+    transition: left 0.3s ease;
+}

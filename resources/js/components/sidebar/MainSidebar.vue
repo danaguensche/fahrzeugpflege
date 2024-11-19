@@ -1,31 +1,27 @@
 <template>
   <div id="sidebar">
-    <SidebarOpened v-if="isSidebarOpen" />
-    <SidebarClosed v-if="!isSidebarOpen" />
-
+    <SidebarState></SidebarState>
     <ReduceButton v-if="isSidebarOpen" @click="toggleSidebar">
       <img class="arrow" src="../../../img/sidebar-img/arrow-icon.png">
     </ReduceButton>
     <ExpandButton v-else @click="toggleSidebar">
       <img class="arrow" src="../../../img/sidebar-img/arrow-icon-mirrored.png">
     </ExpandButton>
-    
+
   </div>
 </template>
 
 <script>
 
-import SidebarOpened from "./SidebarOpened.vue"
-import SidebarClosed from "./SidebarClosed.vue"
 import { mapState, mapMutations } from "vuex"
 import ReduceButton from "./Slots/ReduceButton.vue";
 import ExpandButton from "./Slots/ExpandButton.vue";
+import SidebarState from "./SidebarState.vue";
 
 export default {
   name: "MainSidebar",
   components: {
-    SidebarOpened,
-    SidebarClosed,
+    SidebarState,
 
     ReduceButton,
     ExpandButton,
@@ -41,7 +37,7 @@ export default {
 }
 </script>
 
-<style> 
+<style>
 @import url(../../../css/sidebar/reduce-button.css);
 @import url(../../../css/sidebar/expand-button.css);
 </style>

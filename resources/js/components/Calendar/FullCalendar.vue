@@ -1,6 +1,6 @@
 <template>
-    <div class="calendar">
-        <div :class="{ 'calendar-sidebar-opened': isSidebarOpen }">
+    <div class="calendar":class="{ 'calendar-sidebar-opened': isSidebarOpen }">
+        <div >
             <VueCal :time="false" small active-view="year" locale="de" style="height: 750px;" />
         </div>
     </div>
