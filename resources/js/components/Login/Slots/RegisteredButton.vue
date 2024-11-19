@@ -37,6 +37,3 @@ export default {
 
 </script>
 
-<style>
-@import url("../../../../css/login/user-options-buttons.css");
-</style>

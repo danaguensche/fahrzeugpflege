@@ -27,6 +27,8 @@ export default {
 }
 </script>
 
-<style>
-@import url(../../../css/login/login.css);
+<style >
+@import url("../../../css/login/login.css");
+@import url("../../../css/login/submit-button.css");
+@import url("../../../css/login/user-options-buttons.css");
 </style>
