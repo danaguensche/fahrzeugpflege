@@ -313,7 +313,11 @@
     "src": "resources/img/sidebar-img/settings-icon.png"
   },
   "resources/js/app.js": {
+<<<<<<< HEAD
     "file": "assets/app-Q3oJ5OnN.js",
+=======
+    "file": "assets/app-BPgVcTsm.js",
+>>>>>>> 690bf2d2f6d5962f88b919adda136421bc4243e1
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -364,7 +368,11 @@
       "node_modules/vue-cal/dist/drag-and-drop.es.js"
     ],
     "css": [
+<<<<<<< HEAD
       "assets/app-T4A2GKwK.css"
+=======
+      "assets/app-RgklY32U.css"
+>>>>>>> 690bf2d2f6d5962f88b919adda136421bc4243e1
     ],
     "assets": [
       "assets/dashboard-icon-CAIXilEl.png",

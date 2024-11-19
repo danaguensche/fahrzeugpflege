@@ -2,7 +2,7 @@
 
     <!-- submit prevent verhindert, dass die Seite neu geladen wird, wenn das Formular abgeschickt wird -->
 
-    <form @submit.prevent="submitForm" class="forms-form">
+    <form @submit.prevent="submitForm">
         <fieldset class="forms-fieldset">
             <div class="forms-field">
                 <input type="hidden" name="_token" :value="csrf_token" />
@@ -15,10 +15,12 @@
             </div>
         </fieldset>
         <div v-if="error" class="alert error">{{ error }}</div>
-        <div class="forms-buttons">
+        <div class="forms-buttons-forgot">
+
+        
             <a href="#" class="forms-buttons-forgot">Passwort vergessen?</a>
-            <SubmitButton :buttonLabel="buttonLabel"></SubmitButton>
         </div>
+            <SubmitButton :buttonLabel="buttonLabel"></SubmitButton>
     </form>
 </template>
 
@@ -70,3 +72,7 @@ export default {
     }
 }
 </script>
+
+<style>
+@import url("../../../css/login/login.css");
+</style>

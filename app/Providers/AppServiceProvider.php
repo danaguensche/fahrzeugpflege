@@ -22,11 +22,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Validator::resolver(function($translator, $data, $rules, $messages) {
             return new class($translator, $data, $rules, $messages) extends \Illuminate\Validation\Validator {
-                protected function replaceAttributePlaceholder($message, $attribute)
-                {
-                    $attribute = str_replace(['"', '[', ']'], '', $attribute);
-                    return str_replace(':attribute', $attribute, $message);
-                }
             };
         });
     }    

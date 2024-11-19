@@ -40,22 +40,6 @@
     margin-top: 50px;
 }
 
-.menu-button-content {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    width: 100%;
-    background-color: var(--clr-light);
-    border-radius: 10px;
-    cursor: pointer;
-    font-family: Arial, sans-serif;
-    font-size: 16px;
-    padding: 10px 15px;
-    text-decoration: none;
-    color: var(--clr-button-text);
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px var(--clr-box-shadow);
-}
 
 .menu-button-content:hover {
     background-color: var(--clr-hover);
@@ -77,6 +61,25 @@
     margin-right: 15px;
     flex-shrink: 0;
 }
+
+/* Menu Button Styles */
+.menu-button-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    background-color: var(--clr-light);
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 16px; 
+    padding: 10px 15px; 
+    text-decoration: none; 
+    color: var(--clr-button-text); 
+    transition: all 0.3s ease; 
+    box-shadow: 0 2px 5px var(--clr-box-shadow); 
+    margin-top: 15px;
+  }
 
 .sidebar-textContent {
     flex-grow: 1;
@@ -104,7 +107,8 @@
         font-size: 14px;
     }
 
-   .sidebar-button.profile-spacing {
-        margin-top: 5vh; 
-   }
+    .sidebar-button.profile-spacing {
+        margin-top: 5vh;
+    }
 }
+

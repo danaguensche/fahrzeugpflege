@@ -1,5 +1,5 @@
 <template>
-    <button @click="switchForms" class="user-registered-login" id="login-button">{{ buttonLabel }}
+    <button @click="switchForms" class="user-action" id="login-button">{{ buttonLabel }}
         <slot></slot>
     </button>
 </template>

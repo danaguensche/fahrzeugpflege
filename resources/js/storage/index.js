@@ -14,6 +14,7 @@ export default createStore({
       state.activeForm = formName
     },
 
+    //Sidebar
     toggleSidebar(state){
       state.isSidebarOpen = !state.isSidebarOpen
     }

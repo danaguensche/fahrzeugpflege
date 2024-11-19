@@ -1,11 +1,9 @@
 <template>
     <section class="login-page">
-        <div :class="['user-options-forms', 'user-options-forms-unregistered', { 'active': isActive }]">
-            <div class="user-forms-signup">
+        <div :class="['user-options-forms-registered', 'user-options-forms-unregistered', { 'active': isActive }]">
                 <h2 class="forms-title">Registrieren</h2>
                 <SignUpForm></SignUpForm>
             </div>
-        </div>
     </section>
 </template>
 
@@ -26,3 +24,7 @@ export default {
     }
 }
 </script>
+
+<style>
+@import url("../../../css/login/login.css");
+</style>

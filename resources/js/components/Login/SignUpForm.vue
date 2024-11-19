@@ -1,6 +1,6 @@
 <template>
   <!-- submit prevent verhindert, dass die Seite neu geladen wird, wenn das Formular abgeschickt wird -->
-  <form class="forms-form" @submit.prevent="submitForm">
+  <form @submit.prevent="submitForm">
     <fieldset class="forms-fieldset">
       <div v-for="field in formFields" :key="field.id" class="forms-field">
         <input :type="field.type" :id="field.id" :placeholder="field.placeholder" v-model="formData[field.id]"
@@ -134,3 +134,7 @@ export default {
   }
 };
 </script>
+
+<style>
+@import url("../../../css/login/login.css");
+</style>
