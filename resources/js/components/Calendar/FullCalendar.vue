@@ -1,7 +1,15 @@
 <template>
-    <div class="calendar":class="{ 'calendar-sidebar-opened': isSidebarOpen }">
-        <div >
-            <VueCal :time="false" small active-view="year" locale="de" style="height: 750px;" />
+    <div class="calendar" :class="{ 'calendar-sidebar-opened': isSidebarOpen }">
+        <div>
+            <VueCal :time="false" locale="de"  hide-weekends xsmall
+                hide-view-selector:time="false" :transitions="false" active-view="week":disable-views="['years']"
+                
+                style="height: 650px"
+                >
+
+                >
+            </VueCal>
+
         </div>
     </div>
 </template>
@@ -44,4 +52,6 @@ export default {
 
 <style>
 @import url('../../../css/calendar/main-calendar.css');
+
+
 </style>

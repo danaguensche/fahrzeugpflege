@@ -1,21 +1,71 @@
 :root {
     --font-family: 'Rubik', sans-serif;
-    --clr-box-shadow: rgba(0, 0, 0, 0.1);
 }
 
 
 .form-wrapper {
     position: fixed;
     top: 5%;
-    bottom: 5%;
+    bottom: 10%;
     left: 20%;
     right: 10%;
     transition: left 0.3s ease;
     font-family: var(--font-family);
-    
-}
-
-.page-form {
 
 }
 
+.forms-fieldset.cars {
+    margin-bottom: 10px;
+}
+
+.page-form {}
+
+
+
+/* Theme */
+
+.vuecal__menu,
+.vuecal__cell-events-count {
+    background-color: darkslategray;
+}
+
+.vuecal__title-bar {
+    background-color: #82b5b5;
+}
+
+.vuecal__cell--today,
+.vuecal__cell--current {
+    background-color: #dceaea;
+
+}
+
+.vuecal:not(.vuecal--day-view) .vuecal__cell--selected {
+    background-color: #82b5b5;
+}
+
+.vuecal__cell--selected:before {
+    background-color: #82b5b5;
+    border-color: darkslategray;
+}
+
+
+/* Cells and buttons get highlighted when an event is dragged over it. */
+.vuecal__cell--highlighted:not(.vuecal__cell--has-splits),
+.vuecal__cell-split--highlighted {
+    /* background-color: rgba(195, 255, 225, 0.5); */
+}
+
+.vuecal__arrow.vuecal__arrow--highlighted,
+.vuecal__view-btn.vuecal__view-btn--highlighted {
+    /* background-color: rgba(136, 236, 191, 0.25); */
+}
+
+.vuecal__view-btn {
+    /* background-color: #ff8f61; */
+    color: white;
+    text-shadow: white;
+}
+
+.vuecal__flex.vuecal__title {
+    color: white;
+}

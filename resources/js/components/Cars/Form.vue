@@ -1,34 +1,35 @@
 <template>
-    <div class="form-wrapper">
+    <div class="form-wrapper" @submit.prevent="submitForm">
+        <h2 class="forms-title">Fahrzeug dokumentieren</h2>
         <form class="page-form">
-            <fieldset>
+            <fieldset class="forms-fieldset cars">
                 <input v-model="formData.Kennzeichen" type="text" name="kennzeichen" id="kennzeichen"
-                    placeholder="Kennzeichen"  required autofocus />
+                    placeholder="Kennzeichen" class="forms-field-input"/>
                  </fieldset>
 
-                 <fieldset>
+                 <fieldset class="forms-fieldset cars">
                 <input v-model="formData.Fahrzeugklasse" type="text" name="fahrzeugklasse" id="fahrzeugklasse"
-                    placeholder="Fahrzeugklasse"  required autofocus />
+                    placeholder="Fahrzeugklasse" class="forms-field-input"   />
                  </fieldset>
 
-                 <fieldset>
+                 <fieldset class="forms-fieldset cars">
                 <input v-model="formData.Automarke" type="text" name="automarke" id="automarke"
-                    placeholder="Automarke"  required autofocus />
+                    placeholder="Automarke" class="forms-field-input"/>
                  </fieldset>
 
-                 <fieldset>
+                 <fieldset class="forms-fieldset cars">
                 <input v-model="formData.Typ" type="text" name="typ" id="typ"
-                    placeholder="Typ"  required autofocus />
+                    placeholder="Typ" class="forms-field-input"/>
                  </fieldset>
 
-                 <fieldset>
+                 <fieldset class="forms-fieldset cars">
                 <input v-model="formData.Farbe" type="text" name="farbe" id="farbe"
-                    placeholder="Farbe"  required autofocus />
+                    placeholder="Farbe" class="forms-field-input"/>
                  </fieldset>
 
-                 <fieldset>
+                 <fieldset class="forms-fieldset cars">
                 <input v-model="formData.Sonstiges" type="text" name="sonstiges" id="sonstiges"
-                    placeholder="Sonstiges"  required autofocus />
+                    placeholder="Sonstiges" class="forms-field-input"/>
                  </fieldset>
 
                  <SubmitButton :buttonLabel="buttonLabel"></SubmitButton>
@@ -62,6 +63,12 @@ export default {
             },
 
             buttonLabel: "Absenden"
+        }
+    },
+
+    methods: {
+        submitForm() {
+            console.log("Abgeschickt!")
         }
     }
 }
