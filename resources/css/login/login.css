@@ -39,21 +39,19 @@
 /* Login-Seite Layout */
 .login-page {
 
-
     display: flex;
     flex-direction: column;
     justify-content: top-center;
     align-items: center;
-    padding: 1rem;
     position: relative;
     width: var(--box-width);
-    margin: 0 auto;
+    margin:  0 auto;
 }
 
 /* Benutzerbereich-Styles */
 .user-options-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; 
     align-items: center;
     justify-content: center;
     width: var(--box-width);
@@ -84,8 +82,7 @@
 .user-options-forms-registered,
 .user-options-forms-unregistered {
     position: absolute;
-    top: 0;
-    left: 0;
+
     width: 100%;
     background-color: var(--text-color-light);
     border-radius: var(--border-radius);
@@ -94,11 +91,11 @@
     transition: all var(--transition-speed) ease;
     opacity: 0;
     visibility: hidden;
+    padding: 3rem;
+
 }
 
-.user-options-forms-unregistered {
-    top: -28px;
-}
+
 
 .user-options-forms-registered.active,
 .user-options-forms-unregistered.active {
@@ -106,8 +103,6 @@
     visibility: visible;
     z-index: 1;
 }
-
-
 
 /* Formular-Titel */
 .forms-title {
@@ -143,6 +138,9 @@
 /* Passwort vergessen */
 
 .forms-buttons-forgot {
+    margin-top: 20px;
+    margin-bottom: -5px;
+    margin-left: 2px ;
     color: #999;
     text-decoration: underline;
     transition: color var(--transition-speed);
@@ -173,7 +171,8 @@
     }
 
     .user-options-text,
-    .user-options-forms {
+    .user-options-forms-registered,
+    .user-options-forms-unregistered {
         width: 100%;
     }
 

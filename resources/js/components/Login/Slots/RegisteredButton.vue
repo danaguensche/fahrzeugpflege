@@ -1,5 +1,5 @@
 <template>
-    <button @click="switchForms" class="user-registered-login" id="login-button">{{ buttonLabel }}
+    <button @click="switchForms" class="user-action" id="login-button">{{ buttonLabel }}
         <slot></slot>
     </button>
 </template>
@@ -37,3 +37,6 @@ export default {
 
 </script>
 
+<style>
+@import url("../../../../css/login/user-options-buttons.css");
+</style>

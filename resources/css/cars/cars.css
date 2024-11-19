@@ -12,7 +12,7 @@
     right: 10%;
     transition: left 0.3s ease;
     font-family: var(--font-family);
-    box-shadow: 2px 0 5px var(--clr-box-shadow);
+    
 }
 
 .page-form {
