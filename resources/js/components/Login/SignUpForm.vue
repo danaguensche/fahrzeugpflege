@@ -5,7 +5,10 @@
       <div v-for="field in formFields" :key="field.id" class="forms-field">
         <input :type="field.type" :id="field.id" :placeholder="field.placeholder" v-model="formData[field.id]"
           class="forms-field-input" />
-        <span v-if="errors[field.id]" class="alert error">{{ errors[field.id][0] }}</span>
+        <span class="alert error">
+          <!-- Wenn Fehlermeldung ein Array ist, wird nur das erste Element des Arrays angezeigt -->
+          {{ Array.isArray(errors[field.id]) ? errors[field.id][0] : errors[field.id] }}
+        </span>
       </div>
     </fieldset>
     <div class="forms-buttons">
@@ -65,6 +68,11 @@ export default {
         password_confirmation: this.validatePassword_confirmation,
       };
 
+      //Validiert alle Formularfelder, indem für jedes Feld die entsprechende Validierungsmethode aufruft 
+      //every() iteriert über das Array und checkt für jedes Feld ob für die entsprechende Funktion true oder false zurückgegeben wird
+      //der Rückgabewert ergibt true wenn alle Validierungen erfolgreich waren
+      //Wird in SubmitForm() aufgerufen und das Formular wird abgeschickt wenn der Rückgabewert true ist 
+      //Object.keys() gibt einen Array zurückt -> dynamische Verarbeitung vom validators Objekt ohne die einzelnen Einträge auflisten zu müssen 
       return Object.keys(validators).every(field => validators[field]());
     },
 

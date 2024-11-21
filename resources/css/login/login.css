@@ -1,18 +1,4 @@
 /* CSS-Variablen für Wiederverwendbarkeit */
-:root {
-    --primary-color: #ff4c02;
-    --primary-color-hover: #ff6f3c;
-    --secondary-color: #333;
-    --background-color: #fafafa;
-    --text-color-light: #fff;
-    --text-color-dark: #333;
-    --placeholder-color: #aaa;
-    --border-radius: 5px;
-    --box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    --transition-speed: 0.3s;
-    --font-family: 'Rubik', sans-serif;
-    --box-width: 43.75rem;
-}
 
 /* Grundlegende Styles */
 * {
@@ -64,7 +50,7 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: var(--secondary-color);
+    background-color: var(--primary-color);
     padding: 1.5rem;
     width: 100%;
     box-shadow: var(--box-shadow);
@@ -153,7 +139,7 @@
 
 /* Fehlermeldung */
 .alert.error {
-    color: red;
+    color: red; 
     font-size: 0.875rem;
     margin-top: 0.25rem;
 }
