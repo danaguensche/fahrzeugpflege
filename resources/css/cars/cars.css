@@ -2,7 +2,7 @@
 
     box-shadow: var(--box-shadow);
     padding: 70px;
-    /* align-self: flex-end; */
+    align-self: flex-end;
 
 }
 
@@ -12,9 +12,8 @@
 
 .searchbar {
     margin-top: 50px;
-    margin-bottom: 50px;
+    margin-bottom: 100px;
     width: 100px;
-
     box-shadow: var(--box-shadow);
 
 }
@@ -25,10 +24,10 @@
 
 .search-icon {
     align-self: flex-end;
-    position: fixed;
+    position: absolute;
     transform: scale(0.4);
     filter: brightness(50%);
-    margin-top: 1.5%;
+    margin-top: 25px;
 
 
 }
