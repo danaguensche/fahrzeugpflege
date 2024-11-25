@@ -194,6 +194,7 @@ return [
         'email' => 'E-Mail Adresse',
         'firstname' => 'Vorname',
         'lastname' => 'Nachname',
+        'password' => 'Passwort'
     ],
 
 ];

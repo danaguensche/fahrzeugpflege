@@ -9,6 +9,10 @@
     --clr-box-shadow: rgba(0, 0, 0, 0.1);
 }
 
+.sidebar-container, .sidebar-container.closed {
+    transition: width 0.3s ease;
+}
+
 .sidebar-container {
     width: 260px;
     height: 100vh;
@@ -24,6 +28,8 @@
     border-radius: 10px;
     box-shadow: 2px 0 5px var(--clr-box-shadow);
     user-select: none;
+
+    transition: width 0.6s ease;
 }
 
 .sidebar-buttons-wrapper {
@@ -97,6 +103,8 @@
 @media (max-width: 768px) {
     .sidebar-container {
         width: 220px;
+        transition: width 0.3s ease; 
+        
     }
 
     .sidebar-buttons-wrapper {

@@ -16,11 +16,9 @@
         </fieldset>
         <div v-if="error" class="alert error">{{ error }}</div>
         <div class="forms-buttons-forgot">
-
-        
             <a href="#" class="forms-buttons-forgot">Passwort vergessen?</a>
         </div>
-            <SubmitButton :buttonLabel="buttonLabel"></SubmitButton>
+            <SubmitButton>Anmelden</SubmitButton>
     </form>
 </template>
 
@@ -35,8 +33,6 @@ export default {
     },
     data() {
         return {
-            buttonLabel: "Anmelden",
-
             formData: {
                 email: '',
                 password: ''
@@ -47,10 +43,6 @@ export default {
         }
     },
     methods: {
-        update_buttonLabel(newName) {
-            this.buttonLabel = newName
-        },
-
         //Wird beim Absenden des Formulars aufgerufen
         async submitForm() {
             this.error = null;

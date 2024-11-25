@@ -1,24 +1,11 @@
 <template>
-    <button type="submit" class="forms-buttons-action">{{ buttonLabel }}<slot></slot></button>
+    <button type="submit" class="forms-buttons-action"><slot></slot></button>
 </template>
 
 <script>
 
 export default {
     name: "SubmitButton",
-
-    props: {
-        buttonLabel: {
-            type: String,
-            default: ""
-        }
-    },
-
-    methods: {
-        set_buttonLabel(name) {
-            this.buttonLabel = name;
-        }
-    }
 }
 
 </script>

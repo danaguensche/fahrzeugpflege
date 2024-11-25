@@ -2,11 +2,12 @@
     <div class="user-options-container user-options-container-registered">
         <div class="user-options-text">
             <div class="user-options">
-                <RegisteredButton :buttonLabel="'Anmelden'"
-                    :class="['user-action', { 'active': activeForm === 'login' }]" @click="switchToLogin">
+                <RegisteredButton :class="['user-action', { 'active': activeForm === 'login' }]" @click="switchToLogin">
+                    Anmelden
                 </RegisteredButton>
-                <RegisteredButton :buttonLabel="'Registrieren'"
-                    :class="['user-action', { 'active': activeForm === 'signup' }]" @click="switchToSignup">
+                <RegisteredButton :class="['user-action', { 'active': activeForm === 'signup' }]"
+                    @click="switchToSignup">
+                    Registrieren
                 </RegisteredButton>
             </div>
         </div>
@@ -40,4 +41,3 @@ export default {
 <style>
 @import url("../../../css/login/login.css");
 </style>
-

@@ -264,9 +264,13 @@
     "isDynamicEntry": true
   },
   "resources/css/main.css": {
-    "file": "assets/main-C4oClnmf.css",
+    "file": "assets/main-Ba931a7S.css",
     "src": "resources/css/main.css",
     "isEntry": true
+  },
+  "resources/img/icons/search.png": {
+    "file": "assets/search-MwXeqgVr.png",
+    "src": "resources/img/icons/search.png"
   },
   "resources/img/sidebar-img/arrow-icon-mirrored.png": {
     "file": "assets/arrow-icon-mirrored-BY0Ho_NH.png",
@@ -313,7 +317,7 @@
     "src": "resources/img/sidebar-img/settings-icon.png"
   },
   "resources/js/app.js": {
-    "file": "assets/app-CCyH1oRb.js",
+    "file": "assets/app-CSzEdjaN.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -364,7 +368,7 @@
       "node_modules/vue-cal/dist/drag-and-drop.es.js"
     ],
     "css": [
-      "assets/app-DQA0LRU5.css"
+      "assets/app-mUaWVVss.css"
     ],
     "assets": [
       "assets/dashboard-icon-CAIXilEl.png",
@@ -377,7 +381,8 @@
       "assets/settings-icon-D4GeoFNu.png",
       "assets/logout-icon-h9aPZeif.png",
       "assets/arrow-icon-BOHLJTC6.png",
-      "assets/arrow-icon-mirrored-BY0Ho_NH.png"
+      "assets/arrow-icon-mirrored-BY0Ho_NH.png",
+      "assets/search-MwXeqgVr.png"
     ]
   }
 }

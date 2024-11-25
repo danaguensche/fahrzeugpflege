@@ -1,5 +1,5 @@
 <template>
-    <button @click="switchForms" class="user-action" id="login-button">{{ buttonLabel }}
+    <button @click="switchForms" class="user-action" id="login-button">
         <slot></slot>
     </button>
 </template>
@@ -15,18 +15,10 @@ export default {
             default: false
         },
 
-        buttonLabel: {
-            type: String,
-            default: ""
-        }
     },
 
     methods: {
         switchForms() {
-        },
-
-        setButtonLabel(name) {
-            this.buttonLabel = name;
         },
 
         set_isActive() {

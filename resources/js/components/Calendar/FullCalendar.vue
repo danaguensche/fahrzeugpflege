@@ -1,17 +1,15 @@
 <template>
-    <div class="calendar" :class="{ 'calendar-sidebar-opened': isSidebarOpen }">
-        <div>
-            <VueCal :time="false" locale="de"  hide-weekends xsmall
-                hide-view-selector:time="false" :transitions="false" active-view="week":disable-views="['years']"
-                
-                style="height: 650px"
-                >
 
-                >
-            </VueCal>
+    <div>
+        <VueCal class="calendar" :class="{ 'calendar-sidebar-opened': isSidebarOpen }" locale="de" :time="false"
+            hide-weekends hide-view-selector:time="false" :transitions="false" active-view="week"
+            :disable-views="['years']" today-button :selected-date="selectedDate" :events="events">
+        </VueCal>
 
-        </div>
+
+
     </div>
+
 </template>
 
 <script>
@@ -33,6 +31,20 @@ export default {
 
     data() {
         return {
+            selectedDate: new Date(new Date().getFullYear(), 11, 31),
+
+            events: [
+                {
+                    start: new Date(),
+                    end: new Date(),
+                    // You can also define event dates with Javascript Date objects:
+                    // start: new Date(2018, 11 - 1, 16, 10, 30),
+                    // end: new Date(2018, 11 - 1, 16, 11, 30),
+                    title: '',
+                    content: '<i class="icon material-icons"></i>',
+                    class: ''
+                }
+            ]
         }
     },
     methods: {
@@ -52,6 +64,4 @@ export default {
 
 <style>
 @import url('../../../css/calendar/main-calendar.css');
-
-
 </style>

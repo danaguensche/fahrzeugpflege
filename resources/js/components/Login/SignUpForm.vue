@@ -12,7 +12,7 @@
       </div>
     </fieldset>
     <div class="forms-buttons">
-      <SubmitButton :buttonLabel="buttonLabel"></SubmitButton>
+      <SubmitButton>Registrieren</SubmitButton>
     </div>
   </form>
 </template>
@@ -35,9 +35,7 @@ export default {
         password: "",
         password_confirmation: "",
       },
-
-      buttonLabel: "Registrieren",
-
+      
       errors: {},
 
       formFields: [

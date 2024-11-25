@@ -4,9 +4,9 @@
     margin-top: 1rem;
     margin-right: 0.27rem;
     margin-left: 0.27rem;
-    border: 0.0625rem solid var(--secondary-color);
+    /* border: 0.0625rem solid var(--primary-color); */
     border-radius: var(--border-radius);
-    padding: 0.75rem 2rem;
+    padding: 0.85rem 2rem;
     color: var(--text-color-light);
     text-transform: uppercase;
     transition: background-color var(--transition-speed), color var(--transition-speed), transform var(--transition-speed);
