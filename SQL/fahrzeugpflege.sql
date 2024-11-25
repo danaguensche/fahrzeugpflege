@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 05. Nov 2024 um 13:51
+-- Erstellungszeit: 25. Nov 2024 um 16:04
 -- Server-Version: 10.4.32-MariaDB
 -- PHP-Version: 8.2.12
 
@@ -20,33 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Datenbank: `fahrzeugpflege`
 --
-
--- --------------------------------------------------------
-
---
--- Tabellenstruktur für Tabelle `auftraege`
---
-
-CREATE TABLE `auftraege` (
-  `AuftragsID` int(11) NOT NULL,
-  `KundenID` int(11) NOT NULL,
-  `FahrzeugsID` int(11) NOT NULL,
-  `LeistungsID` int(11) NOT NULL,
-  `auftrag_eingegangen` date NOT NULL,
-  `auftrag_abgeschlossen` date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Tabellenstruktur für Tabelle `auftrag_leistung`
---
-
-CREATE TABLE `auftrag_leistung` (
-  `auftraege_leistungenID` int(11) NOT NULL,
-  `AuftragsID` int(11) NOT NULL,
-  `LeistungsID` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -87,20 +60,17 @@ CREATE TABLE `counters` (
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `fahrzeuge`
+-- Tabellenstruktur für Tabelle `events`
 --
 
-CREATE TABLE `fahrzeuge` (
-  `FahrzeugID` int(11) NOT NULL,
-  `KundenID` int(11) NOT NULL,
-  `Definition` text NOT NULL,
-  `Kennzeichen` text NOT NULL,
-  `Fahrzeugklasse` text NOT NULL,
-  `Automarke` text NOT NULL,
-  `Typ` text NOT NULL,
-  `Farbe` text NOT NULL,
-  `Foto` blob NOT NULL,
-  `Sonstiges` text NOT NULL
+CREATE TABLE `events` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `start` datetime NOT NULL,
+  `end` datetime NOT NULL,
+  `content` text NOT NULL,
+  `class` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -118,25 +88,6 @@ CREATE TABLE `failed_jobs` (
   `exception` longtext NOT NULL,
   `failed_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Tabellenstruktur für Tabelle `grosse_innenraumreinigung`
---
-
-CREATE TABLE `grosse_innenraumreinigung` (
-  `LeistungsID` int(11) NOT NULL,
-  `sitzreinigung_VL` tinyint(1) NOT NULL,
-  `sitzreinigung_VR` tinyint(1) NOT NULL,
-  `sitzreiningung_HL` tinyint(1) NOT NULL,
-  `sitzreinigung_HM` tinyint(1) NOT NULL,
-  `sitzreinigung_HR` tinyint(1) NOT NULL,
-  `himmelreinigung` tinyint(1) NOT NULL,
-  `teppich_shampoonierung` tinyint(1) NOT NULL,
-  `kunststoffpflege` tinyint(1) NOT NULL,
-  `lederpflege` tinyint(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -176,36 +127,6 @@ CREATE TABLE `job_batches` (
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `kunden`
---
-
-CREATE TABLE `kunden` (
-  `KundenID` int(11) NOT NULL,
-  `Benutzername` text NOT NULL,
-  `Vorname` text NOT NULL,
-  `Nachname` text NOT NULL,
-  `PLZ` text NOT NULL,
-  `Straße` text NOT NULL,
-  `Ort` text NOT NULL,
-  `Telefonnummer` text NOT NULL,
-  `E-Mail` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Tabellenstruktur für Tabelle `leistungen`
---
-
-CREATE TABLE `leistungen` (
-  `LeistungsID` int(11) NOT NULL,
-  `Name` text NOT NULL,
-  `Definition` int(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Tabellenstruktur für Tabelle `migrations`
 --
 
@@ -228,21 +149,6 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `mitarbeiter`
---
-
-CREATE TABLE `mitarbeiter` (
-  `MitarbeiterID` int(11) NOT NULL,
-  `AuftragsID` int(11) NOT NULL,
-  `Vorname` text NOT NULL,
-  `Nachname` int(255) NOT NULL,
-  `Telefonnummer` text NOT NULL,
-  `E-Mail` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Tabellenstruktur für Tabelle `password_reset_tokens`
 --
 
@@ -251,30 +157,6 @@ CREATE TABLE `password_reset_tokens` (
   `token` varchar(255) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Tabellenstruktur für Tabelle `schnellwaesche_buerste`
---
-
-CREATE TABLE `schnellwaesche_buerste` (
-  `LeistungsID` int(11) NOT NULL,
-  `felgenreinigung` tinyint(1) NOT NULL,
-  `scheibenreinigung` tinyint(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Tabellenstruktur für Tabelle `schonwaesche_hand`
---
-
-CREATE TABLE `schonwaesche_hand` (
-  `LeistungsID` int(11) NOT NULL,
-  `felgenreinigung` tinyint(1) NOT NULL,
-  `scheibenreinigung` tinyint(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -296,7 +178,7 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('ZlOkF8C7J2XodAotOZ5X4OTzn6l9aZqyhJWwKoHA', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiUWRzRVhYc0N3ckZLb3BNUDU2ak5mVE5mbUlTTVV3QTBINVIxT3hEbSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mjc6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6MzoidXJsIjthOjE6e3M6ODoiaW50ZW5kZWQiO3M6MzE6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC9kYXNoYm9hcmQiO31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1730808329);
+('zbFjMQhlstZzGSqD6QJi7z226cr2iNfkxmYlT7Xc', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiUmRJSjl1VVFCbmtydEN1UjhzbkRwd3VVRFptaXF0TmhnOVczQlZTdSI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC9kYXNoYm9hcmQiO31zOjM6InVybCI7YToxOntzOjg6ImludGVuZGVkIjtzOjMxOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvZmFocnpldWdlIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1732546544);
 
 -- --------------------------------------------------------
 
@@ -321,27 +203,12 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `firstname`, `lastname`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'Dana', 'Günsche', 'danag2407@gmail.com', NULL, '$2y$12$27FSc0/qF61RRM/XIfH89.qwlYGhVrgnZbrMjIh.En2cCE43k9Krm', NULL, '2024-11-05 07:22:38', '2024-11-05 07:22:38');
+(1, 'Dana', 'Günsche', 'danag2407@gmail.com', NULL, '$2y$12$27FSc0/qF61RRM/XIfH89.qwlYGhVrgnZbrMjIh.En2cCE43k9Krm', NULL, '2024-11-05 07:22:38', '2024-11-05 07:22:38'),
+(12, 'Test', 'Günsche', 'hallo@gmail.com', NULL, '$2y$12$KUYe5Fi6kGPGLRQ06j9Zd.evsZf/cxsS/zvfvfzsxVJVLB.DzLIQS', NULL, '2024-11-14 12:09:52', '2024-11-14 12:09:52');
 
 --
 -- Indizes der exportierten Tabellen
 --
-
---
--- Indizes für die Tabelle `auftraege`
---
-ALTER TABLE `auftraege`
-  ADD PRIMARY KEY (`AuftragsID`),
-  ADD KEY `KundenID` (`KundenID`),
-  ADD KEY `FahrzeugsID` (`FahrzeugsID`);
-
---
--- Indizes für die Tabelle `auftrag_leistung`
---
-ALTER TABLE `auftrag_leistung`
-  ADD PRIMARY KEY (`auftraege_leistungenID`),
-  ADD KEY `LeistungsID` (`LeistungsID`),
-  ADD KEY `AuftragsID` (`AuftragsID`);
 
 --
 -- Indizes für die Tabelle `cache`
@@ -362,11 +229,11 @@ ALTER TABLE `counters`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indizes für die Tabelle `fahrzeuge`
+-- Indizes für die Tabelle `events`
 --
-ALTER TABLE `fahrzeuge`
-  ADD PRIMARY KEY (`FahrzeugID`),
-  ADD KEY `KundenID` (`KundenID`);
+ALTER TABLE `events`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indizes für die Tabelle `failed_jobs`
@@ -374,12 +241,6 @@ ALTER TABLE `fahrzeuge`
 ALTER TABLE `failed_jobs`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`);
-
---
--- Indizes für die Tabelle `grosse_innenraumreinigung`
---
-ALTER TABLE `grosse_innenraumreinigung`
-  ADD PRIMARY KEY (`LeistungsID`);
 
 --
 -- Indizes für die Tabelle `jobs`
@@ -395,47 +256,16 @@ ALTER TABLE `job_batches`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indizes für die Tabelle `kunden`
---
-ALTER TABLE `kunden`
-  ADD PRIMARY KEY (`KundenID`);
-
---
--- Indizes für die Tabelle `leistungen`
---
-ALTER TABLE `leistungen`
-  ADD PRIMARY KEY (`LeistungsID`);
-
---
 -- Indizes für die Tabelle `migrations`
 --
 ALTER TABLE `migrations`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indizes für die Tabelle `mitarbeiter`
---
-ALTER TABLE `mitarbeiter`
-  ADD PRIMARY KEY (`MitarbeiterID`),
-  ADD KEY `AuftragsID` (`AuftragsID`);
-
---
 -- Indizes für die Tabelle `password_reset_tokens`
 --
 ALTER TABLE `password_reset_tokens`
   ADD PRIMARY KEY (`email`);
-
---
--- Indizes für die Tabelle `schnellwaesche_buerste`
---
-ALTER TABLE `schnellwaesche_buerste`
-  ADD PRIMARY KEY (`LeistungsID`);
-
---
--- Indizes für die Tabelle `schonwaesche_hand`
---
-ALTER TABLE `schonwaesche_hand`
-  ADD PRIMARY KEY (`LeistungsID`);
 
 --
 -- Indizes für die Tabelle `sessions`
@@ -457,28 +287,16 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT für Tabelle `auftraege`
---
-ALTER TABLE `auftraege`
-  MODIFY `AuftragsID` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT für Tabelle `auftrag_leistung`
---
-ALTER TABLE `auftrag_leistung`
-  MODIFY `auftraege_leistungenID` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT für Tabelle `counters`
 --
 ALTER TABLE `counters`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT für Tabelle `fahrzeuge`
+-- AUTO_INCREMENT für Tabelle `events`
 --
-ALTER TABLE `fahrzeuge`
-  MODIFY `FahrzeugID` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `events`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT für Tabelle `failed_jobs`
@@ -487,28 +305,10 @@ ALTER TABLE `failed_jobs`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT für Tabelle `grosse_innenraumreinigung`
---
-ALTER TABLE `grosse_innenraumreinigung`
-  MODIFY `LeistungsID` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT für Tabelle `jobs`
 --
 ALTER TABLE `jobs`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT für Tabelle `kunden`
---
-ALTER TABLE `kunden`
-  MODIFY `KundenID` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT für Tabelle `leistungen`
---
-ALTER TABLE `leistungen`
-  MODIFY `LeistungsID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT für Tabelle `migrations`
@@ -517,89 +317,10 @@ ALTER TABLE `migrations`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT für Tabelle `mitarbeiter`
---
-ALTER TABLE `mitarbeiter`
-  MODIFY `MitarbeiterID` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT für Tabelle `schnellwaesche_buerste`
---
-ALTER TABLE `schnellwaesche_buerste`
-  MODIFY `LeistungsID` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT für Tabelle `schonwaesche_hand`
---
-ALTER TABLE `schonwaesche_hand`
-  MODIFY `LeistungsID` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT für Tabelle `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- Constraints der exportierten Tabellen
---
-
---
--- Constraints der Tabelle `auftraege`
---
-ALTER TABLE `auftraege`
-  ADD CONSTRAINT `auftraege_ibfk_1` FOREIGN KEY (`KundenID`) REFERENCES `auftraege` (`AuftragsID`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `auftraege_ibfk_2` FOREIGN KEY (`FahrzeugsID`) REFERENCES `auftraege` (`AuftragsID`) ON UPDATE CASCADE;
-
---
--- Constraints der Tabelle `auftrag_leistung`
---
-ALTER TABLE `auftrag_leistung`
-  ADD CONSTRAINT `auftrag_leistung_ibfk_1` FOREIGN KEY (`AuftragsID`) REFERENCES `auftrag_leistung` (`auftraege_leistungenID`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `auftrag_leistung_ibfk_2` FOREIGN KEY (`LeistungsID`) REFERENCES `auftrag_leistung` (`auftraege_leistungenID`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `auftrag_leistung_ibfk_3` FOREIGN KEY (`AuftragsID`) REFERENCES `kunden` (`KundenID`) ON UPDATE CASCADE;
-
---
--- Constraints der Tabelle `fahrzeuge`
---
-ALTER TABLE `fahrzeuge`
-  ADD CONSTRAINT `fahrzeuge_ibfk_1` FOREIGN KEY (`KundenID`) REFERENCES `kunden` (`KundenID`) ON UPDATE CASCADE;
-
---
--- Constraints der Tabelle `grosse_innenraumreinigung`
---
-ALTER TABLE `grosse_innenraumreinigung`
-  ADD CONSTRAINT `grosse_innenraumreinigung_ibfk_1` FOREIGN KEY (`LeistungsID`) REFERENCES `leistungen` (`LeistungsID`) ON UPDATE CASCADE;
-
---
--- Constraints der Tabelle `kunden`
---
-ALTER TABLE `kunden`
-  ADD CONSTRAINT `kunden_ibfk_1` FOREIGN KEY (`KundenID`) REFERENCES `auftraege` (`AuftragsID`);
-
---
--- Constraints der Tabelle `leistungen`
---
-ALTER TABLE `leistungen`
-  ADD CONSTRAINT `leistungen_ibfk_1` FOREIGN KEY (`LeistungsID`) REFERENCES `auftrag_leistung` (`LeistungsID`);
-
---
--- Constraints der Tabelle `mitarbeiter`
---
-ALTER TABLE `mitarbeiter`
-  ADD CONSTRAINT `mitarbeiter_ibfk_1` FOREIGN KEY (`AuftragsID`) REFERENCES `auftraege` (`AuftragsID`) ON UPDATE CASCADE;
-
---
--- Constraints der Tabelle `schnellwaesche_buerste`
---
-ALTER TABLE `schnellwaesche_buerste`
-  ADD CONSTRAINT `schnellwaesche_buerste_ibfk_1` FOREIGN KEY (`LeistungsID`) REFERENCES `leistungen` (`LeistungsID`) ON UPDATE CASCADE;
-
---
--- Constraints der Tabelle `schonwaesche_hand`
---
-ALTER TABLE `schonwaesche_hand`
-  ADD CONSTRAINT `schonwaesche_hand_ibfk_1` FOREIGN KEY (`LeistungsID`) REFERENCES `leistungen` (`LeistungsID`) ON UPDATE CASCADE;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
