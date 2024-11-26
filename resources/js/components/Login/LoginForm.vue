@@ -13,16 +13,20 @@
                 <input v-model="formData.password" type="password" name="password" id="password" placeholder="Passwort"
                     class="forms-field-input" required />
             </div>
+            <Checkbox>Anmeldedaten speichern</Checkbox>
+
         </fieldset>
         <div v-if="error" class="alert error">{{ error }}</div>
         <div class="forms-buttons-forgot">
             <a href="#" class="forms-buttons-forgot">Passwort vergessen?</a>
         </div>
-            <SubmitButton>Anmelden</SubmitButton>
+        <SubmitButton>Anmelden</SubmitButton>
     </form>
 </template>
 
 <script>
+
+import Checkbox from '../CommonSlots/Checkbox.vue';
 import SubmitButton from './Slots/SubmitButton.vue';
 import axios from 'axios';
 
@@ -30,6 +34,7 @@ export default {
     name: "LoginForm",
     components: {
         SubmitButton,
+        Checkbox
     },
     data() {
         return {

@@ -1,7 +1,7 @@
 <template>
     <div class="form-wrapper profil" @submit.prevent="submitForm">
         <form class="page-form">
-
+            
             <div class="single-form">
                 <h2 class="forms-title">Profil</h2>
                 <div v-for="field in formFields_profil" :key="field.id" class="forms-field">
