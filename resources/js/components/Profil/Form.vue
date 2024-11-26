@@ -26,7 +26,7 @@
                     <input :type="field.type" :id="field.id" :placeholder="field.placeholder"
                         v-model="formData[field.id]" class="forms-field-input" />
                     <span class="alert error">
-                        {{ Array.isArray(errors[field.id]) ? errors[field.id][0] : errors[field.id] }}
+                       {{errors[field.id]}}
                     </span>
                 </div>
                 <SubmitButton>Passwort ändern</SubmitButton>
@@ -50,9 +50,11 @@ export default {
                 lastname: "",
                 email: "",
                 phonenumber: "",
+
                 addressline: "",
                 postalcode: "",
                 city: "",
+
                 oldpassword: "",
                 newpassword: "",
                 confirmpassword: ""
@@ -109,6 +111,14 @@ export default {
 
         submitForm() {
             this.errors = {};
+
+            if(this.validatePasswordChange()){
+                console.log("Passt!");
+            }
+
+            else {
+                console.log("Passt nicht");
+            }
         }
     }
 }
