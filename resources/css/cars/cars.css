@@ -10,31 +10,7 @@
     margin-bottom: 10px;
 }
 
-.searchbar {
-    margin-top: 50px;
-    margin-bottom: 100px;
-    width: 100px;
-    box-shadow: var(--box-shadow);
 
-}
-
-.searchbar.forms-field {
-    border-radius: 30px;
-}
-
-.search-icon {
-    align-self: flex-end;
-    position: absolute;
-    transform: scale(0.4);
-    filter: brightness(50%);
-    margin-top: 25px;
-
-
-}
-
-.search-icon:hover {
-    cursor: pointer;
-}
 
 .car-page {
     display: flex;
