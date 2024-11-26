@@ -1,7 +1,7 @@
 <template>
     <div class="form-wrapper profil" @submit.prevent="submitForm">
         <form class="page-form">
-            
+
             <div class="single-form">
                 <h2 class="forms-title">Profil</h2>
                 <div v-for="field in formFields_profil" :key="field.id" class="forms-field">
@@ -26,7 +26,7 @@
                     <input :type="field.type" :id="field.id" :placeholder="field.placeholder"
                         v-model="formData[field.id]" class="forms-field-input" />
                     <span class="alert error">
-                       {{errors[field.id]}}
+                        {{ errors[field.id] }}
                     </span>
                 </div>
                 <SubmitButton>Passwort ändern</SubmitButton>
@@ -112,7 +112,7 @@ export default {
         submitForm() {
             this.errors = {};
 
-            if(this.validatePasswordChange()){
+            if (this.validatePasswordChange()) {
                 console.log("Passt!");
             }
 
@@ -125,5 +125,35 @@ export default {
 </script>
 
 <style scoped>
-@import url('../../../css/profil/profil.css');
+.form-wrapper.profil {
+    font-family: var(--font-family);
+    display: flex;
+    align-self: flex-start;
+    justify-content: center;
+    flex-direction: row;
+    box-shadow: var(--box-shadow);
+
+    /* margin-top: 50px;
+    margin-bottom: 50px; */
+}
+
+.single-form {
+    margin-bottom: 25px;
+    padding: 100px;
+    /* box-shadow: var(--box-shadow); */
+    width: 700px;
+}
+
+.forms-title {
+    margin-bottom: 50px;
+}
+
+.forms-field {
+    margin-bottom: 15px;
+}
+
+.alert.error {
+    color: red;
+    font-size: 0.9em;
+}
 </style>

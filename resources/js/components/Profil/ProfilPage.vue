@@ -18,4 +18,12 @@ export default {
 
 </script>
 
-<style></style>
+<style scoped>
+
+.hr {
+    border: none;
+    height: 1px;
+    background-color: black;
+    margin: 20px 0; 
+}
+</style>

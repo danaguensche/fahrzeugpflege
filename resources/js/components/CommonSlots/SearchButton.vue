@@ -15,7 +15,7 @@ export default{
 .search-button {
     align-self: flex-end;
     position: absolute;
-    transform: scale(0.4);
+    transform: scale(0.3);
     background-color: white;
     margin-top: 25px;
 

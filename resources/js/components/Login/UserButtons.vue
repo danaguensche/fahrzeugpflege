@@ -38,6 +38,4 @@ export default {
 }
 </script>
 
-<style>
-@import url("../../../css/login/login.css");
-</style>
+<style></style>

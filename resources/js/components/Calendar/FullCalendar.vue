@@ -5,9 +5,6 @@
             hide-weekends hide-view-selector:time="false" :transitions="false" active-view="week"
             :disable-views="['years']" today-button :selected-date="selectedDate" :events="events">
         </VueCal>
-
-
-
     </div>
 
 </template>
@@ -63,5 +60,75 @@ export default {
 </script>
 
 <style>
-@import url('../../../css/calendar/main-calendar.css');
+.calendar {
+    position: fixed;
+    top: 5%;
+    bottom: 5%;
+    left: 15%;
+    right: 10%;
+    transition: left 0.3s ease;
+    font-family: var(--font-family);
+    box-shadow: 2px 0 5px var(--clr-box-shadow);
+    height: 700px
+}
+
+.calendar-sidebar-opened {
+    left: 25%;
+    transition: left 0.3s ease;
+}
+
+
+/* Theme */
+
+.vuecal__menu,
+.vuecal__cell-events-count {
+    background-color: var(--primary-color);
+}
+
+.vuecal__title-bar {
+    background-color: var(--primary-color-hover);
+}
+
+.vuecal__cell--today,
+.vuecal__cell--current {
+    background-color: #dceaea;
+
+}
+
+.vuecal:not(.vuecal--day-view) .vuecal__cell--selected {
+    background-color: #82b5b5;
+}
+
+.vuecal__cell--selected:before {
+    background-color: var(--primary-color-hover);
+    border-color: var(--primary-color);
+}
+
+
+/* Cells and buttons get highlighted when an event is dragged over it. */
+.vuecal__cell--highlighted:not(.vuecal__cell--has-splits),
+.vuecal__cell-split--highlighted {
+    /* background-color: rgba(195, 255, 225, 0.5); */
+}
+
+.vuecal__arrow.vuecal__arrow--highlighted,
+.vuecal__view-btn.vuecal__view-btn--highlighted {
+    /* background-color: rgba(136, 236, 191, 0.25); */
+}
+
+.vuecal__view-btn {
+    /* background-color: #ff8f61; */
+    color: white;
+    text-shadow: white;
+}
+
+.vuecal__flex.vuecal__title {
+    color: white;
+}
+
+@media screen and (min-width: 1800px) {
+    .calendar {
+        height: 1100px;
+    }
+}
 </style>

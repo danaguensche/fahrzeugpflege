@@ -111,5 +111,114 @@ export default {
 }
 </script>
 <style scoped >
-@import url(../../../css/sidebar/main-sidebar-opened.css)
+.sidebar-container, .sidebar-container.closed {
+    transition: width 0.3s ease;
+}
+
+.sidebar-container {
+    width: 260px;
+    height: 100vh;
+    background-color: var(--clr-bg-sidebar);
+    color: var(--clr-dark);
+    padding: 2.5vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    border-radius: 10px;
+    box-shadow: 2px 0 5px var(--clr-box-shadow);
+    user-select: none;
+
+    transition: width 0.6s ease;
+}
+
+.sidebar-buttons-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 200px;
+    transform: scale(1.05);
+}
+
+
+.sidebar-button.profile-spacing {
+    margin-top: 50px;
+}
+
+
+.menu-button-content:hover {
+    background-color: var(--clr-hover);
+    transform: scale(1.05);
+    color: var(--clr-light);
+}
+
+.menu-button-content:hover .sidebar-textContent {
+    color: var(--clr-hover-text);
+}
+
+.menu-button-content:hover .icon {
+    filter: brightness(200%);
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+/* Menu Button Styles */
+.menu-button-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    background-color: var(--clr-light);
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 16px; 
+    padding: 10px 15px; 
+    text-decoration: none; 
+    color: var(--clr-button-text); 
+    transition: all 0.3s ease; 
+    box-shadow: 0 2px 5px var(--clr-box-shadow); 
+    margin-top: 15px;
+  }
+
+.sidebar-textContent {
+    flex-grow: 1;
+    font-size: 16px;
+    color: var(--clr-link);
+    font-family: "Rubik", sans-serif;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.rubik-font {
+    font-family: "Rubik", sans-serif;
+}
+
+@media (max-width: 768px) {
+    .sidebar-container {
+        width: 220px;
+        transition: width 0.3s ease; 
+        
+    }
+
+    .sidebar-buttons-wrapper {
+        width: 160px;
+    }
+
+    .sidebar-textContent {
+        font-size: 14px;
+    }
+
+    .sidebar-button.profile-spacing {
+        margin-top: 5vh;
+    }
+}
 </style>

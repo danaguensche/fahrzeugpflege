@@ -102,6 +102,72 @@ export default {
 }
 </script>
 
-<style >
-@import url(../../../css/sidebar/main-sidebar-closed.css);
+<style scoped>
+/* Menu Button Styles */
+.menu-button-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    background-color: var(--clr-light);
+    border-radius: 10px;
+    cursor: pointer;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: var(--clr-button-text);
+
+    box-shadow: 0 2px 5px var(--clr-box-shadow);
+    margin-top: 15px;
+
+    transition: all 0.3s ease;
+}
+
+.sidebar-button.closed {
+    border-radius: 10px;
+}
+
+.profile-spacing.closed {
+    margin-top: 50px;
+}
+
+.sidebar-button.closed:hover {
+    background-color: var(--clr-hover);
+    transform: scale(1.06);
+}
+
+.icon.closed {
+    width: 24px;
+    height: 24px;
+}
+
+.sidebar-button.closed:hover .icon.closed {
+    filter: brightness(200%);
+    transform: scale(1.06);
+}
+
+.menu-button-content:hover {
+    background-color: var(--clr-hover);
+    transform: scale(1.05);
+    color: var(--clr-light);
+}
+
+@media (max-width: 768px) {
+    .sidebar-container.closed {
+        width: auto;
+        transition: width 0.3s ease;
+    }
+
+    .sidebar-button.closed {
+        width: auto;
+    }
+
+    .icon.closed {
+        width: auto;
+        height: auto;
+    }
+
+    .sidebar-button.profile-spacing.closed {
+        margin-top: 5vh;
+    }
+}
 </style>

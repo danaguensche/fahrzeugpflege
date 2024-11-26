@@ -35,7 +35,7 @@ export default {
         password: "",
         password_confirmation: "",
       },
-      
+
       errors: {},
 
       formFields: [
@@ -142,5 +142,34 @@ export default {
 </script>
 
 <style>
-@import url("../../../css/login/login.css");
+/* Formular-Titel */
+.forms-title {
+  margin-bottom: 3.125rem;
+  font-size: 2rem;
+  font-weight: 500;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.15rem;
+  text-align: center;
+}
+
+/* Formular-Feld */
+.forms-field:not(:last-of-type) {
+  margin-bottom: 1.875rem;
+}
+
+.forms-field-input {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius);
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 300;
+  color: var(--text-color-dark);
+  transition: border-color var(--transition-speed);
+}
+
+.forms-field-input:focus {
+  border-color: var(--primary-color);
+}
 </style>

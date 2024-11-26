@@ -1,7 +1,7 @@
 <template>
     <input v-model="searchText" class="searchbar forms-field forms-field-input" type="search" :placeholder="context">
         <SearchButton></SearchButton>
-        <CloseButton v-show="searchText" @click="clearSearch"></CloseButton>
+        <CloseButton :isVisible="!!searchText" @close="clearSearch"></CloseButton>
 
     <slot></slot>
     </input>

@@ -73,6 +73,15 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
+.form-wrapper {
+    box-shadow: var(--box-shadow);
+    padding: 70px;
+    align-self: flex-end;
+    /* visibility: hidden; */
+}
 
+.forms-fieldset.cars {
+    margin-bottom: 10px;
+}
 </style>
