@@ -12,7 +12,7 @@ import Search from './Slots/Search.vue';
 import { mapState } from 'vuex';
 
 export default {
-    name: "Page",
+    name: "CarPage",
     computed: {
         ...mapState(['isSidebarOpen'])
     },
