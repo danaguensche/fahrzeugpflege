@@ -1,19 +1,19 @@
 <template>
-<button class="search-button">
-    <img src="../../../img/icons/search.png" class="search-icon">
-    <slot></slot>
-</button>
-
+    <button class="add-button">
+        <img src="../../../img/icons/add.png" class="add-icon">
+        <slot></slot>
+    </button>
 </template>
 
 <script>
-export default{
-    name: "SearchButton"
+export default {
+    name: "AddButton",
+
 }
 </script>
 
 <style scoped>
-.search-button {
+.add-button {
     align-self: flex-end;
     position: absolute;
     transform: scale(0.3);
@@ -22,11 +22,11 @@ export default{
 
 }
 
-.search-icon {
+.add-icon {
     filter: brightness(50%);
 }
 
-.search-icon:hover {
+.add-icon:hover {
     cursor: pointer;
     filter: brightness(0%);
 }

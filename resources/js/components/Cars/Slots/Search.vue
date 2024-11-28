@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import CloseButton from '../../CommonSlots/Close.Button.vue';
+import CloseButton from '../../CommonSlots/CloseButton.vue';
 import SearchButton from '../../CommonSlots/SearchButton.vue';
 
 export default {

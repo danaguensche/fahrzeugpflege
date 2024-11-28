@@ -2,6 +2,7 @@
     <transition name="fade">
       <button v-if="isVisible" class="close-button" @click="$emit('close')">
         <img src="../../../img/icons/close.png" class="close-icon">
+        <slot></slot>
       </button>
     </transition>
   </template>
