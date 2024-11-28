@@ -1,6 +1,7 @@
 <template>
     <button class="edit-button">
-        <img src="../../../img/icons/edit.png" class="edit-icon">
+        <img src="../../../img/icons/edit.png" class="edit-icon" :class="{ 'hover-tooltip': showTooltip }"
+            :title="tooltipText">
         <slot></slot>
     </button>
 </template>
@@ -9,6 +10,20 @@
 export default {
     name: "EditButton",
 
+    props: {
+        tooltipText: {
+            type: String,
+            default: null
+        }
+    },
+
+    computed: {
+        showTooltip() {
+            if (this.tooltipText !== null && this.tooltipText !== '') {
+                return true;
+            }
+        }
+    }
 }
 </script>
 
@@ -17,7 +32,7 @@ export default {
     align-self: flex-end;
     position: absolute;
     transform: scale(0.3);
-    background-color: white;
+    background-color: transparent;
     margin-top: 25px;
 
 }
@@ -30,4 +45,8 @@ export default {
     cursor: pointer;
     filter: brightness(0%);
 }
+</style>
+
+<style>
+@import url("../../../css/tooltips.css");
 </style>

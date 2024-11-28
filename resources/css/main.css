@@ -1,7 +1,7 @@
 /* CSS-Variablen für Wiederverwendbarkeit */
 :root {
     --primary-color: darkslategray;
-    --primary-color-hover: #82b5b5; 
+    --primary-color-hover: #82b5b5;
     --secondary-color: #dceaea;
     --background-color: #fafafa;
     --text-color-light: #fff;
@@ -11,6 +11,7 @@
     --box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     --transition-speed: 0.3s;
     --font-family: 'Rubik', sans-serif;
+    --font-size: 1rem;
     --box-width: 43.75rem;
 
     --clr-light: whitesmoke;

@@ -24,7 +24,7 @@ export default {
 .checkbox {
     -webkit-appearance: none;
     appearance: none;
-    background-color: #fff;
+    background-color: transparent;
     margin: 0;
     font: inherit;
     color: currentColor;

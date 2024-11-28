@@ -1,11 +1,15 @@
 <template>
+    <AddButton class="add" tooltip-text="Termin hinzufügen"></AddButton>
 
+    
     <div>
         <VueCal class="calendar" :class="{ 'calendar-sidebar-opened': isSidebarOpen }" locale="de" :time="false"
             hide-weekends hide-view-selector:time="false" :transitions="false" active-view="week"
             :disable-views="['years']" today-button :selected-date="selectedDate" :events="events">
         </VueCal>
     </div>
+
+    
 
 </template>
 
@@ -16,10 +20,14 @@ import 'vue-cal/dist/vuecal.css';
 import axios from 'axios';
 
 import { mapState } from "vuex"
+import AddButton from '../CommonSlots/AddButton.vue';
+import EditButton from '../CommonSlots/EditButton.vue';
 
 export default {
     components: {
-        VueCal
+        VueCal,
+        AddButton,
+        EditButton
     },
 
     computed: {
@@ -76,6 +84,8 @@ export default {
     left: 25%;
     transition: left 0.3s ease;
 }
+
+.add {}
 
 
 /* Theme */
