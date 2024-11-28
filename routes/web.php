@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\CarController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -14,7 +17,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/login', 'loginPost')->name('login.post');
     Route::get('/signup', 'signup')->name('signup');
     Route::post('/signup', 'signupPost')->name('signup.post');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/logout', 'logout')->name('logout');
 });
 
 // Protected Routes
@@ -28,8 +31,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/chat', 'chat');
         Route::get('/profil', 'profile');
         Route::get('/einstellungen', 'settings');
-        
     });
+
+    Route::post('/fahrzeuge', [CarController::class, 'store']);
+    Route::post('/profil', [EmployeeController::class, 'store']);
 });
 
-Route::get('/new', 'TestController@controllerMethod');
+Route::get('/new', [TestController::class, 'controllerMethod']);

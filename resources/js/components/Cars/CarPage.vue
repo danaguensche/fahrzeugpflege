@@ -23,7 +23,7 @@ export default {
     },
     data() {
         return {
-            context: "Suchen Sie nach einem Fahrzeug..."
+            context: "Suchen Sie nach einem Fahrzeug...",
         }
     }
 }

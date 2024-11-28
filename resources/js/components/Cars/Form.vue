@@ -2,36 +2,10 @@
     <div class="form-wrapper" @submit.prevent="submitForm">
         <form class="page-form">
             <h2 class="forms-title">Fahrzeug dokumentieren</h2>
-            <fieldset class="forms-fieldset cars">
-                <input v-model="formData.Kennzeichen" type="text" name="kennzeichen" id="kennzeichen"
-                    placeholder="Kennzeichen" class="forms-field-input" />
-            </fieldset>
-
-            <fieldset class="forms-fieldset cars">
-                <input v-model="formData.Fahrzeugklasse" type="text" name="fahrzeugklasse" id="fahrzeugklasse"
-                    placeholder="Fahrzeugklasse" class="forms-field-input" />
-            </fieldset>
-
-            <fieldset class="forms-fieldset cars">
-                <input v-model="formData.Automarke" type="text" name="automarke" id="automarke" placeholder="Automarke"
+            <div v-for="field in formFields" :key="field.id" class="forms-field">
+                <input :type="field.type" :id="field.id" :placeholder="field.placeholder" v-model="formData[field.id]"
                     class="forms-field-input" />
-            </fieldset>
-
-            <fieldset class="forms-fieldset cars">
-                <input v-model="formData.Typ" type="text" name="typ" id="typ" placeholder="Typ"
-                    class="forms-field-input" />
-            </fieldset>
-
-            <fieldset class="forms-fieldset cars">
-                <input v-model="formData.Farbe" type="text" name="farbe" id="farbe" placeholder="Farbe"
-                    class="forms-field-input" />
-            </fieldset>
-
-            <fieldset class="forms-fieldset cars">
-                <input v-model="formData.Sonstiges" type="text" name="sonstiges" id="sonstiges" placeholder="Sonstiges"
-                    class="forms-field-input" />
-            </fieldset>
-
+            </div>
             <SubmitButton>Speichern</SubmitButton>
 
         </form>
@@ -42,6 +16,7 @@
 <script>
 
 import SubmitButton from '../Login/Slots/SubmitButton.vue';
+import axios from 'axios';
 
 export default {
     name: "Form",
@@ -61,14 +36,29 @@ export default {
                 Sonstiges: '',
                 Bild: ''
             },
+
+            formFields: [
+                { id: 'Kennzeichen', name: 'Kennzeichen', type: 'text', placeholder: 'Kennzeichen' },
+                { id: 'Fahrzeugklasse', name: 'Fahrzeugklasse', type: 'text', placeholder: 'Fahrzeugklasse' },
+                { id: 'Automarke', name: 'Automarke', type: 'text', placeholder: 'Automarke' },
+                { id: 'Typ', name: 'Typ', type: 'text', placeholder: 'Typ' },
+                { id: 'Farbe', name: 'Farbe', type: 'text', placeholder: 'Farbe' },
+                { id: 'Sonstiges', name: 'Sonstiges', type: 'text', placeholder: 'Sonstiges' },
+            ]
         }
     },
 
     methods: {
-        submitForm() {
-            console.log("Abgeschickt!")
+        async submitForm() {
+            try {
+                const response = await axios.post('/fahrzeuge', this.formData);
+                console.log('Fahrzeug erfolgreich gespeichert:', response.data);
+            } catch (error) {
+                console.error('Fehler beim Speichern des Fahrzeugs:', error);
+            }
         }
     }
+
 }
 
 </script>
@@ -81,7 +71,7 @@ export default {
     /* visibility: hidden; */
 }
 
-.forms-fieldset.cars {
+.forms-fieldset {
     margin-bottom: 10px;
 }
 </style>

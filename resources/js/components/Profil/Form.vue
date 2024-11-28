@@ -109,15 +109,12 @@ export default {
             return Object.keys(validators).every(field => validators[field]());
         },
 
-        submitForm() {
-            this.errors = {};
-
-            if (this.validatePasswordChange()) {
-                console.log("Passt!");
-            }
-
-            else {
-                console.log("Passt nicht");
+        async submitForm() {
+            try {
+                const response = await axios.post('/profil', this.formData);
+                console.log('Profil erfolgreich aktualisiert:', response.data);
+            } catch (error) {
+                console.error('Fehler beim aktualisieren des Profils:', error);
             }
         }
     }

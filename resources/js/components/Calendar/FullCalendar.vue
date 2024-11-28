@@ -85,7 +85,9 @@ export default {
     transition: left 0.3s ease;
 }
 
-.add {}
+.add {
+    margin-left: 90%;
+}
 
 
 /* Theme */
