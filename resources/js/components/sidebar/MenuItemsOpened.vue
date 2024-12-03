@@ -97,7 +97,7 @@ export default {
                     }
                 }).then(() => {
                     localStorage.removeItem('auth_token');
-                    this.$router.push('/');
+                    this.$router.push('/login');
                 }).catch(error => {
                     console.error('Logout fehlgeschlagen', error);
                     alert('Logout fehlgeschlagen. Bitte versuchen Sie es erneut.');
