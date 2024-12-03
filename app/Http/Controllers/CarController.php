@@ -11,16 +11,30 @@ class CarController extends Controller
     public function store(Request $request)
     {
         try {
-            $car = new Car();
-            $car->Kennzeichen = $request->Kennzeichen;
-            $car->Fahrzeugklasse = $request->Fahrzeugklasse;
-            $car->Automarke = $request->Automarke;
-            $car->Typ = $request->Typ;
-            $car->Farbe = $request->Farbe;
-            $car->Sonstiges = $request->Sonstiges;
-            $car->save();
+            $validatedData = $request->validate([
+                'Kennzeichen' => 'required|string',
+                'Fahrzeugklasse' => 'nullable|string',
+                'Automarke' => 'nullable|string',
+                'Typ' => 'nullable|string',
+                'Farbe' => 'nullable|string',
+                'Sonstiges' => 'nullable|string',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
             
+
+            $car = new Car();
+            $car->fill($validatedData);
+
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $car->image = base64_encode(file_get_contents($image));
+            }
+
+            $car->save();
+
             return response()->json(['message' => 'Fahrzeug erfolgreich gespeichert'], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => $e->errors()], 422);
         } catch (\Exception $e) {
             Log::error('Fehler beim Speichern des Fahrzeugs: ' . $e->getMessage());
             return response()->json(['error' => 'Fehler beim Speichern des Fahrzeugs'], 500);

@@ -15,6 +15,7 @@ class Car extends Model
         'Automarke',
         'Typ',
         'Farbe',
-        'Sonstiges'
+        'Sonstiges',
+        'image'
     ];
 }

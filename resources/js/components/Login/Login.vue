@@ -6,7 +6,6 @@
         </div>
         <div :class="['user-options-forms-unregistered', { 'active': activeForm === 'register' }]">
             <h2 class="forms-title">Registrieren</h2>
-            <RegisterForm></RegisterForm>
         </div>
     </section>
 </template>

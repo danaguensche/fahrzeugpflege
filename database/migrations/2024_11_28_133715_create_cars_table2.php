@@ -12,11 +12,12 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->text('Kennzeichen');
-            $table->text('Fahrzeugklasse');
-            $table->text('Automarke');
-            $table->text('Typ');
-            $table->text('Farbe');
-            $table->text('Sonstiges');
+            $table->text('Fahrzeugklasse')->nullable();
+            $table->text('Automarke')->nullable();
+            $table->text('Typ')->nullable();
+            $table->text('Farbe')->nullable();
+            $table->text('Sonstiges')->nullable();
+            $table->longText('image')->nullable();
         });
     }
 
