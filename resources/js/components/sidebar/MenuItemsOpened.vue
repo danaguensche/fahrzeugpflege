@@ -22,7 +22,7 @@ export default {
     name: 'MenuItemsOpened',
 
     components: {
-     MenuButton
+        MenuButton
     },
 
     data: () => ({
@@ -110,8 +110,9 @@ export default {
     }
 }
 </script>
-<style scoped >
-.sidebar-container, .sidebar-container.closed {
+<style scoped>
+.sidebar-container,
+.sidebar-container.closed {
     transition: width 0.3s ease;
 }
 
@@ -137,7 +138,7 @@ export default {
 .sidebar-buttons-wrapper {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     width: 200px;
     transform: scale(1.05);
@@ -170,7 +171,6 @@ export default {
     flex-shrink: 0;
 }
 
-/* Menu Button Styles */
 .menu-button-content {
     display: flex;
     align-items: center;
@@ -180,22 +180,26 @@ export default {
     border-radius: 10px;
     cursor: pointer;
     font-family: Arial, sans-serif;
-    font-size: 16px; 
-    padding: 10px 15px; 
-    text-decoration: none; 
-    color: var(--clr-button-text); 
-    transition: all 0.3s ease; 
-    box-shadow: 0 2px 5px var(--clr-box-shadow); 
+    font-size: 16px;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: var(--clr-button-text);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px var(--clr-box-shadow);
     margin-top: 15px;
-  }
+    text-align: left;
+}
+
 
 .sidebar-textContent {
+    margin-left: 2vh;
     flex-grow: 1;
     font-size: 16px;
     color: var(--clr-link);
     font-family: "Rubik", sans-serif;
     text-decoration: none;
     transition: color 0.3s ease;
+    text-align: left;
 }
 
 .rubik-font {
@@ -205,8 +209,8 @@ export default {
 @media (max-width: 768px) {
     .sidebar-container {
         width: 220px;
-        transition: width 0.3s ease; 
-        
+        transition: width 0.3s ease;
+
     }
 
     .sidebar-buttons-wrapper {

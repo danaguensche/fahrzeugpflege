@@ -18,4 +18,9 @@ class Car extends Model
         'Sonstiges',
         'image'
     ];
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
 }
