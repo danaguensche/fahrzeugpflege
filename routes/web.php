@@ -26,6 +26,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', 'dashboard')->name('dashboard');
         Route::get('/kalender', 'calendar');
         Route::get('/fahrzeuge', 'cars');
+        Route::get('/kunden', 'customers');
         Route::get('/auftraege', 'jobs');
         Route::get('/berichte', 'reports');
         Route::get('/chat', 'chat');

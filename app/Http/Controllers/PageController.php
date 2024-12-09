@@ -21,6 +21,11 @@ class PageController extends Controller
         return view('pages.cars');
     }
 
+    public function customers()
+    {
+        return view('pages.customers');
+    }
+
     public function jobs()
     {
         return view('pages.jobs');

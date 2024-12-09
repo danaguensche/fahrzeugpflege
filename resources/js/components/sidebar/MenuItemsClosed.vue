@@ -1,3 +1,5 @@
+<!-- Farbe für Icons ist #808080 -->
+
 <template>
     <div class="sidebar-container-closed">
         <div v-for="(menuitem, index) in menuitems" :key="menuitem.id"
@@ -28,9 +30,10 @@ export default {
             { id: 1, name: 'Dashboard' },
             { id: 2, name: 'Kalender' },
             { id: 3, name: 'Fahrzeuge' },
-            { id: 4, name: 'Aufträge' },
-            { id: 5, name: 'Berichte' },
-            { id: 6, name: 'Chat' },
+            { id: 4, name: 'Kunden' },
+            { id: 5, name: 'Aufträge' },
+            { id: 6, name: 'Berichte' },
+            
             { id: 7, name: 'Profil' },
             { id: 8, name: 'Einstellungen' },
             { id: 9, name: 'Abmelden' },
@@ -40,9 +43,9 @@ export default {
             { id: 1, name: new URL('@/img/sidebar-img/dashboard-icon.png', import.meta.url).href },
             { id: 2, name: new URL('@/img/sidebar-img/calendar-icon.png', import.meta.url).href },
             { id: 3, name: new URL('@/img/sidebar-img/cars-icon.png', import.meta.url).href },
-            { id: 4, name: new URL('@/img/sidebar-img/jobs-icon.png', import.meta.url).href },
-            { id: 5, name: new URL('@/img/sidebar-img/reports-icon.png', import.meta.url).href },
-            { id: 6, name: new URL('@/img/sidebar-img/chat-icon.png', import.meta.url).href },
+            { id: 4, name: new URL('@/img/sidebar-img/customer-icon.png', import.meta.url).href },
+            { id: 5, name: new URL('@/img/sidebar-img/jobs-icon.png', import.meta.url).href },
+            { id: 6, name: new URL('@/img/sidebar-img/reports-icon.png', import.meta.url).href },
             { id: 7, name: new URL('@/img/sidebar-img/profile-icon.png', import.meta.url).href },
             { id: 8, name: new URL('@/img/sidebar-img/settings-icon.png', import.meta.url).href },
             { id: 9, name: new URL('@/img/sidebar-img/logout-icon.png', import.meta.url).href },

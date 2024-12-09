@@ -6,7 +6,7 @@
                 <input v-if="field.type !== 'file'" :type="field.type" :id="field.id" :placeholder="field.placeholder"
                     v-model="formData[field.id]" class="forms-field-input" />
                 <input v-else :id="field.id" :name="field.name" :type="field.type" @change="handleFileUpload"
-                    ref="imageInput" class="forms-field-input" />
+                    ref="imageInput"/>
                 <span v-if="errors[field.id]" class="alert error">
                     {{ errors[field.id] }}
                 </span>
@@ -37,11 +37,11 @@ export default {
 
             formData: {
                 Kennzeichen: '',
-                Fahrzeugklasse: '',
-                Automarke: '',
-                Typ: '',
-                Farbe: '',
-                Sonstiges: '',
+                Fahrzeugklasse: null,
+                Automarke: null,
+                Typ: null,
+                Farbe: null,
+                Sonstiges: null,
                 image: null
             },
 
@@ -126,5 +126,25 @@ export default {
 
 .forms-fieldset {
     margin-bottom: 10px;
+}
+
+input[type="file"]::file-selector-button {
+  border-radius: var(--border-radius);
+  padding: 0 16px;
+  height: 40px;
+  cursor: pointer;
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
+  margin-right: 16px;
+  transition: background-color 200ms;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background-color: #f3f4f6;
+}
+
+input[type="file"]::file-selector-button:active {
+  background-color: #e5e7eb;
 }
 </style>
