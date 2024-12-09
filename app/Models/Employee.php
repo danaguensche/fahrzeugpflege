@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Auth;
 
 class Employee extends Authenticatable
 {
@@ -31,14 +32,19 @@ class Employee extends Authenticatable
         'password' => 'hashed',
     ];
 
-    // public function department()
-    // {
-    //     return $this->belongsTo(Department::class);
-    // }
-
     public function updatePassword($newPassword)
     {
         $this->password = bcrypt($newPassword);
         $this->save();
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($employee) {
+            if (!$employee->password) {
+                $employee->password = Auth::user()->password;
+            }
+        });
     }
 }

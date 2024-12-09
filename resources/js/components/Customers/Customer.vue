@@ -51,42 +51,12 @@ export default {
         };
     },
     methods: {
-        validatePassword() {
-            if (this.customer.newpassword.length < 8) {
-                this.errors.newpassword = "Das Passwort muss mindestens 8 Zeichen lang sein.";
-                return false;
-            } else {
-                return true;
-            }
-        },
-        validatePassword_confirmed() {
-            if (this.customer.newpassword !== this.customer.confirmpassword) {
-                this.errors.confirmpassword = "Die Passwörter stimmen nicht überein.";
-                return false;
-            } else {
-                return true;
-            }
-        },
-        validateOldPassword() {
-            //Altes Passwort muss richtig sein
-            return true;
-        },
-        validatePasswordChange() {
-            const validators = {
-                oldpassword: this.validateOldPassword,
-                newpassword: this.validatePassword,
-                confirmpassword: this.validatePassword_confirmed,
-            };
-
-            return Object.keys(validators).every(field => validators[field]());
-        },
-
         async submitForm() {
             try {
-                const response = await axios.post('/profil', this.customer);
-                console.log('Profil erfolgreich aktualisiert:', response.data);
+                const response = await axios.post('/kunden', this.customer);
+                console.log('Kunde wurde erfolgreich hinzugefügt.', response.data);
             } catch (error) {
-                console.error('Fehler beim aktualisieren des Profils:', error);
+                console.error('Fehler beim Speichern des Kunden.', error);
             }
         }
     }
