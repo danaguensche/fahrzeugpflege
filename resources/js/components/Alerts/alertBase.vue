@@ -24,9 +24,6 @@
         props: ['alertHeading', 'alertParagraph', 'alertCloseButton', 'alertOkayButton', 'alertTypeClass'],
         methods: {
             hideAlert() {
-                console.log("WE IN HERE: " + this.alertVisible + " " + this.visibleAlert);
-                //this.alertVisible = false;
-                console.log("WE IN HERE: " + this.alertVisible + " " + this.visibleAlert);
                 this.$emit('close-alert-clicked');
             },
             confirmationClicked() {
