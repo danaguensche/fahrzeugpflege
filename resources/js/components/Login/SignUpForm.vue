@@ -13,10 +13,11 @@
       <SubmitButton>Registrieren</SubmitButton>
     </div>
   </form>
+  <alert-base v-if="alertVisible" v-on="alertHandlers" alert-heading="Erfolg" alert-paragraph="Registrierung erfolgreich! Sie können sich jetzt anmelden." alert-close-button="Schließen" alert-type-class="alertTypeBasic"/>
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, provide, computed } from 'vue';
 import { useValidation } from '../../composables/useValidation.js';
 import SubmitButton from './Slots/SubmitButton.vue';
 import axios from 'axios';
@@ -26,7 +27,17 @@ export default {
   components: {
     SubmitButton,
   },
+  data() {
+    return {
+      alertVisible: {},
+      alertHandlers: {
+        closeAlertClicked: this.updateAlertVisibility
+      }
+    }
+  },
   setup() {
+    let alertVisible = ref({});
+    alertVisible.value = false;
     const initialData = {
       firstname: "",
       lastname: "",
@@ -51,7 +62,7 @@ export default {
         try {
           const response = await axios.post('/signup', formData);
           if (response.data.success) {
-            alert("Registrierung erfolgreich! Sie können sich jetzt anmelden.");
+            vm.alertVisible = true;
           } else {
             console.error('Unerwarteter Erfolgsfall:', response.data);
           }
@@ -65,14 +76,27 @@ export default {
         }
       }
     };
-
     return {
       formData,
       errors,
       formFields,
       submitForm,
-      success
+      success,
+      alertVisible
     };
+  },
+  provide() {
+    return {
+      alertVisible: computed(() => this.alertVisible)
+    }
+  },
+  methods: {
+    updateAlertVisibility() {
+      this.alertVisible = !this.alertVisible;
+    }
+  },
+  mounted() {
+    window.vm = this;
   }
 };
 </script>
