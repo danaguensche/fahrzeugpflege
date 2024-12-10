@@ -1,0 +1,111 @@
+.alertShadow {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.7); 
+    z-index: 900;
+}
+.alertArea {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: grid;
+    justify-items: center;
+    z-index: 901;
+    width: 100%;
+    height: 100%;
+}
+.alertWindow {
+    /* for star selector */
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+
+    --fontSize1: 5vw;
+    --fontSize2: 4vh;
+    --windowFontFamily: var(--font-family);
+    --windowColor: var(--primary-color);
+
+    z-index: 902;
+    row-gap: 1.5vmin;
+    width: max(80svw, 90vmin);
+    height: max-content;
+    margin-top: 4vmin;
+    background-color: var(--text-color-light);
+    color: var(--text-color-dark);
+    border: 4px solid var(--windowColor);
+    border-radius: 7px;
+    font-size: max(var(--fontSize1), var(--fontSize2));
+    font-family: var(--windowFontFamily);
+    box-shadow: 0 0 45px 3px rgba(0, 0, 0, 0.5);
+
+    display: grid;
+    align-items: center;
+    justify-items: center;
+    grid-template-columns: [col1a] 1fr [col1b];
+    grid-template-rows: repeat(4, max-content);
+}
+.alertWindow h2 {
+    width: 100%;
+    min-height: max-content;
+    height: 100%;
+    text-align: center;
+    font-family: inherit;
+    font-size: inherit;
+    display: grid;
+    justify-items: center;
+    border-radius: 0 0 4vmin 4vmin;
+    padding: 1vmin 2vh 1vmin 2vh;
+    background-color: var(--windowColor);
+    text-shadow: 0 3px 0.5vh var(--text-color-dark);
+    color: var(--text-color-light);
+    grid-column: 1 / -1;
+}
+.alertWindow p {
+    color: inherit;
+    font-size: max(calc(var(--fontSize1)*0.5), calc(var(--fontSize2)*0.5));
+    font-family: var(--windowFontFamily);
+    padding-left: 4.5%;
+    padding-right: 5%;
+    word-break: break-word;
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+    grid-column: 1 / -1;
+}
+.alertButton {
+    color: var(--text-color-light);
+    background-color: var(--windowColor);
+    font-family: var(--windowFontFamily);
+    font-size: min(var(--fontSize1), var(--fontSize2));
+    display: grid;
+    align-items: center;
+    justify-items: center;
+    border-radius: 1vh;
+    cursor: pointer;
+    border: 0.3vh solid rgba(0, 0, 0, 0.5);
+    border-bottom-width: 0.45vh;
+    padding: 1vmin;
+    min-height: max-content;
+    width: calc(100% - 2vmin);
+
+    transition-property: background-color;
+    transition-duration: var(--transition-speed);
+}
+.alertClose {
+    grid-column: span 1;
+}
+.alertButton:hover {
+    background-color: var(--primary-color-hover);
+}
+
+.alertTypeBase {
+    grid-template-columns: [col1a] 1fr [col1b];
+    grid-template-rows: repeat(4, max-content);
+}
+.alertTypeConfirmation {
+    grid-template-columns: [col1a] 1fr [col1b col2a] 1fr [col2b];
+    grid-template-rows: repeat(4, max-content);
+}
