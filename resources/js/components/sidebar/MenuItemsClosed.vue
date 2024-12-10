@@ -64,7 +64,7 @@ export default {
         return {
             alertVisible: this.alertVisible
         }
-    }
+    },
 
     methods: {
         //Formatiert Einträge aus dem menuitems Array und gibt die Route zu der dazugehörigen Seite zurück
