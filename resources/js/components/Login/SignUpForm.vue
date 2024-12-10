@@ -26,7 +26,7 @@ export default {
   components: {
     SubmitButton,
   },
-  setup() {
+  data() {
     const initialData = {
       firstname: "",
       lastname: "",

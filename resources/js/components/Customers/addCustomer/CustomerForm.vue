@@ -1,7 +1,9 @@
 <template>
     <div class="form-wrapper profil" @submit.prevent="submitForm">
         <form class="page-form">
+            <CloseButton :isVisible="true" @click="" ></CloseButton>
             <div class="single-form">
+
                 <h2 class="forms-title">Kunde hinzufügen</h2>
                 <div v-for="field in formFields" :key="field.id" class="forms-field">
                     <p class="field-header">{{ field.name }}</p>
@@ -25,13 +27,15 @@ import { ref } from 'vue';
 import { useValidation } from '../../../composables/useValidation.js';
 import SubmitButton from '../../Login/Slots/SubmitButton.vue';
 import axios from 'axios';
+import CloseButton from '../../CommonSlots/CloseButton.vue';
 
 export default {
     name: "Form",
     components: {
         SubmitButton,
+        CloseButton
     },
-    setup() {
+    data() {
         const initialData = {
             company: "",
             firstname: "",
@@ -84,6 +88,10 @@ export default {
 </script>
 
 <style scoped>
+.close-button {
+    visibility: visible;
+}
+
 .form-wrapper.profil {
     font-family: var(--font-family);
     display: flex;
@@ -98,10 +106,12 @@ export default {
 }
 
 .single-form {
+    position: absolute;
     margin-top: 5vh;
     margin-bottom: 5vh;
     padding: 80px;
     box-shadow: var(--box-shadow);
+    z-index: 10;
 
 }
 

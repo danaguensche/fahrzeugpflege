@@ -14,12 +14,15 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # Serve static assets (images, css, js) directly if they exist
+    # Serve static assets directly
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^(.*)\.(jpg|jpeg|png|gif|css|js|svg|webp|woff|woff2|ttf|eot)$ - [L]
 
-    # Send Requests To Front Controller...
-    RewriteCond %{REQUEST_FILENAME} !-d
+    # Handle API requests (assuming your API routes start with /api)
+    RewriteRule ^api/ index.php [L]
+
+    # Send all other requests to index.html for the SPA
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.html [L]
 </IfModule>

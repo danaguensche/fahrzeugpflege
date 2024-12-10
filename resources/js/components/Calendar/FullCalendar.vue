@@ -1,7 +1,7 @@
 <template>
     <AddButton class="add" tooltip-text="Termin hinzufügen"></AddButton>
 
-    
+
     <div>
         <VueCal class="calendar" :class="{ 'calendar-sidebar-opened': isSidebarOpen }" locale="de" :time="false"
             hide-weekends hide-view-selector:time="false" :transitions="false" active-view="week"
@@ -9,7 +9,7 @@
         </VueCal>
     </div>
 
-    
+
 
 </template>
 

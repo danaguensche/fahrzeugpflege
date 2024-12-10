@@ -29,7 +29,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kalender', 'calendar');
         Route::get('/fahrzeuge', 'cars');
         Route::get('/kunden', [CustomerController::class, 'index']);
-        Route::get('/kunden/hinzufuegen', 'addcustomer');
         Route::get('/auftraege', 'jobs');
         Route::get('/berichte', 'reports');
         Route::get('/chat', 'chat');
@@ -39,7 +38,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/fahrzeuge', [CarController::class, 'store']);
     Route::post('/profil', [EmployeeController::class, 'store']);
-    Route::post('/kunden/hinzufuegen', [CustomerController::class, 'store']);
 });
 
 Route::get('/new', [TestController::class, 'controllerMethod']);

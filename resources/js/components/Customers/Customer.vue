@@ -2,7 +2,7 @@
     <div class="customer-page" :class="{ 'customer-page-sidebar-opened': isSidebarOpen }">
         <Search :context="context" class="searchbar"></Search>
         <div class="content-container">
-            <DefaultButton class="addCustomer" @click="redirectToAddCustomer">Kunde hinzufügen</DefaultButton>
+            <DefaultButton class="addCustomer" @click="addCustomer">Kunde hinzufügen</DefaultButton>
         </div>
 
         <table class="table table-bordered">
@@ -50,8 +50,8 @@
                     </td>
                 </tr>
             </tbody>
-
         </table>
+        <CustomerForm v-if="addCustomerValue"></CustomerForm>
     </div>
 </template>
 
@@ -64,6 +64,8 @@ import Search from '../CommonSlots/Searchbar.vue';
 import { mapState } from 'vuex';
 import axios from 'axios';
 import { RouterLink } from 'vue-router';
+import CustomerForm from './addCustomer/CustomerForm.vue';
+
 
 export default {
     name: 'Customer',
@@ -72,14 +74,20 @@ export default {
         DefaultButton,
         Checkbox,
         DeleteButton,
-        EditButton
+        EditButton,
+        CustomerForm
     },
 
     data() {
         return {
             context: "Suchen Sie nach einem Kunden...",
-            customers: []
+            customers: [],
+            addCustomerValue: false
         }
+    },
+
+    props:{
+
     },
 
     mounted() {
@@ -92,8 +100,8 @@ export default {
     },
 
     methods: {
-        redirectToAddCustomer() {
-            this.$router.push('/kunden/hinzufuegen');
+        addCustomer() {
+            this.addCustomerValue = !this.addCustomerValue;
         },
 
         getCustomers() {
