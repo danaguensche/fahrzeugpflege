@@ -7,7 +7,7 @@
 
 <script>
 import Form from './Form.vue';
-import Search from './Slots/Search.vue';
+import Search from '../CommonSlots/Searchbar.vue';
 
 import { mapState } from 'vuex';
 
@@ -45,7 +45,6 @@ margin-right: 50px;
 
 transition: left 0.3s ease;
 font-family: var(--font-family);
-height: 700px;
 transition: margin-left 0.3s ease;
 
 }

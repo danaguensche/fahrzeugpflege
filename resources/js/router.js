@@ -12,6 +12,7 @@ import LoginPage from './components/pages/LoginPage.vue';
 import SignUpPage from './components/pages/SignUpPage.vue';
 import WelcomePage from './components/pages/WelcomePage.vue';
 import CustomerPage from './components/pages/CustomerPage.vue';
+import AddCustomerPage from './components/pages/addCustomerPage.vue';
 
 const routes = [
     {
@@ -29,6 +30,10 @@ const routes = [
     {
         path: '/kunden',
         component: CustomerPage
+    },
+    {
+        path: '/kunden/hinzufuegen',
+        component: AddCustomerPage
     },
     {
         path: '/auftraege',
