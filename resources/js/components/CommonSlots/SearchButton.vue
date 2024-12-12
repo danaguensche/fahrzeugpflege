@@ -17,7 +17,7 @@ export default {
         }
     },
 
-    computed: {
+    methods: {
         showTooltip() {
             if (this.tooltipText !== null && this.tooltipText !== '') {
                 return true;

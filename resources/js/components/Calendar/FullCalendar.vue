@@ -62,7 +62,7 @@ export default {
         }
     },
     mounted() {
-        this.loadEvents()
+        // this.loadEvents()
     }
 }
 </script>

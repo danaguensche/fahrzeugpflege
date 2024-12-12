@@ -23,11 +23,9 @@ export default {
     }
   },
   methods: {
-    computed: {
-      showTooltip() {
-        if (this.tooltipText !== null && this.tooltipText !== '') {
-          return true;
-        }
+    showTooltip() {
+      if (this.tooltipText !== null && this.tooltipText !== '') {
+        return true;
       }
     }
   }
