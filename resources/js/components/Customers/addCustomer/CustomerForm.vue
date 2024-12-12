@@ -1,9 +1,13 @@
 <template>
-    <div class="form-wrapper profil" @submit.prevent="submitForm">
+    <div v-if="isOpen" class="form-wrapper profil">
         <form class="page-form">
-            <CloseButton :isVisible="true" @click="" ></CloseButton>
             <div class="single-form">
+                <!-- Close Button  -->
+                <div class="form-header">
+                    <CloseButton :isVisible="true" @click="closeForm"></CloseButton>
+                </div>
 
+                <!-- Form Fields -->
                 <h2 class="forms-title">Kunde hinzufügen</h2>
                 <div v-for="field in formFields" :key="field.id" class="forms-field">
                     <p class="field-header">{{ field.name }}</p>
@@ -13,14 +17,19 @@
                         {{ errors[field.id] }}
                     </span>
                 </div>
+
+                <!-- Success Alert -->
                 <div v-if="success" class="alert success">
                     {{ success }}
                 </div>
+
+                <!-- Submit Button -->
                 <SubmitButton>speichern</SubmitButton>
             </div>
         </form>
     </div>
 </template>
+
 
 <script>
 import { ref } from 'vue';
@@ -76,6 +85,8 @@ export default {
             }
         };
 
+
+
         return {
             formData,
             errors,
@@ -83,15 +94,23 @@ export default {
             submitForm,
             success
         };
+    },
+    props: {
+        isOpen: {
+            type: Boolean,
+            required: true,
+        }
+    },
+
+    methods: {
+        closeForm() {
+            this.$emit('close');
+        }
     }
 }
 </script>
 
 <style scoped>
-.close-button {
-    visibility: visible;
-}
-
 .form-wrapper.profil {
     font-family: var(--font-family);
     display: flex;
@@ -100,26 +119,40 @@ export default {
     flex-direction: row;
 }
 
-.field-header {
-    font-family: var(--font-family);
-    margin-bottom: 1vh;
-}
 
 .single-form {
-    position: absolute;
+    position: relative;
     margin-top: 5vh;
     margin-bottom: 5vh;
     padding: 80px;
     box-shadow: var(--box-shadow);
     z-index: 10;
-
 }
+
+
+.form-header {
+    position: absolute;
+    top: -45px;
+    right: 80px;
+}
+
 
 .forms-title {
     margin-bottom: 50px;
 }
 
+
 .forms-field {
     margin-bottom: 15px;
+}
+
+.field-header {
+    font-family: var(--font-family);
+    margin-bottom: 1vh;
+}
+
+.forms-field-input {
+    width: 100%;
+    padding: 10px;
 }
 </style>

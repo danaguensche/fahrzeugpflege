@@ -51,7 +51,7 @@
                 </tr>
             </tbody>
         </table>
-        <CustomerForm v-if="addCustomerValue"></CustomerForm>
+        <CustomerForm :isOpen="showCustomerForm" @close="showCustomerForm = false"></CustomerForm>
     </div>
 </template>
 
@@ -82,12 +82,8 @@ export default {
         return {
             context: "Suchen Sie nach einem Kunden...",
             customers: [],
-            addCustomerValue: false
+            showCustomerForm: false,
         }
-    },
-
-    props:{
-
     },
 
     mounted() {
@@ -101,7 +97,7 @@ export default {
 
     methods: {
         addCustomer() {
-            this.addCustomerValue = !this.addCustomerValue;
+            this.showCustomerForm = !this.showCustomerForm;
         },
 
         getCustomers() {
