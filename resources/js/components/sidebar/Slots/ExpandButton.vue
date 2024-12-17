@@ -15,13 +15,15 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    position: fixed;
-
-    margin-top: 44px;
+    position: absolute;
 
     left: 80px;
+    margin-top: 44px;
+
     width: 50px;
     height: 50px;
+
+    z-index: 0;
     background-color: whitesmoke;
     border: none;
     border-radius: 50%;

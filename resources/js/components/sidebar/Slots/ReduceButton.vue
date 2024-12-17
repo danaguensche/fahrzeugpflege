@@ -16,11 +16,13 @@ export default {
 .reduce-button {
     display: flex;
     align-items: center;
-    position: fixed;
+    justify-content: center;
+    position: absolute;
+    
     left: 240px;
     margin-top: 44px;
 
-    justify-content: center;
+    
     width: 50px;
     height: 50px;
 

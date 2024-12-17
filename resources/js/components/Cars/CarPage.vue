@@ -70,10 +70,6 @@ transition: margin-left 0.3s ease;
 .car-page-sidebar-opened {
     left: 260px;
     transition: left 0.3s ease;
-
-    .search-icon {
-        visibility: hidden;
-    }
 }
 
 .car-page.h {
@@ -84,15 +80,6 @@ transition: margin-left 0.3s ease;
     box-shadow: none;
     padding: 0px;
     margin-top: 50px;
-}
-
-.searchbar.forms-field {
-    width: 300px;
-}
-
-.search-icon {
-    left: 79%;
-
 }
 }
 </style>

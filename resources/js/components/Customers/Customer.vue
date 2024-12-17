@@ -1,57 +1,55 @@
 <template>
     <div class="customer-page" :class="{ 'customer-page-sidebar-opened': isSidebarOpen }">
-        <Search :context="context" class="searchbar"></Search>
+    
+            <Search :context="context" class="searchbar" ></Search>
+        
         <div class="content-container">
             <DefaultButton class="addCustomer" @click="addCustomer">Kunde hinzufügen</DefaultButton>
         </div>
 
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Auswählen</th>
-                    <th>Firma</th>
-                    <th>Vorname</th>
-                    <th>Nachname</th>
-                    <th>E-Mail</th>
-                    <th>Telefonnummer</th>
-                    <th>Straße und Hausnummer</th>
-                    <th>PLZ</th>
-                    <th>Ort</th>
-                    <th>Löschen</th>
-                    <th>Bearbeiten</th>
-                </tr>
-            </thead>
-            <tbody v-if="this.customers.length > 0">
-                <tr v-for="(customer, index) in this.customers" :key="index">
-                    <td>
-                        <Checkbox></Checkbox>
-                    </td>
-                    <td>{{ customer.company }}</td>
-                    <td>{{ customer.firstname }}</td>
-                    <td>{{ customer.lastname }}</td>
-                    <td>{{ customer.email }}</td>
-                    <td>{{ customer.phonenumber }}</td>
-                    <td>{{ customer.addressline }}</td>
-                    <td>{{ customer.postalcode }}</td>
-                    <td>{{ customer.city }}</td>
-                    <td>
-                        <DeleteButton></DeleteButton>
-                    </td>
-                    <td>
-                        <EditButton></EditButton>
-                    </td>
-                </tr>
-            </tbody>
-
-            <tbody v-else>
-                <tr>
-                    <td colspan="11">
-                        <div class="loader"></div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <CustomerForm :isOpen="showCustomerForm" @close="showCustomerForm = false"></CustomerForm>
+        <div class="table-container" :class="{ 'table-container-sidebar-opened': isSidebarOpen }">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Auswählen</th>
+                        <th>Firma</th>
+                        <th>Vorname</th>
+                        <th>Nachname</th>
+                        <th>E-Mail</th>
+                        <th>Telefonnummer</th>
+                        <th>Straße und Hausnummer</th>
+                        <th>PLZ</th>
+                        <th>Ort</th>
+                        <th>Löschen</th>
+                        <th>Bearbeiten</th>
+                    </tr>
+                </thead>
+                <tbody v-if="this.customers.length > 0">
+                    <tr v-for="(customer, index) in this.customers" :key="index">
+                        <td>
+                            <Checkbox></Checkbox>
+                        </td>
+                        <td>{{ customer.company }}</td>
+                        <td>{{ customer.firstname }}</td>
+                        <td>{{ customer.lastname }}</td>
+                        <td>{{ customer.email }}</td>
+                        <td>{{ customer.phonenumber }}</td>
+                        <td>{{ customer.addressline }}</td>
+                        <td>{{ customer.postalcode }}</td>
+                        <td>{{ customer.city }}</td>
+                        <td>
+                            <DeleteButton></DeleteButton>
+                        </td>
+                        <td>
+                            <EditButton></EditButton>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="form-container">
+            <CustomerForm :isOpen="showCustomerForm" @close="showCustomerForm = false"></CustomerForm>
+        </div>
     </div>
 </template>
 
@@ -63,7 +61,6 @@ import EditButton from '../CommonSlots/EditButton.vue';
 import Search from '../CommonSlots/Searchbar.vue';
 import { mapState } from 'vuex';
 import axios from 'axios';
-import { RouterLink } from 'vue-router';
 import CustomerForm from './addCustomer/CustomerForm.vue';
 
 
@@ -117,6 +114,22 @@ export default {
 
 
 <style scoped>
+.customer-page {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+    margin-left: 150px;
+    margin-right: 50px;
+    transition: margin-left 0.3s ease;
+    font-family: var(--font-family);
+}
+
+.customer-page-sidebar-opened {
+    margin-left: 330px;
+    transition: margin-left 0.3s ease;
+}
+
 .edit-button {
     display: flex;
     align-self: flex-start;
@@ -133,9 +146,18 @@ export default {
     transform: scale(0.25);
 }
 
+.table-container {
+    width: 150vh;
+}
+
+.table-container-sidebar-opened {
+    width: 140vh;
+}
+
 .table {
     border-collapse: collapse;
     margin: 25px 0;
+
     font-size: 0.9em;
     font-family: var(--font-family);
     min-width: 400px;
@@ -172,56 +194,6 @@ export default {
     color: #009879;
 }
 
-.loader {
-    .loader {
-        width: 65px;
-        display: grid;
-        --mask:
-            radial-gradient(12px at left 15px top 50%, #0000 95%, #000),
-            radial-gradient(12px at right 15px top 50%, #0000 95%, #000);
-        -webkit-mask: var(--mask);
-        mask: var(--mask);
-        -webkit-mask-composite: source-in;
-        mask-composite: intersect;
-        animation: l1 1s infinite alternate;
-    }
-
-    .loader:before,
-    .loader:after {
-        content: "";
-        grid-area: 1/1;
-        height: 30px;
-        aspect-ratio: 1;
-        background: #fff;
-        border-radius: 50%;
-    }
-
-    .loader:after {
-        margin-left: auto;
-    }
-
-    @keyframes l1 {
-        to {
-            width: 40px;
-        }
-    }
-}
-
-
-.table-bordered {}
-
-.customer-page {
-    display: flex;
-    flex-direction: column;
-    margin-left: 150px;
-    margin-right: 30px;
-    transition: margin-left 0.3s ease;
-    font-family: var(--font-family);
-}
-
-.customer-page-sidebar-opened {
-    margin-left: 350px;
-}
 
 
 
@@ -233,7 +205,11 @@ export default {
 }
 
 .form-container {
-    width: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
 }
 
 @media only screen and (max-width: 650px) {

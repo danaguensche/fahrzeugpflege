@@ -124,9 +124,11 @@ export default {
     position: relative;
     margin-top: 5vh;
     margin-bottom: 5vh;
-    padding: 80px;
+    padding: 90px;
     box-shadow: var(--box-shadow);
     z-index: 10;
+    background-color: var(--background-color);
+    
 }
 
 
