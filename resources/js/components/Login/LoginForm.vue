@@ -56,7 +56,10 @@ export default {
                 if (response.data.success) {
                     console.log('Login erfolgreich', response.data);
                     window.location.href = response.data.redirect;
+                    localStorage.setItem('apiToken', response.data.token);
                 }
+                
+
             } catch (error) {
                 if (error.response && error.response.data) {
                     this.error = error.response.data.message;

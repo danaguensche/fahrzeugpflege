@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Http\Resources\CarResource;
+use App\Http\Resources\CarCollection;
 
 class CarController extends Controller
 {
@@ -39,5 +41,15 @@ class CarController extends Controller
             Log::error('Fehler beim Speichern des Fahrzeugs: ' . $e->getMessage());
             return response()->json(['error' => 'Fehler beim Speichern des Fahrzeugs'], 500);
         }
+    }
+
+    public function index()
+    {
+        return new CarCollection(Car::paginate());
+    }
+
+    public function show(Car $car)
+    {
+        return new CarResource($car);
     }
 }

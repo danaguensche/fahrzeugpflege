@@ -264,9 +264,25 @@
     "isDynamicEntry": true
   },
   "resources/css/main.css": {
-    "file": "assets/main-Ba931a7S.css",
+    "file": "assets/main-BGJYZcHd.css",
     "src": "resources/css/main.css",
     "isEntry": true
+  },
+  "resources/img/icons/add.png": {
+    "file": "assets/add-BV6xjPmn.png",
+    "src": "resources/img/icons/add.png"
+  },
+  "resources/img/icons/close.png": {
+    "file": "assets/close-BmGMexF3.png",
+    "src": "resources/img/icons/close.png"
+  },
+  "resources/img/icons/delete.png": {
+    "file": "assets/delete-BagUlXP5.png",
+    "src": "resources/img/icons/delete.png"
+  },
+  "resources/img/icons/edit.png": {
+    "file": "assets/edit-NUrQm3gB.png",
+    "src": "resources/img/icons/edit.png"
   },
   "resources/img/icons/search.png": {
     "file": "assets/search-MwXeqgVr.png",
@@ -288,9 +304,9 @@
     "file": "assets/cars-icon-DzkOgjAL.png",
     "src": "resources/img/sidebar-img/cars-icon.png"
   },
-  "resources/img/sidebar-img/chat-icon.png": {
-    "file": "assets/chat-icon-D9dKKZes.png",
-    "src": "resources/img/sidebar-img/chat-icon.png"
+  "resources/img/sidebar-img/customer-icon.png": {
+    "file": "assets/customer-icon-CAcILZl9.png",
+    "src": "resources/img/sidebar-img/customer-icon.png"
   },
   "resources/img/sidebar-img/dashboard-icon.png": {
     "file": "assets/dashboard-icon-CAIXilEl.png",
@@ -317,7 +333,7 @@
     "src": "resources/img/sidebar-img/settings-icon.png"
   },
   "resources/js/app.js": {
-    "file": "assets/app-CSzEdjaN.js",
+    "file": "assets/app-o4Skp-tI.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -368,21 +384,25 @@
       "node_modules/vue-cal/dist/drag-and-drop.es.js"
     ],
     "css": [
-      "assets/app-mUaWVVss.css"
+      "assets/app-5MyZ7Qx_.css"
     ],
     "assets": [
       "assets/dashboard-icon-CAIXilEl.png",
       "assets/calendar-icon-CmEiUby_.png",
       "assets/cars-icon-DzkOgjAL.png",
+      "assets/customer-icon-CAcILZl9.png",
       "assets/jobs-icon-B_GHknOh.png",
       "assets/reports-icon-N2rV8TTf.png",
-      "assets/chat-icon-D9dKKZes.png",
       "assets/profile-icon-Djnr2mpq.png",
       "assets/settings-icon-D4GeoFNu.png",
       "assets/logout-icon-h9aPZeif.png",
       "assets/arrow-icon-BOHLJTC6.png",
       "assets/arrow-icon-mirrored-BY0Ho_NH.png",
-      "assets/search-MwXeqgVr.png"
+      "assets/add-BV6xjPmn.png",
+      "assets/edit-NUrQm3gB.png",
+      "assets/search-MwXeqgVr.png",
+      "assets/close-BmGMexF3.png",
+      "assets/delete-BagUlXP5.png"
     ]
   }
 }

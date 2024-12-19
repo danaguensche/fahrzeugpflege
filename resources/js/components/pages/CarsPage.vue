@@ -1,18 +1,18 @@
 <template>
     <MainSidebar></MainSidebar>
-    <CarPage></CarPage>
+    <Car></Car>
 </template>
 
 <script>
 
 import MainSidebar from '../sidebar/MainSidebar.vue';
-import CarPage from '../Cars/CarPage.vue';
+import Car from '../Cars/Car.vue';
 
 export default {
     name: "CarsPage",
     components: {
         MainSidebar,
-        CarPage
+        Car
     }
 }
 

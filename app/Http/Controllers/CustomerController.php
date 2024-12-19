@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use App\Http\Resources\CustomerResource;
+use App\Http\Resources\CustomerCollection;
 
 class CustomerController extends Controller
 {
@@ -40,7 +42,11 @@ class CustomerController extends Controller
 
     public function index()
     {
-        $customers = Customer::all();
-        return response()->json($customers);
+        return new CustomerCollection(Customer::paginate());
+    }
+
+    public function show(Customer $customer)
+    {
+        return new CustomerResource($customer);
     }
 }

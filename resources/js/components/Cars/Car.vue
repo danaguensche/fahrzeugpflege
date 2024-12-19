@@ -1,46 +1,42 @@
 <template>
-    <div class="customer-page" :class="{ 'customer-page-sidebar-opened': isSidebarOpen }">
-
+    <div class="car-page" :class="{ 'car-page-sidebar-opened': isSidebarOpen }">
         <Search :context="context" class="searchbar"></Search>
 
         <div class="content-container">
-            <DefaultButton class="addCustomer" @click="addCustomer">Kunde hinzufügen</DefaultButton>
+            <DefaultButton class="addCar" @click="addCar">Fahrzeug hinzufügen</DefaultButton>
         </div>
 
+
         <div class="form-container">
-            <CustomerForm :isOpen="showCustomerForm" @close="showCustomerForm = false"></CustomerForm>
+            <CarForm :isOpen="showCarForm" @close="showCarForm = false"></CarForm>
         </div>
-        
+
+
+
         <div class="table-container" :class="{ 'table-container-sidebar-opened': isSidebarOpen }">
             <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th>Auswählen</th>
-                        <th>Firma</th>
-                        <th>Vorname</th>
-                        <th>Nachname</th>
-                        <th>E-Mail</th>
-                        <th>Telefonnummer</th>
-                        <th>Straße und Hausnummer</th>
-                        <th>PLZ</th>
-                        <th>Ort</th>
+                        <th>Kennzeichen</th>
+                        <th>Fahrzeugklasse</th>
+                        <th>Automarke</th>
+                        <th>Typ</th>
+                        <th>Farbe</th>
                         <th>Löschen</th>
                         <th>Bearbeiten</th>
                     </tr>
                 </thead>
-                <tbody v-if="this.customers.length">
-                    <tr v-for="(customer, index) in this.customers" :key="index">
+                <tbody v-if="this.cars.length">
+                    <tr v-for="(car, index) in this.cars" :key="index">
                         <td>
                             <Checkbox></Checkbox>
                         </td>
-                        <td>{{ customer.company }}</td>
-                        <td>{{ customer.firstname }}</td>
-                        <td>{{ customer.lastname }}</td>
-                        <td>{{ customer.email }}</td>
-                        <td>{{ customer.phonenumber }}</td>
-                        <td>{{ customer.addressline }}</td>
-                        <td>{{ customer.postalcode }}</td>
-                        <td>{{ customer.city }}</td>
+                        <td><a href="">{{ car.Kennzeichen }}</a></td>
+                        <td>{{ car.Fahrzeugklasse }}</td>
+                        <td>{{ car.Automarke }}</td>
+                        <td>{{ car.Typ }}</td>
+                        <td>{{ car.Farbe }}</td>
                         <td>
                             <DeleteButton></DeleteButton>
                         </td>
@@ -60,32 +56,36 @@ import DefaultButton from '../CommonSlots/DefaultButton.vue';
 import DeleteButton from '../CommonSlots/DeleteButton.vue';
 import EditButton from '../CommonSlots/EditButton.vue';
 import Search from '../CommonSlots/Searchbar.vue';
-import { mapState } from 'vuex';
 import axios from 'axios';
-import CustomerForm from './addCustomer/CustomerForm.vue';
+import CarForm from './addCar/CarForm.vue';
 
+import { mapState } from 'vuex';
 
 export default {
-    name: 'Customer',
-    components: {
-        Search,
-        DefaultButton,
-        Checkbox,
-        DeleteButton,
-        EditButton,
-        CustomerForm
+    name: "CarPage",
+    computed: {
+        ...mapState(['isSidebarOpen'])
     },
 
+    components: {
+        CarForm,
+        Search,
+        DeleteButton,
+        DefaultButton,
+        EditButton,
+        Checkbox
+
+    },
     data() {
         return {
-            context: "Suchen Sie nach einem Kunden...",
-            customers: [],
-            showCustomerForm: false,
+            context: "Suchen Sie nach einem Fahrzeug...",
+            cars: [],
+            showCarForm: false,
         }
     },
 
     mounted() {
-        this.getCustomers();
+        this.getCars();
     },
 
     computed: {
@@ -93,27 +93,27 @@ export default {
     },
 
     methods: {
-        addCustomer() {
-            this.showCustomerForm = !this.showCustomerForm;
+        addCar() {
+            this.showCarForm = !this.showCarForm;
         },
 
-        getCustomers() {
-            axios.get('/kunden')
+        getCars() {
+            axios.get('/fahrzeuge')
                 .then(response => {
                     console.log('Antwort erhalten:', response.data);
-                    this.customers = response.data;
+                    this.cars = response.data;
                 })
                 .catch(error => {
-                    console.error('Fehler beim Abrufen der Kunden:', error);
+                    console.error('Fehler beim Abrufen der Fahrzeuge:', error);
                 });
         }
     }
 }
+
 </script>
 
-
 <style scoped>
-.customer-page {
+.car-page {
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
@@ -122,9 +122,23 @@ export default {
     margin-right: 50px;
     transition: margin-left 0.3s ease;
     font-family: var(--font-family);
+
 }
 
-.customer-page-sidebar-opened {
+.content-container {
+    /* Abstand Formular und Searchbar */
+    margin-top: -110px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.form-container {
+    margin-top: 2vh;
+    margin-bottom: 1vh;
+}
+
+
+.car-page-sidebar-opened {
     margin-left: 330px;
     transition: margin-left 0.3s ease;
 }

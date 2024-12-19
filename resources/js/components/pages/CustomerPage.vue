@@ -9,7 +9,7 @@ import Customer from '../Customers/Customer.vue';
 import MainSidebar from '../sidebar/MainSidebar.vue';
 
 export default {
-    name: "ChatPage",
+    name: "CustomerPage",
     components: {
         MainSidebar,
         Customer

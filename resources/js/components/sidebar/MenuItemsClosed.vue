@@ -107,7 +107,7 @@ export default {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
                 }).then(() => {
-                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('apiToken');
                     this.$router.push('/login');
                 }).catch(error => {
                     console.error('Logout fehlgeschlagen', error);
