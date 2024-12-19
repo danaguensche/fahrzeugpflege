@@ -22,7 +22,7 @@ class CarController extends Controller
                 'Sonstiges' => 'nullable|string',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
-            
+
 
             $car = new Car();
             $car->fill($validatedData);
@@ -45,7 +45,8 @@ class CarController extends Controller
 
     public function index()
     {
-        return new CarCollection(Car::paginate());
+        // return new CarCollection(Car::paginate());
+        return new CarCollection(Car::all());
     }
 
     public function show(Car $car)

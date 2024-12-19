@@ -27,7 +27,7 @@
                         <th>Bearbeiten</th>
                     </tr>
                 </thead>
-                <tbody v-if="this.cars.length">
+                <tbody>
                     <tr v-for="(car, index) in this.cars" :key="index">
                         <td>
                             <Checkbox></Checkbox>
@@ -160,20 +160,19 @@ export default {
 }
 
 .table-container {
-    width: 150vh;
+    width: 130vh;
 }
 
 .table-container-sidebar-opened {
-    width: 140vh;
+    width: 115vh;
 }
 
 .table {
     border-collapse: collapse;
     margin: 25px 0;
-
     font-size: 0.9em;
     font-family: var(--font-family);
-    min-width: 400px;
+    width: 100%;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 

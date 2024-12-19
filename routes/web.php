@@ -3,6 +3,9 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CarController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\EmployeeController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -21,12 +24,31 @@ Route::controller(AuthController::class)->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::controller(PageController::class)->group(function () {
         Route::get('/dashboard', 'dashboard')->name('dashboard');
-        Route::get('/kalender', 'calendar');
-        Route::get('/fahrzeuge', 'cars');
-        Route::get('/kunden', 'customers');
-        Route::get('/auftraege', 'jobs');
-        Route::get('/berichte', 'reports');
-        Route::get('/profil', 'profile');
-        Route::get('/einstellungen', 'settings');
+        Route::get('/kalender', 'calendar')->name('calendar');
+        Route::get('/auftraege', 'jobs')->name('jobs');
+        Route::get('/berichte', 'reports')->name('reports');
+        Route::get('/profil', 'profile')->name('profile');
+        Route::get('/einstellungen', 'settings')->name('settings');
+    });
+
+    // Car API
+    Route::controller(CarController::class)->group(function () {
+        Route::get('/fahrzeuge', 'index')->name('fahrzeuge.index');
+        Route::post('/fahrzeuge', 'store')->name('fahrzeuge.store');
+        // Route::get('/fahrzeuge/{id}', 'edit')->name('fahrzeuge.edit');
+        // Route::put('/fahrzeuge/{id}', 'update')->name('fahrzeuge.update');
+        // Route::delete('/fahrzeuge/{id}', 'destroy')->name('fahrzeuge.destroy');
+    });
+
+    // Profil
+    Route::post('/profil', [EmployeeController::class, 'store'])->name('profil.store');
+
+    // Customer API
+    Route::controller(CustomerController::class)->group(function () {
+        Route::get('/kunden', 'index')->name('kunden.index');
+        Route::post('/kunden', 'store')->name('kunden.store');
+        // Route::get('/kunden/{id}', 'edit')->name('kunden.edit');
+        // Route::put('/kunden/{id}', 'update')->name('kunden.update');
+        // Route::delete('/kunden/{id}', 'destroy')->name('kunden.destroy');
     });
 });

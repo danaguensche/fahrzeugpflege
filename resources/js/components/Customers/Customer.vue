@@ -10,7 +10,7 @@
         <div class="form-container">
             <CustomerForm :isOpen="showCustomerForm" @close="showCustomerForm = false"></CustomerForm>
         </div>
-        
+
         <div class="table-container" :class="{ 'table-container-sidebar-opened': isSidebarOpen }">
             <table class="table table-bordered">
                 <thead>
@@ -28,7 +28,7 @@
                         <th>Bearbeiten</th>
                     </tr>
                 </thead>
-                <tbody v-if="this.customers.length">
+                <tbody>
                     <tr v-for="(customer, index) in this.customers" :key="index">
                         <td>
                             <Checkbox></Checkbox>
@@ -97,13 +97,13 @@ export default {
             this.showCustomerForm = !this.showCustomerForm;
         },
 
+
         getCustomers() {
             axios.get('/kunden')
-                .then(response => {
-                    console.log('Antwort erhalten:', response.data);
+                .then((response) => {
                     this.customers = response.data;
                 })
-                .catch(error => {
+                .catch((error) => {
                     console.error('Fehler beim Abrufen der Kunden:', error);
                 });
         }
@@ -146,20 +146,19 @@ export default {
 }
 
 .table-container {
-    width: 150vh;
+    width: 130vh;
 }
 
 .table-container-sidebar-opened {
-    width: 140vh;
+    width: 115vh;
 }
 
 .table {
     border-collapse: collapse;
     margin: 25px 0;
-
     font-size: 0.9em;
     font-family: var(--font-family);
-    min-width: 400px;
+    width: 100%;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
