@@ -27,7 +27,6 @@ export default {
 
     data() {
         return {
-            logoutClicked: false,
             alertVisible: false,
             alertHandlers: {
                 confirmationClicked: this.logout,
@@ -93,8 +92,7 @@ export default {
 
         redirectToView(menuitem) {
             if (menuitem.name === 'Abmelden') {
-                this.logoutClicked = true;
-                this.alertVisible = true;
+                this.updateAlertVisibility();
             } else {
                 this.$router.push(this.getRoute(menuitem.name));
             }
