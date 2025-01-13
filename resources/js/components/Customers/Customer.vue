@@ -12,10 +12,11 @@
         </div>
 
         <div class="table-container" :class="{ 'table-container-sidebar-opened': isSidebarOpen }">
-            <table class="table table-bordered">
+            <div v-if="customers.length === 0">Laden...</div>
+            <table v-else class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Auswählen</th>
+                        <!-- <th>Auswählen</th> -->
                         <th>Firma</th>
                         <th>Vorname</th>
                         <th>Nachname</th>
@@ -29,17 +30,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(customer, index) in this.customers" :key="index">
-                        <td>
+                    <tr v-for="customer in customers" :key="customer.id">
+                        <!-- <td>
                             <Checkbox></Checkbox>
-                        </td>
+                        </td> -->
                         <td>{{ customer.company }}</td>
-                        <td>{{ customer.firstname }}</td>
-                        <td>{{ customer.lastname }}</td>
+                        <td>{{ customer.firstName }}</td>
+                        <td>{{ customer.lastName }}</td>
                         <td>{{ customer.email }}</td>
-                        <td>{{ customer.phonenumber }}</td>
-                        <td>{{ customer.addressline }}</td>
-                        <td>{{ customer.postalcode }}</td>
+                        <td>{{ customer.phoneNumber }}</td>
+                        <td>{{ customer.addressLine }}</td>
+                        <td>{{ customer.postalCode }}</td>
                         <td>{{ customer.city }}</td>
                         <td>
                             <DeleteButton></DeleteButton>
@@ -88,10 +89,6 @@ export default {
         this.getCustomers();
     },
 
-    computed: {
-        ...mapState(['isSidebarOpen'])
-    },
-
     methods: {
         addCustomer() {
             this.showCustomerForm = !this.showCustomerForm;
@@ -101,7 +98,7 @@ export default {
         getCustomers() {
             axios.get('/kunden')
                 .then((response) => {
-                    this.customers = response.data;
+                    this.customers = response.data.data;
                 })
                 .catch((error) => {
                     console.error('Fehler beim Abrufen der Kunden:', error);

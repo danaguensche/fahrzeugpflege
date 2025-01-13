@@ -14,10 +14,11 @@
 
 
         <div class="table-container" :class="{ 'table-container-sidebar-opened': isSidebarOpen }">
-            <table class="table table-bordered">
+            <div v-if="cars.length === 0">Laden...</div>
+            <table v-else class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Auswählen</th>
+                        <!-- <th>Auswählen</th> -->
                         <th>Kennzeichen</th>
                         <th>Fahrzeugklasse</th>
                         <th>Automarke</th>
@@ -28,10 +29,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(car, index) in this.cars" :key="index">
-                        <td>
+                    <tr v-for="car in cars" :key="car.Kennzeichen">
+                        <!-- <td>
                             <Checkbox></Checkbox>
-                        </td>
+                        </td> -->
                         <td><a href="">{{ car.Kennzeichen }}</a></td>
                         <td>{{ car.Fahrzeugklasse }}</td>
                         <td>{{ car.Automarke }}</td>
@@ -63,9 +64,6 @@ import { mapState } from 'vuex';
 
 export default {
     name: "CarPage",
-    computed: {
-        ...mapState(['isSidebarOpen'])
-    },
 
     components: {
         CarForm,
@@ -101,7 +99,7 @@ export default {
             axios.get('/fahrzeuge')
                 .then(response => {
                     console.log('Antwort erhalten:', response.data);
-                    this.cars = response.data;
+                    this.cars = response.data.data;
                 })
                 .catch(error => {
                     console.error('Fehler beim Abrufen der Fahrzeuge:', error);
