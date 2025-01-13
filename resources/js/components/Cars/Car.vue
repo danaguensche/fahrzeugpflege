@@ -49,11 +49,13 @@
             </table>
         </div>
 
-        <div class="pagination">
-            <p @click.prevent="changePage(currentPage - 1)" > &laquo; </p>
-            <p v-for="page in totalPages" :key="page" @click.prevent="changePage(page)"
-                :class="{ active: page === currentPage }">{{ page }}</p>
-            <p @click.prevent="changePage(currentPage + 1)"> &raquo; </p>
+        <div class="pagination-container">
+            <div class="pagination">
+                <p @click.prevent="changePage(currentPage - 1)"> &laquo; </p>
+                <p v-for="page in totalPages" :key="page" @click.prevent="changePage(page)"
+                    :class="{ active: page === currentPage }">{{ page }}</p>
+                <p @click.prevent="changePage(currentPage + 1)"> &raquo; </p>
+            </div>
         </div>
 
     </div>
@@ -218,7 +220,12 @@ export default {
     color: #009879;
 }
 
-
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+}
 .pagination {
     display: inline-block;
 }
@@ -238,7 +245,7 @@ export default {
 .pagination p:hover {
     cursor: pointer;
     background-color: #ddd;
-} 
+}
 
 
 .content-container {
