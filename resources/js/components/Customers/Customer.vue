@@ -16,7 +16,7 @@
             <table v-else class="table table-bordered">
                 <thead>
                     <tr>
-                        <!-- <th>Auswählen</th> -->
+                        <th>Auswählen</th>
                         <th>Firma</th>
                         <th>Vorname</th>
                         <th>Nachname</th>
@@ -25,15 +25,15 @@
                         <th>Straße und Hausnummer</th>
                         <th>PLZ</th>
                         <th>Ort</th>
-                        <th>Löschen</th>
-                        <th>Bearbeiten</th>
+                        <!-- <th>Löschen</th>
+                        <th>Bearbeiten</th> -->
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="customer in customers" :key="customer.id">
-                        <!-- <td>
+                        <td>
                             <Checkbox></Checkbox>
-                        </td> -->
+                        </td>
                         <td>{{ customer.company }}</td>
                         <td>{{ customer.firstName }}</td>
                         <td>{{ customer.lastName }}</td>
@@ -42,16 +42,24 @@
                         <td>{{ customer.addressLine }}</td>
                         <td>{{ customer.postalCode }}</td>
                         <td>{{ customer.city }}</td>
-                        <td>
+                        <!-- <td>
                             <DeleteButton></DeleteButton>
                         </td>
                         <td>
                             <EditButton></EditButton>
-                        </td>
+                        </td> -->
                     </tr>
                 </tbody>
             </table>
         </div>
+
+        <div class="pagination">
+            <p @click.prevent="changePage(currentPage - 1)"> &laquo; </p>
+            <p v-for="page in totalPages" :key="page" @click.prevent="changePage(page)"
+                :class="{ active: page === currentPage }">{{ page }}</p>
+            <p @click.prevent="changePage(currentPage + 1)"> &raquo; </p>
+        </div>
+
     </div>
 </template>
 
@@ -82,6 +90,8 @@ export default {
             context: "Suchen Sie nach einem Kunden...",
             customers: [],
             showCustomerForm: false,
+            currentPage: 1,
+            totalPages: 1,
         }
     },
 
@@ -94,11 +104,17 @@ export default {
             this.showCustomerForm = !this.showCustomerForm;
         },
 
+        changePage(page) {
+            this.getCustomers(page);
+        },
 
-        getCustomers() {
-            axios.get('/kunden')
+
+        getCustomers(page = 1) {
+            axios.get(`/kunden?page=${page}`)
                 .then((response) => {
                     this.customers = response.data.data;
+                    this.totalPages = response.data.meta.last_page;
+                    this.currentPage = page;
                 })
                 .catch((error) => {
                     console.error('Fehler beim Abrufen der Kunden:', error);
@@ -155,7 +171,7 @@ export default {
     margin: 25px 0;
     font-size: 0.9em;
     font-family: var(--font-family);
-    width: 100%;
+    width: 90%;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
@@ -188,6 +204,27 @@ export default {
     font-weight: bold;
     color: #009879;
 }
+
+.pagination {
+    display: inline-block;
+}
+
+.pagination p {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+
+.pagination p.active {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+}
+
+.pagination p:hover {
+    cursor: pointer;
+    background-color: #ddd;
+} 
 
 
 

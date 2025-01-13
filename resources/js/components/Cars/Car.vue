@@ -18,36 +18,44 @@
             <table v-else class="table table-bordered">
                 <thead>
                     <tr>
-                        <!-- <th>Auswählen</th> -->
+                        <th>Auswählen</th>
                         <th>Kennzeichen</th>
                         <th>Fahrzeugklasse</th>
                         <th>Automarke</th>
                         <th>Typ</th>
                         <th>Farbe</th>
-                        <th>Löschen</th>
-                        <th>Bearbeiten</th>
+                        <!-- <th>Löschen</th> -->
+                        <!-- <th>Bearbeiten</th> -->
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="car in cars" :key="car.Kennzeichen">
-                        <!-- <td>
+                        <td>
                             <Checkbox></Checkbox>
-                        </td> -->
+                        </td>
                         <td><a href="">{{ car.Kennzeichen }}</a></td>
                         <td>{{ car.Fahrzeugklasse }}</td>
                         <td>{{ car.Automarke }}</td>
                         <td>{{ car.Typ }}</td>
                         <td>{{ car.Farbe }}</td>
-                        <td>
+                        <!-- <td>
                             <DeleteButton></DeleteButton>
-                        </td>
-                        <td>
+                        </td> -->
+                        <!-- <td>
                             <EditButton></EditButton>
-                        </td>
+                        </td> -->
                     </tr>
                 </tbody>
             </table>
         </div>
+
+        <div class="pagination">
+            <p @click.prevent="changePage(currentPage - 1)" > &laquo; </p>
+            <p v-for="page in totalPages" :key="page" @click.prevent="changePage(page)"
+                :class="{ active: page === currentPage }">{{ page }}</p>
+            <p @click.prevent="changePage(currentPage + 1)"> &raquo; </p>
+        </div>
+
     </div>
 </template>
 
@@ -79,6 +87,8 @@ export default {
             context: "Suchen Sie nach einem Fahrzeug...",
             cars: [],
             showCarForm: false,
+            currentPage: 1,
+            totalPages: 1,
         }
     },
 
@@ -95,16 +105,23 @@ export default {
             this.showCarForm = !this.showCarForm;
         },
 
-        getCars() {
-            axios.get('/fahrzeuge')
+        changePage(page) {
+            this.getCars(page);
+        },
+
+
+        getCars(page = 1) {
+            axios.get(`/fahrzeuge?page=${page}`)
                 .then(response => {
-                    console.log('Antwort erhalten:', response.data);
                     this.cars = response.data.data;
+                    this.totalPages = response.data.meta.last_page;
+                    this.currentPage = page;
                 })
                 .catch(error => {
                     console.error('Fehler beim Abrufen der Fahrzeuge:', error);
                 });
         }
+
     }
 }
 
@@ -170,7 +187,7 @@ export default {
     margin: 25px 0;
     font-size: 0.9em;
     font-family: var(--font-family);
-    width: 100%;
+    width: 90%;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
@@ -205,6 +222,26 @@ export default {
 }
 
 
+.pagination {
+    display: inline-block;
+}
+
+.pagination p {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+
+.pagination p.active {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+}
+
+.pagination p:hover {
+    cursor: pointer;
+    background-color: #ddd;
+} 
 
 
 .content-container {
