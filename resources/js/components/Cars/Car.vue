@@ -210,9 +210,6 @@ export default {
     background-color: #f3f3f3;
 }
 
-.table tbody tr:last-of-type {
-    border-bottom: 2px solid var(--primary-color);
-}
 
 
 

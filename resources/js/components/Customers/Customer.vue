@@ -99,6 +99,10 @@ export default {
         this.getCustomers();
     },
 
+    computed: {
+        ...mapState(['isSidebarOpen'])
+    },
+
     methods: {
         addCustomer() {
             this.showCustomerForm = !this.showCustomerForm;
@@ -193,12 +197,6 @@ export default {
 .table tbody tr:nth-of-type(even) {
     background-color: #f3f3f3;
 }
-
-.table tbody tr:last-of-type {
-    border-bottom: 2px solid var(--primary-color);
-}
-
-
 
 .table tbody tr.active-row {
     font-weight: bold;
