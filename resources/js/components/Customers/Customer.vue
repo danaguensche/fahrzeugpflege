@@ -16,7 +16,7 @@
             <table v-else class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Auswählen</th>
+                        <th class="select">Auswählen</th>
                         <th>Firma</th>
                         <th>Vorname</th>
                         <th>Nachname</th>
@@ -25,13 +25,13 @@
                         <th>Straße und Hausnummer</th>
                         <th>PLZ</th>
                         <th>Ort</th>
-                        <!-- <th>Löschen</th>
-                        <th>Bearbeiten</th> -->
+                        <th>Löschen</th>
+                        <th>Bearbeiten</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="customer in customers" :key="customer.id">
-                        <td>
+                        <td class="checkbox">
                             <Checkbox></Checkbox>
                         </td>
                         <td>{{ customer.company }}</td>
@@ -42,12 +42,12 @@
                         <td>{{ customer.addressLine }}</td>
                         <td>{{ customer.postalCode }}</td>
                         <td>{{ customer.city }}</td>
-                        <!-- <td>
+                        <td class="table-icon">
                             <DeleteButton></DeleteButton>
-                        </td>
+                        </td class="table-icon">
                         <td>
                             <EditButton></EditButton>
-                        </td> -->
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -129,7 +129,6 @@ export default {
 }
 </script>
 
-
 <style scoped>
 .customer-page {
     display: flex;
@@ -149,34 +148,50 @@ export default {
 
 .edit-button {
     display: flex;
-    align-self: flex-start;
     margin-top: -50px;
-    margin-left: -20px;
+    justify-content: center;
+    align-content: center;
     transform: scale(0.25);
+    margin-left: -1.5vh;
 }
 
 .delete-button {
     display: flex;
-    align-self: flex-start;
     margin-top: -50px;
-    margin-left: -20px;
+    justify-content: center;
+    align-content: center;
     transform: scale(0.25);
+    margin-left: -1.5vh;
+}
+
+.select {
+    width: 0.5vh;
+}
+
+.checkbox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .table-container {
-    width: 130vh;
+    width: 100%;
 }
 
 .table-container-sidebar-opened {
-    width: 115vh;
+    width: 100%;
+}
+
+.table-icon {
+    width: 0.5vh;
 }
 
 .table {
-    border-collapse: collapse;
+    border-collapse: separate;
     margin: 25px 0;
     font-size: 0.9em;
     font-family: var(--font-family);
-    width: 90%;
+    width: 92%;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 

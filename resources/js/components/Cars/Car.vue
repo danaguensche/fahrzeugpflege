@@ -18,19 +18,19 @@
             <table v-else class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Auswählen</th>
+                        <th class="select">Auswählen</th>
                         <th>Kennzeichen</th>
                         <th>Fahrzeugklasse</th>
                         <th>Automarke</th>
                         <th>Typ</th>
                         <th>Farbe</th>
-                        <!-- <th>Löschen</th> -->
-                        <!-- <th>Bearbeiten</th> -->
+                        <th>Löschen</th>
+                        <th>Bearbeiten</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="car in cars" :key="car.Kennzeichen">
-                        <td>
+                        <td class="checkbox">
                             <Checkbox></Checkbox>
                         </td>
                         <td><a href="">{{ car.Kennzeichen }}</a></td>
@@ -38,12 +38,12 @@
                         <td>{{ car.Automarke }}</td>
                         <td>{{ car.Typ }}</td>
                         <td>{{ car.Farbe }}</td>
-                        <!-- <td>
+                        <td class="table-icon">
                             <DeleteButton></DeleteButton>
-                        </td> -->
-                        <!-- <td>
+                        </td>
+                        <td class="table-icon">
                             <EditButton></EditButton>
-                        </td> -->
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -160,39 +160,54 @@ export default {
     transition: margin-left 0.3s ease;
 }
 
+.select {
+    width: 0.5vh;
+}
+
+.checkbox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .edit-button {
     display: flex;
-    align-self: flex-start;
     margin-top: -50px;
-    margin-left: -20px;
+    justify-content: center;
+    align-content: center;
     transform: scale(0.25);
+    margin-left: -1.5vh;
 }
 
 .delete-button {
     display: flex;
-    align-self: flex-start;
     margin-top: -50px;
-    margin-left: -20px;
+    justify-content: center;
+    align-content: center;
     transform: scale(0.25);
+    margin-left: -1.5vh;
 }
 
 .table-container {
-    width: 130vh;
+    width: 100%;
 }
 
 .table-container-sidebar-opened {
-    width: 115vh;
+    width: 100%;
 }
 
 .table {
-    border-collapse: collapse;
+    border-collapse: separate;
     margin: 25px 0;
     font-size: 0.9em;
     font-family: var(--font-family);
-    width: 90%;
+    width: 92%;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
+.table-icon {
+    width: 0.5vh;
+}
 .table thead tr {
     background-color: var(--primary-color);
     color: var(--text-color-light);
