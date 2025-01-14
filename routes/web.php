@@ -33,8 +33,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Car API
     Route::controller(CarController::class)->group(function () {
-        Route::get('/fahrzeuge', 'index')->name('fahrzeuge.index');
-        Route::post('/fahrzeuge', 'store')->name('fahrzeuge.store');
+        Route::get('/api/fahrzeuge', 'index')->name('fahrzeuge.index');
+        Route::post('/api/fahrzeuge', 'store')->name('fahrzeuge.store');
         // Route::get('/fahrzeuge/{id}', 'edit')->name('fahrzeuge.edit');
         // Route::put('/fahrzeuge/{id}', 'update')->name('fahrzeuge.update');
         // Route::delete('/fahrzeuge/{id}', 'destroy')->name('fahrzeuge.destroy');
@@ -45,8 +45,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Customer API
     Route::controller(CustomerController::class)->group(function () {
-        Route::get('/kunden', 'index')->name('kunden.index');
-        Route::post('/kunden', 'store')->name('kunden.store');
+        Route::get('/api/kunden', 'index')->name('kunden.index');
+        Route::post('/api/kunden', 'store')->name('kunden.store');
         // Route::get('/kunden/{id}', 'edit')->name('kunden.edit');
         // Route::put('/kunden/{id}', 'update')->name('kunden.update');
         // Route::delete('/kunden/{id}', 'destroy')->name('kunden.destroy');

@@ -115,7 +115,7 @@ export default {
 
 
         getCustomers(page = 1) {
-            axios.get(`/kunden?page=${page}`)
+            axios.get(`/api/kunden?page=${page}`)
                 .then((response) => {
                     this.customers = response.data.data;
                     this.totalPages = response.data.meta.last_page;

@@ -99,7 +99,7 @@ export default {
           formData.append(key, this.formData[key]);
         }
 
-        const response = await axios.post('/fahrzeuge', formData, {
+        const response = await axios.post('/api/fahrzeuge', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }

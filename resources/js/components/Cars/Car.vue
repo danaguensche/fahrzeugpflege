@@ -113,7 +113,7 @@ export default {
 
 
         getCars(page = 1) {
-            axios.get(`/fahrzeuge?page=${page}`)
+            axios.get(`/api/fahrzeuge?page=${page}`)
                 .then(response => {
                     this.cars = response.data.data;
                     this.totalPages = response.data.meta.last_page;
