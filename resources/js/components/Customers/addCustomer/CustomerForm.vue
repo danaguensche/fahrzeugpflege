@@ -83,7 +83,7 @@ export default {
                     errors.value.general = "Fehler beim Speichern des Kunden.";
                 }
             }
-        };
+        }; 
 
 
 

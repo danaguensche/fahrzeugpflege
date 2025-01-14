@@ -89,32 +89,16 @@ export default {
     },
 
     async submitForm() {
-      if (!this.validateForm()) {
-        return;
-      }
-
-      try {
-        const formData = new FormData();
-        for (let key in this.formData) {
-          formData.append(key, this.formData[key]);
-        }
-
-        const response = await axios.post('/api/fahrzeuge', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-
-        console.log('Fahrzeug erfolgreich gespeichert:', response.data);
-        this.success.general = "Fahrzeug wurde erfolgreich gespeichert";
-        this.resetForm();
-
-      } catch (error) {
-        if (error.response && error.response.status === 422) {
-          this.errors = error.response.data.errors;
-        } else {
-          console.error('Fehler beim Speichern des Fahrzeugs:', error);
-          this.errors.general = "Fehler beim Speichern des Fahrzeugs";
+      if (this.validateForm()) {
+        try {
+          const response = await axios.post('/api/fahrzeuge', this.formData);
+          console.log('Fahrzeug wurde erfolgreich hinzugefügt.', response.data);
+          this.success.general = "Fahrzeug wurde erfolgreich hinzugefügt.";
+          // Formular zurücksetzen
+          Object.keys(this.formData).forEach(key => this.formData[key] = '');
+        } catch (error) {
+          console.error('Fehler beim Speichern des Fahrzeuges.', error);
+          this.errors.general = "Fehler beim Speichern des Fahrzeuges.";
         }
       }
     },
@@ -151,7 +135,7 @@ export default {
   background-color: var(--background-color);
   width: 700px;
 
-  
+
 }
 
 .forms-fieldset {
