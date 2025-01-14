@@ -150,10 +150,9 @@ export default {
 }
 
 .form-container {
-    margin-top: 2vh;
+    margin-top: 1vh;
     margin-bottom: 1vh;
 }
-
 
 .car-page-sidebar-opened {
     margin-left: 330px;
@@ -168,7 +167,9 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100%; 
 }
+
 
 .edit-button {
     display: flex;
@@ -217,6 +218,10 @@ export default {
 .table th,
 .table td {
     padding: 12px 15px;
+}
+
+.table th{
+    height: 45px;
 }
 
 .table tbody tr {

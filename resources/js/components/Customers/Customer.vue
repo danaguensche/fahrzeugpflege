@@ -53,14 +53,14 @@
             </table>
         </div>
 
-    <div class="pagination-container">
-        <div class="pagination">
-            <p @click.prevent="changePage(currentPage - 1)"> &laquo; </p>
-            <p v-for="page in totalPages" :key="page" @click.prevent="changePage(page)"
-                :class="{ active: page === currentPage }">{{ page }}</p>
-            <p @click.prevent="changePage(currentPage + 1)"> &raquo; </p>
+        <div class="pagination-container">
+            <div class="pagination">
+                <p @click.prevent="changePage(currentPage - 1)"> &laquo; </p>
+                <p v-for="page in totalPages" :key="page" @click.prevent="changePage(page)"
+                    :class="{ active: page === currentPage }">{{ page }}</p>
+                <p @click.prevent="changePage(currentPage + 1)"> &raquo; </p>
+            </div>
         </div>
-    </div>
     </div>
 </template>
 
@@ -141,6 +141,18 @@ export default {
     font-family: var(--font-family);
 }
 
+.content-container {
+    /* Abstand Formular und Searchbar */
+    margin-top: -110px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.form-container {
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+}
+
 .customer-page-sidebar-opened {
     margin-left: 330px;
     transition: margin-left 0.3s ease;
@@ -172,6 +184,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100%; 
 }
 
 .table-container {
@@ -204,6 +217,11 @@ export default {
 .table th,
 .table td {
     padding: 12px 15px;
+
+}
+
+.table th {
+    height: 45px;
 }
 
 .table tbody tr {
@@ -245,21 +263,6 @@ export default {
 .pagination p:hover {
     cursor: pointer;
     background-color: #ddd;
-} 
-
-
-
-
-.content-container {
-    /* Abstand Formular und Searchbar */
-    margin-top: -110px;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.form-container {
-    margin-top: 1vh;
-    margin-bottom: 1vh;
 }
 
 @media only screen and (max-width: 650px) {
