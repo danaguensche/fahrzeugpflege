@@ -11,56 +11,16 @@
             <CustomerForm :isOpen="showCustomerForm" @close="showCustomerForm = false"></CustomerForm>
         </div>
 
-        <div class="table-container" :class="{ 'table-container-sidebar-opened': isSidebarOpen }">
-            <div v-if="customers.length === 0">Laden...</div>
-            <table v-else class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th class="select">Auswählen</th>
-                        <th>Firma</th>
-                        <th>Vorname</th>
-                        <th>Nachname</th>
-                        <th>E-Mail</th>
-                        <th>Telefonnummer</th>
-                        <th>Straße und Hausnummer</th>
-                        <th>PLZ</th>
-                        <th>Ort</th>
-                        <th>Löschen</th>
-                        <th>Bearbeiten</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="customer in customers" :key="customer.id">
-                        <td class="checkbox">
-                            <Checkbox></Checkbox>
-                        </td>
-                        <td>{{ customer.company }}</td>
-                        <td>{{ customer.firstName }}</td>
-                        <td>{{ customer.lastName }}</td>
-                        <td>{{ customer.email }}</td>
-                        <td>{{ customer.phoneNumber }}</td>
-                        <td>{{ customer.addressLine }}</td>
-                        <td>{{ customer.postalCode }}</td>
-                        <td>{{ customer.city }}</td>
-                        <td class="table-icon">
-                            <DeleteButton></DeleteButton>
-                        </td class="table-icon">
-                        <td>
-                            <EditButton></EditButton>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="pagination-container">
-            <div class="pagination">
-                <p @click.prevent="changePage(currentPage - 1)"> &laquo; </p>
-                <p v-for="page in totalPages" :key="page" @click.prevent="changePage(page)"
-                    :class="{ active: page === currentPage }">{{ page }}</p>
-                <p @click.prevent="changePage(currentPage + 1)"> &raquo; </p>
-            </div>
-        </div>
+        <CustomerTable
+            :customers="customers"
+            :editCustomerId="editCustomerId"
+            :editCustomer="editCustomer"
+            :currentPage="currentPage"
+            :totalPages="totalPages"
+            @edit-customer="editCustomerDetails"
+            @save-customer="saveCustomer"
+            @page-changed="changePage"
+        ></CustomerTable>
     </div>
 </template>
 
@@ -73,6 +33,7 @@ import Search from '../CommonSlots/Searchbar.vue';
 import { mapState } from 'vuex';
 import axios from 'axios';
 import CustomerForm from './addCustomer/CustomerForm.vue';
+import CustomerTable from './CustomerTable.vue';
 
 
 export default {
@@ -83,7 +44,8 @@ export default {
         Checkbox,
         DeleteButton,
         EditButton,
-        CustomerForm
+        CustomerForm,
+        CustomerTable
     },
 
     data() {
@@ -91,6 +53,8 @@ export default {
             context: "Suchen Sie nach einem Kunden...",
             customers: [],
             showCustomerForm: false,
+            editCustomerId: null,
+            editCustomer: {},
             currentPage: 1,
             totalPages: 1,
         }
@@ -113,6 +77,11 @@ export default {
             this.getCustomers(page);
         },
 
+        editCustomerDetails(customer) {
+            this.editCustomerId = customer.id;
+            this.editCustomer = { ...customer };
+        },
+
 
         getCustomers(page = 1) {
             axios.get(`/api/kunden?page=${page}`)
@@ -123,6 +92,18 @@ export default {
                 })
                 .catch((error) => {
                     console.error('Fehler beim Abrufen der Kunden:', error);
+                });
+        },
+
+        saveCustomer(id) {
+            axios.put(`/api/kunden/${id}`, this.editCustomer)
+                .then(() => {
+                    this.getCustomers(this.currentPage);
+                    this.editCustomerId = null;
+                    this.editCustomer = {};
+                })
+                .catch((error) => {
+                    console.error('Fehler beim Speichern des Kunden:', error);
                 });
         }
     }
@@ -184,7 +165,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%; 
+    height: 100%;
 }
 
 .table-container {

@@ -54,3 +54,4 @@ Route::middleware(['auth'])->group(function () {
         // Route::delete('/kunden/{id}', 'destroy')->name('kunden.destroy');
     });
 });
+
