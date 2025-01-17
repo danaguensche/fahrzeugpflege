@@ -1,6 +1,6 @@
 <template>
     <button class="delete-button">
-        <img src="../../../img/icons/delete.png" class="delete-icon" :class="{ 'hover-tooltip': showTooltip }"
+        <img src="../../../img/icons/delete.png" class="delete-icon" :class="{ 'tooltip': showTooltip }"
             :title="tooltipText">
         <slot></slot>
     </button>

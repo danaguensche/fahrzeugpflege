@@ -1,74 +1,79 @@
 <template>
-    <div class="table-container" :class="{ 'table-container-sidebar-opened': isSidebarOpen }">
-        <div v-if="customers.length === 0">Laden...</div>
-        <table v-else class="table table-bordered">
-            <thead>
-                <tr>
-                    <th class="select">Auswählen</th>
-                    <th>Firma</th>
-                    <th>Vorname</th>
-                    <th>Nachname</th>
-                    <th>Email</th>
-                    <th>Telefonnummer</th>
-                    <th>Straße und Hausnummer</th>
-                    <th>PLZ</th>
-                    <th>Stadt</th>
-                    <th>Bearbeiten</th>
-                    <th>Löschen</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="customer in customers" :key="customer.id">
-                    <td class="checkbox">
-                        <Checkbox></Checkbox>
-                    </td>
-                    <td v-if="editCustomerId === customer.id" class="edit-field">
-                        <input v-model="editCustomer.company" />
-                    </td>
-                    <td v-else>
-                        {{ customer.company }}
-                    </td>
-                    <td v-if="editCustomerId === customer.id" class="edit-field">
-                        <input v-model="editCustomer.firstName" />
-                    </td>
-                    <td v-else>{{ customer.firstName }}</td>
-                    <td v-if="editCustomerId === customer.id" class="edit-field">
-                        <input v-model="editCustomer.lastName" />
-                    </td>
-                    <td v-else>{{ customer.lastName }}</td>
-                    <td v-if="editCustomerId === customer.id" class="edit-field">
-                        <input v-model="editCustomer.email" />
-                    </td>
-                    <td v-else>{{ customer.email }}</td>
-                    <td v-if="editCustomerId === customer.id" class="edit-field">
-                        <input v-model="editCustomer.phoneNumber" />
-                    </td>
-                    <td v-else>{{ customer.phoneNumber }}</td>
-                    <td v-if="editCustomerId === customer.id" class="edit-field">
-                        <input v-model="editCustomer.addressLine" />
-                    </td>
-                    <td v-else>{{ customer.addressLine }}</td>
-                    <td v-if="editCustomerId === customer.id" class="edit-field">
-                        <input v-model="editCustomer.postalCode" />
-                    </td>
-                    <td v-else>{{ customer.postalCode }}</td>
-                    <td v-if="editCustomerId === customer.id" class="edit-field">
-                        <input v-model="editCustomer.city" />
-                    </td>
-                    <td v-else>{{ customer.city }}</td>
-                    <td class="table-icon">
-                        <DeleteButton></DeleteButton>
-                    </td>
-                    <td class="table-icon">
-                        <EditButton
-                            @click="editCustomerId === customer.id ? saveCustomer(customer.id) : editCustomerDetails(customer)" />
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <div>
+        <div class="button-container">
+            <DefaultButton class="delete-customer-button" @click="deleteCustomers">Löschen
+            </DefaultButton>
+        </div>
+        <div class="table-container" :class="{ 'table-container-sidebar-opened': isSidebarOpen }">
+            <div v-if="customers.length === 0">Laden...</div>
+            <table v-else class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th class="select">Auswählen</th>
+                        <th>Firma</th>
+                        <th>Vorname</th>
+                        <th>Nachname</th>
+                        <th>Email</th>
+                        <th>Telefonnummer</th>
+                        <th>Straße und Hausnummer</th>
+                        <th>PLZ</th>
+                        <th>Stadt</th>
+                        <th>Bearbeiten</th>
+                        <th>Löschen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="customer in customers" :key="customer.id">
+                        <td class="checkbox">
+                            <Checkbox @change="updateSelectedCustomers(customer.id, $event.target.checked)"></Checkbox>
+                        </td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field">
+                            <input v-model="editCustomer.company" />
+                        </td>
+                        <td v-else>
+                            {{ customer.company }}
+                        </td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field">
+                            <input v-model="editCustomer.firstName" />
+                        </td>
+                        <td v-else>{{ customer.firstName }}</td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field">
+                            <input v-model="editCustomer.lastName" />
+                        </td>
+                        <td v-else>{{ customer.lastName }}</td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field">
+                            <input v-model="editCustomer.email" />
+                        </td>
+                        <td v-else>{{ customer.email }}</td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field">
+                            <input v-model="editCustomer.phoneNumber" />
+                        </td>
+                        <td v-else>{{ customer.phoneNumber }}</td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field">
+                            <input v-model="editCustomer.addressLine" />
+                        </td>
+                        <td v-else>{{ customer.addressLine }}</td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field">
+                            <input v-model="editCustomer.postalCode" />
+                        </td>
+                        <td v-else>{{ customer.postalCode }}</td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field">
+                            <input v-model="editCustomer.city" />
+                        </td>
+                        <td v-else>{{ customer.city }}</td>
+                        <td class="table-icon">
+                            <EditButton
+                                @click="editCustomerId === customer.id ? saveCustomer(customer.id) : editCustomerDetails(customer)" />
+                        </td>
+                        <td class="table-icon">
+                            <DeleteButton></DeleteButton>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <Pagination :currentPage="currentPage" :totalPages="totalPages" @page-changed="changePage"></Pagination>
     </div>
-
-    <Pagination :currentPage="currentPage" :totalPages="totalPages" @page-changed="changePage"></Pagination>
 </template>
 
 <script>
@@ -76,6 +81,7 @@ import Checkbox from '../CommonSlots/Checkbox.vue';
 import DeleteButton from '../CommonSlots/DeleteButton.vue';
 import EditButton from '../CommonSlots/EditButton.vue';
 import Pagination from '../CommonSlots/Pagination.vue';
+import DefaultButton from '../CommonSlots/DefaultButton.vue';
 
 export default {
     name: "CustomerTable",
@@ -83,6 +89,7 @@ export default {
         Checkbox,
         DeleteButton,
         EditButton,
+        DefaultButton,
         Pagination
     },
     props: {
@@ -107,7 +114,24 @@ export default {
             required: true
         }
     },
+    data() {
+        return {
+            selectedCustomers: [],
+            showDeleteButton: false
+        };
+    },
     methods: {
+        updateSelectedCustomers(customerId, isChecked) {
+            if (isChecked) {
+                this.selectedCustomers.push(customerId);
+            } else {
+                this.selectedCustomers = this.selectedCustomers.filter(id => id !== customerId);
+            }
+            this.showDeleteButton = this.selectedCustomers.length > 0;
+        },
+        deleteCustomers() {
+            console.log('Deleting customers:', this.selectedCustomers);
+        },
         editCustomerDetails(customer) {
             this.$emit('edit-customer', customer);
         },
@@ -122,13 +146,40 @@ export default {
 </script>
 
 <style scoped>
-.edit-field {
-    padding: 10px 12px;
+:root {
+    --button-width: 100px;
+}
+
+.button-container {
+    display: flex;
+    position: relative;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+    margin-right: 110px;
+}
+
+.delete-customer-button {
+    width: var(--button-width);
+    background-color: #fc0328;
+}
+
+.delete-customer-button:hover {
+    background-color: firebrick;
+}
+
+.table-container {
+    position: relative;
+}
+
+.table-container-sidebar-opened {
     width: 100%;
 }
 
+.edit-field {
+    padding: 10px 12px;
+}
+
 .edit-field input {
-    width: 100%;
     padding: 8px;
     font-size: 1em;
     box-sizing: border-box;
@@ -147,7 +198,6 @@ export default {
     justify-content: center;
     align-content: center;
     transform: scale(0.25);
-    margin-left: -1.5vh;
 }
 
 .delete-button {

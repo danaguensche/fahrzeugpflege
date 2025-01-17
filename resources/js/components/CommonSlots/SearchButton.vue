@@ -1,5 +1,5 @@
 <template>
-    <button class="search-button" :class="{ 'hover-tooltip': showTooltip }" :title="tooltipText">
+    <button class="search-button" :class="{ 'tooltip': showTooltip }" :title="tooltipText">
         <img src="../../../img/icons/search.png" class="search-icon">
         <slot></slot>
     </button>

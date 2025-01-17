@@ -1,6 +1,6 @@
 <template>
     <button class="edit-button">
-        <img src="../../../img/icons/edit.png" class="edit-icon" :class="{ 'hover-tooltip': showTooltip }"
+        <img src="../../../img/icons/edit.png" class="edit-icon" :class="{ 'tooltip': showTooltip }"
             :title="tooltipText">
         <slot></slot>
     </button>

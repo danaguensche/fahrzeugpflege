@@ -1,16 +1,21 @@
 <template>
     <div class="pagination-container">
-        <div class="pagination">
-            <p @click.prevent="changePage(currentPage - 1)"> &laquo; </p>
-            <p v-for="page in totalPages" :key="page" @click.prevent="changePage(page)"
-                :class="{ active: page === currentPage }">{{ page }}</p>
-            <p @click.prevent="changePage(currentPage + 1)"> &raquo; </p>
-        </div>
+        <n-pagination
+            :page="currentPage"
+            :page-count="totalPages"
+            @update:page="changePage"
+        />
     </div>
 </template>
 
 <script>
+import { NPagination } from 'naive-ui'
+
 export default {
+    name: "Pagination",
+    components: {
+        NPagination
+    },
     props: {
         currentPage: {
             type: Number,
@@ -23,9 +28,7 @@ export default {
     },
     methods: {
         changePage(page) {
-            if (page > 0 && page <= this.totalPages) {
-                this.$emit('page-changed', page);
-            }
+            this.$emit('page-changed', page);
         }
     }
 }
@@ -37,26 +40,5 @@ export default {
     justify-content: center;
     align-items: center;
     margin: 20px auto;
-}
-
-.pagination {
-    display: inline-block;
-}
-
-.pagination p {
-    color: black;
-    float: left;
-    padding: 8px 16px;
-    text-decoration: none;
-}
-
-.pagination p.active {
-    background-color: var(--primary-color);
-    color: var(--background-color);
-}
-
-.pagination p:hover {
-    cursor: pointer;
-    background-color: #ddd;
 }
 </style>

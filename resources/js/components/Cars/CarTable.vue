@@ -107,6 +107,16 @@ export default {
 </script>
 
 <style scoped>
+.edit-field {
+    padding: 10px 12px;
+}
+
+.edit-field input {
+    padding: 8px;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
 .checkbox {
     display: flex;
     justify-content: center;

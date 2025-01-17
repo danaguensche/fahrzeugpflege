@@ -1,7 +1,7 @@
 <template>
     <!-- Tool-Tipps werden nur dann gezeigt, wenn tooltipText nicht null oder ein leerer String ist, damit das Anzeigen eines Tooltipps dynamisch bleibt -->
     <!-- :class="{ 'add button hover-tooltip': showTooltip }"  <- Custom Tool-Tipps -->
-    <button class="add-button" :class="{ 'add-button hover-tooltip': showTooltip }" :title="tooltipText">
+    <button class="add-button" :class="{ 'add-button tooltip': showTooltip }" :title="tooltipText">
         <img src="../../../img/icons/add.png" class="add-icon">
         <div class="text-content">
             <slot></slot>

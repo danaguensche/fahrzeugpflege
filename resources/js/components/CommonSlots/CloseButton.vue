@@ -1,6 +1,6 @@
 <template>
   <transition name="fade">
-    <button v-if="isVisible" class="close-button" :class="{ 'hover-tooltip': showTooltip }" :title="tooltipText"
+    <button v-if="isVisible" class="close-button" :class="{ 'tooltip': showTooltip }" :title="tooltipText"
       @click="$emit('close')">
       <img src="../../../img/icons/close.png" class="close-icon">
       <slot></slot>
