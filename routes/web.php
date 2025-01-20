@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\PDFController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -52,6 +53,12 @@ Route::middleware(['auth'])->group(function () {
         // Route::get('/kunden/{id}', 'edit')->name('kunden.edit');
         // Route::put('/kunden/{id}', 'update')->name('kunden.update');
         // Route::delete('/kunden/{id}', 'destroy')->name('kunden.destroy');
+    });
+
+    // PDF Generation
+    Route::controller(PDFController::class)->group(function () {
+        Route::get('generate-pdf-kundenauftrag', 'generatePDFKundenauftrag');
+        Route::get('generate-pdf-uebergabeprotokoll', 'generatePDFUebergabeprotokoll');
     });
 });
 
