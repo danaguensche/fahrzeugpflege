@@ -1,8 +1,21 @@
 <template>
     <div>
         <div class="button-container">
-            <DefaultButton class="delete-customer-button" @click="deleteCustomers">Löschen
-            </DefaultButton>
+                <n-button-group>
+                    <n-popconfirm title="Sind Sie sicher, dass Sie die ausgewählten Kunden löschen möchten?"
+                        @positive-click="deleteCustomers">
+                        <template #trigger>
+                            <n-button class="delete-customer-button">Löschen</n-button>
+                        </template>
+                    </n-popconfirm>
+
+                    <n-popconfirm title="Wollen Sie die Änderungen speichern?" @positive-click="saveChanges">
+                        <template #trigger>
+                            <n-button>Bestätigen</n-button>
+                        </template>
+                    </n-popconfirm>
+                    <n-button @click="anotherAction">Verwerfen</n-button>
+                </n-button-group>
         </div>
         <div class="table-container" :class="{ 'table-container-sidebar-opened': isSidebarOpen }">
             <div v-if="customers.length === 0">Laden...</div>
@@ -25,14 +38,13 @@
                 <tbody>
                     <tr v-for="customer in customers" :key="customer.id">
                         <td class="checkbox">
-                            <Checkbox @change="updateSelectedCustomers(customer.id, $event.target.checked)"></Checkbox>
+                            <Checkbox @change="updateSelectedCustomers(customer.id, $event.target.checked)">
+                            </Checkbox>
                         </td>
                         <td v-if="editCustomerId === customer.id" class="edit-field">
                             <input v-model="editCustomer.company" />
                         </td>
-                        <td v-else>
-                            {{ customer.company }}
-                        </td>
+                        <td v-else>{{ customer.company }}</td>
                         <td v-if="editCustomerId === customer.id" class="edit-field">
                             <input v-model="editCustomer.firstName" />
                         </td>
@@ -66,7 +78,12 @@
                                 @click="editCustomerId === customer.id ? saveCustomer(customer.id) : editCustomerDetails(customer)" />
                         </td>
                         <td class="table-icon">
-                            <DeleteButton></DeleteButton>
+                            <n-popconfirm title="Sind Sie sicher, dass Sie diesen Kunden löschen möchten?"
+                                @positive-click="deleteCustomer(customer.id)">
+                                <template #trigger>
+                                    <DeleteButton></DeleteButton>
+                                </template>
+                            </n-popconfirm>
                         </td>
                     </tr>
                 </tbody>
@@ -82,6 +99,7 @@ import DeleteButton from '../CommonSlots/DeleteButton.vue';
 import EditButton from '../CommonSlots/EditButton.vue';
 import Pagination from '../CommonSlots/Pagination.vue';
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
+import { NPopconfirm, NButton, NButtonGroup } from 'naive-ui';
 
 export default {
     name: "CustomerTable",
@@ -90,7 +108,10 @@ export default {
         DeleteButton,
         EditButton,
         DefaultButton,
-        Pagination
+        Pagination,
+        NPopconfirm,
+        NButton,
+        NButtonGroup
     },
     props: {
         customers: {
@@ -132,6 +153,9 @@ export default {
         deleteCustomers() {
             console.log('Deleting customers:', this.selectedCustomers);
         },
+        deleteCustomer(customerId) {
+            console.log('Deleting customer:', customerId);
+        },
         editCustomerDetails(customer) {
             this.$emit('edit-customer', customer);
         },
@@ -146,33 +170,16 @@ export default {
 </script>
 
 <style scoped>
-:root {
-    --button-width: 100px;
-}
-
 .button-container {
     display: flex;
-    position: relative;
-    justify-content: flex-start;
-    margin-bottom: 10px;
-    margin-right: 110px;
-}
-
-.delete-customer-button {
-    width: var(--button-width);
-    background-color: #fc0328;
-}
-
-.delete-customer-button:hover {
-    background-color: firebrick;
+    justify-content: flex-end;
+    margin-right: 114px;
+    margin-bottom: -15px;
 }
 
 .table-container {
     position: relative;
-}
-
-.table-container-sidebar-opened {
-    width: 100%;
+    width: 1400px;
 }
 
 .edit-field {
@@ -183,6 +190,7 @@ export default {
     padding: 8px;
     font-size: 1em;
     box-sizing: border-box;
+    width: 100%;
 }
 
 .checkbox {
@@ -192,36 +200,23 @@ export default {
     height: 100%;
 }
 
-.edit-button {
+.edit-button,
+.delete-button {
     display: flex;
-    margin-top: -50px;
     justify-content: center;
-    align-content: center;
+    align-items: center;
     transform: scale(0.25);
+    margin-top: -50px;
 }
 
 .delete-button {
-    display: flex;
-    margin-top: -50px;
-    justify-content: center;
-    align-content: center;
-    transform: scale(0.25);
-    margin-left: -1.5vh;
-}
-
-.table-container {
-    width: 100%;
-}
-
-.table-container-sidebar-opened {
-    width: 100%;
+    margin-left: -15px;
 }
 
 .table {
     border-collapse: separate;
     margin: 25px 0;
     font-size: 0.9em;
-    font-family: var(--font-family);
     width: 92%;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
@@ -231,8 +226,8 @@ export default {
 }
 
 .table thead tr {
-    background-color: var(--primary-color);
-    color: var(--text-color-light);
+    background-color: darkslategray;
+    color: #ffffff;
     text-align: left;
 }
 

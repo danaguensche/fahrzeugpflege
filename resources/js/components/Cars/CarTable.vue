@@ -1,59 +1,82 @@
 <template>
-    <div class="table-container" :class="{ 'table-container-sidebar-opened': isSidebarOpen }">
-        <div v-if="cars.length === 0">Laden...</div>
-        <table v-else class="table table-bordered">
-            <thead>
-                <tr>
-                    <th class="select">Auswählen</th>
-                    <th>Kennzeichen</th>
-                    <th>Fahrzeugklasse</th>
-                    <th>Automarke</th>
-                    <th>Typ</th>
-                    <th>Farbe</th>
-                    <th>Löschen</th>
-                    <th>Bearbeiten</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="car in cars" :key="car.Kennzeichen">
-                    <td class="checkbox">
-                        <Checkbox></Checkbox>
-                    </td>
-                    <td v-if="editCarId === car.Kennzeichen" class="edit-field">
-                            <input v-model="editCar.Kennzeichen" />
-                    </td>
-                    <td v-else>
-                        <a href="">{{ car.Kennzeichen }}</a>
-                    </td>
-                    <td v-if="editCarId === car.Kennzeichen" class="edit-field">
-                        <input v-model="editCar.Fahrzeugklasse" />
-                    </td>
-                    <td v-else>{{ car.Fahrzeugklasse }}</td>
-                    <td v-if="editCarId === car.Kennzeichen" class="edit-field">
-                        <input v-model="editCar.Automarke" />
-                    </td>
-                    <td v-else>{{ car.Automarke }}</td>
-                    <td v-if="editCarId === car.Kennzeichen" class="edit-field">
-                        <input v-model="editCar.Typ" />
-                    </td>
-                    <td v-else>{{ car.Typ }}</td>
-                    <td v-if="editCarId === car.Kennzeichen" class="edit-field">
-                        <input v-model="editCar.Farbe" />
-                    </td>
-                    <td v-else>{{ car.Farbe }}</td>
-                    <td class="table-icon">
-                        <DeleteButton></DeleteButton>
-                    </td>
-                    <td class="table-icon">
-                        <EditButton
-                            @click="editCarId === car.Kennzeichen ? saveCar(car.Kennzeichen) : editCarDetails(car)" />
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <n-config-provider :locale="locale" :date-locale="dateLocale">
+        <div>
+            <div class="button-container">
+                <n-button-group>
+                    <n-popconfirm title="Sind Sie sicher, dass Sie die ausgewählten Kunden löschen möchten?"
+                        @positive-click="deleteCars">
+                        <template #trigger>
+                            <n-button class="delete-car-button">Löschen</n-button>
+                        </template>
+                    </n-popconfirm>
 
-    <Pagination :currentPage="currentPage" :totalPages="totalPages" @page-changed="changePage"></Pagination>
+                    <n-popconfirm title="Wollen Sie die Änderungen speichern?" @positive-click="saveChanges">
+                        <template #trigger>
+                            <n-button>Bestätigen</n-button>
+                        </template>
+                    </n-popconfirm>
+
+                    <n-button @click="anotherAction">Verwerfen</n-button>
+                </n-button-group>
+            </div>
+
+            <div class="table-container" :class="{ 'table-container-sidebar-opened': isSidebarOpen }">
+                <div v-if="cars.length === 0">Laden...</div>
+                <table v-else class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th class="select">Auswählen</th>
+                            <th>Kennzeichen</th>
+                            <th>Fahrzeugklasse</th>
+                            <th>Automarke</th>
+                            <th>Typ</th>
+                            <th>Farbe</th>
+                            <th>Löschen</th>
+                            <th>Bearbeiten</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="car in cars" :key="car.Kennzeichen">
+                            <td class="checkbox">
+                                <Checkbox></Checkbox>
+                            </td>
+                            <td v-if="editCarId === car.Kennzeichen" class="edit-field">
+                                <input v-model="editCar.Kennzeichen" />
+                            </td>
+                            <td v-else>
+                                <a href="">{{ car.Kennzeichen }}</a>
+                            </td>
+                            <td v-if="editCarId === car.Kennzeichen" class="edit-field">
+                                <input v-model="editCar.Fahrzeugklasse" />
+                            </td>
+                            <td v-else>{{ car.Fahrzeugklasse }}</td>
+                            <td v-if="editCarId === car.Kennzeichen" class="edit-field">
+                                <input v-model="editCar.Automarke" />
+                            </td>
+                            <td v-else>{{ car.Automarke }}</td>
+                            <td v-if="editCarId === car.Kennzeichen" class="edit-field">
+                                <input v-model="editCar.Typ" />
+                            </td>
+                            <td v-else>{{ car.Typ }}</td>
+                            <td v-if="editCarId === car.Kennzeichen" class="edit-field">
+                                <input v-model="editCar.Farbe" />
+                            </td>
+                            <td v-else>{{ car.Farbe }}</td>
+                            <td class="table-icon">
+                                <DeleteButton></DeleteButton>
+                            </td>
+                            <td class="table-icon">
+                                <EditButton
+                                    @click="editCarId === car.Kennzeichen ? saveCar(car.Kennzeichen) : editCarDetails(car)" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <Pagination :currentPage="currentPage" :totalPages="totalPages" @page-changed="changePage"></Pagination>
+    </n-config-provider>
 </template>
 
 <script>
@@ -61,6 +84,7 @@ import Checkbox from '../CommonSlots/Checkbox.vue';
 import DeleteButton from '../CommonSlots/DeleteButton.vue';
 import EditButton from '../CommonSlots/EditButton.vue';
 import Pagination from '../CommonSlots/Pagination.vue';
+import { NPopconfirm, NButton, NButtonGroup, NConfigProvider, deDE, dateDeDE } from 'naive-ui';
 
 export default {
     name: "CarTable",
@@ -68,7 +92,11 @@ export default {
         Checkbox,
         DeleteButton,
         EditButton,
-        Pagination
+        Pagination,
+        NPopconfirm,
+        NButton,
+        NButtonGroup,
+        NConfigProvider
     },
     props: {
         cars: {
@@ -92,7 +120,28 @@ export default {
             required: true
         }
     },
+
+    data() {
+        return {
+            selectedCars: [],
+            showDeleteButton: false,
+            locale: deDE,
+            dateLocale: dateDeDE
+        };
+    },
     methods: {
+        updateSelectedCars(carId, isChecked) {
+            if (isChecked) {
+                this.selectedCars.push(carId);
+            } else {
+                this.selectedCars = this.selectedCars.filter(id => id !== carId);
+            }
+        },
+
+        deleteCars() {
+            console.log('Deleting cars:', this.selectedCars);
+
+        },
         editCarDetails(car) {
             this.$emit('edit-car', car);
         },
@@ -107,6 +156,19 @@ export default {
 </script>
 
 <style scoped>
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 3px;
+    margin-bottom: -15px;
+}
+
+.table-container {
+    position: relative;
+    width: 1300px;
+}
+
+
 .edit-field {
     padding: 10px 12px;
 }
@@ -115,6 +177,7 @@ export default {
     padding: 8px;
     font-size: 1em;
     box-sizing: border-box;
+    width: 100%;
 }
 
 .checkbox {
@@ -124,38 +187,24 @@ export default {
     height: 100%;
 }
 
-.edit-button {
+.edit-button,
+.delete-button {
     display: flex;
-    margin-top: -50px;
     justify-content: center;
-    align-content: center;
+    align-items: center;
     transform: scale(0.25);
-    margin-left: -1.5vh;
+    margin-top: -50px;
 }
 
 .delete-button {
-    display: flex;
-    margin-top: -50px;
-    justify-content: center;
-    align-content: center;
-    transform: scale(0.25);
-    margin-left: -1.5vh;
-}
-
-.table-container {
-    width: 100%;
-}
-
-.table-container-sidebar-opened {
-    width: 100%;
+    margin-left: -15px;
 }
 
 .table {
     border-collapse: separate;
     margin: 25px 0;
     font-size: 0.9em;
-    font-family: var(--font-family);
-    width: 92%;
+    width: 100%;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
@@ -164,8 +213,8 @@ export default {
 }
 
 .table thead tr {
-    background-color: var(--primary-color);
-    color: var(--text-color-light);
+    background-color: darkslategray;
+    color: #ffffff;
     text-align: left;
 }
 

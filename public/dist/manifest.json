@@ -333,7 +333,7 @@
     "src": "resources/img/sidebar-img/settings-icon.png"
   },
   "resources/js/app.js": {
-    "file": "assets/app-DZDc1KDE.js",
+    "file": "assets/app-DJsgv0CP.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -384,7 +384,7 @@
       "node_modules/vue-cal/dist/drag-and-drop.es.js"
     ],
     "css": [
-      "assets/app-BlcxFT9s.css"
+      "assets/app-BFg6P9ue.css"
     ],
     "assets": [
       "assets/dashboard-icon-CAIXilEl.png",
@@ -400,9 +400,9 @@
       "assets/arrow-icon-mirrored-BY0Ho_NH.png",
       "assets/add-BV6xjPmn.png",
       "assets/edit-NUrQm3gB.png",
-      "assets/delete-BagUlXP5.png",
       "assets/search-MwXeqgVr.png",
-      "assets/close-BmGMexF3.png"
+      "assets/close-BmGMexF3.png",
+      "assets/delete-BagUlXP5.png"
     ]
   }
 }
