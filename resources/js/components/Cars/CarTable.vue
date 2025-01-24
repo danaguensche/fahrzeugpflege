@@ -2,10 +2,10 @@
     <div>
         <div class="table-container">
             <div v-if="cars.length === 0">Laden...</div>
-            <v-table v-else class="custom-table" fixed-header height="450">
+            <v-table v-else class="custom-table" fixed-header height="850">
                 <thead>
                     <tr>
-                        <th class="select fixed-width">Auswählen</th>
+                        <th class="select ">Auswählen</th>
                         <th class="fixed-width">Kennzeichen</th>
                         <th class="fixed-width">Fahrzeugklasse</th>
                         <th class="fixed-width">Automarke</th>
@@ -133,7 +133,7 @@ export default {
 }
 
 .fixed-width {
-    width: 150px;
+    width: 200px;
 }
 
 .edit-field {
@@ -145,13 +145,6 @@ export default {
     font-size: 1em;
     box-sizing: border-box;
     width: 100%;
-}
-
-.checkbox {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
 }
 
 .edit-button,
@@ -177,31 +170,36 @@ export default {
     width: 0.5vh;
 }
 
-.table thead tr {
-    background-color: darkslategray;
-    color: #ffffff;
-    text-align: left;
+@media only screen and (max-width: 600px) {
+    .table-container {
+        width: 50%;
+        height: 50%;
+    }
+
+    .custom-table {
+        width: 50%;
+        height: 50%;
+    }
 }
 
-.table th,
-.table td {
-    padding: 12px 15px;
+@media only screen and (min-height: 1080px) {
+    .table-container {
+        height: 130%;
+    }
+
+    .custom-table {
+        height: 130%;
+    }   
 }
 
-.table th {
-    height: 45px;
+@media only screen and (min-height: 1440px) {
+    .table-container {
+        height: 150%;
+    }
+    .custom-table {
+        height: 150%;
+    }
 }
 
-.table tbody tr {
-    border-bottom: 1px solid #dddddd;
-}
 
-.table tbody tr:nth-of-type(even) {
-    background-color: #f3f3f3;
-}
-
-.table tbody tr.active-row {
-    font-weight: bold;
-    color: #009879;
-}
 </style>

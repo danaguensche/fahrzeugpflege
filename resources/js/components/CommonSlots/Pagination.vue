@@ -53,4 +53,5 @@ export default {
     align-items: center;
     margin: 20px auto;
 }
+
 </style>

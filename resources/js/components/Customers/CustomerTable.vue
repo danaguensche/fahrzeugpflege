@@ -1,12 +1,12 @@
 <template>
-    <div>
+    <div class="component">
         <div class="table-container">
             <div v-if="customers.length === 0">Laden...</div>
-            <v-table v-else class="custom-table" fixed-header height="450">
+            <v-table v-else class="custom-table" fixed-header height="850">
                 <thead>
                     <tr>
                         <th class="select fixed-width">Auswählen</th>
-                        <th class="fixed-width">Firma</th>
+                        <!-- <th class="fixed-width">Firma</th> -->
                         <th class="fixed-width">Vorname</th>
                         <th class="fixed-width">Nachname</th>
                         <th class="fixed-width">Email</th>
@@ -23,10 +23,10 @@
                         <td class="checkbox fixed-width">
                             <v-checkbox v-model="selectedCustomers" :value="customer.id"></v-checkbox>
                         </td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
-                            <v-text-field v-model="editCustomer.company"></v-text-field>
+                        <!-- <td v-if="editCustomerId === customer.id" class="edit-field fixed-width"> -->
+                            <!-- <v-text-field v-model="editCustomer.company"></v-text-field>
                         </td>
-                        <td v-else class="fixed-width">{{ customer.company }}</td>
+                        <td v-else class="fixed-width">{{ customer.company }}</td> -->
                         <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
                             <v-text-field v-model="editCustomer.firstName"></v-text-field>
                         </td>
@@ -61,7 +61,8 @@
                             </v-btn>
                         </td>
                         <td class="table-icon fixed-width">
-                            <v-btn variant="plain" icon @click="editCustomerId === customer.id ? saveCustomer(customer.id) : editCustomerDetails(customer)">
+                            <v-btn variant="plain" icon
+                                @click="editCustomerId === customer.id ? saveCustomer(customer.id) : editCustomerDetails(customer)">
                                 <v-icon>mdi-pencil</v-icon>
                             </v-btn>
                         </td>
@@ -121,7 +122,7 @@ export default {
         },
         deleteCustomers() {
             console.log('Deleting customers:', this.selectedCustomers);
-           
+
         },
         deleteCustomer(customerId) {
             console.log('Deleting customer:', customerId);
@@ -164,12 +165,6 @@ export default {
     width: 100%;
 }
 
-.checkbox {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-}
 
 .edit-button,
 .delete-button {
@@ -183,10 +178,7 @@ export default {
 }
 
 .table {
-    border-collapse: separate;
     margin: 25px 0;
-    font-size: 0.9em;
-    width: 100%;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
@@ -194,31 +186,34 @@ export default {
     width: 0.5vh;
 }
 
-.table thead tr {
-    background-color: darkslategray;
-    color: #ffffff;
-    text-align: left;
+@media only screen and (max-width: 600px) {
+    .table-container {
+        width: 50%;
+        height: 50%;
+    }
+
+    .custom-table {
+        width: 50%;
+        height: 50%;
+    }
 }
 
-.table th,
-.table td {
-    padding: 12px 15px;
+@media only screen and (min-height: 1080px) {
+    .table-container {
+        height: 130%;
+    }
+
+    .custom-table {
+        height: 130%;
+    }   
 }
 
-.table th {
-    height: 45px;
-}
-
-.table tbody tr {
-    border-bottom: 1px solid #dddddd;
-}
-
-.table tbody tr:nth-of-type(even) {
-    background-color: #f3f3f3;
-}
-
-.table tbody tr.active-row {
-    font-weight: bold;
-    color: #009879;
+@media only screen and (min-height: 1440px) {
+    .table-container {
+        height: 150%;
+    }
+    .custom-table {
+        height: 150%;
+    }
 }
 </style>
