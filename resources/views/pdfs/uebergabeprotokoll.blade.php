@@ -1,13 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title></title>
-    <style>
-
-    </style>
-</head>
+@extends("layouts.default")
+@section("title", "Übergabeprotokoll")
+@section("content")
 <body>
     <!-- Use values from method like this  {{ $varName }} -->
 
 </body>
 </html>
+@endsection

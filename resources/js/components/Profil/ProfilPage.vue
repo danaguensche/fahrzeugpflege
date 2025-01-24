@@ -1,19 +1,28 @@
 <template>
-    <div class="profil-page">
-         <Form></Form>
+    <div class="profil-page" :class="{ 'profile-page-sidebar-opened': isSidebarOpen }">
+        <Settings></Settings> 
+        <Form></Form>
+
     </div>
 </template>
 
 <script>
 
 import Form from './Form.vue';
+import Settings from './Settings.vue';
+import { mapState } from 'vuex';
 
 export default {
     name: "ProfilPage",
 
     components: {
-        Form
-    }
+        Form,
+        Settings
+    },
+
+    computed: {
+        ...mapState(['isSidebarOpen'])
+    },
 }
 
 </script>

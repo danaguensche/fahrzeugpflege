@@ -9,7 +9,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\PDFController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 // Auth Routes

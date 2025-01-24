@@ -1,21 +1,23 @@
 <template>
     <div class="pagination-container">
-        <n-pagination
-            :page="currentPage"
-            :page-count="totalPages"
-            @update:page="changePage"
-        />
+        <v-container>
+            <v-row justify="center">
+                <v-col cols="8">
+                    <v-pagination
+                        v-model="page"
+                        :length="totalPages"
+                        class="my-4"
+                        @input="changePage"
+                    ></v-pagination>
+                </v-col>
+            </v-row>
+        </v-container>
     </div>
 </template>
 
 <script>
-import { NPagination } from 'naive-ui'
-
 export default {
     name: "Pagination",
-    components: {
-        NPagination
-    },
     props: {
         currentPage: {
             type: Number,
@@ -24,6 +26,16 @@ export default {
         totalPages: {
             type: Number,
             required: true
+        }
+    },
+    data() {
+        return {
+            page: this.currentPage
+        };
+    },
+    watch: {
+        currentPage(newPage) {
+            this.page = newPage;
         }
     },
     methods: {

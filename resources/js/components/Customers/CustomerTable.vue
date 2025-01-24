@@ -1,93 +1,73 @@
 <template>
     <div>
-        <div class="button-container">
-                <n-button-group>
-                    <n-popconfirm title="Sind Sie sicher, dass Sie die ausgewählten Kunden löschen möchten?"
-                        @positive-click="deleteCustomers">
-                        <template #trigger>
-                            <n-button class="delete-customer-button">Löschen</n-button>
-                        </template>
-                    </n-popconfirm>
-
-                    <n-popconfirm title="Wollen Sie die Änderungen speichern?" @positive-click="saveChanges">
-                        <template #trigger>
-                            <n-button>Bestätigen</n-button>
-                        </template>
-                    </n-popconfirm>
-                    <n-button @click="anotherAction">Verwerfen</n-button>
-                </n-button-group>
-        </div>
-        <div class="table-container" :class="{ 'table-container-sidebar-opened': isSidebarOpen }">
+        <div class="table-container">
             <div v-if="customers.length === 0">Laden...</div>
-            <table v-else class="table table-bordered">
+            <v-table v-else class="custom-table" fixed-header height="450">
                 <thead>
                     <tr>
-                        <th class="select">Auswählen</th>
-                        <th>Firma</th>
-                        <th>Vorname</th>
-                        <th>Nachname</th>
-                        <th>Email</th>
-                        <th>Telefonnummer</th>
-                        <th>Straße und Hausnummer</th>
-                        <th>PLZ</th>
-                        <th>Stadt</th>
-                        <th>Bearbeiten</th>
-                        <th>Löschen</th>
+                        <th class="select fixed-width">Auswählen</th>
+                        <th class="fixed-width">Firma</th>
+                        <th class="fixed-width">Vorname</th>
+                        <th class="fixed-width">Nachname</th>
+                        <th class="fixed-width">Email</th>
+                        <th class="fixed-width">Telefonnummer</th>
+                        <th class="fixed-width">Straße und Hausnummer</th>
+                        <th class="fixed-width">PLZ</th>
+                        <th class="fixed-width">Stadt</th>
+                        <th class="fixed-width">Bearbeiten</th>
+                        <th class="fixed-width">Löschen</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="customer in customers" :key="customer.id">
-                        <td class="checkbox">
-                            <Checkbox @change="updateSelectedCustomers(customer.id, $event.target.checked)">
-                            </Checkbox>
+                        <td class="checkbox fixed-width">
+                            <v-checkbox v-model="selectedCustomers" :value="customer.id"></v-checkbox>
                         </td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field">
-                            <input v-model="editCustomer.company" />
+                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
+                            <v-text-field v-model="editCustomer.company"></v-text-field>
                         </td>
-                        <td v-else>{{ customer.company }}</td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field">
-                            <input v-model="editCustomer.firstName" />
+                        <td v-else class="fixed-width">{{ customer.company }}</td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
+                            <v-text-field v-model="editCustomer.firstName"></v-text-field>
                         </td>
-                        <td v-else>{{ customer.firstName }}</td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field">
-                            <input v-model="editCustomer.lastName" />
+                        <td v-else class="fixed-width">{{ customer.firstName }}</td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
+                            <v-text-field v-model="editCustomer.lastName"></v-text-field>
                         </td>
-                        <td v-else>{{ customer.lastName }}</td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field">
-                            <input v-model="editCustomer.email" />
+                        <td v-else class="fixed-width">{{ customer.lastName }}</td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
+                            <v-text-field v-model="editCustomer.email"></v-text-field>
                         </td>
-                        <td v-else>{{ customer.email }}</td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field">
-                            <input v-model="editCustomer.phoneNumber" />
+                        <td v-else class="fixed-width">{{ customer.email }}</td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
+                            <v-text-field v-model="editCustomer.phoneNumber"></v-text-field>
                         </td>
-                        <td v-else>{{ customer.phoneNumber }}</td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field">
-                            <input v-model="editCustomer.addressLine" />
+                        <td v-else class="fixed-width">{{ customer.phoneNumber }}</td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
+                            <v-text-field v-model="editCustomer.addressLine"></v-text-field>
                         </td>
-                        <td v-else>{{ customer.addressLine }}</td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field">
-                            <input v-model="editCustomer.postalCode" />
+                        <td v-else class="fixed-width">{{ customer.addressLine }}</td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
+                            <v-text-field v-model="editCustomer.postalCode"></v-text-field>
                         </td>
-                        <td v-else>{{ customer.postalCode }}</td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field">
-                            <input v-model="editCustomer.city" />
+                        <td v-else class="fixed-width">{{ customer.postalCode }}</td>
+                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
+                            <v-text-field v-model="editCustomer.city"></v-text-field>
                         </td>
-                        <td v-else>{{ customer.city }}</td>
-                        <td class="table-icon">
-                            <EditButton
-                                @click="editCustomerId === customer.id ? saveCustomer(customer.id) : editCustomerDetails(customer)" />
+                        <td v-else class="fixed-width">{{ customer.city }}</td>
+                        <td class="table-icon fixed-width">
+                            <v-btn icon class="delete-button" variant="plain">
+                                <v-icon>mdi-delete</v-icon>
+                            </v-btn>
                         </td>
-                        <td class="table-icon">
-                            <n-popconfirm title="Sind Sie sicher, dass Sie diesen Kunden löschen möchten?"
-                                @positive-click="deleteCustomer(customer.id)">
-                                <template #trigger>
-                                    <DeleteButton></DeleteButton>
-                                </template>
-                            </n-popconfirm>
+                        <td class="table-icon fixed-width">
+                            <v-btn variant="plain" icon @click="editCustomerId === customer.id ? saveCustomer(customer.id) : editCustomerDetails(customer)">
+                                <v-icon>mdi-pencil</v-icon>
+                            </v-btn>
                         </td>
                     </tr>
                 </tbody>
-            </table>
+            </v-table>
         </div>
         <Pagination :currentPage="currentPage" :totalPages="totalPages" @page-changed="changePage"></Pagination>
     </div>
@@ -95,23 +75,13 @@
 
 <script>
 import Checkbox from '../CommonSlots/Checkbox.vue';
-import DeleteButton from '../CommonSlots/DeleteButton.vue';
-import EditButton from '../CommonSlots/EditButton.vue';
 import Pagination from '../CommonSlots/Pagination.vue';
-import DefaultButton from '../CommonSlots/DefaultButton.vue';
-import { NPopconfirm, NButton, NButtonGroup } from 'naive-ui';
 
 export default {
     name: "CustomerTable",
     components: {
         Checkbox,
-        DeleteButton,
-        EditButton,
-        DefaultButton,
-        Pagination,
-        NPopconfirm,
-        NButton,
-        NButtonGroup
+        Pagination
     },
     props: {
         customers: {
@@ -148,10 +118,10 @@ export default {
             } else {
                 this.selectedCustomers = this.selectedCustomers.filter(id => id !== customerId);
             }
-            this.showDeleteButton = this.selectedCustomers.length > 0;
         },
         deleteCustomers() {
             console.log('Deleting customers:', this.selectedCustomers);
+           
         },
         deleteCustomer(customerId) {
             console.log('Deleting customer:', customerId);
@@ -170,16 +140,17 @@ export default {
 </script>
 
 <style scoped>
-.button-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-right: 114px;
-    margin-bottom: -15px;
-}
-
 .table-container {
     position: relative;
-    width: 1400px;
+    width: 100%;
+}
+
+.custom-table {
+    width: 100%;
+}
+
+.fixed-width {
+    width: 150px;
 }
 
 .edit-field {
@@ -205,19 +176,17 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    transform: scale(0.25);
-    margin-top: -50px;
 }
 
-.delete-button {
-    margin-left: -15px;
+.delete-button:hover {
+    background-color: red !important;
 }
 
 .table {
     border-collapse: separate;
     margin: 25px 0;
     font-size: 0.9em;
-    width: 92%;
+    width: 100%;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
