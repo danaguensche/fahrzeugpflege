@@ -21,6 +21,7 @@
         "@fullcalendar/interaction": "^6.1.15",
         "@fullcalendar/timegrid": "^6.1.15",
         "@fullcalendar/vue3": "^6.1.15",
+        "@jamescoyle/svg-icon": "^0.2.1",
         "@jamescoyle/vue-icon": "^0.1.2",
         "@mdi/font": "^7.4.47",
         "@mdi/js": "^7.4.47",
