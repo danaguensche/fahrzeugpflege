@@ -79,8 +79,16 @@ export default {
                 { title: "Bearbeiten", key: "edit", sortable: "false" },
                 { title: "Löschen", key: "delete", sortable: "false" }
             ],
-            fields: ["firstName", "lastName", "email", "phoneNumber", "addressLine", "postalCode", "city"]
+            fields: ["firstName", "lastName", "email", "phoneNumber", "addressLine", "postalCode", "city"],
+            options: {
+                page: 1,
+                itemsPerPage: 10,
+                sortBy: ['Kennzeichen'],
+                sortDesc: [false],
+            }
         };
+
+
     },
     methods: {
         async loadItems(options) {
@@ -130,7 +138,8 @@ export default {
 
 <style scoped>
 .scrollable-table {
-    max-height: 800px; /* Setzen Sie die gewünschte Höhe */
+    max-height: 800px;
+    /* Setzen Sie die gewünschte Höhe */
     overflow-y: auto;
 }
 
