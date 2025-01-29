@@ -40,9 +40,26 @@ class CustomerController extends Controller
         }
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return new CustomerCollection(Customer::paginate(20));
+        $perPage = $request->input('itemsPerPage', 20);
+        $page = $request->input('page', 1);
+        $sortBy = $request->input('sortBy', 'ID');
+        $sortDesc = $request->input('sortDesc', 'false') === 'true';
+
+        $query = Customer::query();
+
+        if ($sortBy) {
+            $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
+        }
+
+        $total = $query->count();
+        $customers = $query->skip(($page - 1) * $perPage)->take($perPage)->get();
+
+        return response()->json([
+            'items' => CustomerResource::collection($customers),
+            'total' => $total,
+        ]);
     }
 
     public function show(Customer $customer)

@@ -1,146 +1,150 @@
 <template>
     <div class="component">
-        <div class="table-container">
-            <div v-if="customers.length === 0">Laden...</div>
-            <v-table v-else class="custom-table" fixed-header height="850">
-                <thead>
-                    <tr>
-                        <th class="select fixed-width">Auswählen</th>
-                        <!-- <th class="fixed-width">Firma</th> -->
-                        <th class="fixed-width">Vorname</th>
-                        <th class="fixed-width">Nachname</th>
-                        <th class="fixed-width">Email</th>
-                        <th class="fixed-width">Telefonnummer</th>
-                        <th class="fixed-width">Straße und Hausnummer</th>
-                        <th class="fixed-width">PLZ</th>
-                        <th class="fixed-width">Stadt</th>
-                        <th class="fixed-width">Bearbeiten</th>
-                        <th class="fixed-width">Löschen</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="customer in customers" :key="customer.id">
-                        <td class="checkbox fixed-width">
-                            <v-checkbox v-model="selectedCustomers" :value="customer.id"></v-checkbox>
-                        </td>
-                        <!-- <td v-if="editCustomerId === customer.id" class="edit-field fixed-width"> -->
-                            <!-- <v-text-field v-model="editCustomer.company"></v-text-field>
-                        </td>
-                        <td v-else class="fixed-width">{{ customer.company }}</td> -->
-                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
-                            <v-text-field v-model="editCustomer.firstName"></v-text-field>
-                        </td>
-                        <td v-else class="fixed-width">{{ customer.firstName }}</td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
-                            <v-text-field v-model="editCustomer.lastName"></v-text-field>
-                        </td>
-                        <td v-else class="fixed-width">{{ customer.lastName }}</td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
-                            <v-text-field v-model="editCustomer.email"></v-text-field>
-                        </td>
-                        <td v-else class="fixed-width">{{ customer.email }}</td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
-                            <v-text-field v-model="editCustomer.phoneNumber"></v-text-field>
-                        </td>
-                        <td v-else class="fixed-width">{{ customer.phoneNumber }}</td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
-                            <v-text-field v-model="editCustomer.addressLine"></v-text-field>
-                        </td>
-                        <td v-else class="fixed-width">{{ customer.addressLine }}</td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
-                            <v-text-field v-model="editCustomer.postalCode"></v-text-field>
-                        </td>
-                        <td v-else class="fixed-width">{{ customer.postalCode }}</td>
-                        <td v-if="editCustomerId === customer.id" class="edit-field fixed-width">
-                            <v-text-field v-model="editCustomer.city"></v-text-field>
-                        </td>
-                        <td v-else class="fixed-width">{{ customer.city }}</td>
-                        <td class="table-icon fixed-width">
-                            <v-btn icon class="delete-button" variant="plain">
-                                <v-icon>mdi-delete</v-icon>
-                            </v-btn>
-                        </td>
-                        <td class="table-icon fixed-width">
-                            <v-btn variant="plain" icon
-                                @click="editCustomerId === customer.id ? saveCustomer(customer.id) : editCustomerDetails(customer)">
-                                <v-icon>mdi-pencil</v-icon>
-                            </v-btn>
-                        </td>
-                    </tr>
-                </tbody>
-            </v-table>
+        <div class="header">
+            <RefreshButton class="refresh-button" @refresh="loadItems(options)"></RefreshButton>
+            <div class="spacer"></div>
+            <ButtonGroup class="button-group"></ButtonGroup>
         </div>
-        <Pagination :currentPage="currentPage" :totalPages="totalPages" @page-changed="changePage"></Pagination>
+        <div class="table-container">
+            <div v-if="customers.length === 0"><v-progress-circular indeterminate></v-progress-circular></div>
+            <div class="scrollable-table">
+                <v-data-table-server :headers="headers" :items="customers" :options.sync="options"
+                    :server-items-length="totalItems" :loading="loading" @update:options="loadItems">
+                    <template v-slot:item="{ item }">
+                        <tr>
+                            <td class="checkbox fixed-width">
+                                <v-checkbox v-model="selectedCustomers" :value="item.id"></v-checkbox>
+                            </td>
+                            <template v-for="field in fields" :key="field">
+                                <td v-if="editCustomerId === item.id" class="edit-field fixed-width">
+                                    <v-text-field v-model="editCustomer[field]"></v-text-field>
+                                </td>
+                                <td v-else class="fixed-width">{{ item[field] }}</td>
+                            </template>
+                            <td class="table-icon fixed-width">
+                                <v-btn icon class="delete-button" variant="plain" @click="confirmDelete(item.id)">
+                                    <v-icon>mdi-delete</v-icon>
+                                </v-btn>
+                            </td>
+                            <td class="table-icon fixed-width">
+                                <v-btn variant="plain" icon
+                                    @click="editCustomerId === item.id ? saveCustomer(item.id) : editCustomerDetails(item)">
+                                    <v-icon>mdi-pencil</v-icon>
+                                </v-btn>
+                            </td>
+                        </tr>
+                    </template>
+                </v-data-table-server>
+            </div>
+        </div>
+        <alert-base v-if="alertVisible" v-on="alertHandlers" alert-heading="Wollen Sie diesen Kunden wirklich löschen?"
+            alert-close-button="Abbrechen" alert-okay-button="Löschen" alert-type-class="alertTypeConfirmation">
+        </alert-base>
     </div>
 </template>
 
 <script>
-import Checkbox from '../CommonSlots/Checkbox.vue';
-import Pagination from '../CommonSlots/Pagination.vue';
+import ButtonGroup from '../CommonSlots/ButtonGroup.vue';
+import RefreshButton from '../CommonSlots/RefreshButton.vue';
+import AlertBase from '../Alerts/AlertBase.vue';
+import axios from 'axios';
 
 export default {
     name: "CustomerTable",
     components: {
-        Checkbox,
-        Pagination
-    },
-    props: {
-        customers: {
-            type: Array,
-            required: true
-        },
-        editCustomerId: {
-            type: String,
-            default: null
-        },
-        editCustomer: {
-            type: Object,
-            default: () => ({})
-        },
-        currentPage: {
-            type: Number,
-            required: true
-        },
-        totalPages: {
-            type: Number,
-            required: true
-        }
+        ButtonGroup,
+        RefreshButton,
+        AlertBase
     },
     data() {
         return {
+            customers: [],
             selectedCustomers: [],
-            showDeleteButton: false
+            showDeleteButton: false,
+            customerToDelete: null,
+            alertVisible: false,
+            alertHandlers: {
+                confirmationClicked: this.deleteCustomer,
+                closeAlertClicked: this.updateAlertVisibility
+            },
+            headers: [
+                { title: "Auswählen", key: "checkox", sortable: "false" },
+                { title: "Vorname", key: "firstName" },
+                { title: "Nachname", key: "lastName" },
+                { title: "Email", key: "email" },
+                { title: "Telefonnummer", key: "phoneNumber" },
+                { title: "Straße und Hausnummer", key: "addressLine" },
+                { title: "PLZ", key: "postalCode" },
+                { title: "Stadt", key: "city" },
+                { title: "Bearbeiten", key: "edit", sortable: "false" },
+                { title: "Löschen", key: "delete", sortable: "false" }
+            ],
+            fields: ["firstName", "lastName", "email", "phoneNumber", "addressLine", "postalCode", "city"]
         };
     },
     methods: {
-        updateSelectedCustomers(customerId, isChecked) {
-            if (isChecked) {
-                this.selectedCustomers.push(customerId);
-            } else {
-                this.selectedCustomers = this.selectedCustomers.filter(id => id !== customerId);
+        async loadItems(options) {
+            this.loading = true;
+            const { page = 1, itemsPerPage = 10, sortBy = [{ key: 'firstName' }], sortDesc = [false] } = options || {};
+            try {
+                const response = await axios.get('/api/customers', {
+                    params: {
+                        page,
+                        itemsPerPage,
+                        sortBy: sortBy.length > 0 ? sortBy[0].key : '',
+                        sortDesc: sortDesc.length > 0 ? sortDesc[0] : false,
+                    },
+                });
+                this.customers = response.data.items;
+                this.totalItems = response.data.total;
+            } catch (error) {
+                console.error('Fehler beim Laden der Daten:', error);
+            }
+            this.loading = false;
+        },
+        confirmDelete(id) {
+            this.customerToDelete = id;
+            this.alertVisible = true;
+        },
+        deleteCustomer() {
+            if (this.customerToDelete) {
+                console.log('Deleting customer:', this.customerToDelete);
+                this.customerToDelete = null;
+                this.alertVisible = false;
             }
         },
-        deleteCustomers() {
-            console.log('Deleting customers:', this.selectedCustomers);
-
-        },
-        deleteCustomer(customerId) {
-            console.log('Deleting customer:', customerId);
-        },
         editCustomerDetails(customer) {
-            this.$emit('edit-customer', customer);
+            this.editCustomerId = customer.id;
+            this.editCustomer = { ...customer };
         },
-        saveCustomer(customerId) {
-            this.$emit('save-customer', customerId);
+        saveCustomer(id) {
+            this.editCustomerId = null;
+            this.editCustomer = {};
         },
-        changePage(page) {
-            this.$emit('page-changed', page);
+        updateAlertVisibility() {
+            this.alertVisible = !this.alertVisible;
         }
     }
 }
 </script>
 
 <style scoped>
+.scrollable-table {
+    max-height: 800px; /* Setzen Sie die gewünschte Höhe */
+    overflow-y: auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* margin-bottom: 10px; */
+}
+
+.spacer {
+    flex-grow: 1;
+}
+
 .table-container {
     position: relative;
     width: 100%;
@@ -164,7 +168,6 @@ export default {
     box-sizing: border-box;
     width: 100%;
 }
-
 
 .edit-button,
 .delete-button {
@@ -205,13 +208,14 @@ export default {
 
     .custom-table {
         height: 130%;
-    }   
+    }
 }
 
 @media only screen and (min-height: 1440px) {
     .table-container {
         height: 150%;
     }
+
     .custom-table {
         height: 150%;
     }

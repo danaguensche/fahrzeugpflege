@@ -9,17 +9,10 @@
         <div class="form-container">
             <CarForm :isOpen="showCarForm" @close="showCarForm = false"></CarForm>
         </div>
-
-        <CarTable
-            :cars="cars"
-            :editCarId="editCarId"
-            :editCar="editCar"
-            :currentPage="currentPage"
-            :totalPages="totalPages"
-            @edit-car="editCarDetails"
-            @save-car="saveCar"
-            @page-changed="changePage"
-        ></CarTable>
+        
+        <CarTable :cars="cars" :editCarId="editCarId" :editCar="editCar" :currentPage="currentPage"
+            :totalPages="totalPages" @edit-car="editCarDetails" @save-car="saveCar" @page-changed="changePage"
+            @update:options="handleSortChange"></CarTable>
     </div>
 </template>
 
@@ -31,12 +24,13 @@ import DefaultButton from '../CommonSlots/DefaultButton.vue';
 import CarForm from './addCar/CarForm.vue';
 import CarTable from './CarTable.vue';
 
+
 export default {
     components: {
         Search,
         DefaultButton,
         CarForm,
-        CarTable
+        CarTable,
     },
     data() {
         return {
@@ -62,21 +56,35 @@ export default {
         changePage(page) {
             this.getCars(page);
         },
-        getCars(page = 1) {
-            axios.get(`/api/fahrzeuge?page=${page}`)
+
+        handleSortChange({ sortBy, sortDesc }) {
+            this.getCars(this.currentPage, sortBy[0], sortDesc[0]);
+        },
+
+        editCarDetails(car) {
+            this.editCarId = car.Kennzeichen;
+            this.editCar = { ...car };
+        },
+
+        getCars(page = 1, sortBy = 'Kennzeichen', sortDesc = false) {
+            axios.get(`/api/fahrzeuge`, {
+                params: {
+                    page: page,
+                    itemsPerPage: 20,
+                    sortBy: sortBy,
+                    sortDesc: sortDesc
+                }
+            })
                 .then((response) => {
-                    this.cars = response.data.data;
-                    this.totalPages = response.data.meta.last_page;
+                    this.cars = response.data.items;
+                    this.totalPages = Math.ceil(response.data.totalItems / 20);
                     this.currentPage = page;
                 })
                 .catch((error) => {
                     console.error('Fehler beim Abrufen der Fahrzeuge:', error);
                 });
         },
-        editCarDetails(car) {
-            this.editCarId = car.Kennzeichen;
-            this.editCar = { ...car };
-        },
+
         saveCar(kennzeichen) {
             axios.put(`/api/fahrzeuge/${kennzeichen}`, this.editCar)
                 .then(() => {
@@ -85,7 +93,7 @@ export default {
                     this.editCar = {};
                 })
                 .catch((error) => {
-                    console.error('Fehler beim Speichern des Autos:', error);
+                    console.error('Fehler beim Speichern des Fahrzeugs:', error);
                 });
         }
     }

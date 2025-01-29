@@ -3,8 +3,6 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CarController;
-use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\PDFController;
 
@@ -34,26 +32,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/einstellungen', 'settings')->name('settings');
     });
 
-    // Car API
-    Route::controller(CarController::class)->group(function () {
-        Route::get('/api/fahrzeuge', 'index')->name('fahrzeuge.index');
-        Route::post('/api/fahrzeuge', 'store')->name('fahrzeuge.store');
-        // Route::get('/fahrzeuge/{id}', 'edit')->name('fahrzeuge.edit');
-        // Route::put('/fahrzeuge/{id}', 'update')->name('fahrzeuge.update');
-        // Route::delete('/fahrzeuge/{id}', 'destroy')->name('fahrzeuge.destroy');
-    });
-
     // Profil
     Route::post('/profil', [EmployeeController::class, 'store'])->name('profil.store');
 
-    // Customer API
-    Route::controller(CustomerController::class)->group(function () {
-        Route::get('/api/kunden', 'index')->name('kunden.index');
-        Route::post('/api/kunden', 'store')->name('kunden.store');
-        // Route::get('/kunden/{id}', 'edit')->name('kunden.edit');
-        // Route::put('/kunden/{id}', 'update')->name('kunden.update');
-        // Route::delete('/kunden/{id}', 'destroy')->name('kunden.destroy');
-    });
+
 
     // PDF Generation
     Route::controller(PDFController::class)->group(function () {
@@ -61,4 +43,3 @@ Route::middleware(['auth'])->group(function () {
         Route::get('generate-pdf-uebergabeprotokoll', 'generatePDFUebergabeprotokoll');
     });
 });
-

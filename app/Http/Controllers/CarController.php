@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Resources\CarResource;
 use App\Http\Resources\CarCollection;
 
+
+
 class CarController extends Controller
 {
     public function store(Request $request)
@@ -43,11 +45,28 @@ class CarController extends Controller
         }
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return new CarCollection(Car::paginate(20));
-        // return new CarCollection(Car::all());
+        $perPage = $request->input('itemsPerPage', 20);
+        $page = $request->input('page', 1);
+        $sortBy = $request->input('sortBy', 'Kennzeichen');
+        $sortDesc = $request->input('sortDesc', 'false') === 'true';
+
+        $query = Car::query();
+
+        if ($sortBy) {
+            $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
+        }
+
+        $total = $query->count();
+        $cars = $query->skip(($page - 1) * $perPage)->take($perPage)->get();
+
+        return response()->json([
+            'items' => CarResource::collection($cars),
+            'total' => $total,
+        ]);
     }
+
 
     public function show(Car $car)
     {

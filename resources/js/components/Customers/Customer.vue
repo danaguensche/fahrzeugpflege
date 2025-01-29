@@ -11,24 +11,14 @@
             <CustomerForm :isOpen="showCustomerForm" @close="showCustomerForm = false"></CustomerForm>
         </div>
 
-        <CustomerTable
-            :customers="customers"
-            :editCustomerId="editCustomerId"
-            :editCustomer="editCustomer"
-            :currentPage="currentPage"
-            :totalPages="totalPages"
-            @edit-customer="editCustomerDetails"
-            @save-customer="saveCustomer"
-            @page-changed="changePage"
-        ></CustomerTable>
+        <CustomerTable :customers="customers" :editCustomerId="editCustomerId" :editCustomer="editCustomer"
+            :currentPage="currentPage" :totalPages="totalPages" @edit-customer="editCustomerDetails"
+            @save-customer="saveCustomer" @page-changed="changePage" @update:option="handleSortChange"></CustomerTable>
     </div>
 </template>
 
 <script>
-import Checkbox from '../CommonSlots/Checkbox.vue';
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
-import DeleteButton from '../CommonSlots/DeleteButton.vue';
-import EditButton from '../CommonSlots/EditButton.vue';
 import Search from '../CommonSlots/Searchbar.vue';
 import { mapState } from 'vuex';
 import axios from 'axios';
@@ -41,9 +31,6 @@ export default {
     components: {
         Search,
         DefaultButton,
-        Checkbox,
-        DeleteButton,
-        EditButton,
         CustomerForm,
         CustomerTable
     },
@@ -77,17 +64,28 @@ export default {
             this.getCustomers(page);
         },
 
+        handleSortChange({ sortBy, sortDesc }) {
+            this.getCars(this.currentPage, sortBy[0], sortDesc[0]);
+        },
+
         editCustomerDetails(customer) {
             this.editCustomerId = customer.id;
             this.editCustomer = { ...customer };
         },
 
 
-        getCustomers(page = 1) {
-            axios.get(`/api/kunden?page=${page}`)
+        getCustomers(page = 1, sortBy = 'id', sortDesc = false) {
+            axios.get('/api/customers', {
+                params: {
+                    page: page,
+                    per_page: 10,
+                    sortBy: sortBy,
+                    sortDesc: sortDesc
+                }
+            })
                 .then((response) => {
-                    this.customers = response.data.data;
-                    this.totalPages = response.data.meta.last_page;
+                    this.cs = response.data.items;
+                    this.totalPages = Math.ceil(response.data.totalItems / 20);
                     this.currentPage = page;
                 })
                 .catch((error) => {
@@ -96,7 +94,7 @@ export default {
         },
 
         saveCustomer(id) {
-            axios.put(`/api/kunden/${id}`, this.editCustomer)
+            axios.put(`/api/customers/${id}`, this.editCustomer)
                 .then(() => {
                     this.getCustomers(this.currentPage);
                     this.editCustomerId = null;
