@@ -2,7 +2,6 @@ import "./bootstrap.js";
 import { createApp } from 'vue';
 import Router from './router.js';
 import App from './components/App.vue';
-import AlertBase from "./components/Alerts/alertBase.vue";
 import store from "./storage/index.js";
 import axios from 'axios';
 import vuetify from '../plugins/vuetify.js';
@@ -21,8 +20,6 @@ if (token) {
 
 const app = createApp(App);
 
-
-app.component('alert-base', AlertBase);
 
 app.config.globalProperties.$http = axios;
 

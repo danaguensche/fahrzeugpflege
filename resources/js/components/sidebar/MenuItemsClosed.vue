@@ -11,23 +11,29 @@
             </div>
         </div>
     </div>
-    <alert-base v-if="this.alertVisible" v-on="alertHandlers" alert-heading="Wirklich Abmelden?" alert-paragraph="Wollen Sie sich abmelden?" alert-close-button="Abbrechen" alert-okay-button="Abmelden" alert-type-class="alertTypeConfirmation"/>
+    <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
+            alertHeading="Abmelden"
+            alertParagraph="Wollen Sie sich abmelden?"
+            alertOkayButton="Abmelden" alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
+        </VuetifyAlert>
 </template>
 
 <script>
 import MenuButton from './Slots/MenuButton.vue';
 import axios from 'axios';
+import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
 
 export default {
     name: 'MenuItemsClosed',
 
     components: {
-        MenuButton
+        MenuButton,
+        VuetifyAlert
     },
 
     data() {
         return {
-            alertVisible: false,
+            isAlertVisible: false,
             alertHandlers: {
                 confirmationClicked: this.logout,
                 closeAlertClicked: this.updateAlertVisibility
@@ -98,8 +104,12 @@ export default {
             }
         },
 
+        handleConfirmation() {
+            this.logout();
+        },
+
         logout() {
-            this.alertVisible = false;
+            this.isAlertVisible = false;
                 axios.post('/logout', {}, {
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -113,7 +123,7 @@ export default {
                 });
         },
         updateAlertVisibility() {
-            this.alertVisible = !this.alertVisible;
+            this.isAlertVisible = !this.isAlertVisible;
         }
     },
 }

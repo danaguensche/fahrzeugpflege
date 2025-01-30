@@ -37,38 +37,35 @@
                 </v-data-table-server>
             </div>
         </div>
-        <alert-base v-if="alertVisible" v-on="alertHandlers" alert-heading="Wollen Sie diesen Kunden wirklich löschen?"
-            alert-close-button="Abbrechen" alert-okay-button="Löschen" alert-type-class="alertTypeConfirmation">
-        </alert-base>
+        <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
+            alertHeading="Kunden löschen"
+            alertParagraph="Wollen Sie diesen Kunden wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+            alertOkayButton="Löschen" alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
+        </VuetifyAlert>
     </div>
 </template>
 
 <script>
 import ButtonGroup from '../CommonSlots/ButtonGroup.vue';
 import RefreshButton from '../CommonSlots/RefreshButton.vue';
-import AlertBase from '../Alerts/AlertBase.vue';
 import axios from 'axios';
+import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
 
 export default {
     name: "CustomerTable",
     components: {
         ButtonGroup,
         RefreshButton,
-        AlertBase
+        VuetifyAlert
     },
     data() {
         return {
+            isAlertVisible: false,
             customers: [],
             selectedCustomers: [],
-            showDeleteButton: false,
             customerToDelete: null,
-            alertVisible: false,
-            alertHandlers: {
-                confirmationClicked: this.deleteCustomer,
-                closeAlertClicked: this.updateAlertVisibility
-            },
             headers: [
-                { title: "Auswählen", key: "checkox", sortable: "false" },
+                { title: "Auswählen", key: "checkbox", sortable: "false" },
                 { title: "Vorname", key: "firstName" },
                 { title: "Nachname", key: "lastName" },
                 { title: "Email", key: "email" },
@@ -80,17 +77,39 @@ export default {
                 { title: "Löschen", key: "delete", sortable: "false" }
             ],
             fields: ["firstName", "lastName", "email", "phoneNumber", "addressLine", "postalCode", "city"],
-            options: {
+        };
+    },
+
+    computed: {
+        currentPage() {
+            return this.options.page;
+        },
+        totalPages() {
+            return Math.ceil(this.totalItems / this.itemsPerPage);
+        },
+
+        options() {
+            return {
                 page: 1,
                 itemsPerPage: 10,
-                sortBy: ['Kennzeichen'],
+                sortBy: [{ key: 'id' }],
                 sortDesc: [false],
-            }
-        };
+            };
+        },
 
-
+        isEditing() {
+            return this.editCustomerId !== null;
+        },
     },
     methods: {
+        showAlert() {
+            this.isAlertVisible = true;
+        },
+
+        handleConfirmation() {
+            deleteCustomer();
+            this.isAlertVisible = false;
+        },
         async loadItems(options) {
             this.loading = true;
             const { page = 1, itemsPerPage = 10, sortBy = [{ key: 'firstName' }], sortDesc = [false] } = options || {};
@@ -112,7 +131,7 @@ export default {
         },
         confirmDelete(id) {
             this.customerToDelete = id;
-            this.alertVisible = true;
+            this.isAlertVisible = true;
         },
         deleteCustomer() {
             if (this.customerToDelete) {
@@ -129,9 +148,6 @@ export default {
             this.editCustomerId = null;
             this.editCustomer = {};
         },
-        updateAlertVisibility() {
-            this.alertVisible = !this.alertVisible;
-        }
     }
 }
 </script>

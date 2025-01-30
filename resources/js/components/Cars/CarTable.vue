@@ -3,13 +3,13 @@
         <div class="header">
             <RefreshButton class="refresh-button" @refresh="loadItems(options)"></RefreshButton>
             <div class="spacer"></div>
-            <ButtonGroup class="button-group"/>
+            <ButtonGroup class="button-group" />
         </div>
         <div class="table-container">
             <div v-if="cars.length === 0"><v-progress-circular indeterminate></v-progress-circular></div>
             <div class="scrollable-table">
-                <v-data-table-server :headers="headers" :items="cars" :options.sync="options" :server-items-length="totalItems"
-                    :loading="loading" @update:options="loadItems">
+                <v-data-table-server :headers="headers" :items="cars" :options.sync="options"
+                    :server-items-length="totalItems" :loading="loading" @update:options="loadItems">
                     <template v-slot:item="{ item }">
                         <tr>
                             <td class="checkbox fixed-width">
@@ -22,7 +22,8 @@
                                 <td v-else class="fixed-width">{{ item[field] }}</td>
                             </template>
                             <td class="table-icon fixed-width">
-                                <v-btn icon class="delete-button" variant="plain" @click="confirmDelete(item.Kennzeichen)">
+                                <v-btn icon class="delete-button" variant="plain"
+                                    @click="confirmDelete(item.Kennzeichen)">
                                     <v-icon>mdi-delete</v-icon>
                                 </v-btn>
                             </td>
@@ -37,36 +38,33 @@
                 </v-data-table-server>
             </div>
         </div>
-        <alert-base v-if="alertVisible" v-on="alertHandlers" alert-heading="Wollen Sie dieses Fahrzeug wirklich löschen?"
-            alert-close-button="Abbrechen" alert-okay-button="Löschen" alert-type-class="alertTypeConfirmation">
-        </alert-base>
+        <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
+            alertHeading="Fahrzeug löschen"
+            alertParagraph="Wollen Sie dieses Fahrzeug wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+            alertOkayButton="Löschen" alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
+        </VuetifyAlert>
     </div>
 </template>
 
 <script>
 import ButtonGroup from '../CommonSlots/ButtonGroup.vue';
 import RefreshButton from '../CommonSlots/RefreshButton.vue';
-import AlertBase from '../Alerts/AlertBase.vue';
 import axios from 'axios';
+import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
 
 export default {
     name: "CarTable",
     components: {
         ButtonGroup,
         RefreshButton,
-        AlertBase
+        VuetifyAlert
     },
     data() {
         return {
             cars: [],
             selectedCars: [],
-            showDeleteButton: false,
             carToDelete: null,
-            alertVisible: false,
-            alertHandlers: {
-                confirmationClicked: this.deleteCar,
-                closeAlertClicked: this.updateAlertVisibility
-            },
+            isAlertVisible: false,
             headers: [
                 { title: 'Auswählen', key: 'checkbox', sortable: false },
                 { title: 'Kennzeichen', key: 'Kennzeichen' },
@@ -81,17 +79,42 @@ export default {
             editCarId: null,
             editCar: {},
             loading: false,
-            itemsPerPage: 10,
             totalItems: 0,
-            options: {
-                page: 1,
-                itemsPerPage: 10,
-                sortBy: ['Kennzeichen'],
-                sortDesc: [false],
-            }
         };
     },
+
+    computed: {
+
+        currentPage() {
+            return this.options.page;
+        },
+        totalPages() {
+            return Math.ceil(this.totalItems / this.itemsPerPage);
+        },
+
+        options() {
+            return {
+                page: 1,
+                itemsPerPage: 10,
+                sortBy: [{ key: 'Kennzeichen' }],
+                sortDesc: [false],
+            };
+        },
+
+        isEditing() {
+            return this.editCarId !== null;
+        },
+    },
+
     methods: {
+        showAlert() {
+            this.isAlertVisible = true;
+        },
+
+        handleConfirmation() {
+            deleteCar();
+            this.isAlertVisible = false;
+        },
         async loadItems(options) {
             this.loading = true;
             const { page = 1, itemsPerPage = 10, sortBy = [{ key: 'Kennzeichen' }], sortDesc = [false] } = options || {};
@@ -114,7 +137,7 @@ export default {
         },
         confirmDelete(kennzeichen) {
             this.carToDelete = kennzeichen;
-            this.alertVisible = true;
+            this.isAlertVisible = true;
         },
         deleteCar() {
             if (this.carToDelete) {
@@ -131,9 +154,6 @@ export default {
             this.editCarId = null;
             this.editCar = {};
         },
-        updateAlertVisibility() {
-            this.alertVisible = !this.alertVisible;
-        }
     }
 }
 </script>
@@ -156,7 +176,8 @@ export default {
 }
 
 .scrollable-table {
-    max-height: 800px; /* Setzen Sie die gewünschte Höhe */
+    max-height: 800px;
+    /* Setzen Sie die gewünschte Höhe */
     overflow-y: auto;
 }
 
