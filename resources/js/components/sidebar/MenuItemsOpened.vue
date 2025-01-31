@@ -11,11 +11,16 @@
             </div>
         </div>
     </div>
-    <alert-base v-if="this.alertVisible" v-on="alertHandlers" alert-heading="Wirklich Abmelden?" alert-paragraph="Wollen Sie sich abmelden?" alert-close-button="Abbrechen" alert-okay-button="Abmelden" alert-type-class="alertTypeConfirmation"/>
+    <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
+            alertHeading="Abmelden"
+            alertParagraph="Wollen Sie sich abmelden?"
+            alertOkayButton="Abmelden" alertCloseButton="Abbrechen" @confirmation="logout">
+        </VuetifyAlert>
 </template>
 
 
 <script>
+import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
 import MenuButton from './Slots/MenuButton.vue';
 import axios from 'axios';
 
@@ -23,12 +28,13 @@ export default {
     name: 'MenuItemsOpened',
 
     components: {
-        MenuButton
+        MenuButton,
+        VuetifyAlert
     },
 
     data() {
         return {
-            alertVisible: false,
+            isAlertVisible: false,
             alertHandlers: {
                 confirmationClicked: this.logout,
                 closeAlertClicked: this.updateAlertVisibility
@@ -58,11 +64,6 @@ export default {
                 { id: 8, name: new URL('@/img/sidebar-img/settings-icon.png', import.meta.url).href },
                 { id: 9, name: new URL('@/img/sidebar-img/logout-icon.png', import.meta.url).href },
             ]
-        }
-    },
-    provide() {
-        return {
-            alertVisible: this.alertVisible
         }
     },
     methods: {
@@ -101,7 +102,7 @@ export default {
         },
 
         logout() {
-            this.alertVisible = false;
+            this.isAlertVisible = false;
                 axios.post('/logout', {}, {
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -115,7 +116,7 @@ export default {
                 });
         },
         updateAlertVisibility() {
-            this.alertVisible = !this.alertVisible;
+            this.isAlertVisible = !this.isAlertVisible;
         }
 
 

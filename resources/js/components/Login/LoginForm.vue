@@ -13,12 +13,13 @@
                 <input v-model="formData.password" type="password" name="password" id="password" placeholder="Passwort"
                     class="forms-field-input" required />
             </div>
-            <Checkbox>Anmeldedaten speichern</Checkbox>
-
         </fieldset>
         <div v-if="error" class="alert error">{{ error }}</div>
-        <div class="forms-buttons-forgot">
-            <a href="#" class="forms-buttons-forgot">Passwort vergessen?</a>
+        <div class="actions">
+            <v-checkbox label="Anmeldedaten speichern"></v-checkbox>
+            <div class="forms-buttons-forgot">
+                <a href="#" class="forms-buttons-forgot">Passwort vergessen?</a>
+            </div>
         </div>
         <SubmitButton>Anmelden</SubmitButton>
     </form>
@@ -26,7 +27,6 @@
 
 <script>
 
-import Checkbox from '../CommonSlots/Checkbox.vue';
 import SubmitButton from './Slots/SubmitButton.vue';
 import axios from 'axios';
 
@@ -34,7 +34,6 @@ export default {
     name: "LoginForm",
     components: {
         SubmitButton,
-        Checkbox
     },
     data() {
         return {
@@ -58,7 +57,7 @@ export default {
                     window.location.href = response.data.redirect;
                     localStorage.setItem('apiToken', response.data.token);
                 }
-                
+
 
             } catch (error) {
                 if (error.response && error.response.data) {
@@ -106,13 +105,13 @@ export default {
 }
 
 /* Passwort vergessen */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
 .forms-buttons-forgot {
-    display: flex;
-    flex-direction: row-reverse;
-    margin-top: -15px;
-    margin-bottom: 15px;
-    margin-left: 2px;
     color: #999;
     text-decoration: underline;
     transition: color var(--transition-speed);

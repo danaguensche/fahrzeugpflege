@@ -8,8 +8,13 @@
         <div class="table-container">
             <div v-if="cars.length === 0"><v-progress-circular indeterminate></v-progress-circular></div>
             <div class="scrollable-table">
-                <v-data-table-server :headers="headers" :items="cars" :options.sync="options"
-                    :server-items-length="totalItems" :loading="loading" @update:options="loadItems">
+                <v-data-table-server 
+                :headers="headers" 
+                :items="cars" 
+                :options.sync="options"
+                :server-items-length="totalItems" 
+                :loading="loading" 
+                @update:options="loadItems">
                     <template v-slot:item="{ item }">
                         <tr>
                             <td class="checkbox fixed-width">
@@ -125,7 +130,7 @@ export default {
                         page,
                         itemsPerPage,
                         sortBy: sortBy.length > 0 ? sortBy[0].key : '',
-                        sortDesc: sortDesc.length > 0 ? sortDesc[0] : false,
+                        sortDesc: sortDesc.length > 0 ? sortDesc[0] : true,
                     },
                 });
                 this.cars = response.data.items;

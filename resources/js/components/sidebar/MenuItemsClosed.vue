@@ -14,7 +14,7 @@
     <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
             alertHeading="Abmelden"
             alertParagraph="Wollen Sie sich abmelden?"
-            alertOkayButton="Abmelden" alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
+            alertOkayButton="Abmelden" alertCloseButton="Abbrechen" @confirmation="logout">
         </VuetifyAlert>
 </template>
 
@@ -65,11 +65,6 @@ export default {
             ]
         }
     },
-    provide() {
-        return {
-            alertVisible: this.alertVisible
-        }
-    },
 
     methods: {
         //Formatiert Einträge aus dem menuitems Array und gibt die Route zu der dazugehörigen Seite zurück
@@ -102,10 +97,6 @@ export default {
             } else {
                 this.$router.push(this.getRoute(menuitem.name));
             }
-        },
-
-        handleConfirmation() {
-            this.logout();
         },
 
         logout() {

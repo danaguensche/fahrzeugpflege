@@ -23,12 +23,27 @@ export default {
         context: {
             type: String,
             default: ""
+        },
+
+        data: {
+            type: Array,
+            required: true
         }
     },
 
     data(){
         return {
             searchText: ""
+        }
+    },
+
+    computed: {
+        filteredData() {
+            return this.data.filter((item) => {
+                return Object.keys(item).some((key) => {
+                    return String(item[key]).toLowerCase().includes(this.searchText.toLowerCase());
+                });
+            });
         }
     },
 

@@ -11,8 +11,14 @@
               :text="alertOkayButton"
             ></v-btn>
             <v-spacer></v-spacer>
-            <v-btn
+            <v-btn v-if="alertTypeClass === 'alertTypeConfirmation'"
               prepend-icon="mdi-cancel"
+              :text="alertCloseButton"
+              @click="closeDialog"
+            ></v-btn>
+
+            <v-btn v-else="alertTypeClass === 'alertTypeDefault'"
+              prepend-icon="mdi-check-circle"
               :text="alertCloseButton"
               @click="closeDialog"
             ></v-btn>

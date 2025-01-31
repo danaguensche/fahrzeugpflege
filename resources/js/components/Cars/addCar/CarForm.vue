@@ -91,7 +91,7 @@ export default {
     async submitForm() {
       if (this.validateForm()) {
         try {
-          const response = await axios.post('/api/fahrzeuge', this.formData);
+          const response = await axios.post('/api/cars', this.formData);
           console.log('Fahrzeug wurde erfolgreich hinzugefügt.', response.data);
           this.success.general = "Fahrzeug wurde erfolgreich hinzugefügt.";
           // Formular zurücksetzen

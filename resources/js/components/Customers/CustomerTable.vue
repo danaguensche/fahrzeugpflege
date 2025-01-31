@@ -77,6 +77,10 @@ export default {
                 { title: "Löschen", key: "delete", sortable: "false" }
             ],
             fields: ["firstName", "lastName", "email", "phoneNumber", "addressLine", "postalCode", "city"],
+            editCustomerId: null,
+            editCustomer: {},
+            loading: false,
+            totalItems: 0,
         };
     },
 
@@ -119,7 +123,7 @@ export default {
                         page,
                         itemsPerPage,
                         sortBy: sortBy.length > 0 ? sortBy[0].key : '',
-                        sortDesc: sortDesc.length > 0 ? sortDesc[0] : false,
+                        sortDesc: sortDesc.length > 0 ? sortDesc[0] : true,
                     },
                 });
                 this.customers = response.data.items;

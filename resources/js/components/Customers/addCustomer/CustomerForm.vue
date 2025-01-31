@@ -73,7 +73,7 @@ export default {
         const submitForm = async () => {
             if (validateForm()) {
                 try {
-                    const response = await axios.post('/api/kunden', formData);
+                    const response = await axios.post('/api/customers', formData);
                     console.log('Kunde wurde erfolgreich hinzugefügt.', response.data);
                     success.value = "Kunde wurde erfolgreich hinzugefügt.";
                     //Formular zurücksetzen

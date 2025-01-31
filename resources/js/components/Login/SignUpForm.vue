@@ -1,104 +1,90 @@
 <template>
   <form @submit.prevent="submitForm">
-    <fieldset class="forms-fieldset">
-      <div v-for="field in formFields" :key="field.id" class="forms-field">
-        <input :type="field.type" :id="field.id" :placeholder="field.placeholder" v-model="formData[field.id]"
-          class="forms-field-input" />
-        <span class="alert error">
-          {{ Array.isArray(errors[field.id]) ? errors[field.id][0] : errors[field.id] }}
-        </span>
-      </div>
+    <fieldset v-for="field in formFields" :key="field.id" class="forms-field">
+      <input class="forms-field-input"
+        v-model="formData[field.id]"
+        :type="field.type"
+        :id="field.id"
+        :placeholder="field.placeholder"
+      />
+      <span class="alert error" v-if="errors[field.id]">
+        {{ Array.isArray(errors[field.id]) ? errors[field.id][0] : errors[field.id] }}
+      </span>
     </fieldset>
     <div class="forms-buttons">
       <SubmitButton>Registrieren</SubmitButton>
     </div>
   </form>
-  <alert-base v-if="alertVisible" v-on="alertHandlers" alert-heading="Erfolg"
-    alert-paragraph="Registrierung erfolgreich! Sie können sich jetzt anmelden." alert-close-button="Schließen"
-    alert-type-class="alertTypeBasic" />
+  <VuetifyAlert v-model="alertVisible" maxWidth="500" alertTypeClass="alertTypeDefault"
+            alertHeading="Registrierung erfolgreich!"
+            alertParagraph="Sie haben sich erfolgreich registriert. Sie können sich jetzt anmelden."
+            alertCloseButton="Okay">
+  </VuetifyAlert>
 </template>
 
 <script>
-import { ref, provide, computed } from 'vue';
+import { ref } from 'vue';
 import { useValidation } from '../../composables/useValidation.js';
 import SubmitButton from './Slots/SubmitButton.vue';
 import axios from 'axios';
+import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
 
 export default {
   name: "SignUpForm",
   components: {
     SubmitButton,
+    VuetifyAlert
   },
   data() {
     return {
-      alertVisible: {},
-      alertHandlers: {
-        closeAlertClicked: this.updateAlertVisibility
-      }
-    }
-  },
-  setup() {
-    let alertVisible = ref({});
-    alertVisible.value = false;
-    const initialData = {
-      firstname: "",
-      lastname: "",
-      email: "",
-      password: "",
-      password_confirmation: "",
+      formData: {
+        firstname: "",
+        lastname: "",
+        email: "",
+        password: "",
+        password_confirmation: "",
+      },
+      errors: {},
+      alertVisible: false,
+      formFields: [
+        { id: 'firstname', name: 'Vorname *', type: 'text', placeholder: 'Vorname' },
+        { id: 'lastname', name: 'Nachname *', type: 'text', placeholder: 'Nachname' },
+        { id: 'email', name: 'E-Mail *', type: 'email', placeholder: 'Email' },
+        { id: 'password', name: 'Passwort *', type: 'password', placeholder: 'Passwort' },
+        { id: 'password_confirmation', name: 'Passwort wiederholen *', type: 'password', placeholder: 'Passwort wiederholen' },
+      ],
+      success: '',
     };
-
-    const { formData, errors, validateForm } = useValidation(initialData);
-    const success = ref('');
-
-    const formFields = [
-      { id: 'firstname', name: 'Vorname *', type: 'text', placeholder: 'Vorname' },
-      { id: 'lastname', name: 'Nachname *', type: 'text', placeholder: 'Nachname' },
-      { id: 'email', name: 'E-Mail *', type: 'email', placeholder: 'Email' },
-      { id: 'password', name: 'Passwort *', type: 'password', placeholder: 'Passwort' },
-      { id: 'password_confirmation', name: 'Passwort wiederholen *', type: 'password', placeholder: 'Passwort wiederholen' },
-    ];
-
-    const submitForm = async () => {
+  },
+  methods: {
+    async submitForm() {
+      const { validateForm } = useValidation(this.formData);
       if (validateForm()) {
         try {
-          const response = await axios.post('/signup', formData);
+          const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+          const response = await axios.post('/signup', this.formData, {
+            headers: {
+              'X-CSRF-TOKEN': csrfToken,
+            },
+          });
           if (response.data.success) {
-            vm.alertVisible = true;
+            this.alertVisible = true;
           } else {
             console.error('Unerwarteter Erfolgsfall:', response.data);
           }
         } catch (error) {
           if (error.response && error.response.data && error.response.data.errors) {
-            errors.value = error.response.data.errors;
+            this.errors = error.response.data.errors;
           } else {
             console.error('Registrierungsfehler:', error);
-            errors.value.general = 'Ein Fehler ist bei der Registrierung aufgetreten. Bitte versuchen Sie es später erneut.';
+            this.errors.general = 'Ein Fehler ist bei der Registrierung aufgetreten. Bitte versuchen Sie es später erneut.';
           }
         }
       }
-    };
-    return {
-      formData,
-      errors,
-      formFields,
-      submitForm,
-      success,
-      alertVisible
-    };
-  },
-  provide() {
-    return {
-      alertVisible: computed(() => this.alertVisible)
+    },
+    clearSearch() {
+      this.searchText = "";
     }
-  },
-  methods: {
-    updateAlertVisibility() {
-      this.alertVisible = !this.alertVisible;
-    }
-  },
-  mounted() {
-    window.vm = this;
   }
 };
 </script>
