@@ -1,7 +1,7 @@
 <template>
     <input v-model="searchText" class="searchbar forms-field forms-field-input" type="search" :placeholder="context">
-        <SearchButton></SearchButton>
-        <CloseButton :isVisible="!!searchText" @close="clearSearch"></CloseButton>
+    <SearchButton></SearchButton>
+    <CloseButton :isVisible="!!searchText" @close="clearSearch"></CloseButton>
 
     <slot></slot>
     </input>
@@ -31,20 +31,14 @@ export default {
         }
     },
 
-    data(){
+    data() {
         return {
             searchText: ""
         }
     },
 
     computed: {
-        filteredData() {
-            return this.data.filter((item) => {
-                return Object.keys(item).some((key) => {
-                    return String(item[key]).toLowerCase().includes(this.searchText.toLowerCase());
-                });
-            });
-        }
+
     },
 
     methods: {
@@ -60,7 +54,6 @@ export default {
 </script>
 
 <style scoped>
-
 .search-container {
     display: flex;
     align-items: center;

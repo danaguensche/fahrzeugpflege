@@ -8,13 +8,8 @@
         <div class="table-container">
             <div v-if="cars.length === 0"><v-progress-circular indeterminate></v-progress-circular></div>
             <div class="scrollable-table">
-                <v-data-table-server 
-                :headers="headers" 
-                :items="cars" 
-                :options.sync="options"
-                :server-items-length="totalItems" 
-                :loading="loading" 
-                @update:options="loadItems">
+                <v-data-table-server :headers="headers" :items="cars" :options.sync="options"
+                    :server-items-length="totalItems" :loading="loading" @update:options="loadItems">
                     <template v-slot:item="{ item }">
                         <tr>
                             <td class="checkbox fixed-width">
@@ -117,7 +112,7 @@ export default {
         },
 
         handleConfirmation() {
-            deleteCar();
+            this.deleteCar();
             this.isAlertVisible = false;
         },
         async loadItems(options) {
@@ -144,11 +139,22 @@ export default {
             this.carToDelete = kennzeichen;
             this.isAlertVisible = true;
         },
-        deleteCar() {
+        async deleteCar() {
+            console.log('Attempting to delete car:', this.carToDelete);
             if (this.carToDelete) {
-                console.log('Deleting car:', this.carToDelete);
-                this.carToDelete = null;
-                this.alertVisible = false;
+                try {
+                    await axios.delete(`/api/cars/${this.carToDelete}`);
+                    console.log('Car deleted successfully:', this.carToDelete);
+                    this.cars = this.cars.filter(car => car.Kennzeichen !== this.carToDelete);
+                    this.loadItems(this.options); // Reload the data
+                    this.carToDelete = null;
+                } catch (error) {
+                    console.error('Fehler beim Löschen des Fahrzeuges:', error.response?.data || error.message);
+                } finally {
+                    this.isAlertVisible = false;
+                }
+            } else {
+                console.error('No car selected for deletion');
             }
         },
         editCarDetails(car) {
@@ -182,7 +188,6 @@ export default {
 
 .scrollable-table {
     max-height: 800px;
-    /* Setzen Sie die gewünschte Höhe */
     overflow-y: auto;
 }
 

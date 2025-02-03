@@ -44,7 +44,7 @@ class CustomerController extends Controller
     {
         $perPage = $request->input('itemsPerPage', 20);
         $page = $request->input('page', 1);
-        $sortBy = $request->input('sortBy', 'ID');
+        $sortBy = $request->input('sortBy', 'id');
         $sortDesc = $request->input('sortDesc', 'false') === 'true';
 
         $query = Customer::query();
@@ -65,5 +65,16 @@ class CustomerController extends Controller
     public function show(Customer $customer)
     {
         return new CustomerResource($customer);
+    }
+
+    public function destroy($id)
+    {
+        $customer = Customer::find($id);
+        if ($customer) {
+            $customer->delete();
+            return response()->json(['success' => true, 'message' => 'Kunde wurde gelöscht.']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Kunde nicht gefunden.'], 404);
+        }
     }
 }

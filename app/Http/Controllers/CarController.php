@@ -72,4 +72,16 @@ class CarController extends Controller
     {
         return new CarResource($car);
     }
+
+    public function destroy($kennzeichen)
+    {
+        $car = Car::where('Kennzeichen', $kennzeichen)->first();
+        if ($car) {
+            $car->delete();
+            return response()->json(['success' => true, 'message' => 'Fahrzeug wurde gelöscht.']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Fahrzeug nicht gefunden.'], 404);
+        }
+    }
+    
 }

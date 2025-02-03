@@ -111,7 +111,7 @@ export default {
         },
 
         handleConfirmation() {
-            deleteCustomer();
+            this.deleteCustomer();
             this.isAlertVisible = false;
         },
         async loadItems(options) {
@@ -137,18 +137,23 @@ export default {
             this.customerToDelete = id;
             this.isAlertVisible = true;
         },
-        deleteCustomer() {
+        async deleteCustomer() {
             if (this.customerToDelete) {
-                console.log('Deleting customer:', this.customerToDelete);
-                this.customerToDelete = null;
-                this.alertVisible = false;
+                try {
+                    await axios.delete(`/api/customers/${this.customerToDelete}`);
+                    this.customers = this.customers.filter(customer => customer.id !== this.customerToDelete);
+                    this.customerToDelete = null;
+                    this.isAlertVisible = false;
+                } catch (error) {
+                    console.error('Fehler beim Löschen des Kunden:', error);
+                }
             }
         },
         editCustomerDetails(customer) {
             this.editCustomerId = customer.id;
             this.editCustomer = { ...customer };
         },
-        saveCustomer(id) {
+        saveCustomer() {
             this.editCustomerId = null;
             this.editCustomer = {};
         },
@@ -159,7 +164,6 @@ export default {
 <style scoped>
 .scrollable-table {
     max-height: 800px;
-    /* Setzen Sie die gewünschte Höhe */
     overflow-y: auto;
 }
 
@@ -167,7 +171,6 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* margin-bottom: 10px; */
 }
 
 .spacer {
