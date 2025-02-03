@@ -15,7 +15,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    position: absolute;
+    position: fixed;
 
     left: 80px;
     margin-top: 44px;
