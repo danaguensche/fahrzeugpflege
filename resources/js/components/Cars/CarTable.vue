@@ -35,7 +35,7 @@
                             </template>
                             <td class="table-icon fixed-width">
                                 <v-btn icon class="delete-button" variant="plain"
-                                    @click="confirmDelete(item.Kennzeichen)">
+                                    @click="confirmDeleteCars(item.Kennzeichen)">
                                     <v-icon>mdi-delete</v-icon>
                                 </v-btn>
                             </td>
