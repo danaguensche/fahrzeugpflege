@@ -3,7 +3,15 @@
         <div class="header">
             <RefreshButton class="refresh-button" @refresh="loadItems(options)"></RefreshButton>
             <div class="spacer"></div>
-            <ButtonGroup class="button-group" />
+
+            <div class="button-group">
+                <ConfirmButton class="confirm-button">Bestätigen</ConfirmButton>
+                <CancelButton class="cancel-button">Abbrechen</CancelButton>
+                <DeleteButton class="delete-button" :disabled="selectedCars.length === 0" @click="confirmDeleteCars(selectedCars.kennzeichen)">
+                    Löschen
+                </DeleteButton>
+            </div>
+
         </div>
         <div class="table-container">
             <div v-if="cars.length === 0"><v-progress-circular indeterminate></v-progress-circular></div>
@@ -19,7 +27,11 @@
                                 <td v-if="editCarId === item.Kennzeichen" class="edit-field fixed-width">
                                     <v-text-field v-model="editCar[field]"></v-text-field>
                                 </td>
-                                <td v-else class="fixed-width">{{ item[field] }}</td>
+                                <td v-else class="fixed-width">
+                                    <a v-if="field === 'Kennzeichen'" :href="'/cars/' + item.Kennzeichen">{{ item[field]
+                                        }}</a>
+                                    <span v-else>{{ item[field] }}</span>
+                                </td>
                             </template>
                             <td class="table-icon fixed-width">
                                 <v-btn icon class="delete-button" variant="plain"
@@ -39,23 +51,26 @@
             </div>
         </div>
         <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
-            alertHeading="Fahrzeug löschen"
-            alertParagraph="Wollen Sie dieses Fahrzeug wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
-            alertOkayButton="Löschen" alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
+            :alertHeading="deleteAlertHeading" :alertParagraph="deleteAlertParagraph" alertOkayButton="Löschen"
+            alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
         </VuetifyAlert>
     </div>
 </template>
 
 <script>
-import ButtonGroup from '../CommonSlots/ButtonGroup.vue';
 import RefreshButton from '../CommonSlots/RefreshButton.vue';
 import axios from 'axios';
 import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
+import ConfirmButton from '../CommonSlots/ConfirmButton.vue';
+import CancelButton from '../CommonSlots/CancelButton.vue';
+import DeleteButton from '../CommonSlots/DeleteButton.vue';
 
 export default {
     name: "CarTable",
     components: {
-        ButtonGroup,
+        ConfirmButton,
+        CancelButton,
+        DeleteButton,
         RefreshButton,
         VuetifyAlert
     },
@@ -85,6 +100,16 @@ export default {
 
     computed: {
 
+        deleteAlertHeading() {
+            return this.selectedCars.length > 1 ? "Fahrzeuge löschen" : "Fahrzeug löschen";
+        },
+
+        deleteAlertParagraph() {
+            return this.selectedCars.length > 1
+                ? "Wollen Sie diese Fahrzeuge wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+                : 'Wollen Sie dieses Fahrzeug wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.';
+        },
+
         currentPage() {
             return this.options.page;
         },
@@ -112,7 +137,11 @@ export default {
         },
 
         handleConfirmation() {
-            this.deleteCar();
+            if (this.carToDelete) {
+                this.deleteCar();
+            } else {
+                this.deleteCars();
+            }
             this.isAlertVisible = false;
         },
         async loadItems(options) {
@@ -135,7 +164,7 @@ export default {
             }
             this.loading = false;
         },
-        confirmDelete(kennzeichen) {
+        confirmDeleteCars(kennzeichen) {
             this.carToDelete = kennzeichen;
             this.isAlertVisible = true;
         },
@@ -146,7 +175,7 @@ export default {
                     await axios.delete(`/api/cars/${this.carToDelete}`);
                     console.log('Car deleted successfully:', this.carToDelete);
                     this.cars = this.cars.filter(car => car.Kennzeichen !== this.carToDelete);
-                    this.loadItems(this.options); // Reload the data
+                    // this.loadItems(this.options);
                     this.carToDelete = null;
                 } catch (error) {
                     console.error('Fehler beim Löschen des Fahrzeuges:', error.response?.data || error.message);
@@ -157,6 +186,22 @@ export default {
                 console.error('No car selected for deletion');
             }
         },
+
+        async deleteCars() {
+            if (this.selectedCars.length > 0) {
+                try {
+                    await axios.delete(`/api/cars`, {
+                        data: { kennzeichen: this.selectedCars }
+                    });
+                    this.cars = this.cars.filter(car => !this.selectedCars.includes(car.Kennzeichen));
+                    this.selectedCars = [];
+                    this.$emit('carsDeleted');
+                } catch (error) {
+                    console.error('Fehler beim Löschen der Fahrzeuge:', error);
+                }
+            }
+        },
+
         editCarDetails(car) {
             this.editCarId = car.Kennzeichen;
             this.editCar = { ...car };
@@ -170,11 +215,18 @@ export default {
 </script>
 
 <style scoped>
+.button-group {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    flex-direction: row;
+}
+
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 0px;
 }
 
 .spacer {

@@ -3,7 +3,16 @@
         <div class="header">
             <RefreshButton class="refresh-button" @refresh="loadItems(options)"></RefreshButton>
             <div class="spacer"></div>
-            <ButtonGroup class="button-group"></ButtonGroup>
+
+            <div class="button-group">
+                <ConfirmButton class="confirm-button">Bestätigen</ConfirmButton>
+                <CancelButton class="cancel-button">Abbrechen</CancelButton>
+                <DeleteButton class="delete-button" :disabled="selectedCustomers.length === 0"
+                    @click="confirmDeleteCustomers">
+                    Löschen
+                </DeleteButton>
+            </div>
+
         </div>
         <div class="table-container">
             <div v-if="customers.length === 0"><v-progress-circular indeterminate></v-progress-circular></div>
@@ -38,25 +47,29 @@
             </div>
         </div>
         <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
-            alertHeading="Kunden löschen"
-            alertParagraph="Wollen Sie diesen Kunden wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
-            alertOkayButton="Löschen" alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
+            :alertHeading="deleteAlertHeading" :alertParagraph="deleteAlertParagraph" alertOkayButton="Löschen"
+            alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
         </VuetifyAlert>
+
     </div>
 </template>
 
 <script>
-import ButtonGroup from '../CommonSlots/ButtonGroup.vue';
 import RefreshButton from '../CommonSlots/RefreshButton.vue';
 import axios from 'axios';
 import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
+import ConfirmButton from '../CommonSlots/ConfirmButton.vue';
+import CancelButton from '../CommonSlots/CancelButton.vue';
+import DeleteButton from '../CommonSlots/DeleteButton.vue';
 
 export default {
     name: "CustomerTable",
     components: {
-        ButtonGroup,
         RefreshButton,
-        VuetifyAlert
+        VuetifyAlert,
+        ConfirmButton,
+        CancelButton,
+        DeleteButton
     },
     data() {
         return {
@@ -85,6 +98,15 @@ export default {
     },
 
     computed: {
+        deleteAlertHeading() {
+            return this.selectedCustomers.length > 1 ? "Kunden löschen" : "Kunde löschen";
+        },
+
+        deleteAlertParagraph() {
+            return this.selectedCustomers.length > 1
+                ? "Wollen Sie diese Kunden wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+                : 'Wollen Sie diesen Kunden wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.';
+        },
         currentPage() {
             return this.options.page;
         },
@@ -111,9 +133,14 @@ export default {
         },
 
         handleConfirmation() {
-            this.deleteCustomer();
+            if (this.customerToDelete) {
+                this.deleteCustomer();
+            } else {
+                this.deleteCustomers();
+            }
             this.isAlertVisible = false;
         },
+
         async loadItems(options) {
             this.loading = true;
             const { page = 1, itemsPerPage = 10, sortBy = [{ key: 'firstName' }], sortDesc = [false] } = options || {};
@@ -137,6 +164,12 @@ export default {
             this.customerToDelete = id;
             this.isAlertVisible = true;
         },
+        confirmDeleteCustomers() {
+            if (this.selectedCustomers.length > 0) {
+                this.isAlertVisible = true;
+            }
+        },
+
         async deleteCustomer() {
             if (this.customerToDelete) {
                 try {
@@ -149,6 +182,22 @@ export default {
                 }
             }
         },
+
+        async deleteCustomers() {
+            if (this.selectedCustomers.length > 0) {
+                try {
+                    await axios.delete(`/api/customers`, {
+                        data: { ids: this.selectedCustomers }
+                    });
+                    this.customers = this.customers.filter(customer => !this.selectedCustomers.includes(customer.id));
+                    this.selectedCustomers = [];
+                    this.$emit('customersDeleted');
+                } catch (error) {
+                    console.error('Fehler beim Löschen der Kunden:', error);
+                }
+            }
+        },
+
         editCustomerDetails(customer) {
             this.editCustomerId = customer.id;
             this.editCustomer = { ...customer };
@@ -162,6 +211,13 @@ export default {
 </script>
 
 <style scoped>
+.button-group {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    flex-direction: row;
+}
+
 .scrollable-table {
     max-height: 800px;
     overflow-y: auto;
@@ -171,6 +227,7 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 0px;
 }
 
 .spacer {

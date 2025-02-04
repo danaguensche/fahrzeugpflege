@@ -77,4 +77,10 @@ class CustomerController extends Controller
             return response()->json(['success' => false, 'message' => 'Kunde nicht gefunden.'], 404);
         }
     }
+
+    public function destroyMultiple(Request $request)
+    {
+        Customer::destroy($request->ids);
+        return response()->json(null, 204);
+    }
 }
