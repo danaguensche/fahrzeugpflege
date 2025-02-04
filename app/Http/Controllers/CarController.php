@@ -83,5 +83,11 @@ class CarController extends Controller
             return response()->json(['success' => false, 'message' => 'Fahrzeug nicht gefunden.'], 404);
         }
     }
+
+    public function destroyMultiple(Request $request)
+    {
+        Car::destroy($request->ids);
+        return response()->json(null, 204);
+    }
     
 }
