@@ -127,6 +127,9 @@ export default {
 
     methods: {
         showAlert() {
+            this.alertHeading = 'Fahrzeug löschen';
+            this.alertParagraph = 'Möchten Sie das ausgewählte Fahrzeug wirklich löschen?';
+            this.alertOkayButton = 'Löschen';
             if (this.selectedCars.length === 1) {
                 this.alertHeading = 'Fahrzeug löschen';
                 this.alertParagraph = 'Möchten Sie das ausgewählte Fahrzeug wirklich löschen?';

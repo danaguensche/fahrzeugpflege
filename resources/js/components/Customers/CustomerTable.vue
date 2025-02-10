@@ -123,6 +123,9 @@ export default {
     },
     methods: {
         showAlert() {
+            this.alertHeading = 'Kunde löschen';
+            this.alertParagraph = 'Möchten Sie den ausgewählten Kunden wirklich löschen?';
+            this.alertOkayButton = 'Löschen';
             if (this.selectedCustomers.length === 1) {
                 this.alertHeading = 'Kunden löschen';
                 this.alertParagraph = 'Möchten Sie den ausgewählten Kunden wirklich löschen?';
