@@ -52,7 +52,7 @@
             </div>
         </div>
         <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
-            :alertHeading="alertHeading" :alertParagraph="alertParagraph" :alertOkayButton="okayButton"
+            :alertHeading="alertHeading" :alertParagraph="alertParagraph" :alertOkayButton="alertOkayButton"
             alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
         </VuetifyAlert>
     </div>
