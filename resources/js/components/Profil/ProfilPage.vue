@@ -1,23 +1,25 @@
 <template>
+    <v-container>
+        <ProfileSettings/>
+    </v-container>
     <div class="profil-page" :class="{ 'profile-page-sidebar-opened': isSidebarOpen }">
-        <Settings></Settings> 
-        <Form></Form>
+
 
     </div>
 </template>
 
 <script>
 
-import Form from './Form.vue';
-import Settings from './Settings.vue';
+import ProfileSettings from './ProfileSettings.vue';
+
+
 import { mapState } from 'vuex';
 
 export default {
     name: "ProfilPage",
 
     components: {
-        Form,
-        Settings
+        ProfileSettings
     },
 
     computed: {
@@ -28,11 +30,10 @@ export default {
 </script>
 
 <style scoped>
-
 .hr {
     border: none;
     height: 1px;
     background-color: black;
-    margin: 20px 0; 
+    margin: 20px 0;
 }
 </style>

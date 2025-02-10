@@ -5,10 +5,10 @@
             <div class="spacer"></div>
 
             <div class="button-group">
-                <ConfirmButton class="confirm-button">Bestätigen</ConfirmButton>
+                <ConfirmButton class="confirm-button" @click="confirmEditCustomer(editCustomerId)">Bestätigen</ConfirmButton>
                 <CancelButton class="cancel-button">Abbrechen</CancelButton>
                 <DeleteButton class="delete-button" :disabled="selectedCustomers.length === 0"
-                    @click="confirmDeleteCustomers">
+                    @click="confirmDeleteCustomers(selectedCustomers.id)">
                     Löschen
                 </DeleteButton>
             </div>
@@ -47,7 +47,7 @@
             </div>
         </div>
         <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
-            :alertHeading="deleteAlertHeading" :alertParagraph="deleteAlertParagraph" alertOkayButton="Löschen"
+            :alertHeading="alertHeading" :alertParagraph="alertParagraph" :alertOkayButton="alertOkayButton"
             alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
         </VuetifyAlert>
 
@@ -94,19 +94,13 @@ export default {
             editCustomer: {},
             loading: false,
             totalItems: 0,
+            alertHeading : '',
+            alertParagraph: '',
+            alertOkayButton: '',
         };
     },
 
     computed: {
-        deleteAlertHeading() {
-            return this.selectedCustomers.length > 1 ? "Kunden löschen" : "Kunde löschen";
-        },
-
-        deleteAlertParagraph() {
-            return this.selectedCustomers.length > 1
-                ? "Wollen Sie diese Kunden wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
-                : 'Wollen Sie diesen Kunden wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.';
-        },
         currentPage() {
             return this.options.page;
         },
@@ -129,6 +123,23 @@ export default {
     },
     methods: {
         showAlert() {
+            if (this.selectedCustomers.length === 1) {
+                this.alertHeading = 'Kunden löschen';
+                this.alertParagraph = 'Möchten Sie den ausgewählten Kunden wirklich löschen?';
+                this.alertOkayButton = 'Löschen';
+            }
+
+            if (this.selectedCustomers.length > 1) {
+                this.alertHeading = 'Kunden löschen';
+                this.alertParagraph = 'Möchten Sie die ausgewählten Kunden wirklich löschen?';
+                this.alertOkayButton = 'Löschen';
+            }
+
+            if (this.editCustomerId) {
+                this.alertHeading = 'Kunde bearbeiten';
+                this.alertParagraph = 'Möchten Sie die Änderungen wirklich speichern?';
+                this.alertOkayButton = 'Speichern';
+            }
             this.isAlertVisible = true;
         },
 
@@ -162,12 +173,17 @@ export default {
         },
         confirmDelete(id) {
             this.customerToDelete = id;
-            this.isAlertVisible = true;
+            this.showAlert();
         },
         confirmDeleteCustomers() {
             if (this.selectedCustomers.length > 0) {
-                this.isAlertVisible = true;
+                this.showAlert();
             }
+        },
+
+        confirmEditCustomer(editCustomerId) {
+            this.editCustomerId = editCustomerId;
+            this.showAlert();
         },
 
         async deleteCustomer() {

@@ -5,9 +5,10 @@
             <div class="spacer"></div>
 
             <div class="button-group">
-                <ConfirmButton class="confirm-button">Bestätigen</ConfirmButton>
+                <ConfirmButton class="confirm-button" @click="confirmEditCar(editCarId)">Bestätigen</ConfirmButton>
                 <CancelButton class="cancel-button">Abbrechen</CancelButton>
-                <DeleteButton class="delete-button" :disabled="selectedCars.length === 0" @click="confirmDeleteCars(selectedCars.kennzeichen)">
+                <DeleteButton class="delete-button" :disabled="selectedCars.length === 0"
+                    @click="confirmDeleteCars(selectedCars.kennzeichen)">
                     Löschen
                 </DeleteButton>
             </div>
@@ -28,8 +29,8 @@
                                     <v-text-field v-model="editCar[field]"></v-text-field>
                                 </td>
                                 <td v-else class="fixed-width">
-                                    <a v-if="field === 'Kennzeichen'" :href="'/cars/' + item.Kennzeichen">{{ item[field]
-                                        }}</a>
+                                    <a v-if="field === 'Kennzeichen'"
+                                        :href="'/fahrzeuge/fahrzeugdetails'">{{ item[field] }}</a>
                                     <span v-else>{{ item[field] }}</span>
                                 </td>
                             </template>
@@ -51,7 +52,7 @@
             </div>
         </div>
         <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
-            :alertHeading="deleteAlertHeading" :alertParagraph="deleteAlertParagraph" alertOkayButton="Löschen"
+            :alertHeading="alertHeading" :alertParagraph="alertParagraph" :alertOkayButton="okayButton"
             alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
         </VuetifyAlert>
     </div>
@@ -95,20 +96,13 @@ export default {
             editCar: {},
             loading: false,
             totalItems: 0,
+            alertHeading: '',
+            alertParagraph: '',
+            alertOkayButton: ''
         };
     },
 
     computed: {
-
-        deleteAlertHeading() {
-            return this.selectedCars.length > 1 ? "Fahrzeuge löschen" : "Fahrzeug löschen";
-        },
-
-        deleteAlertParagraph() {
-            return this.selectedCars.length > 1
-                ? "Wollen Sie diese Fahrzeuge wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
-                : 'Wollen Sie dieses Fahrzeug wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.';
-        },
 
         currentPage() {
             return this.options.page;
@@ -133,13 +127,33 @@ export default {
 
     methods: {
         showAlert() {
+            if (this.selectedCars.length === 1) {
+                this.alertHeading = 'Fahrzeug löschen';
+                this.alertParagraph = 'Möchten Sie das ausgewählte Fahrzeug wirklich löschen?';
+                this.alertOkayButton = 'Löschen';
+            }
+
+            if (this.selectedCars.length > 1) {
+                this.alertHeading = 'Fahrzeuge löschen';
+                this.alertParagraph = 'Möchten Sie die ausgewählten Fahrzeuge wirklich löschen?';
+                this.alertOkayButton = 'Löschen';
+            }
+
+            if (this.editCarId) {
+                this.alertHeading = 'Fahrzeug bearbeiten';
+                this.alertParagraph = 'Möchten Sie die Änderungen wirklich speichern?';
+                this.alertOkayButton = 'Speichern';
+            }
             this.isAlertVisible = true;
         },
 
         handleConfirmation() {
             if (this.carToDelete) {
                 this.deleteCar();
-            } else {
+            } if (this.editCarId) {
+                this.saveCar(this.editCarId);
+            }
+            else {
                 this.deleteCars();
             }
             this.isAlertVisible = false;
@@ -167,6 +181,11 @@ export default {
         confirmDeleteCars(kennzeichen) {
             this.carToDelete = kennzeichen;
             this.isAlertVisible = true;
+            this.showAlert();
+        },
+        confirmEditCar(editCarId) {
+            this.editCarId = editCarId;
+            this.showAlert();
         },
         async deleteCar() {
             console.log('Attempting to delete car:', this.carToDelete);

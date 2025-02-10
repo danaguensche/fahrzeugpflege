@@ -11,6 +11,8 @@ import LoginPage from './components/pages/LoginPage.vue';
 import SignUpPage from './components/pages/SignUpPage.vue';
 import WelcomePage from './components/pages/WelcomePage.vue';
 import CustomerPage from './components/pages/CustomerPage.vue';
+import CarDetailsPage from './components/pages/CarDetailsPage.vue';
+import CustomerDetailsPage from './components/pages/CustomerDetailsPage.vue';
 
 const routes = [
     {
@@ -26,8 +28,16 @@ const routes = [
         component: CarsPage
     },
     {
+        path: '/fahrzeuge/fahrzeugdetails',
+        component: CarDetailsPage
+    },
+    {
         path: '/kunden',
         component: CustomerPage
+    },
+    {
+        path: '/kunden/kundendetails',
+        component: CustomerDetailsPage
     },
 
     {

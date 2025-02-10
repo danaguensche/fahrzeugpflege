@@ -25,7 +25,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', 'dashboard')->name('dashboard');
         Route::get('/kalender', 'calendar')->name('calendar');
         Route::get('/fahrzeuge', 'cars')->name('fahrzeuge');
+        Route::get('/fahrzeuge/fahrzeugdetails', 'cars')->name('fahrzeugdetails');
         Route::get('/kunden', 'customers')->name('kunden');
+        Route::get('/kunden/kundendetails', 'customers')->name('fahrzeugdetails');
         Route::get('/auftraege', 'jobs')->name('jobs');
         Route::get('/berichte', 'reports')->name('reports');
         Route::get('/profil', 'profile')->name('profile');
