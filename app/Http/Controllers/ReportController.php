@@ -10,9 +10,9 @@ class ReportController extends Controller
     public function chooseForm(string $formType) {
         switch ($formType) {
             case "kundenauftrag":
-                return formKundenauftrag();
+                return $this->formKundenauftrag();
             case "uebergabeprotokoll":
-                return formUebergabeProtokoll();
+                return $this->formUebergabeProtokoll();
         }
         // no match
         return view('pages.reports');

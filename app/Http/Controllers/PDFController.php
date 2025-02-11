@@ -11,9 +11,9 @@ class PDFController extends Controller
     public function choosePDF(string $pdfType) {
         switch ($pdfType) {
             case "kundenauftrag":
-                return generatePDFKundenauftrag();
+                return $this->generatePDFKundenauftrag();
             case "uebergabeprotokoll":
-                return generatePDFUebergabeprotokoll();
+                return $this->generatePDFUebergabeprotokoll();
         }
         // no match
         return view('pages.reports');
