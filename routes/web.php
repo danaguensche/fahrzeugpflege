@@ -26,13 +26,11 @@ Route::middleware(['auth'])->group(function () {
 
   // PDF- & Report-Controller before PageController so urls with /berichte get checked by them first
     Route::controller(ReportController::class)->group(function () {
-        Route::get('/berichte/form/kundenauftrag', 'formKundenAuftrag');
-        Route::get('/berichte/form/uebergabeprotokoll', 'formUebergabeprotokoll');
+        Route::get('/berichte/form/{formType}', 'chooseForm');
     });
     // PDF Generation
     Route::controller(PDFController::class)->group(function () {
-        Route::get('/berichte/pdf/kundenauftrag', 'generatePDFKundenauftrag');
-        Route::get('/berichte/pdf/uebergabeprotokoll', 'generatePDFUebergabeprotokoll');
+        Route::get('/berichte/pdf/{pdfType}', 'choosePDF');
     });
 
 
