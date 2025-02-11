@@ -43,6 +43,7 @@ export default {
         border: 4px solid var(--primary-color);
         border-radius: calc(var(--border-radius)*0.8);
         display: grid;
+        grid-auto-rows: minmax(50px, auto);
         justify-items: center;
         align-items: center;
         row-gap: 0.5svh;
