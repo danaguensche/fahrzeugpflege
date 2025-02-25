@@ -1,6 +1,9 @@
 <template>
     <div class="car-page" :class="{ 'car-page-sidebar-opened': isSidebarOpen }">
-        <Search :context="context" class="searchbar"></Search>
+        
+        <Search :context="context" class="searchbar">
+            
+        </Search>
 
         <div class="content-container">
             <DefaultButton class="addCar" @click="addCar">Fahrzeug hinzufügen</DefaultButton>
@@ -17,7 +20,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axiosInstance from '../../axiosConfig';
 import { mapState } from 'vuex';
 import Search from '../CommonSlots/Searchbar.vue';
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
@@ -67,7 +70,7 @@ export default {
         },
 
         getCars(page = 1, sortBy = 'Kennzeichen', sortDesc = false) {
-            axios.get(`/api/fahrzeuge`, {
+            axiosInstance.get(`/api/fahrzeuge`, {
                 params: {
                     page: page,
                     itemsPerPage: 20,
@@ -86,7 +89,7 @@ export default {
         },
 
         saveCar(kennzeichen) {
-            axios.put(`/api/fahrzeuge/${kennzeichen}`, this.editCar)
+            axiosInstance.put(`/api/fahrzeuge/${kennzeichen}`, this.editCar)
                 .then(() => {
                     this.getCars(this.currentPage);
                     this.editCarId = null;

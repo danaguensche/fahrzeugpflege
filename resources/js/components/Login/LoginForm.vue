@@ -28,7 +28,7 @@
 <script>
 
 import SubmitButton from './Slots/SubmitButton.vue';
-import axios from 'axios';
+import axiosInstance from '../../axiosConfig';
 
 export default {
     name: "LoginForm",
@@ -51,7 +51,7 @@ export default {
         async submitForm() {
             this.error = null;
             try {
-                const response = await axios.post('/login', this.formData);
+                const response = await axiosInstance.post('/login', this.formData);
                 if (response.data.success) {
                     console.log('Login erfolgreich', response.data);
                     window.location.href = response.data.redirect;

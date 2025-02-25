@@ -21,7 +21,7 @@
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
 import Search from '../CommonSlots/Searchbar.vue';
 import { mapState } from 'vuex';
-import axios from 'axios';
+import axiosInstance from '../../axiosConfig';
 import CustomerForm from './addCustomer/CustomerForm.vue';
 import CustomerTable from './CustomerTable.vue';
 
@@ -75,7 +75,7 @@ export default {
 
 
         getCustomers(page = 1, sortBy = 'id', sortDesc = false) {
-            axios.get('/api/customers', {
+            axiosInstance.get('/api/customers', {
                 params: {
                     page: page,
                     per_page: 10,
@@ -94,7 +94,7 @@ export default {
         },
 
         saveCustomer(id) {
-            axios.put(`/api/customers/${id}`, this.editCustomer)
+            axiosInstance.put(`/api/customers/${id}`, this.editCustomer)
                 .then(() => {
                     this.getCustomers(this.currentPage);
                     this.editCustomerId = null;
