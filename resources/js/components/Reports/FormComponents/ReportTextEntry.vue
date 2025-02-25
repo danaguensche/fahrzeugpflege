@@ -1,7 +1,7 @@
 <template>
 <section class="report-text-entry">
     <span>{{rteLabel}}</span>
-    <input type="text" name="{{rteKey}}">
+    <input type="text" v-bind:name="rteKey">
 </section>
 </template>
 
