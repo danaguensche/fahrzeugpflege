@@ -26,7 +26,7 @@
 import { ref } from 'vue';
 import { useValidation } from '../../composables/useValidation.js';
 import SubmitButton from './Slots/SubmitButton.vue';
-import axiosInstance from '../../axiosConfig';
+import axios from 'axios';
 import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
 
 export default {
@@ -62,7 +62,7 @@ export default {
       if (validateForm()) {
         try {
           const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-          const response = await axiosInstance.post('/signup', this.formData, {
+          const response = await axios.post('/signup', this.formData, {
             headers: {
               'X-CSRF-TOKEN': csrfToken,
             },

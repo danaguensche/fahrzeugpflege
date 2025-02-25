@@ -17,16 +17,8 @@
         <div class="table-container">
             <div v-if="cars.length === 0"><v-progress-circular indeterminate></v-progress-circular></div>
             <div class="scrollable-table">
-                <v-data-table-server 
-                :headers="headers" 
-                :items="cars" 
-                :options.sync="options"
-                :server-items-length="totalItems" 
-                :loading="loading" 
-                @update:options="loadItems"
-                :itemsPerPage="itemsPerPage"
-                >
-
+                <v-data-table-server :headers="headers" :items="cars" :options.sync="options"
+                    :server-items-length="totalItems" :loading="loading" @update:options="loadItems">
                     <template v-slot:item="{ item }">
                         <tr>
                             <td class="checkbox fixed-width">
@@ -37,8 +29,8 @@
                                     <v-text-field v-model="editCar[field]"></v-text-field>
                                 </td>
                                 <td v-else class="fixed-width">
-                                    <a v-if="field === 'Kennzeichen'" :href="'/fahrzeuge/fahrzeugdetails'">{{
-                                        item[field] }}</a>
+                                    <a v-if="field === 'Kennzeichen'"
+                                        :href="'/fahrzeuge/fahrzeugdetails'">{{ item[field] }}</a>
                                     <span v-else>{{ item[field] }}</span>
                                 </td>
                             </template>
@@ -68,7 +60,7 @@
 
 <script>
 import RefreshButton from '../CommonSlots/RefreshButton.vue';
-import axiosInstance from '../../axiosConfig';
+import axios from 'axios';
 import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
 import ConfirmButton from '../CommonSlots/ConfirmButton.vue';
 import CancelButton from '../CommonSlots/CancelButton.vue';
@@ -106,8 +98,7 @@ export default {
             totalItems: 0,
             alertHeading: '',
             alertParagraph: '',
-            alertOkayButton: '',
-            itemsPerPage: 10,
+            alertOkayButton: ''
         };
     },
 
@@ -175,7 +166,7 @@ export default {
             const { page = 1, itemsPerPage = 10, sortBy = [{ key: 'Kennzeichen' }], sortDesc = [false] } = options || {};
 
             try {
-                const response = await axiosInstance.get('/api/cars', {
+                const response = await axios.get('/api/cars', {
                     params: {
                         page,
                         itemsPerPage,
@@ -203,7 +194,7 @@ export default {
             console.log('Attempting to delete car:', this.carToDelete);
             if (this.carToDelete) {
                 try {
-                    await axiosInstance.delete(`/api/cars/${this.carToDelete}`);
+                    await axios.delete(`/api/cars/${this.carToDelete}`);
                     console.log('Car deleted successfully:', this.carToDelete);
                     this.cars = this.cars.filter(car => car.Kennzeichen !== this.carToDelete);
                     // this.loadItems(this.options);
@@ -221,7 +212,7 @@ export default {
         async deleteCars() {
             if (this.selectedCars.length > 0) {
                 try {
-                    await axiosInstance.delete(`/api/cars`, {
+                    await axios.delete(`/api/cars`, {
                         data: { kennzeichen: this.selectedCars }
                     });
                     this.cars = this.cars.filter(car => !this.selectedCars.includes(car.Kennzeichen));
