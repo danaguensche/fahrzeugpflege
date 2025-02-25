@@ -1,9 +1,6 @@
 <template>
     <div class="car-page" :class="{ 'car-page-sidebar-opened': isSidebarOpen }">
-        
-        <Search :context="context" class="searchbar">
-            
-        </Search>
+        <Search :context="context" class="searchbar"></Search>
 
         <div class="content-container">
             <DefaultButton class="addCar" @click="addCar">Fahrzeug hinzufügen</DefaultButton>

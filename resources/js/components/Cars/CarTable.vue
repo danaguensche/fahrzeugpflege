@@ -17,16 +17,8 @@
         <div class="table-container">
             <div v-if="cars.length === 0"><v-progress-circular indeterminate></v-progress-circular></div>
             <div class="scrollable-table">
-                <v-data-table-server 
-                :headers="headers" 
-                :items="cars" 
-                :options.sync="options"
-                :server-items-length="totalItems" 
-                :loading="loading" 
-                @update:options="loadItems"
-                :itemsPerPage="itemsPerPage"
-                >
-
+                <v-data-table-server :headers="headers" :items="cars" :options.sync="options"
+                    :server-items-length="totalItems" :loading="loading" @update:options="loadItems">
                     <template v-slot:item="{ item }">
                         <tr>
                             <td class="checkbox fixed-width">
@@ -37,8 +29,8 @@
                                     <v-text-field v-model="editCar[field]"></v-text-field>
                                 </td>
                                 <td v-else class="fixed-width">
-                                    <a v-if="field === 'Kennzeichen'" :href="'/fahrzeuge/fahrzeugdetails'">{{
-                                        item[field] }}</a>
+                                    <a v-if="field === 'Kennzeichen'"
+                                        :href="'/fahrzeuge/fahrzeugdetails'">{{ item[field] }}</a>
                                     <span v-else>{{ item[field] }}</span>
                                 </td>
                             </template>
@@ -106,8 +98,7 @@ export default {
             totalItems: 0,
             alertHeading: '',
             alertParagraph: '',
-            alertOkayButton: '',
-            itemsPerPage: 10,
+            alertOkayButton: ''
         };
     },
 

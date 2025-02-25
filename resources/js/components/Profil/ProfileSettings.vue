@@ -1,45 +1,18 @@
 <template>
     <v-card>
         <v-card-title>
-            Persönliche Details
+            Profil bearbeiten
         </v-card-title>
 
-        <v-card-text v-if="loading">
-            Lade Daten...
+        <v-card-text>
+            <v-text-field v-model="firstName" label="Vorname"></v-text-field>
+            <v-text-field v-model="lastName" label="Nachname"></v-text-field>
+            <v-text-field v-model="email" label="E-Mail Adresse"></v-text-field>
+            <v-text-field v-model="addressLine" label="Straße und Hausnummer"></v-text-field>
+            <v-text-field v-model="postalCode" label="PLZ"></v-text-field>
+            <v-text-field v-model="city" label="Stadt"></v-text-field>
+            <v-btn class="mt-2" type="submit" >Speichern</v-btn>
         </v-card-text>
-
-        <v-card-text v-else-if="error">
-            {{ error }}
-        </v-card-text>
-
-        <v-table v-else>
-            <tbody>
-                <tr>
-                    <td>Vorname</td>
-                    <td>{{ firstName }}</td>
-                </tr>
-                <tr>
-                    <td>Nachname</td>
-                    <td>{{ lastName }}</td>
-                </tr>
-                <tr>
-                    <td>E-Mail</td>
-                    <td>{{ email }}</td>
-                </tr>
-                <tr>
-                    <td>Postleitzahl</td>
-                    <td>{{ postalCode }}</td>
-                </tr>
-                <tr>
-                    <td>Stadt</td>
-                    <td>{{ city }}</td>
-                </tr>
-                <tr>
-                    <td>Straße und Hausnummer</td>
-                    <td>{{ addressLine }}</td>
-                </tr>
-            </tbody>
-        </v-table>
     </v-card>
 </template>
 
@@ -55,9 +28,7 @@ export default {
             email: '',
             addressLine: '',
             postalCode: '',
-            city: '',
-            loading: true,
-            error: null
+            city: ''
         };
     },
 
