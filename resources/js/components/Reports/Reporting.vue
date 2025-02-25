@@ -2,8 +2,8 @@
     <main class="reports-page-content" :class="{ 'reports-page-sidebar-opened': isSidebarOpen }">
         <h1>Berichtsauswahl</h1>
         <section class="report-list">
-            <a href="reportTypes/uebergabeprotokoll" class="report-link">Übergabeprotokoll</a>
-            <a href="reportTypes/kundenauftrag" class="report-link">Kundenauftrag</a>
+            <a href="berichte/form/uebergabeprotokoll" class="report-link">Übergabeprotokoll</a>
+            <a href="berichte/form/kundenauftrag" class="report-link">Kundenauftrag</a>
         </section>
     </main>
 </template>
