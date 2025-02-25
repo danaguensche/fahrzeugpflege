@@ -18,9 +18,9 @@ class ReportController extends Controller
         return view('pages.reports');
     }
     private function formKundenauftrag() {
-        //return view('forms.kundenauftrag');
+        return view('forms.kundenauftrag');
     }
     private function formUebergabeprotokoll() {
-        //return view('forms.uebergabeprotokoll');
+        return view('forms.uebergabeprotokoll');
     }
 }
