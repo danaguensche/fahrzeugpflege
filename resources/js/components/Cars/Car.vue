@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import axiosInstance from '../../axiosConfig';
+import axios from 'axios';
 import { mapState } from 'vuex';
 import Search from '../CommonSlots/Searchbar.vue';
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
@@ -70,7 +70,7 @@ export default {
         },
 
         getCars(page = 1, sortBy = 'Kennzeichen', sortDesc = false) {
-            axiosInstance.get(`/api/fahrzeuge`, {
+            axios.get(`/api/fahrzeuge`, {
                 params: {
                     page: page,
                     itemsPerPage: 20,
@@ -89,7 +89,7 @@ export default {
         },
 
         saveCar(kennzeichen) {
-            axiosInstance.put(`/api/fahrzeuge/${kennzeichen}`, this.editCar)
+            axios.put(`/api/fahrzeuge/${kennzeichen}`, this.editCar)
                 .then(() => {
                     this.getCars(this.currentPage);
                     this.editCarId = null;

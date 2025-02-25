@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import axiosInstance from './../../axiosConfig';
+import axios from 'axios';
 
 export default {
     name: "ProfileSettings",
@@ -69,7 +69,7 @@ export default {
         getUser() {
             this.loading = true;
             this.error = null;
-            axiosInstance.get('/api/employee')
+            axios.get('/api/employee')
                 .then(response => {
                     const data = response.data.employee;
                     this.firstName = data.firstname;

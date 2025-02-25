@@ -56,7 +56,7 @@
 
 <script>
 import RefreshButton from '../CommonSlots/RefreshButton.vue';
-import axiosInstance from '../../axiosConfig';
+import axios from 'axios';
 import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
 import ConfirmButton from '../CommonSlots/ConfirmButton.vue';
 import CancelButton from '../CommonSlots/CancelButton.vue';
@@ -159,7 +159,7 @@ export default {
             this.loading = true;
             const { page = 1, itemsPerPage = 10, sortBy = [{ key: 'firstName' }], sortDesc = [false] } = options || {};
             try {
-                const response = await axiosInstance.get('/api/customers', {
+                const response = await axios.get('/api/customers', {
                     params: {
                         page,
                         itemsPerPage,
@@ -192,7 +192,7 @@ export default {
         async deleteCustomer() {
             if (this.customerToDelete) {
                 try {
-                    await axiosInstance.delete(`/api/customers/${this.customerToDelete}`);
+                    await axios.delete(`/api/customers/${this.customerToDelete}`);
                     this.customers = this.customers.filter(customer => customer.id !== this.customerToDelete);
                     this.customerToDelete = null;
                     this.isAlertVisible = false;
@@ -205,7 +205,7 @@ export default {
         async deleteCustomers() {
             if (this.selectedCustomers.length > 0) {
                 try {
-                    await axiosInstance.delete(`/api/customers`, {
+                    await axios.delete(`/api/customers`, {
                         data: { ids: this.selectedCustomers }
                     });
                     this.customers = this.customers.filter(customer => !this.selectedCustomers.includes(customer.id));
