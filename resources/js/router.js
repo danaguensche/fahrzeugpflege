@@ -3,6 +3,7 @@ import CalendarPage from './components/pages/CalendarPage.vue';
 import DashboardPage from './components/pages/DashboardPage.vue';
 import CarsPage from './components/pages/CarsPage.vue';
 import JobsPage from './components/pages/JobsPage.vue';
+import ReportForm from './components/Reports/ReportForm.vue';
 import ReportsPage from './components/pages/ReportsPage.vue';
 import ProfilePage from './components/pages/ProfilePage.vue';
 import SettingsPage from './components/pages/SettingsPage.vue';
@@ -33,6 +34,10 @@ const routes = [
     {
         path: '/auftraege',
         component: JobsPage
+    },
+    {
+        path: '/berichte/form/:formtype',
+        component: ReportForm
     },
     {
         path: '/berichte',
