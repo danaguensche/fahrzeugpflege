@@ -89,5 +89,29 @@ class CarController extends Controller
         Car::destroy($request->ids);
         return response()->json(null, 204);
     }
+
+    public function update(Request $request, Car $car)
+    {
+        try {
+            $validatedData = $request->validate([
+                'Kennzeichen' => 'required|string',
+                'Fahrzeugklasse' => 'nullable|string',
+                'Automarke' => 'nullable|string',
+                'Typ' => 'nullable|string',
+                'Farbe' => 'nullable|string',
+            ]);
+
+            $car->fill($validatedData);
+
+            $car->save();
+
+            return response()->json(['message' => 'Fahrzeug erfolgreich aktualisiert'], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Aktualisieren des Fahrzeugs: ' . $e->getMessage());
+            return response()->json(['error' => 'Fehler beim Aktualisieren des Fahrzeugs'], 500);
+        }
+    }
     
 }

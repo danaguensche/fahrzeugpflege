@@ -1,4 +1,5 @@
 import { createStore } from 'vuex'
+import auth from "./auth.js";
 
 export default createStore({
   state: {
@@ -8,6 +9,11 @@ export default createStore({
     //Sidebar
     isSidebarOpen: false
   },
+
+  modules: {
+    auth
+  },
+  
   mutations: {
     //Login
     setActiveForm(state, formName) {

@@ -1,12 +1,8 @@
 <template>
   <form @submit.prevent="submitForm">
     <fieldset v-for="field in formFields" :key="field.id" class="forms-field">
-      <input class="forms-field-input"
-        v-model="formData[field.id]"
-        :type="field.type"
-        :id="field.id"
-        :placeholder="field.placeholder"
-      />
+      <input class="forms-field-input" v-model="formData[field.id]" :type="field.type" :id="field.id"
+        :placeholder="field.placeholder" />
       <span class="alert error" v-if="errors[field.id]">
         {{ Array.isArray(errors[field.id]) ? errors[field.id][0] : errors[field.id] }}
       </span>
@@ -16,14 +12,14 @@
     </div>
   </form>
   <VuetifyAlert v-model="alertVisible" maxWidth="500" alertTypeClass="alertTypeDefault"
-            alertHeading="Registrierung erfolgreich!"
-            alertParagraph="Sie haben sich erfolgreich registriert. Sie können sich jetzt anmelden."
-            alertCloseButton="Okay">
+    alertHeading="Registrierung erfolgreich!"
+    alertParagraph="Sie haben sich erfolgreich registriert. Sie können sich jetzt anmelden." alertCloseButton="Okay">
   </VuetifyAlert>
 </template>
 
 <script>
 import { ref } from 'vue';
+import { mapGetters } from 'vuex';
 import { useValidation } from '../../composables/useValidation.js';
 import SubmitButton from './Slots/SubmitButton.vue';
 import axios from 'axios';
@@ -55,6 +51,10 @@ export default {
       ],
       success: '',
     };
+  },
+
+  computed: {
+    ...mapGetters('auth', ['isLoggedIn', 'getToken'])
   },
   methods: {
     async submitForm() {

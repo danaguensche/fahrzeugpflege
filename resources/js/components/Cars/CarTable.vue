@@ -154,7 +154,7 @@ export default {
             if (this.carToDelete) {
                 this.deleteCar();
             } if (this.editCarId) {
-                this.saveCar(this.editCarId);
+                this.saveCar();
             }
             else {
                 this.deleteCars();
@@ -228,9 +228,22 @@ export default {
             this.editCarId = car.Kennzeichen;
             this.editCar = { ...car };
         },
-        saveCar(kennzeichen) {
-            this.editCarId = null;
-            this.editCar = {};
+        async saveCar() {
+            try {
+                const response = await axios.put(`/api/cars/${this.editCarId}`, this.editCar);
+                console.log('Car updated successfully:', response.data);
+
+                // Aktualisiere die lokale Liste der Autos
+                const index = this.cars.findIndex(car => car.Kennzeichen === this.editCarId);
+                if (index !== -1) {
+                    this.cars.splice(index, 1, response.data);
+                }
+
+                this.editCarId = null;
+                this.editCar = {};
+            } catch (error) {
+                console.error('Fehler beim Speichern des Fahrzeuges:', error.response?.data || error.message);
+            }
         },
     }
 }

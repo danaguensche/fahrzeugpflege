@@ -1,18 +1,41 @@
 <template>
     <v-card>
         <v-card-title>
-            Profil bearbeiten
+            Persönliche Informationen
         </v-card-title>
 
-        <v-card-text>
-            <v-text-field v-model="firstName" label="Vorname"></v-text-field>
-            <v-text-field v-model="lastName" label="Nachname"></v-text-field>
-            <v-text-field v-model="email" label="E-Mail Adresse"></v-text-field>
-            <v-text-field v-model="addressLine" label="Straße und Hausnummer"></v-text-field>
-            <v-text-field v-model="postalCode" label="PLZ"></v-text-field>
-            <v-text-field v-model="city" label="Stadt"></v-text-field>
-            <v-btn class="mt-2" type="submit" >Speichern</v-btn>
-        </v-card-text>
+        <v-table>
+            <tbody>
+                <tr>
+                    <td class="text-left">Vorname</td>
+                    <td class="text-left">{{ firstName }} test</td>
+                </tr>
+                <tr>
+                    <td class="text-left">Nachname</td>
+                    <td class="text-left">{{ lastName }} test</td>
+                </tr>
+                <tr>
+                    <td class="text-left">Telefonnummer</td>
+                    <td class="text-left">{{ phoneNumber }} test</td>
+                </tr>
+                <tr>
+                    <td class="text-left">E-Mail</td>
+                    <td class="text-left">{{ email }} test</td>
+                </tr>
+                <tr>
+                    <td class="text-left">Straße und Hausnummer</td>
+                    <td class="text-left">{{ addressLine }} test</td>
+                </tr>
+                <tr>
+                    <td class="text-left">PLZ</td>
+                    <td class="text-left">{{ postalCode }} test</td>
+                </tr>
+                <tr>
+                    <td class="text-left">Ort</td>
+                    <td class="text-left">{{ city }} test</td>
+                </tr>
+            </tbody>
+        </v-table>
     </v-card>
 </template>
 
@@ -25,6 +48,7 @@ export default {
         return {
             firstName: '',
             lastName: '',
+            phoneNumber: '',
             email: '',
             addressLine: '',
             postalCode: '',
@@ -38,9 +62,14 @@ export default {
 
     methods: {
         getUser() {
+            console.log('Token: ' + localStorage.getItem('token'));
             this.loading = true;
             this.error = null;
-            axios.get('/api/employee')
+            axios.get('http://localhost:8000/api/employee', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
                 .then(response => {
                     const data = response.data.employee;
                     this.firstName = data.firstname;

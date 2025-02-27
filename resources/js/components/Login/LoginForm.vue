@@ -26,9 +26,8 @@
 </template>
 
 <script>
-
-import SubmitButton from './Slots/SubmitButton.vue';
 import axios from 'axios';
+import SubmitButton from './Slots/SubmitButton.vue';
 
 export default {
     name: "LoginForm",
@@ -42,23 +41,21 @@ export default {
                 password: ''
             },
             error: null,
-
             csrf_token: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
         }
     },
     methods: {
-        //Wird beim Absenden des Formulars aufgerufen
+        // Wird beim Absenden des Formulars aufgerufen
         async submitForm() {
             this.error = null;
             try {
                 const response = await axios.post('/login', this.formData);
                 if (response.data.success) {
                     console.log('Login erfolgreich', response.data);
+                    localStorage.setItem('token', response.data.token);
+                    console.log('Token gespeichert:', localStorage.getItem('token'));
                     window.location.href = response.data.redirect;
-                    localStorage.setItem('apiToken', response.data.token);
                 }
-
-
             } catch (error) {
                 if (error.response && error.response.data) {
                     this.error = error.response.data.message;

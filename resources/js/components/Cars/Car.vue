@@ -48,6 +48,7 @@ export default {
     },
     computed: {
         ...mapState(['isSidebarOpen'])
+        
     },
     methods: {
         addCar() {
