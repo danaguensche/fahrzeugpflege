@@ -5,6 +5,7 @@ use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\PDFController;
+use App\Http\Controllers\ReportController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -21,6 +22,17 @@ Route::controller(AuthController::class)->group(function () {
 
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
+
+  // PDF- & Report-Controller before PageController so urls with /berichte get checked by them first
+    Route::controller(ReportController::class)->group(function () {
+        Route::get('/berichte/form/{formType}', 'chooseForm');
+    });
+    // PDF Generation
+    Route::controller(PDFController::class)->group(function () {
+        Route::get('/berichte/pdf/{pdfType}', 'choosePDF');
+    });
+
+
     Route::controller(PageController::class)->group(function () {
         Route::get('/dashboard', 'dashboard')->name('dashboard');
         Route::get('/kalender', 'calendar')->name('calendar');
@@ -39,9 +51,4 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-    // PDF Generation
-    Route::controller(PDFController::class)->group(function () {
-        Route::get('generate-pdf-kundenauftrag', 'generatePDFKundenauftrag');
-        Route::get('generate-pdf-uebergabeprotokoll', 'generatePDFUebergabeprotokoll');
-    });
 });

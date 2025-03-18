@@ -8,11 +8,22 @@ use Spatie\LaravelPdf\Facades\Pdf;
 class PDFController extends Controller
 {
     //
-    
-    public function generatePDFKundenauftrag() {
-        // Portrait, 1 Page
+    public function choosePDF(string $pdfType) {
+        switch ($pdfType) {
+            case "kundenauftrag":
+                return $this->generatePDFKundenauftrag();
+            case "uebergabeprotokoll":
+                return $this->generatePDFUebergabeprotokoll();
+        }
+        // no match
+        return view('pages.reports');
     }
-    public function generatePDFUebergabeprotokoll() {
+    private function generatePDFKundenauftrag() {
+        // Portrait, 1 Page
+        // return pdf
+    }
+    private function generatePDFUebergabeprotokoll() {
         // Landscape, 4 Pages
+        // return pdf
     }
 }
