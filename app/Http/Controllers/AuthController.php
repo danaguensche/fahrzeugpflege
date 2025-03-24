@@ -7,6 +7,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Employee;
+
 
 class AuthController extends Controller
 {
@@ -20,7 +22,8 @@ class AuthController extends Controller
         return view("auth.signup");
     }
 
-    public function logout(Request $request): JsonResponse {
+    public function logout(Request $request): JsonResponse
+    {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -35,13 +38,22 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['success' => true, 'redirect' => route('dashboard')]);
-        } else {
-            return response()->json(['success' => false, 'message' => 'Login fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.'], 401);
+            $user = Auth::user();
+            $token = $user->createToken('authToken')->plainTextToken;
+            return response()->json([
+                'success' => true,
+                'token' => $token,
+                'user_id' => $user->id,
+                'redirect' => '/dashboard',
+            ]);
         }
+        return response()->json([
+            'success' => false,
+            'message' => 'Ungültige Anmeldedaten',
+        ], 401);
     }
 
-    function signupPost(Request $request)
+    public function signupPost(Request $request)
     {
         $request->validate([
             "firstname" => "required|string|max:30",
@@ -57,7 +69,14 @@ class AuthController extends Controller
         $user->password = Hash::make($request->password);
 
         if ($user->save()) {
-            return response()->json(['success' => true, 'message' => 'Benutzer wurde erfolgreich erstellt.']);
+            $employee = new Employee();
+            $employee->user_id = $user->id;
+            $employee->firstname = $user->firstname;
+            $employee->lastname = $user->lastname;
+            $employee->email = $user->email;
+            $employee->save();
+
+            return response()->json(['success' => true, 'message' => 'Benutzer und Mitarbeiter wurden erfolgreich erstellt.']);
         } else {
             return response()->json(['success' => false, 'message' => 'Beim Erstellen des Benutzers ist ein Fehler aufgetreten.'], 500);
         }

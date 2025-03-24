@@ -24,5 +24,10 @@ class AppServiceProvider extends ServiceProvider
             return new class($translator, $data, $rules, $messages) extends \Illuminate\Validation\Validator {
             };
         });
-    }    
+    
+        header('Content-Type: application/json');
+        header('X-Requested-With: XMLHttpRequest');
+        header('Access-Control-Allow-Headers: Authorization');
+    }
+    
 }

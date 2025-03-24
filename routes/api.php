@@ -15,5 +15,6 @@ Route::apiResource('customers', CustomerController::class);
 Route::delete('customers', [CustomerController::class, 'destroyMultiple']);
 
 Route::apiResource('employee', EmployeeController::class);
+Route::middleware('auth:api')->get('/employee/current', [EmployeeController::class, 'show']);
 
 

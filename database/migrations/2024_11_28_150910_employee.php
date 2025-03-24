@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('postalcode')->nullable();
             $table->string('city')->nullable();
             $table->string('password');
+            $table->integer('user_id');
+            // $table->foreign('user_id')->references('id')->on('users');
             $table->rememberToken();
             $table->timestamps();
         });
