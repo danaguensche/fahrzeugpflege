@@ -1,7 +1,6 @@
 <?php
 
 namespace Database\Factories;
-
 use App\Models\Customer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -12,7 +11,7 @@ class CarFactory extends Factory
         return [
             'customer_id' => Customer::factory(),
             'kennzeichen' => $this->faker->regexify('[A-Z]{1,3} [A-Z]{1,2} [1-9][0-9]{1,3}'),
-            'fahrzeugklasse' => $this->faker->randomElement(['PKW', 'LKW', 'Motorrad', 'Anhänger']),
+            'Fahrzeugklasse' => 1,
             'automarke' => $this->faker->randomElement(['Volkswagen', 'BMW', 'Mercedes-Benz', 'Audi', 'Opel']),
             'typ' => $this->faker->word,
             'farbe' => $this->faker->colorName,

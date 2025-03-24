@@ -23,5 +23,10 @@ class Car extends Model
     {
         return $this->belongsTo(Customer::class);
     }
+
+    public function carGroup()
+    {
+        return $this->belongsTo(CarGroup::class, 'Fahrzeugklasse');
+    }
 }
  

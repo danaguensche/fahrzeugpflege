@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function change(): void
     {
         Schema::table('employees', function (Blueprint $table) {
             $table->string('password')->nullable()->after('email');

@@ -91,5 +91,6 @@ return new class extends Migration
         Schema::dropIfExists('services');
         Schema::dropIfExists('price_conditions');
         Schema::dropIfExists('car_groups');
+        
     }
 };

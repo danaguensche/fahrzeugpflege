@@ -20,12 +20,12 @@ class CustomerSeeder extends Seeder
 
         Customer::factory()
             ->count((25))
-            ->hasCars(0)
+            ->hasCars(2)
             ->create();
 
         Customer::factory()
             ->count((25))
-            ->hasCars(10)
+            ->hasCars(1)
             ->create();
     }
 }
