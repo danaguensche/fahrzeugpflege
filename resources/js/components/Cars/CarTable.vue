@@ -18,7 +18,7 @@
             <div v-if="cars.length === 0"><v-progress-circular indeterminate></v-progress-circular></div>
             <div class="scrollable-table">
                 <v-data-table-server :headers="headers" :items="cars" :options.sync="options"
-                    :server-items-length="totalItems" :loading="loading" @update:options="loadItems">
+                    :server-items-length="totalItems" :loading="loading" @update:options="loadItems" fixed-header>
                     <template v-slot:item="{ item }">
                         <tr>
                             <td class="checkbox fixed-width">
@@ -30,7 +30,8 @@
                                 </td>
                                 <td v-else class="fixed-width">
                                     <a v-if="field === 'Kennzeichen'"
-                                        :href="'/fahrzeuge/fahrzeugdetails'">{{ item[field] }}</a>
+                                        :href="`/fahrzeuge/fahrzeugdetails/${item[field].replace(/\s/g, '')}`">{{
+                                        item[field] }}</a>
                                     <span v-else>{{ item[field] }}</span>
                                 </td>
                             </template>
@@ -126,6 +127,9 @@ export default {
     },
 
     methods: {
+
+
+        //Alerts 
         showAlert() {
             this.alertHeading = 'Fahrzeug löschen';
             this.alertParagraph = 'Möchten Sie das ausgewählte Fahrzeug wirklich löschen?';
@@ -150,6 +154,16 @@ export default {
             this.isAlertVisible = true;
         },
 
+        confirmDeleteCars(kennzeichen) {
+            this.carToDelete = kennzeichen;
+            this.isAlertVisible = true;
+            this.showAlert();
+        },
+        confirmEditCar(editCarId) {
+            this.editCarId = editCarId;
+            this.showAlert();
+        },
+
         handleConfirmation() {
             if (this.carToDelete) {
                 this.deleteCar();
@@ -161,6 +175,10 @@ export default {
             }
             this.isAlertVisible = false;
         },
+
+
+        //Database operations
+
         async loadItems(options) {
             this.loading = true;
             const { page = 1, itemsPerPage = 10, sortBy = [{ key: 'Kennzeichen' }], sortDesc = [false] } = options || {};
@@ -181,15 +199,7 @@ export default {
             }
             this.loading = false;
         },
-        confirmDeleteCars(kennzeichen) {
-            this.carToDelete = kennzeichen;
-            this.isAlertVisible = true;
-            this.showAlert();
-        },
-        confirmEditCar(editCarId) {
-            this.editCarId = editCarId;
-            this.showAlert();
-        },
+
         async deleteCar() {
             console.log('Attempting to delete car:', this.carToDelete);
             if (this.carToDelete) {
@@ -205,7 +215,7 @@ export default {
                     this.isAlertVisible = false;
                 }
             } else {
-                console.error('No car selected for deletion');
+                console.error('Kein Fahrzeug zum Löschen ausgewählt');
             }
         },
 
@@ -233,7 +243,6 @@ export default {
                 const response = await axios.put(`/api/cars/${this.editCarId}`, this.editCar);
                 console.log('Car updated successfully:', response.data);
 
-                // Aktualisiere die lokale Liste der Autos
                 const index = this.cars.findIndex(car => car.Kennzeichen === this.editCarId);
                 if (index !== -1) {
                     this.cars.splice(index, 1, response.data);
