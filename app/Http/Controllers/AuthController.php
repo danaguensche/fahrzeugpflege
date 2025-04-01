@@ -69,16 +69,25 @@ class AuthController extends Controller
         $user->password = Hash::make($request->password);
 
         if ($user->save()) {
+            //Neuer Mitarbeiter wird erstellt sobald er sich registriert
             $employee = new Employee();
+            //Verknüpfe User mit Employee
             $employee->user_id = $user->id;
+            $employee->id = $user->id;
             $employee->firstname = $user->firstname;
             $employee->lastname = $user->lastname;
             $employee->email = $user->email;
+            $employee->password = $user->password;
             $employee->save();
 
             return response()->json(['success' => true, 'message' => 'Benutzer und Mitarbeiter wurden erfolgreich erstellt.']);
         } else {
             return response()->json(['success' => false, 'message' => 'Beim Erstellen des Benutzers ist ein Fehler aufgetreten.'], 500);
         }
+
+        return $this->succes([
+            'user' => $user,
+            'token' => $user->createToken('API Token of'.$user->firstname.$user->lastname)->plainTextToken
+        ]);
     }
 }

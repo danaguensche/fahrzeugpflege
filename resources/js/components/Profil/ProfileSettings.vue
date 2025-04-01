@@ -34,6 +34,7 @@
                     <td class="text-left">Ort</td>
                     <td class="text-left">{{ city }}</td>
                 </tr>
+                
             </tbody>
         </v-table>
     </v-card>
@@ -46,6 +47,7 @@ export default {
     name: "ProfileSettings",
     data() {
         return {
+            userId: null,
             firstName: '',
             lastName: '',
             phoneNumber: '',
@@ -57,39 +59,58 @@ export default {
     },
 
     mounted() {
-        this.getUser();
+        this.loadUserId();
     },
 
     methods: {
+        loadUserId() {
+            const storedUserId = localStorage.getItem('userId');
+
+            if (storedUserId) {
+                this.userId = storedUserId;
+                this.getUser();
+            } else {
+                axios.get('http://localhost:8000/api/user', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                })
+                    .then(response => {
+                        this.userId = response.data.id;
+                        localStorage.setItem('userId', this.userId);
+                        this.getUser();
+                    })
+                    .catch(error => {
+                        console.error('Fehler beim Abrufen der Benutzer-ID:', error);
+                    });
+            }
+        },
+
         getUser() {
-            console.log('Token: ' + localStorage.getItem('token'));
-            this.loading = true;
-            this.error = null;
-            axios.get('http://localhost:8000/api/employee/current', {
+            if (!this.userId) {
+                console.error('Keine Benutzer-ID gefunden!');
+                return;
+            }
+
+            axios.get(`http://localhost:8000/api/employee/${this.userId}`, {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
                 }
             })
                 .then(response => {
-                    console.log(response.data);
-                    let data = response.data.employees && response.data.employees.length > 0
-                        ? response.data.employees[0]
-                        : {};
+                    let data = response.data.employee || {};
 
-                    this.firstName = data.firstname === null ? '' : data.firstname;
-                    this.lastName = data.lastname === null ? '' : data.lastname;
-                    this.email = data.email === null ? '' : data.email;
-                    this.addressLine = data.addressline === null ? '' : data.addressline;
-                    this.postalCode = data.postalcode === null ? '' : data.postalcode;
-                    this.city = data.city === null ? '' : data.city;
-                    this.loading = false;
+                    this.firstName = data.firstname || '';
+                    this.lastName = data.lastname || '';
+                    this.phoneNumber = data.phonenumber || '';
+                    this.email = data.email || '';
+                    this.addressLine = data.addressline || '';
+                    this.postalCode = data.postalcode || '';
+                    this.city = data.city || '';
 
-                    console.log(data);
+                    console.log('Benutzerdaten geladen:', response.data);
                 })
                 .catch(error => {
                     console.error('Fehler beim Laden der Benutzerdaten:', error);
-                    this.error = 'Fehler beim Laden der Benutzerdaten. Bitte versuchen Sie es später erneut.';
-                    this.loading = false;
                 });
         }
     }

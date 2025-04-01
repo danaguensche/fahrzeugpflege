@@ -28,15 +28,15 @@ class EmployeeController extends Controller
             'employee' => $employee
         ], 201);
     }
-
-    public function show()
+    public function show($id)
     {
-        $employee = Auth::user();
+        $user = Auth::user();
 
-        if (!$employee) {
+        if (!$user || $user->id != $id) {
             return response()->json(['message' => 'Nicht autorisiert'], 401);
         }
 
+        $employee = Employee::findOrFail($id);
         return response()->json(['employee' => $employee], 200);
     }
 

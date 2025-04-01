@@ -7,9 +7,9 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\PDFController;
 use App\Http\Controllers\ReportController;
 
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+// Route::get('/', function () {
+//     return redirect()->route('login');
+// });
 
 // Auth Routes
 Route::controller(AuthController::class)->group(function () {
@@ -45,10 +45,4 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/profil', 'profile')->name('profile');
         Route::get('/einstellungen', 'settings')->name('settings');
     });
-
-    // Profil
-    Route::post('/profil', [EmployeeController::class, 'store'])->name('profil.store');
-
-
-
 });
