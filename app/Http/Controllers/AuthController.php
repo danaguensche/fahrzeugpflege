@@ -2,26 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginUserRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Employee;
 
 
 class AuthController extends Controller
 {
-    public function login()
-    {
-        return view("auth.login");
-    }
-
-    public function signup()
-    {
-        return view("auth.signup");
-    }
-
     public function logout(Request $request): JsonResponse
     {
         Auth::logout();
@@ -30,28 +20,30 @@ class AuthController extends Controller
         return response()->json(['message' => 'Sie wurden erfolgreich abgemeldet.']);
     }
 
-    function loginPost(Request $request)
-    {
-        $request->validate([
-            "email" => "required",
-            "password" => "required"
-        ]);
 
-        if (Auth::attempt($request->only('email', 'password'))) {
-            $user = Auth::user();
-            $token = $user->createToken('authToken')->plainTextToken;
-            return response()->json([
-                'success' => true,
-                'token' => $token,
-                'user_id' => $user->id,
-                'redirect' => '/dashboard',
-            ]);
+    public function loginPost(LoginUserRequest $request): JsonResponse
+    {
+        $request->validated($request->all());
+
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json(['message' => 'Ungültige Anmeldedaten'], 401);
         }
+
+        $user = User::where('email', $request->email)->firstOrFail();
+        $token = $user->createToken('authToken')->plainTextToken;
+
         return response()->json([
-            'success' => false,
-            'message' => 'Ungültige Anmeldedaten',
-        ], 401);
+            'success' => true,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+            'token' => $token,
+            'redirect' => '/dashboard'
+        ]);
     }
+
 
     public function signupPost(Request $request)
     {
@@ -60,6 +52,11 @@ class AuthController extends Controller
             "lastname" => "required|string|max:30",
             "email" => "required|string|email|max:255|unique:users",
             "password" => "required|string|min:8|confirmed",
+            "phoneNumber" => "nullable|string|max:20",
+            "addressLine" => "nullable|string|max:255",
+            "postalCode"  => "nullable|string|max:10",
+            "city"        => "nullable|string|max:255"
+
         ]);
 
         $user = new User();
@@ -67,27 +64,14 @@ class AuthController extends Controller
         $user->lastname = $request->lastname;
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
+        $user->save();
 
-        if ($user->save()) {
-            //Neuer Mitarbeiter wird erstellt sobald er sich registriert
-            $employee = new Employee();
-            //Verknüpfe User mit Employee
-            $employee->user_id = $user->id;
-            $employee->id = $user->id;
-            $employee->firstname = $user->firstname;
-            $employee->lastname = $user->lastname;
-            $employee->email = $user->email;
-            $employee->password = $user->password;
-            $employee->save();
+        $token = $user->createToken('authToken')->plainTextToken;
 
-            return response()->json(['success' => true, 'message' => 'Benutzer und Mitarbeiter wurden erfolgreich erstellt.']);
-        } else {
-            return response()->json(['success' => false, 'message' => 'Beim Erstellen des Benutzers ist ein Fehler aufgetreten.'], 500);
-        }
-
-        return $this->succes([
+        return response()->json([
+            'success' => true,
             'user' => $user,
-            'token' => $user->createToken('API Token of'.$user->firstname.$user->lastname)->plainTextToken
+            'token' => $token,
         ]);
     }
 }

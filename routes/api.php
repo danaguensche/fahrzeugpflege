@@ -2,19 +2,17 @@
 
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
-// Car API
-Route::apiResource('cars', CarController::class)->parameters([
-    'cars' => 'kennzeichen'
-]);
+// Auth Routes
+
+Route::middleware('auth:sanctum')->get('/users/me', [UserController::class, 'me']);
+
+Route::apiResource('cars', CarController::class)->parameters(['cars' => 'kennzeichen']);
 Route::delete('cars', [CarController::class, 'destroyMultiple']);
-
-
 Route::apiResource('customers', CustomerController::class);
 Route::delete('customers', [CustomerController::class, 'destroyMultiple']);
 
-Route::apiResource('employee', EmployeeController::class)->middleware('auth:api');
-Route::get('/user', [UserController::class, 'getUser'])->middleware('auth:api');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

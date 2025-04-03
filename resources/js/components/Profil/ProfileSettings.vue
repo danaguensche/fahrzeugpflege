@@ -3,38 +3,12 @@
         <v-card-title>
             Persönliche Informationen
         </v-card-title>
-
         <v-table>
             <tbody>
-                <tr>
-                    <td class="text-left">Vorname</td>
-                    <td class="text-left">{{ firstName }}</td>
+                <tr v-for="(value, key) in userData" :key="key">
+                    <td class="text-left">{{ labels[key] }}</td>
+                    <td class="text-left">{{ value }}</td>
                 </tr>
-                <tr>
-                    <td class="text-left">Nachname</td>
-                    <td class="text-left">{{ lastName }}</td>
-                </tr>
-                <tr>
-                    <td class="text-left">Telefonnummer</td>
-                    <td class="text-left">{{ phoneNumber }}</td>
-                </tr>
-                <tr>
-                    <td class="text-left">E-Mail</td>
-                    <td class="text-left">{{ email }}</td>
-                </tr>
-                <tr>
-                    <td class="text-left">Straße und Hausnummer</td>
-                    <td class="text-left">{{ addressLine }}</td>
-                </tr>
-                <tr>
-                    <td class="text-left">PLZ</td>
-                    <td class="text-left">{{ postalCode }}</td>
-                </tr>
-                <tr>
-                    <td class="text-left">Ort</td>
-                    <td class="text-left">{{ city }}</td>
-                </tr>
-                
             </tbody>
         </v-table>
     </v-card>
@@ -48,71 +22,50 @@ export default {
     data() {
         return {
             userId: null,
-            firstName: '',
-            lastName: '',
-            phoneNumber: '',
-            email: '',
-            addressLine: '',
-            postalCode: '',
-            city: ''
+            userData: {}, 
+            labels: {
+                firstName: "Vorname",
+                lastName: "Nachname",
+                phoneNumber: "Telefonnummer",
+                email: "E-Mail",
+                addressLine: "Straße und Hausnummer",
+                postalCode: "PLZ",
+                city: "Ort"
+            }
         };
     },
-
     mounted() {
-        this.loadUserId();
+        this.getUser();
     },
-
     methods: {
-        loadUserId() {
-            const storedUserId = localStorage.getItem('userId');
-
-            if (storedUserId) {
-                this.userId = storedUserId;
-                this.getUser();
-            } else {
-                axios.get('http://localhost:8000/api/user', {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-                })
-                    .then(response => {
-                        this.userId = response.data.id;
-                        localStorage.setItem('userId', this.userId);
-                        this.getUser();
-                    })
-                    .catch(error => {
-                        console.error('Fehler beim Abrufen der Benutzer-ID:', error);
-                    });
-            }
-        },
-
-        getUser() {
-            if (!this.userId) {
-                console.error('Keine Benutzer-ID gefunden!');
-                return;
-            }
-
-            axios.get(`http://localhost:8000/api/employee/${this.userId}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Accept': 'application/json'
+        async getUser() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    console.error("Kein Token gefunden!");
+                    return;
                 }
-            })
-                .then(response => {
-                    let data = response.data.employee || {};
 
-                    this.firstName = data.firstname || '';
-                    this.lastName = data.lastname || '';
-                    this.phoneNumber = data.phonenumber || '';
-                    this.email = data.email || '';
-                    this.addressLine = data.addressline || '';
-                    this.postalCode = data.postalcode || '';
-                    this.city = data.city || '';
-
-                    console.log('Benutzerdaten geladen:', response.data);
-                })
-                .catch(error => {
-                    console.error('Fehler beim Laden der Benutzerdaten:', error);
+                const response = await axios.get("http://localhost:8000/api/users/me", {
+                    headers: { Authorization: `Bearer ${token}` }
                 });
+
+                console.log("API-Antwort:", response.data);
+                this.userData = {
+                    firstName: response.data.data.firstName || "",
+                    lastName: response.data.data.lastName || "",
+                    phoneNumber: response.data.data.phoneNumber || "",
+                    email: response.data.data.email || "",
+                    addressLine: response.data.data.addressLine || "",
+                    postalCode: response.data.data.postalCode || "",
+                    city: response.data.data.city || ""
+                };
+
+                console.log("Benutzerdaten geladen:", this.userData);
+            } catch (error) {
+                console.error("Fehler beim Laden der Benutzerdaten:", error);
+            }
         }
     }
-}
+};
 </script>
