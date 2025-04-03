@@ -51,4 +51,14 @@ class PageController extends Controller
         return view('pages.settings');
     }
 
+    public function login()
+    {
+        return view("auth.login");
+    }
+
+    public function loginPost()
+    {
+        return redirect()->route('dashboard');
+    }
+
 }

@@ -11,13 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) { 
-            $table->string('api_token', 80)->after('password')
-            ->unique()
-            ->nullable()
-            ->default(null);
-    });
-        
+        Schema::dropIfExists('employees');
     }
 
     /**
@@ -25,8 +19,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('api_token');
-        });
+
     }
 };

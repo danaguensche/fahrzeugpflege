@@ -4,6 +4,8 @@ namespace App\Providers;
 use App\Services\Filesystem;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Sanctum\Sanctum;
+use Laravel\Sanctum\PersonalAccessToken;
 
 
 
@@ -31,6 +33,8 @@ class AppServiceProvider extends ServiceProvider
         header('Content-Type: application/json');
         header('X-Requested-With: XMLHttpRequest');
         header('Access-Control-Allow-Headers: Authorization');
+
+        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
     }
     
 }
