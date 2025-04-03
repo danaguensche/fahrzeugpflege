@@ -22,7 +22,12 @@ class User extends Authenticatable
         'lastname',
         'email',
         'password',
+        'phonenumber',
+        'addressline',
+        'postalcode',
+        'city',
         'api_token'
+
     ];
 
     /**
@@ -46,10 +51,5 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
-    }
-
-    public function employee()
-    {
-        return $this->hasOne(Employee::class);
     }
 }

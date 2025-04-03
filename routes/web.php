@@ -11,11 +11,17 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+Route::controller(PageController::class)->group(function () {
+    Route::get('/', 'login')->name('login');
+    Route::get('/login', 'login')->name('login');
+    Route::get('/signup', 'signup')->name('signup');
+});
+
 // Auth Routes
 Route::controller(AuthController::class)->group(function () {
-    Route::get('/login', 'login')->name('login');
+
     Route::post('/login', 'loginPost')->name('login.post');
-    Route::get('/signup', 'signup')->name('signup');
+
     Route::post('/signup', 'signupPost')->name('signup.post');
     Route::post('/logout', 'logout')->name('logout');
 });
@@ -23,7 +29,7 @@ Route::controller(AuthController::class)->group(function () {
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
 
-  // PDF- & Report-Controller before PageController so urls with /berichte get checked by them first
+    // PDF- & Report-Controller before PageController so urls with /berichte get checked by them first
     Route::controller(ReportController::class)->group(function () {
         Route::get('/berichte/form/{formType}', 'chooseForm');
     });
@@ -45,10 +51,4 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/profil', 'profile')->name('profile');
         Route::get('/einstellungen', 'settings')->name('settings');
     });
-
-    // Profil
-    Route::post('/profil', [EmployeeController::class, 'store'])->name('profil.store');
-
-
-
 });
