@@ -24,9 +24,15 @@ class Car extends Model
         return $this->belongsTo(Customer::class);
     }
 
+    /*
     public function carGroup()
     {
         return $this->belongsTo(CarGroup::class, 'Fahrzeugklasse');
+    }
+        */
+    public function carGroupSubgroup()
+    {
+        return $this->belongsTo(CarGroupSubgroup::class, 'Fahrzeugklasse');
     }
 }
  
