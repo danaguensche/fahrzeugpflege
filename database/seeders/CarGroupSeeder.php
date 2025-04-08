@@ -12,6 +12,9 @@ class CarGroupSeeder extends Seeder
      */
     public function run(): void
     {
-
+        $POSSIBLE_GROUPS = 3;
+        CarGroup::factory()
+            ->count($POSSIBLE_GROUPS)
+            ->create();
     }
 }

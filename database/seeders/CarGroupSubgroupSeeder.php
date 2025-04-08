@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\CarGroupSubgroup;
 use Illuminate\Database\Seeder;
 
 class CarGroupSubgroupSeeder extends Seeder
@@ -13,5 +13,10 @@ class CarGroupSubgroupSeeder extends Seeder
     public function run(): void
     {
         //
+        $POSSIBLE_SUBGROUPS = 12;
+        CarGroupSubgroup::factory()
+            ->count($POSSIBLE_SUBGROUPS)
+            ->create();
+    
     }
 }

@@ -4,20 +4,15 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CarGroup>
- */
 class CarGroupFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
+        $CAR_GROUP_MIN = 1;
+        $CAR_GROUP_MAX = 3;
         return [
-            'title' => $this->faker->word,
+            'id' => $this->faker->unique()->numberBetween($CAR_GROUP_MIN, $CAR_GROUP_MAX),
+            'title' => $this->faker->word()
         ];
     }
 }
