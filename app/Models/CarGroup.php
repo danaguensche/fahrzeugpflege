@@ -24,4 +24,8 @@ class CarGroup extends Model
     {
         return $this->hasMany(CarGroupSubgroup::class);
     }
+    public function servicePricing()
+    {
+        return $this->hasMany(ServicePricing::class);
+    }
 }
