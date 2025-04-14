@@ -61,7 +61,7 @@ export default {
       },
       formFields: [
         { id: 'Kennzeichen', name: 'Kennzeichen', type: 'text', placeholder: 'Kennzeichen *' },
-        { id: 'Fahrzeugklasse', name: 'Fahrzeugklasse', type: 'text', placeholder: 'Fahrzeugklasse' },
+        { id: 'Fahrzeugklasse', name: 'Fahrzeugklasse', type: 'text', placeholder: 'Fahrzeugklasse *' },
         { id: 'Automarke', name: 'Automarke', type: 'text', placeholder: 'Automarke' },
         { id: 'Typ', name: 'Typ', type: 'text', placeholder: 'Typ' },
         { id: 'Farbe', name: 'Farbe', type: 'text', placeholder: 'Farbe' },

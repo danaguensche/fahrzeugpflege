@@ -11,6 +11,12 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+
+// Wenn die Route nicht existiert, wird man automatisch auf die Login-Seite weitergeleitet
+Route::fallback(function () {
+    return redirect()->route('login');
+});
+
 Route::controller(PageController::class)->group(function () {
     Route::get('/', 'login')->name('login');
     Route::get('/login', 'login')->name('login');
@@ -43,9 +49,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', 'dashboard')->name('dashboard');
         Route::get('/kalender', 'calendar')->name('calendar');
         Route::get('/fahrzeuge', 'cars')->name('fahrzeuge');
-        Route::get('/fahrzeuge/fahrzeugdetails', 'cars')->name('fahrzeugdetails');
+        Route::get('/fahrzeuge/fahrzeugdetails/{kennzeichen}', function($kennzeichen){
+            return view('pages.cardetails', ['kennzeichen' => $kennzeichen]);
+        },)->name('cardetails');
         Route::get('/kunden', 'customers')->name('kunden');
-        Route::get('/kunden/kundendetails', 'customers')->name('fahrzeugdetails');
+        Route::get('/kunden/kundendetails/{id}', function($id) {
+            return view('pages.customerdetails', ['id' => $id]);
+        })->name('customerdetails');
         Route::get('/auftraege', 'jobs')->name('jobs');
         Route::get('/berichte', 'reports')->name('reports');
         Route::get('/profil', 'profile')->name('profile');

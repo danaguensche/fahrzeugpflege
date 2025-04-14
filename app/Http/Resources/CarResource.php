@@ -20,7 +20,8 @@ class CarResource extends JsonResource
             'Automarke' => $this->Automarke,
             'Typ' => $this->Typ,
             'Farbe' => $this->Farbe,
-            'Sonstiges' => $this->Sonstiges
+            'Sonstiges' => $this->Sonstiges,
+            'image' => $this->image,
         ];
     }
 }

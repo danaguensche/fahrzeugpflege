@@ -29,7 +29,7 @@ const routes = [
         component: CarsPage
     },
     {
-        path: '/fahrzeuge/fahrzeugdetails',
+        path: '/fahrzeuge/fahrzeugdetails/:kennzeichen',
         component: CarDetailsPage
     },
     {
@@ -37,7 +37,7 @@ const routes = [
         component: CustomerPage
     },
     {
-        path: '/kunden/kundendetails',
+        path: '/kunden/kundendetails/:id',
         component: CustomerDetailsPage
     },
 

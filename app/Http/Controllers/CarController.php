@@ -113,5 +113,10 @@ class CarController extends Controller
             return response()->json(['error' => 'Fehler beim Aktualisieren des Fahrzeugs'], 500);
         }
     }
-    
+
+    public function details(Car $car)
+    {
+        return response()->json($car);
+    }
+
 }

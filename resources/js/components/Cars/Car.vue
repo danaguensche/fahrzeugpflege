@@ -68,7 +68,7 @@ export default {
         },
 
         getCars(page = 1, sortBy = 'Kennzeichen', sortDesc = false) {
-            axios.get(`/api/fahrzeuge`, {
+            axios.get(`/api/cars`, {
                 params: {
                     page: page,
                     itemsPerPage: 20,
