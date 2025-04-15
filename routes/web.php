@@ -45,15 +45,25 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
+    // Fahrzeug Bilder
+    Route::get('/storage/cars/{filename}', function ($filename) {
+        $path = storage_path('app/cars/' . $filename);
+        if (!file_exists($path)) {
+            abort(404);
+        }
+        return response()->file($path);
+    })->name('cars.image');
+
+
     Route::controller(PageController::class)->group(function () {
         Route::get('/dashboard', 'dashboard')->name('dashboard');
         Route::get('/kalender', 'calendar')->name('calendar');
         Route::get('/fahrzeuge', 'cars')->name('fahrzeuge');
-        Route::get('/fahrzeuge/fahrzeugdetails/{kennzeichen}', function($kennzeichen){
+        Route::get('/fahrzeuge/fahrzeugdetails/{kennzeichen}', function ($kennzeichen) {
             return view('pages.cardetails', ['kennzeichen' => $kennzeichen]);
         },)->name('cardetails');
         Route::get('/kunden', 'customers')->name('kunden');
-        Route::get('/kunden/kundendetails/{id}', function($id) {
+        Route::get('/kunden/kundendetails/{id}', function ($id) {
             return view('pages.customerdetails', ['id' => $id]);
         })->name('customerdetails');
         Route::get('/auftraege', 'jobs')->name('jobs');

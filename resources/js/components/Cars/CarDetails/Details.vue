@@ -1,12 +1,56 @@
 <template>
   <div class="car-details">
-    <h1 v-if="loading">Lade Daten...</h1>
-    <template v-else>
-      <h1>Fahrzeugdetails</h1>
-      <p>Kennzeichen: {{ formattedKennzeichen }}</p>
-      <pre v-if="carDetails.Kennzeichen">{{ formattedDetails }}</pre>
-      <p v-else>Keine Daten gefunden</p>
+
+    <template v-if="loading">
+      <v-card title="Fahrzeugdetails" variant="outlined" loading>
+      </v-card>
     </template>
+    <template v-else>
+      <v-card>
+        <v-card-title>
+          Fahrzeugdetails
+          <v-spacer></v-spacer>
+        </v-card-title>
+        <v-table>
+          <tbody>
+            <tr v-for="(value, key) in carDetails.data" :key="key" v-if="key !== 'image'">
+              <template v-if="key === 'Kennzeichen'">
+                <td class="text-left">{{ labels[key] || key }}</td>
+                <td class="text-left">{{ formattedKennzeichen }}</td>
+              </template>
+              <template v-else-if="key === 'created_at'">
+                <td class="text-left">{{ labels[key] || key }}</td>
+                <td class="text-left">{{ formattedCreatedAt }}</td>
+              </template>
+              <template v-else-if="key === 'updated_at'">
+                <td class="text-left">{{ labels[key] || key }}</td>
+                <td class="text-left">{{ formattedUpdatedAt }}</td>
+              </template>
+              <template v-else-if="key === 'image'">
+                <!-- nichts tun -->
+              </template>
+              <template v-else>
+                <td class="text-left">{{ labels[key] || key }}</td>
+                <td class="text-left">{{ value }}</td>
+              </template>
+            </tr>
+
+          </tbody>
+        </v-table>
+
+        <v-img v-if="carDetails.data?.image" :src="carDetails.data.image" :width="400" cover>
+          <template v-slot:placeholder>
+            <div class="d-flex align-center justify-center fill-height">
+              <v-progress-circular indeterminate color="grey lighten-2"></v-progress-circular>
+            </div>
+          </template>
+        </v-img>
+        <v-card-actions>
+          <v-btn color="primary" @click="$router.push(`/fahrzeuge`)">Zurück zur Fahrzeugliste</v-btn>
+        </v-card-actions>
+      </v-card>
+    </template>
+
   </div>
 </template>
 
@@ -15,20 +59,43 @@ export default {
   data() {
     return {
       carDetails: {},
+      labels: {
+        id: "ID",
+        Kennzeichen: "Kennzeichen",
+        Fahrzeugklasse: "Fahrzeugklasse",
+        Automarke: "Automarke",
+        Typ: "Typ",
+        Farbe: "Farbe",
+        Sonstiges: "Sonstiges",
+        customer_id: "Kunde",
+        created_at: "Erstellt am",
+        updated_at: "Zuletzt aktualisiert am"
+      },
       loading: true,
       error: null
     };
   },
   computed: {
+
     formattedKennzeichen() {
-      return this.$route.params.Kennzeichen || 'Ungültiges Kennzeichen';
+      return this.$route.params.kennzeichen.replace(/\+/g, ' ') || 'Ungültiges Kennzeichen';
     },
     formattedDetails() {
       return JSON.stringify(this.carDetails, null, 2);
+    },
+    formattedCreatedAt() {
+      return this.carDetails.data.created_at
+        ? new Date(this.carDetails.data.created_at).toLocaleDateString('de-DE')
+        : 'Unbekannt';
+    },
+    formattedUpdatedAt() {
+      return this.carDetails.data.updated_at
+        ? new Date(this.carDetails.data.updated_at).toLocaleDateString('de-DE')
+        : 'Unbekannt';
     }
   },
   async mounted() {
-    console.log("Empfangener Parameter:", this.$route.params.Kennzeichen);
+    console.log("Empfangener Parameter:", this.$route.params.kennzeichen);
     console.log("Vollständige Route:", this.$route);
     await this.getCar();
   },
@@ -36,7 +103,7 @@ export default {
     async getCar() {
       try {
         const { data } = await axios.get(
-          `/api/cars/${encodeURIComponent(this.$route.params.Kennzeichen)}`
+          `/api/cars/cardetails/${this.$route.params.kennzeichen}`
         );
         this.carDetails = data;
       } catch (error) {
@@ -51,10 +118,9 @@ export default {
 
 <style scoped>
 .car-details {
-  margin-left: 300px;
+  margin-left: 200px;
   padding: 20px;
   background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
 }
 </style>

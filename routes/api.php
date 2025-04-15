@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CarController;
+use App\Http\Controllers\CarDetailsController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
@@ -11,7 +12,7 @@ Route::middleware('auth:sanctum')->get('/users/me', [UserController::class, 'me'
 
 // Cars Routes
 Route::apiResource('cars', CarController::class)->parameters(['cars' => 'kennzeichen']);
-Route::get('cars/cardetails/{kennzeichen}', [CarController::class, 'details']);
+Route::get('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'details']);
 Route::delete('cars', [CarController::class, 'destroyMultiple']);
 
 // Customers Routes

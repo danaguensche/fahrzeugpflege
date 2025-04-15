@@ -30,8 +30,8 @@
                                 </td>
                                 <td v-else class="fixed-width">
                                     <a v-if="field === 'Kennzeichen'"
-                                        :href="`/fahrzeuge/fahrzeugdetails/${item[field].replace(/\s/g, '')}`">{{
-                                        item[field] }}</a>
+                                        :href="`/fahrzeuge/fahrzeugdetails/${item[field].replace(/\s/g, '+')}`">{{ item[field]
+                                        }}</a>
                                     <span v-else>{{ item[field] }}</span>
                                 </td>
                             </template>
