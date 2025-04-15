@@ -28,5 +28,10 @@ class Car extends Model
     {
         return $this->belongsTo(CarGroup::class, 'Fahrzeugklasse');
     }
+
+    public function getRouteKeyName()
+    {
+        return 'Kennzeichen';
+    }
 }
  

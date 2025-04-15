@@ -6,9 +6,7 @@ use App\Models\Car;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\CarResource;
-use App\Http\Resources\CarCollection;
-
-
+use Illuminate\Support\Facades\Storage;
 
 class CarController extends Controller
 {
@@ -22,21 +20,24 @@ class CarController extends Controller
                 'Typ' => 'nullable|string',
                 'Farbe' => 'nullable|string',
                 'Sonstiges' => 'nullable|string',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'image' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
             ]);
-
 
             $car = new Car();
             $car->fill($validatedData);
 
             if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $car->image = base64_encode(file_get_contents($image));
+                $image = $request->file('image')->store('cars');
+                $car->image = Storage::url($image);
             }
 
             $car->save();
 
-            return response()->json(['message' => 'Fahrzeug erfolgreich gespeichert'], 201);
+            return response()->json([
+                'message' => 'Fahrzeug erfolgreich gespeichert',
+                'car' => new CarResource($car),
+                'image_path' => $car->image
+            ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['error' => $e->errors()], 422);
         } catch (\Exception $e) {
@@ -45,28 +46,25 @@ class CarController extends Controller
         }
     }
 
-    public function index(Request $request)
+    public function index()
     {
-        $perPage = $request->input('itemsPerPage', 20);
-        $page = $request->input('page', 1);
-        $sortBy = $request->input('sortBy', 'Kennzeichen');
-        $sortDesc = $request->input('sortDesc', 'false') === 'true';
 
+        $perPage = request()->input('itemsPerPage', 20);
+        $page = request()->input('page', 1);
+        $sortBy = request()->input('sortBy', 'id');
+        $sortDesc = request()->input('sortDesc', 'false') === 'true';
         $query = Car::query();
-
         if ($sortBy) {
             $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
         }
 
         $total = $query->count();
         $cars = $query->skip(($page - 1) * $perPage)->take($perPage)->get();
-
         return response()->json([
             'items' => CarResource::collection($cars),
-            'total' => $total,
+            'total' => $total
         ]);
     }
-
 
     public function show(Car $car)
     {
@@ -77,17 +75,18 @@ class CarController extends Controller
     {
         $car = Car::where('Kennzeichen', $kennzeichen)->first();
         if ($car) {
+            if ($car->image) {
+                $path = str_replace('/storage/', '', $car->image);
+                if (Storage::disk('public')->exists($path)) {
+                    Storage::disk('public')->delete($path);
+                }
+            }
+
             $car->delete();
             return response()->json(['success' => true, 'message' => 'Fahrzeug wurde gelöscht.']);
         } else {
             return response()->json(['success' => false, 'message' => 'Fahrzeug nicht gefunden.'], 404);
         }
-    }
-
-    public function destroyMultiple(Request $request)
-    {
-        Car::destroy($request->ids);
-        return response()->json(null, 204);
     }
 
     public function update(Request $request, Car $car)
@@ -99,13 +98,30 @@ class CarController extends Controller
                 'Automarke' => 'nullable|string',
                 'Typ' => 'nullable|string',
                 'Farbe' => 'nullable|string',
+                'Sonstiges' => 'nullable|string',
+                'image' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
             ]);
 
             $car->fill($validatedData);
 
+            if ($request->hasFile('image')) {
+                if ($car->image) {
+                    $path = str_replace('/storage/', '', $car->image);
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
+                    }
+                }
+
+                $image = $request->file('image')->store('cars', 'public');
+                $car->image = Storage::url($image);
+            }
+
             $car->save();
 
-            return response()->json(['message' => 'Fahrzeug erfolgreich aktualisiert'], 200);
+            return response()->json([
+                'message' => 'Fahrzeug erfolgreich aktualisiert',
+                'car' => new CarResource($car)
+            ], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['error' => $e->errors()], 422);
         } catch (\Exception $e) {
@@ -113,5 +129,4 @@ class CarController extends Controller
             return response()->json(['error' => 'Fehler beim Aktualisieren des Fahrzeugs'], 500);
         }
     }
-    
 }
