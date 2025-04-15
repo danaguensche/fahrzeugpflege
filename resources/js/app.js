@@ -26,5 +26,4 @@ app.config.globalProperties.$http = axios;
 app.use(Router);
 app.use(store);
 app.use(vuetify);
-
 app.mount('#app');
