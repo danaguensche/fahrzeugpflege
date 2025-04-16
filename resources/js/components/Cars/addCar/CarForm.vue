@@ -1,71 +1,82 @@
 <template>
-  <div v-if="isOpen" class="form-wrapper">
-    <div class="single-form">
-      <form class="page-form" @submit.prevent="submitForm" enctype="multipart/form-data">
-        <!-- Close Button -->
-        <div class="form-header">
-          <CloseButton :isVisible="true" @click="closeForm"></CloseButton>
-        </div>
+  <div v-if="isOpen">
+    <v-card class="single-form blue-grey-lighten-3" max-width="700px">
+      <v-card-title class="d-flex justify-space-between card-title">
+        Fahrzeug hinzufügen
+        <v-btn icon @click="closeForm" variant="plain">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-card-title>
 
-        <!-- Form-Fields -->
-        <h2 class="forms-title">Fahrzeug hinzufügen</h2>
-        <div v-for="field in formFields" :key="field.id" class="forms-field">
-          <input 
-            v-if="field.type !== 'file'" 
-            :type="field.type" 
-            :id="field.id" 
-            :placeholder="field.placeholder"
-            v-model="formData[field.id]" 
-            class="forms-field-input" 
+      <v-card-text class="form-fields">
+        <v-form @submit.prevent="submitForm" ref="form">
+          <!-- Text Input Fields -->
+          <v-text-field
+            v-for="field in textFields"
+            :key="field.id"
+            v-model="formData[field.id]"
+            :label="field.placeholder"
             :required="field.required"
-          />
-          <input 
-            v-else 
-            type="file" 
+            :error-messages="errors[field.id]"
+            outlined
+            density="comfortable"
+            class="mb-3"
+            width="95%"
+          ></v-text-field>
+
+          <!-- File Upload für mehrere Bilder -->
+          <v-file-input
+            v-model="formData.images"
+            label="Fahrzeugbilder"
+            multiple
             accept="image/jpeg,image/png,image/jpg,image/gif,image/svg+xml"
-            :id="field.id" 
-            @change="handleFileUpload" 
-            class="forms-field-input" 
-          />
-          <span v-if="errors[field.id]" class="alert error">
-            {{ errors[field.id] }}
-          </span>
-        </div>
+            outlined
+            density="comfortable"
+            prepend-icon="mdi-camera"
+            :error-messages="errors.images"
+            show-size
+            counter
+            chips
+            width="95%"
+          ></v-file-input>
 
-        <!-- General Error Alert -->
-        <span v-if="errors.general" class="alert error">
-          {{ errors.general }}
-        </span>
+          <!-- General Error Alert -->
+          <v-alert v-if="errors.general" type="error" class="mt-3" density="compact" border="start">
+            {{ errors.general }}
+          </v-alert>
 
-        <!-- Success Alert -->
-        <span v-if="success.general" class="alert success">
-          {{ success.general }}
-        </span>
-        <SubmitButton :disabled="isSubmitting">{{ isSubmitting ? 'Wird gespeichert...' : 'Speichern' }}</SubmitButton>
-      </form>
-    </div>
+          <!-- Success Alert -->
+          <v-alert v-if="success.general" type="success" class="mt-3" density="compact" border="start">
+            {{ success.general }}
+          </v-alert>
+
+          <!-- Submit Button mit kleinerer Breite -->
+          <div class="d-flex justify-left mt-4">
+            <v-btn
+              type="submit"
+              color="darkslategray"
+              class="submit-button"
+              :loading="isSubmitting"
+              :disabled="isSubmitting"
+            >
+              {{ isSubmitting ? 'Wird gespeichert...' : 'Speichern' }}
+            </v-btn>
+          </div>
+        </v-form>
+      </v-card-text>
+    </v-card>
   </div>
 </template>
 
 <script>
-import SubmitButton from '../../Login/Slots/SubmitButton.vue';
-import CloseButton from '../../CommonSlots/CloseButton.vue';
 import axios from 'axios';
 
 export default {
   name: "CarForm",
-  components: {
-    SubmitButton,
-    CloseButton
-  },
   props: {
     isOpen: {
       type: Boolean,
       required: true
-    },
-    carToEdit: {
-      type: Object,
-      default: null
     }
   },
   data() {
@@ -80,121 +91,103 @@ export default {
         Typ: '',
         Farbe: '',
         Sonstiges: '',
-        image: null
+        images: []
       },
-      formFields: [
-        { id: 'Kennzeichen', name: 'Kennzeichen', type: 'text', placeholder: 'Kennzeichen *', required: true },
-        { id: 'Fahrzeugklasse', name: 'Fahrzeugklasse', type: 'text', placeholder: 'Fahrzeugklasse', required: false },
-        { id: 'Automarke', name: 'Automarke', type: 'text', placeholder: 'Automarke', required: false },
-        { id: 'Typ', name: 'Typ', type: 'text', placeholder: 'Typ', required: false },
-        { id: 'Farbe', name: 'Farbe', type: 'text', placeholder: 'Farbe', required: false },
-        { id: 'Sonstiges', name: 'Sonstiges', type: 'text', placeholder: 'Sonstiges', required: false },
-        { id: 'image', name: 'Bild', type: 'file', required: false },
+      textFields: [
+        { id: 'Kennzeichen', placeholder: 'Kennzeichen *', required: true },
+        { id: 'Fahrzeugklasse', placeholder: 'Fahrzeugklasse', required: false },
+        { id: 'Automarke', placeholder: 'Automarke', required: false },
+        { id: 'Typ', placeholder: 'Typ', required: false },
+        { id: 'Farbe', placeholder: 'Farbe', required: false },
+        { id: 'Sonstiges', placeholder: 'Sonstiges', required: false },
       ],
     };
-  },
-  watch: {
-    carToEdit(car) {
-      if (car) {
-        // Wenn ein Fahrzeug zum Bearbeiten übergeben wird, Formular füllen
-        this.formData = {
-          Kennzeichen: car.Kennzeichen || '',
-          Fahrzeugklasse: car.Fahrzeugklasse || '',
-          Automarke: car.Automarke || '',
-          Typ: car.Typ || '',
-          Farbe: car.Farbe || '',
-          Sonstiges: car.Sonstiges || '',
-          image: null // Bild muss neu hochgeladen werden
-        };
-      }
-    }
   },
   methods: {
     validateForm() {
       this.errors = {};
-      
-      // Kennzeichen ist Pflichtfeld
+      this.success = {};
       if (!this.formData.Kennzeichen.trim()) {
         this.errors.Kennzeichen = 'Bitte geben Sie ein Kennzeichen an.';
         return false;
       }
-      
-      // Bildvalidierung
-      if (this.formData.image) {
-        const maxSize = 16 * 1024 * 1024; // 16 MB wie im Controller definiert
-        if (this.formData.image.size > maxSize) {
-          this.errors.image = 'Die Bilddatei darf maximal 16 MB groß sein.';
-          return false;
-        }
-        
-        // Prüfen des Bildtyps
+
+      if (this.formData.images && this.formData.images.length > 0) {
+        const maxSize = 16 * 1024 * 1024;
         const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/svg+xml'];
-        if (!allowedTypes.includes(this.formData.image.type)) {
-          this.errors.image = 'Erlaubte Bildformate: JPEG, PNG, GIF, SVG.';
-          return false;
+
+        for (let i = 0; i < this.formData.images.length; i++) {
+          const image = this.formData.images[i];
+
+          if (image.size > maxSize) {
+            this.errors.images = `Bild "${image.name}" ist zu groß. Maximale Größe: 16 MB.`;
+            return false;
+          }
+
+          if (!allowedTypes.includes(image.type)) {
+            this.errors.images = `Bild "${image.name}" hat ein ungültiges Format. Erlaubt: JPG, PNG, GIF, SVG.`;
+            return false;
+          }
         }
       }
-      
-      return true;
-    },
 
-    handleFileUpload(event) {
-      this.formData.image = event.target.files[0] || null;
+      return true;
     },
 
     async submitForm() {
       if (!this.validateForm()) return;
-      
+
       this.isSubmitting = true;
       this.errors = {};
       this.success = {};
-      
+
       try {
         // FormData für Dateiupload erstellen
         const formDataToSend = new FormData();
+
+        // Text-Felder hinzufügen
         Object.keys(this.formData).forEach(key => {
-          if (this.formData[key] !== null && this.formData[key] !== '') {
+          if (key !== 'images' && this.formData[key] !== null && this.formData[key] !== '') {
             formDataToSend.append(key, this.formData[key]);
           }
         });
-        
-        let response;
-        
-        if (this.carToEdit) {
-          // Update existierendes Fahrzeug
-          response = await axios.post(`/api/cars/${this.carToEdit.id}`, formDataToSend, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              'X-HTTP-Method-Override': 'PUT' // Für Laravel PUT mit FormData
-            }
+
+        // Mehrere Bilder hinzufügen
+        if (this.formData.images && this.formData.images.length > 0) {
+          this.formData.images.forEach((file, index) => {
+            formDataToSend.append(`images[${index}]`, file);
           });
-          this.success.general = "Fahrzeug wurde erfolgreich aktualisiert.";
-        } else {
-          // Neues Fahrzeug hinzufügen
-          response = await axios.post('/api/cars', formDataToSend, {
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
-          });
-          this.success.general = "Fahrzeug wurde erfolgreich hinzugefügt.";
         }
-        
-        console.log('Erfolgreich gespeichert:', response.data);
-        
-        // Formular zurücksetzen
-        this.resetForm();
-        
-        // Event emittieren, um Liste zu aktualisieren
-        this.$emit('car-saved');
+
+        // Neues Fahrzeug hinzufügen
+        const response = await axios.post('/api/cars', formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        this.success.general = "Fahrzeug wurde erfolgreich hinzugefügt.";
+
+        setTimeout(() => {
+          this.resetForm();
+          this.$emit('car-saved', response.data);
+        }, 1500);
+
       } catch (error) {
         console.error('Fehler beim Speichern des Fahrzeuges:', error);
-        
+
         if (error.response && error.response.status === 422) {
           // Validierungsfehler vom Server
-          const serverErrors = error.response.data.error;
-          Object.keys(serverErrors).forEach(field => {
-            this.errors[field] = serverErrors[field][0];
-          });
+          const serverErrors = error.response.data.errors || error.response.data.error;
+          if (serverErrors) {
+            Object.keys(serverErrors).forEach(field => {
+              this.errors[field] = Array.isArray(serverErrors[field])
+                ? serverErrors[field][0]
+                : serverErrors[field];
+            });
+          } else {
+            this.errors.general = "Validierungsfehler beim Speichern.";
+          }
         } else {
           this.errors.general = "Fehler beim Speichern des Fahrzeuges.";
         }
@@ -209,103 +202,55 @@ export default {
     },
 
     resetForm() {
-      Object.keys(this.formData).forEach(key => {
-        this.formData[key] = '';
-      });
-      this.formData.image = null;
-      this.errors = {};
-      
-      // Dateieingabefeld zurücksetzen
-      const fileInput = document.getElementById('image');
-      if (fileInput) fileInput.value = '';
-    }
-  },
-  mounted() {
-    // Wenn ein Fahrzeug zum Bearbeiten übergeben wurde, Formular füllen
-    if (this.carToEdit) {
       this.formData = {
-        Kennzeichen: this.carToEdit.Kennzeichen || '',
-        Fahrzeugklasse: this.carToEdit.Fahrzeugklasse || '',
-        Automarke: this.carToEdit.Automarke || '',
-        Typ: this.carToEdit.Typ || '',
-        Farbe: this.carToEdit.Farbe || '',
-        Sonstiges: this.carToEdit.Sonstiges || '',
-        image: null
+        Kennzeichen: '',
+        Fahrzeugklasse: '',
+        Automarke: '',
+        Typ: '',
+        Farbe: '',
+        Sonstiges: '',
+        images: []
       };
+      this.errors = {};
+      this.success = {};
+
+      if (this.$refs.form) {
+        this.$refs.form.reset();
+      }
     }
   }
 }
 </script>
 
 <style scoped>
-.form-header {
-  position: absolute;
-  top: -45px;
-  right: 80px;
-}
-
 .single-form {
-  position: relative;
-  margin-top: 5vh;
-  margin-bottom: 5vh;
-  padding: 90px;
-  box-shadow: var(--box-shadow);
-  z-index: 10;
-  background-color: var(--background-color);
-  width: 700px;
+  max-width: 700px;
+  margin: auto;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
-.forms-title {
-  margin-bottom: 50px;
+.form-fields {
+  padding: 40px;
 }
 
-.forms-field {
-  margin-bottom: 15px;
+.card-title {
+  margin-top: 25px;
+  margin-left: 25px;
 }
 
-.alert {
-  display: block;
+.submit-button {
+  background-color: darkslategray;
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
   padding: 10px;
-  margin: 10px 0;
-  border-radius: 4px;
-}
-
-.error {
-  background-color: #ffebee;
-  color: #c62828;
-  border: 1px solid #ffcdd2;
-}
-
-.success {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #c8e6c9;
-}
-
-.forms-field-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-input[type="file"]::file-selector-button {
-  border-radius: var(--border-radius);
-  padding: 0 16px;
-  height: 40px;
-  cursor: pointer;
-  background-color: white;
-  border: 1px solid rgba(0, 0, 0, 0.16);
-  box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
-  margin-right: 16px;
-  transition: background-color 200ms;
-}
-
-input[type="file"]::file-selector-button:hover {
-  background-color: #f3f4f6;
-}
-
-input[type="file"]::file-selector-button:active {
-  background-color: #e5e7eb;
+  width: 170px;
 }
 </style>

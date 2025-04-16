@@ -3,23 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Car;
+use App\Http\Resources\CarResource;
 use Illuminate\Http\Request;
 
-class CarDetailsController extends CarController
+class CarDetailsController extends Controller
 {
     public function details($kennzeichen)
     {
         $kennzeichen = str_replace('+', ' ', $kennzeichen);
-        $car = Car::where('Kennzeichen', $kennzeichen)->first();
+        $car = Car::with(['images', 'customer'])->where('Kennzeichen', $kennzeichen)->first();
+
         if ($car !== null) {
-            // Decode the image if it exists
-            // if ($car->image) {
-            //     $car->image = base64_decode($car->image);
-            // }
-            // Return the car details as a JSON response
-            return response()->json([
-                'data' => $car,
-            ]);
+            return new CarResource($car);
         } else {
             return response()->json([
                 'success' => false,

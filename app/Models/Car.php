@@ -24,6 +24,11 @@ class Car extends Model
         return $this->belongsTo(Customer::class);
     }
 
+    public function images()
+    {
+        return $this->hasMany(Image::class);
+    }
+
     public function carGroup()
     {
         return $this->belongsTo(CarGroup::class, 'Fahrzeugklasse');
