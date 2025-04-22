@@ -1,59 +1,71 @@
 <template>
-  <div class="car-details">
 
-    <template v-if="loading">
-      <v-card title="Fahrzeugdetails" variant="outlined" loading>
-      </v-card>
-    </template>
-    <template v-else>
-      <v-card>
-        <v-card-title>
-          Fahrzeugdetails
-          <v-spacer></v-spacer>
-        </v-card-title>
-        <v-table>
-          <tbody>
-            <tr v-for="(value, key) in carDetails.data" :key="key">
-              <template v-if="key === 'Kennzeichen'">
-                <td class="text-left">{{ labels[key] || key }}</td>
-                <td class="text-left">{{ formattedKennzeichen }}</td>
-              </template>
-              <template v-else-if="key === 'created_at'">
-                <td class="text-left">{{ labels[key] || key }}</td>
-                <td class="text-left">{{ formattedCreatedAt }}</td>
-              </template>
-              <template v-else-if="key === 'updated_at'">
-                <td class="text-left">{{ labels[key] || key }}</td>
-                <td class="text-left">{{ formattedUpdatedAt }}</td>
-              </template>
-              <template v-else-if="key !== 'images' && key !== 'customer'">
-                <td class="text-left">{{ labels[key] || key }}</td>
-                <td class="text-left">{{ value }}</td>
-              </template>
-              <template v-else-if="key === 'customer'">
-                <td class="text-left">{{ labels[key] || key }}</td>
-                <td class="text-left">
-                  <span v-if="carDetails.data.customer">
-                    <a :href="linkToCustomer" >{{ carDetails.data.customer.firstname }} {{ carDetails.data.customer.lastname }} </a>
-                  </span>
-                  <span v-else>
-                    Kein Kunde zugeordnet
-                  </span>
-                </td>
-              </template>
-              <template v-else-if="key === 'customer_id'">
-                <td class="text-left">{{ labels[key] || key }}</td>
-                <td class="text-left">
-                  {{ value }}
-                </td>
-              </template>
-            </tr>
-          </tbody>
-        </v-table>
+  <template v-if="loading">
+    <v-card title="Fahrzeugdetails" variant="outlined" loading>
+    </v-card>
+  </template>
+  <template v-else>
+    <v-card>
+      <v-card-title>
+        Fahrzeugdetails
+        <v-spacer></v-spacer>
+      </v-card-title>
+      <v-table>
+        <tbody>
+          <tr v-for="(value, key) in carDetails.data" :key="key">
+            <template v-if="key === 'Kennzeichen'">
+              <td class="text-left">{{ labels[key] || key }}</td>
+              <td class="text-left">{{ formattedKennzeichen }}</td>
+            </template>
+            <template v-else-if="key === 'created_at'">
+              <td class="text-left">{{ labels[key] || key }}</td>
+              <td class="text-left">{{ formattedCreatedAt }}</td>
+            </template>
+            <template v-else-if="key === 'updated_at'">
+              <td class="text-left">{{ labels[key] || key }}</td>
+              <td class="text-left">{{ formattedUpdatedAt }}</td>
+            </template>
+            <template v-else-if="key !== 'images' && key !== 'customer'">
+              <td class="text-left">{{ labels[key] || key }}</td>
+              <td class="text-left">{{ value }}</td>
+            </template>
+            <template v-else-if="key === 'customer'">
+              <td class="text-left">{{ labels[key] || key }}</td>
+              <td class="text-left">
+                <span v-if="carDetails.data.customer">
+                  <a :href="linkToCustomer">{{ carDetails.data.customer.firstname }} {{
+                    carDetails.data.customer.lastname }} </a>
+                </span>
+                <span v-else>
+                  Kein Kunde zugeordnet
+                </span>
+              </td>
+            </template>
+            <template v-else-if="key === 'customer_id'">
+              <td class="text-left">{{ labels[key] || key }}</td>
+              <td class="text-left">
+                {{ value }}
+              </td>
+            </template>
+          </tr>
+        </tbody>
+      </v-table>
 
-        <template v-if="images.length > 0">
-          <v-carousel cover>
-            <v-carousel-item v-for="(image, index) in images" :key="index" :src="image">
+      <template v-if="images.length > 0">
+        <v-card class="mt-4">
+          <v-carousel class="custom-carousel" height="400" hide-delimiter-background show-arrows="hover" variant="flat"
+            elevation="0">
+            <template v-slot:prev="{ props }">
+              <v-btn variant="tonal" v-bind="props" class="carousel-arrow">
+                <v-icon color="white" icon="mdi-chevron-left"></v-icon>
+              </v-btn>
+            </template>
+            <template v-slot:next="{ props }">
+              <v-btn variant="tonal" v-bind="props" class="carousel-arrow">
+                <v-icon icon="mdi-chevron-right" color="white"></v-icon>
+              </v-btn>
+            </template>
+            <v-carousel-item v-for="(image, index) in images" :key="index" :src="image" class="carousel-image">
               <template v-slot:placeholder>
                 <div class="d-flex align-center justify-center fill-height">
                   <v-progress-circular indeterminate color="grey lighten-2"></v-progress-circular>
@@ -61,18 +73,15 @@
               </template>
             </v-carousel-item>
           </v-carousel>
-        </template>
-        <template v-else>
-          <p>Keine Bilder vorhanden</p>
-        </template>
 
-        <v-card-actions>
-          <v-btn color="primary" @click="$router.push(`/fahrzeuge`)">Zurück zur Fahrzeugliste</v-btn>
-        </v-card-actions>
-      </v-card>
-    </template>
+        </v-card>
+      </template>
+      <template v-else>
+        <p>Keine Bilder vorhanden</p>
+      </template>
 
-  </div>
+    </v-card>
+  </template>
 </template>
 
 <script>
@@ -80,7 +89,7 @@ export default {
   data() {
     return {
       carDetails: {
-        data:{
+        data: {
           customer: {
             id: 0,
             firstname: '',
@@ -110,15 +119,15 @@ export default {
   computed: {
     images() {
       const img = this.carDetails.data?.images;
-      
+
       if (!img) {
         return [];
       }
-      
+
       if (Array.isArray(img)) {
         return img.filter(Boolean);
       }
-      
+
       return img ? [img] : [];
     },
     formattedKennzeichen() {
@@ -166,12 +175,6 @@ export default {
 </script>
 
 <style scoped>
-.car-details {
-  margin-left: 200px;
-  padding: 20px;
-  background-color: #f9f9f9;
-}
-
 .v-carousel {
   margin-top: 20px;
   width: 800px;
@@ -188,6 +191,22 @@ export default {
   max-width: 500px;
   max-height: 400px;
   object-fit: cover;
-  border-radius: 8px;
+
+}
+
+.custom-carousel {
+  overflow: hidden;
+
+}
+
+.carousel-image img {
+  object-fit: cover;
+  height: 400px;
+  width: 100%;
+
+}
+
+.back-button {
+  width: 20%;
 }
 </style>

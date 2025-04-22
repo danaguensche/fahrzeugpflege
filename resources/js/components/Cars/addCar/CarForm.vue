@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isOpen">
+  <div v-if="isOpen" class="form-wrapper profil">
     <v-card class="single-form blue-grey-lighten-3" max-width="700px">
       <v-card-title class="d-flex justify-space-between card-title">
         Fahrzeug hinzufügen
@@ -11,34 +11,15 @@
       <v-card-text class="form-fields">
         <v-form @submit.prevent="submitForm" ref="form">
           <!-- Text Input Fields -->
-          <v-text-field
-            v-for="field in textFields"
-            :key="field.id"
-            v-model="formData[field.id]"
-            :label="field.placeholder"
-            :required="field.required"
-            :error-messages="errors[field.id]"
-            outlined
-            density="comfortable"
-            class="mb-3"
-            width="95%"
-          ></v-text-field>
+          <v-text-field v-for="field in textFields" :key="field.id" v-model="formData[field.id]"
+            :label="field.placeholder" :required="field.required" :error-messages="errors[field.id]" outlined
+            density="comfortable" class="mb-3" width="95%"></v-text-field>
 
           <!-- File Upload für mehrere Bilder -->
-          <v-file-input
-            v-model="formData.images"
-            label="Fahrzeugbilder"
-            multiple
-            accept="image/jpeg,image/png,image/jpg,image/gif,image/svg+xml"
-            outlined
-            density="comfortable"
-            prepend-icon="mdi-camera"
-            :error-messages="errors.images"
-            show-size
-            counter
-            chips
-            width="95%"
-          ></v-file-input>
+          <v-file-input v-model="formData.images" label="Fahrzeugbilder" multiple
+            accept="image/jpeg,image/png,image/jpg,image/gif,image/svg+xml" outlined density="comfortable"
+            prepend-icon="mdi-camera" :error-messages="errors.images" show-size counter chips
+            width="95%"></v-file-input>
 
           <!-- General Error Alert -->
           <v-alert v-if="errors.general" type="error" class="mt-3" density="compact" border="start">
@@ -52,13 +33,8 @@
 
           <!-- Submit Button mit kleinerer Breite -->
           <div class="d-flex justify-left mt-4">
-            <v-btn
-              type="submit"
-              color="darkslategray"
-              class="submit-button"
-              :loading="isSubmitting"
-              :disabled="isSubmitting"
-            >
+            <v-btn type="submit" color="darkslategray" class="submit-button" :loading="isSubmitting"
+              :disabled="isSubmitting">
               {{ isSubmitting ? 'Wird gespeichert...' : 'Speichern' }}
             </v-btn>
           </div>
@@ -177,7 +153,6 @@ export default {
         console.error('Fehler beim Speichern des Fahrzeuges:', error);
 
         if (error.response && error.response.status === 422) {
-          // Validierungsfehler vom Server
           const serverErrors = error.response.data.errors || error.response.data.error;
           if (serverErrors) {
             Object.keys(serverErrors).forEach(field => {
@@ -224,16 +199,14 @@ export default {
 
 <style scoped>
 .single-form {
-  max-width: 700px;
-  margin: auto;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1000;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
+  position: relative;
+  margin-top: 5vh;
+  margin-bottom: 5vh;
+  padding: 20px;
+  box-shadow: var(--box-shadow);
+  z-index: 10;
+  background-color: var(--background-color);
+  width: 700px
 }
 
 .form-fields {
@@ -252,5 +225,14 @@ export default {
   text-transform: uppercase;
   padding: 10px;
   width: 170px;
+}
+
+.form-wrapper.profil {
+  font-family: var(--font-family);
+  display: flex;
+  align-self: flex-start;
+  justify-content: center;
+  flex-direction: row;
+
 }
 </style>
