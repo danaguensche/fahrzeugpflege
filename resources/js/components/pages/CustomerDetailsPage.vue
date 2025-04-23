@@ -1,19 +1,19 @@
 <template>
     <MainSidebar></MainSidebar>
-    <Footer></Footer>
+    <Page></Page>
 </template>
 <script>
 
 
 import MainSidebar from '../sidebar/MainSidebar.vue';
-import Footer from '../CommonSlots/Footer.vue';
+import Page from '../Customers/CustomerDetails/Page.vue';
 
 
 export default {
     name: "CalendarPage",
     components: {
         MainSidebar,
-        Footer,
+        Page
 
     },
 

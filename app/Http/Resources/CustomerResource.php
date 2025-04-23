@@ -17,14 +17,17 @@ class CustomerResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'company' => $this->id,
+            'company' => $this->company,
             'firstName' => $this->firstname,
             'lastName' => $this->lastname,
             'email' => $this->email,
             'phoneNumber' => $this->phonenumber,
             'addressLine' => $this->addressline,
             'postalCode' => $this->postalcode,
-            'city' => $this->city
+            'city' => $this->city,
+            'createdAt' => $this->created_at,
+            'updatedAt' => $this->updated_at,
+            'cars' => CarResource::collection($this->whenLoaded('cars')),
         ];
     }
 }

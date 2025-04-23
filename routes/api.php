@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CustomerDetailsController;
 
 // Auth Routes
 Route::middleware('auth:sanctum')->get('/users/me', [UserController::class, 'me']);
@@ -16,8 +17,8 @@ Route::get('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'detai
 Route::delete('cars', [CarController::class, 'destroyMultiple']);
 
 // Customers Routes
-Route::apiResource('customers', CustomerController::class);
-Route::get('customer/customerdetails/{id}', [CustomerController::class, 'details']);
+Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
+Route::get('customer/customerdetails/{id}', [CustomerDetailsController::class, 'details']);
 Route::delete('customers', [CustomerController::class, 'destroyMultiple']);
 
 // Logout Routes

@@ -9,13 +9,16 @@ class Customer extends Model
 {
     use HasFactory;
 
-    protected $fillable =[
+    protected $fillable = [
+        'id',
+        'created_at',
+        'updated_at',
         'company',
         'firstname',
         'lastname',
         'email',
         'phonenumber',
-        'adressline',
+        'addressline',
         'postalcode',
         'city'
     ];
@@ -23,6 +26,6 @@ class Customer extends Model
 
     public function cars()
     {
-        return $this->hasMany(Car::class); 
+        return $this->hasMany(Car::class);
     }
 }

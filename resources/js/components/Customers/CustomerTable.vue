@@ -1,35 +1,53 @@
 <template>
     <div class="component">
         <div class="header">
-            <RefreshButton class="refresh-button" @refresh="loadItems(options)"></RefreshButton>
+            <RefreshButton class="refresh-button" @refresh="loadItems"></RefreshButton>
             <div class="spacer"></div>
 
             <div class="button-group">
-                <ConfirmButton class="confirm-button" @click="confirmEditCustomer(editCustomerId)">Bestätigen</ConfirmButton>
-                <CancelButton class="cancel-button">Abbrechen</CancelButton>
+                <ConfirmButton class="confirm-button" @click="confirmEditCustomer" :disabled="!editCustomerId">
+                    Bestätigen
+                </ConfirmButton>
+                <CancelButton class="cancel-button" @click="cancelEdit">Abbrechen</CancelButton>
                 <DeleteButton class="delete-button" :disabled="selectedCustomers.length === 0"
-                    @click="confirmDeleteCustomers(selectedCustomers.id)">
+                    @click="confirmDeleteCustomers">
                     Löschen
                 </DeleteButton>
             </div>
-
         </div>
+
         <div class="table-container">
-            <div v-if="customers.length === 0"><v-progress-circular indeterminate></v-progress-circular></div>
+            <div v-if="loading"><v-progress-circular indeterminate></v-progress-circular></div>
             <div class="scrollable-table">
                 <v-data-table-server :headers="headers" :items="customers" :options.sync="options"
-                    :server-items-length="totalItems" :loading="loading" @update:options="loadItems">
+                    :server-items-length="totalItems" :loading="loading" @update:options="loadItems" height="800">
                     <template v-slot:item="{ item }">
                         <tr>
                             <td class="checkbox fixed-width">
                                 <v-checkbox v-model="selectedCustomers" :value="item.id"></v-checkbox>
                             </td>
-                            <template v-for="field in fields" :key="field">
-                                <td v-if="editCustomerId === item.id" class="edit-field fixed-width">
-                                    <v-text-field v-model="editCustomer[field]"></v-text-field>
-                                </td>
-                                <td v-else class="fixed-width">{{ item[field] }}</td>
-                            </template>
+                            <td v-for="field in fields" :key="field" class="fixed-width">
+                                <template v-if="editCustomerId === item.id">
+                                    <template v-if="field === 'id'">
+                                        <a :href="`/kunden/kundendetails/${editCustomer[field] || ''}`">
+                                            {{ editCustomer[field] || '' }}
+                                        </a>
+                                    </template>
+                                    <template v-else>
+                                        <v-text-field v-model="editCustomer[field]" :rules="getFieldRules(field)"
+                                            :error-messages="fieldErrors[field]" dense outlined
+                                            hide-details="auto"></v-text-field>
+                                    </template>
+                                </template>
+                                <template v-else>
+                                    <a v-if="field === 'id'" :href="`/kunden/kundendetails/${item[field] || ''}`">
+                                        {{ item[field] || '' }}
+                                    </a>
+                                    <span v-else>{{ item[field] || '' }}</span>
+                                </template>
+                            </td>
+
+
                             <td class="table-icon fixed-width">
                                 <v-btn icon class="delete-button" variant="plain" @click="confirmDelete(item.id)">
                                     <v-icon>mdi-delete</v-icon>
@@ -37,8 +55,9 @@
                             </td>
                             <td class="table-icon fixed-width">
                                 <v-btn variant="plain" icon
-                                    @click="editCustomerId === item.id ? saveCustomer(item.id) : editCustomerDetails(item)">
-                                    <v-icon>mdi-pencil</v-icon>
+                                    @click="editCustomerId === item.id ? saveCustomer() : editCustomerDetails(item)">
+                                    <v-icon>{{ editCustomerId === item.id ? 'mdi-content-save' : 'mdi-pencil'
+                                        }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
@@ -78,7 +97,8 @@ export default {
             selectedCustomers: [],
             customerToDelete: null,
             headers: [
-                { title: "Auswählen", key: "checkbox", sortable: "false" },
+                { title: "Auswählen", key: "checkbox", sortable: false },
+                { title: "Kundennummer", key: "id", sortable: true },
                 { title: "Vorname", key: "firstName" },
                 { title: "Nachname", key: "lastName" },
                 { title: "Email", key: "email" },
@@ -86,17 +106,25 @@ export default {
                 { title: "Straße und Hausnummer", key: "addressLine" },
                 { title: "PLZ", key: "postalCode" },
                 { title: "Stadt", key: "city" },
-                { title: "Bearbeiten", key: "edit", sortable: "false" },
-                { title: "Löschen", key: "delete", sortable: "false" }
+                { title: "Bearbeiten", key: "edit", sortable: false },
+                { title: "Löschen", key: "delete", sortable: false }
             ],
-            fields: ["firstName", "lastName", "email", "phoneNumber", "addressLine", "postalCode", "city"],
+            fields: ["id", "firstName", "lastName", "email", "phoneNumber", "addressLine", "postalCode", "city"],
             editCustomerId: null,
             editCustomer: {},
             loading: false,
             totalItems: 0,
-            alertHeading : '',
+            alertHeading: '',
             alertParagraph: '',
             alertOkayButton: '',
+            options: {
+                page: 1,
+                itemsPerPage: 10,
+                sortBy: [{ key: 'id' }],
+                sortDesc: [false],
+            },
+            confirmAction: null,
+            fieldErrors: {}
         };
     },
 
@@ -105,66 +133,73 @@ export default {
             return this.options.page;
         },
         totalPages() {
-            return Math.ceil(this.totalItems / this.itemsPerPage);
+            return Math.ceil(this.totalItems / this.options.itemsPerPage);
         },
-
-        options() {
-            return {
-                page: 1,
-                itemsPerPage: 10,
-                sortBy: [{ key: 'id' }],
-                sortDesc: [false],
-            };
-        },
-
         isEditing() {
             return this.editCustomerId !== null;
         },
     },
+
+    mounted() {
+        this.loadItems();
+    },
+
     methods: {
-        showAlert() {
-            this.alertHeading = 'Kunde löschen';
-            this.alertParagraph = 'Möchten Sie den ausgewählten Kunden wirklich löschen?';
-            this.alertOkayButton = 'Löschen';
-            if (this.selectedCustomers.length === 1) {
-                this.alertHeading = 'Kunden löschen';
-                this.alertParagraph = 'Möchten Sie den ausgewählten Kunden wirklich löschen?';
-                this.alertOkayButton = 'Löschen';
-            }
+        isEditableField(field) {
+            return field !== 'id' && field !== 'checkbox' && field !== 'edit' && field !== 'delete';
+        },
 
-            if (this.selectedCustomers.length > 1) {
-                this.alertHeading = 'Kunden löschen';
-                this.alertParagraph = 'Möchten Sie die ausgewählten Kunden wirklich löschen?';
-                this.alertOkayButton = 'Löschen';
+        getFieldRules(field) {
+            switch (field) {
+                case 'id':
+                    return [];
+                case 'firstName':
+                    return [value => !!value || 'Vorname ist erforderlich'];
+                case 'lastName':
+                    return [value => !!value || 'Nachname ist erforderlich'];
+                case 'email':
+                    return [
+                        value => !!value || 'Email ist erforderlich',
+                        value => /.+@.+\..+/.test(value) || 'Email muss gültig sein'
+                    ];
+                case 'phoneNumber':
+                    return [value => !!value || 'Telefonnummer ist erforderlich'];
+                case 'addressLine':
+                    return [value => !!value || 'Adresse ist erforderlich'];
+                case 'postalCode':
+                    return [value => !!value || 'PLZ ist erforderlich'];
+                case 'city':
+                    return [value => !!value || 'Stadt ist erforderlich'];
+                default:
+                    return [];
             }
+        },
 
-            if (this.editCustomerId) {
-                this.alertHeading = 'Kunde bearbeiten';
-                this.alertParagraph = 'Möchten Sie die Änderungen wirklich speichern?';
-                this.alertOkayButton = 'Speichern';
-            }
+        showAlert(heading, paragraph, okayButton, action) {
+            this.alertHeading = heading;
+            this.alertParagraph = paragraph;
+            this.alertOkayButton = okayButton;
+            this.confirmAction = action;
             this.isAlertVisible = true;
         },
 
         handleConfirmation() {
-            if (this.customerToDelete) {
-                this.deleteCustomer();
-            } else {
-                this.deleteCustomers();
+            if (this.confirmAction) {
+                this.confirmAction();
             }
             this.isAlertVisible = false;
         },
 
-        async loadItems(options) {
+        async loadItems() {
             this.loading = true;
-            const { page = 1, itemsPerPage = 10, sortBy = [{ key: 'firstName' }], sortDesc = [false] } = options || {};
+            const { page, itemsPerPage, sortBy, sortDesc } = this.options;
             try {
                 const response = await axios.get('/api/customers', {
                     params: {
                         page,
                         itemsPerPage,
-                        sortBy: sortBy.length > 0 ? sortBy[0].key : '',
-                        sortDesc: sortDesc.length > 0 ? sortDesc[0] : true,
+                        sortBy: sortBy.length > 0 ? sortBy[0].key : 'id',
+                        sortDesc: sortDesc.length > 0 ? sortDesc[0] : false,
                     },
                 });
                 this.customers = response.data.items;
@@ -174,19 +209,41 @@ export default {
             }
             this.loading = false;
         },
+
         confirmDelete(id) {
             this.customerToDelete = id;
-            this.showAlert();
+            this.showAlert(
+                'Kunde löschen',
+                'Möchten Sie den ausgewählten Kunden wirklich löschen?',
+                'Löschen',
+                this.deleteCustomer
+            );
         },
+
         confirmDeleteCustomers() {
             if (this.selectedCustomers.length > 0) {
-                this.showAlert();
+                const message = this.selectedCustomers.length === 1
+                    ? 'Möchten Sie den ausgewählten Kunden wirklich löschen?'
+                    : 'Möchten Sie die ausgewählten Kunden wirklich löschen?';
+
+                this.showAlert(
+                    'Kunden löschen',
+                    message,
+                    'Löschen',
+                    this.deleteCustomers
+                );
             }
         },
 
-        confirmEditCustomer(editCustomerId) {
-            this.editCustomerId = editCustomerId;
-            this.showAlert();
+        confirmEditCustomer() {
+            if (this.editCustomerId) {
+                this.showAlert(
+                    'Kunde bearbeiten',
+                    'Möchten Sie die Änderungen wirklich speichern?',
+                    'Speichern',
+                    this.updateCustomer
+                );
+            }
         },
 
         async deleteCustomer() {
@@ -195,7 +252,8 @@ export default {
                     await axios.delete(`/api/customers/${this.customerToDelete}`);
                     this.customers = this.customers.filter(customer => customer.id !== this.customerToDelete);
                     this.customerToDelete = null;
-                    this.isAlertVisible = false;
+
+                    this.selectedCustomers = this.selectedCustomers.filter(id => id !== this.customerToDelete);
                 } catch (error) {
                     console.error('Fehler beim Löschen des Kunden:', error);
                 }
@@ -220,11 +278,39 @@ export default {
         editCustomerDetails(customer) {
             this.editCustomerId = customer.id;
             this.editCustomer = { ...customer };
+            delete this.editCustomer.id;
         },
+
+        async updateCustomer() {
+            try {
+                const formattedData = {
+                    firstname: this.editCustomer.firstName,
+                    lastName: this.editCustomer.lastName,
+                    email: this.editCustomer.email,
+                    phoneNumber: this.editCustomer.phoneNumber,
+                    addressLine: this.editCustomer.addressLine,
+                    postalCode: this.editCustomer.postalCode,
+                    city: this.editCustomer.city,
+                    company: this.editCustomer.company
+                };
+
+                await axios.put(`/api/customers/${this.editCustomerId}`, formattedData);
+                this.cancelEdit();
+                await this.loadItems();
+            } catch (error) {
+                console.error('Fehler beim Aktualisieren des Kunden:', error.response?.data?.error || error.message);
+                alert('Fehler beim Aktualisieren des Kunden: ' + (error.response?.data?.error || error.message));
+            }
+        },
+
         saveCustomer() {
+            this.confirmEditCustomer();
+        },
+
+        cancelEdit() {
             this.editCustomerId = null;
             this.editCustomer = {};
-        },
+        }
     }
 }
 </script>
@@ -238,7 +324,7 @@ export default {
 }
 
 .scrollable-table {
-    max-height: 800px;
+    min-height: 900px !important;
     overflow-y: auto;
 }
 
@@ -255,7 +341,7 @@ export default {
 
 .table-container {
     position: relative;
-    width: 100%;
+    width: 1500px;
 }
 
 .custom-table {
@@ -295,37 +381,5 @@ export default {
 
 .table-icon {
     width: 0.5vh;
-}
-
-@media only screen and (max-width: 600px) {
-    .table-container {
-        width: 50%;
-        height: 50%;
-    }
-
-    .custom-table {
-        width: 50%;
-        height: 50%;
-    }
-}
-
-@media only screen and (min-height: 1080px) {
-    .table-container {
-        height: 130%;
-    }
-
-    .custom-table {
-        height: 130%;
-    }
-}
-
-@media only screen and (min-height: 1440px) {
-    .table-container {
-        height: 150%;
-    }
-
-    .custom-table {
-        height: 150%;
-    }
 }
 </style>

@@ -6,7 +6,7 @@ use App\Models\Car;
 use App\Http\Resources\CarResource;
 use Illuminate\Http\Request;
 
-class CarDetailsController extends Controller
+class CarDetailsController extends CarController
 {
     public function details($kennzeichen)
     {

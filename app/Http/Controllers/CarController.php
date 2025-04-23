@@ -15,7 +15,7 @@ class CarController extends Controller
         try {
             $validatedData = $request->validate([
                 'Kennzeichen' => 'required|string',
-                'Fahrzeugklasse' => 'nullable|string',
+                'Fahrzeugklasse' => 'nullable|integer',
                 'Automarke' => 'nullable|string',
                 'Typ' => 'nullable|string',
                 'Farbe' => 'nullable|string',
@@ -26,7 +26,6 @@ class CarController extends Controller
 
             $car = Car::create($validatedData);
 
-            // Bilder speichern, falls vorhanden
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $path = $image->store('cars');
@@ -94,7 +93,7 @@ class CarController extends Controller
 
     public function destroyMultiple(Request $request)
     {
-        $ids = $request->input('ids'); // Erwartet array
+        $ids = $request->input('ids');
 
         if (!is_array($ids) || empty($ids)) {
             return response()->json(['error' => 'Keine IDs angegeben.'], 400);
@@ -112,17 +111,20 @@ class CarController extends Controller
         return response()->json(['success' => true, 'message' => 'Fahrzeuge gelöscht.']);
     }
 
-    public function update(Request $request, Car $car)
+    public function update(Request $request, $kennzeichen)
     {
         try {
+            $car = Car::where('Kennzeichen', $kennzeichen)->firstOrFail();
+
             $validatedData = $request->validate([
                 'Kennzeichen' => 'required|string',
-                'Fahrzeugklasse' => 'nullable|string',
+                'Fahrzeugklasse' => 'nullable|integer',
                 'Automarke' => 'nullable|string',
                 'Typ' => 'nullable|string',
                 'Farbe' => 'nullable|string',
                 'Sonstiges' => 'nullable|string',
-                'image' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
+                'images' => 'nullable|array',
+                'images.*' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
             ]);
 
             $car->update($validatedData);
@@ -133,8 +135,6 @@ class CarController extends Controller
                     $car->images()->create(['path' => $path]);
                 }
             }
-
-            $car->save();
 
             return response()->json([
                 'message' => 'Fahrzeug erfolgreich aktualisiert',

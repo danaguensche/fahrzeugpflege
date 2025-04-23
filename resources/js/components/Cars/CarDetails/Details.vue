@@ -33,7 +33,7 @@
               <td class="text-left">{{ labels[key] || key }}</td>
               <td class="text-left">
                 <span v-if="carDetails.data.customer">
-                  <a :href="linkToCustomer">{{ carDetails.data.customer.firstname }} {{
+                  <a :href="`/kunden/kundendetails/${carDetails.data.customer.id}`">{{ carDetails.data.customer.firstname }} {{
                     carDetails.data.customer.lastname }} </a>
                 </span>
                 <span v-else>
