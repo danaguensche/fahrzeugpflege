@@ -41,16 +41,10 @@ export default {
         async getUser() {
             try {
                 const token = localStorage.getItem('token');
-                if (!token) {
-                    console.error("Kein Token gefunden!");
-                    return;
-                }
 
-                const response = await axios.get("http://localhost:8000/api/users/me", {
+                const response = await axios.get("http://172.17.100.242/api/users/me", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-
-                console.log("API-Antwort:", response.data);
                 this.userData = {
                     firstName: response.data.data.firstName || "",
                     lastName: response.data.data.lastName || "",
