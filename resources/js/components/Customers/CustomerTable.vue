@@ -57,7 +57,7 @@
                                 <v-btn variant="plain" icon
                                     @click="editCustomerId === item.id ? saveCustomer() : editCustomerDetails(item)">
                                     <v-icon>{{ editCustomerId === item.id ? 'mdi-content-save' : 'mdi-pencil'
-                                        }}</v-icon>
+                                    }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>

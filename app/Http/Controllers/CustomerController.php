@@ -98,7 +98,7 @@ class CustomerController extends Controller
                 'company' => 'nullable|string|max:255',
                 'firstname' => 'required|string|max:255',
                 'lastName' => 'required|string|max:255',
-                'email' => 'required|email|unique:customers,email,' . $id, // Modified this line
+                'email' => 'required|email|unique:customers,email,' . $id,
                 'phoneNumber' => 'required|string',
                 'addressLine' => 'required|string',
                 'postalCode' => 'required|string',
