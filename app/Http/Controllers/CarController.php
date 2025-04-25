@@ -15,28 +15,28 @@ class CarController extends Controller
         try {
             $validatedData = $request->validate([
                 'Kennzeichen' => 'required|string',
-                'Fahrzeugklasse' => 'nullable|string',
+                'Fahrzeugklasse' => 'nullable|integer',
                 'Automarke' => 'nullable|string',
                 'Typ' => 'nullable|string',
                 'Farbe' => 'nullable|string',
                 'Sonstiges' => 'nullable|string',
-                'image' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
+                'images' => 'nullable|array',
+                'images.*' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
             ]);
 
-            $car = new Car();
-            $car->fill($validatedData);
+            $car = Car::create($validatedData);
 
-            if ($request->hasFile('image')) {
-                $image = $request->file('image')->store('cars');
-                $car->image = Storage::url($image);
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $path = $image->store('cars');
+                    $car->images()->create(['path' => $path]);
+                }
             }
-
-            $car->save();
+            $car->load('images');
 
             return response()->json([
                 'message' => 'Fahrzeug erfolgreich gespeichert',
                 'car' => new CarResource($car),
-                'image_path' => $car->image
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['error' => $e->errors()], 422);
@@ -46,14 +46,14 @@ class CarController extends Controller
         }
     }
 
+
     public function index()
     {
-
         $perPage = request()->input('itemsPerPage', 20);
         $page = request()->input('page', 1);
         $sortBy = request()->input('sortBy', 'id');
         $sortDesc = request()->input('sortDesc', 'false') === 'true';
-        $query = Car::query();
+        $query = Car::with('images');
         if ($sortBy) {
             $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
         }
@@ -66,57 +66,75 @@ class CarController extends Controller
         ]);
     }
 
-    public function show(Car $car)
+    public function show($kennzeichen)
     {
+        $car = Car::with('images')->where('Kennzeichen', $kennzeichen)->firstOrFail();
         return new CarResource($car);
     }
+
+
 
     public function destroy($kennzeichen)
     {
         $car = Car::where('Kennzeichen', $kennzeichen)->first();
+
         if ($car) {
-            if ($car->image) {
-                $path = str_replace('/storage/', '', $car->image);
-                if (Storage::disk('public')->exists($path)) {
-                    Storage::disk('public')->delete($path);
-                }
+            foreach ($car->images as $image) {
+                Storage::disk('cars/')->delete($image->path);
+                $image->delete();
             }
 
             $car->delete();
-            return response()->json(['success' => true, 'message' => 'Fahrzeug wurde gelöscht.']);
+            return response()->json(['success' => true, 'message' => 'Fahrzeug und Bilder wurden gelöscht.']);
         } else {
             return response()->json(['success' => false, 'message' => 'Fahrzeug nicht gefunden.'], 404);
         }
     }
 
-    public function update(Request $request, Car $car)
+    public function destroyMultiple(Request $request)
+    {
+        $ids = $request->input('ids');
+
+        if (!is_array($ids) || empty($ids)) {
+            return response()->json(['error' => 'Keine IDs angegeben.'], 400);
+        }
+
+        $cars = Car::whereIn('id', $ids)->with('images')->get();
+        foreach ($cars as $car) {
+            foreach ($car->images as $image) {
+                Storage::disk('cars/')->delete($image->path);
+                $image->delete();
+            }
+            $car->delete();
+        }
+
+        return response()->json(['success' => true, 'message' => 'Fahrzeuge gelöscht.']);
+    }
+
+    public function update(Request $request, $kennzeichen)
     {
         try {
+            $car = Car::where('Kennzeichen', $kennzeichen)->firstOrFail();
+
             $validatedData = $request->validate([
                 'Kennzeichen' => 'required|string',
-                'Fahrzeugklasse' => 'nullable|string',
+                'Fahrzeugklasse' => 'nullable|integer',
                 'Automarke' => 'nullable|string',
                 'Typ' => 'nullable|string',
                 'Farbe' => 'nullable|string',
                 'Sonstiges' => 'nullable|string',
-                'image' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
+                'images' => 'nullable|array',
+                'images.*' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
             ]);
 
-            $car->fill($validatedData);
+            $car->update($validatedData);
 
-            if ($request->hasFile('image')) {
-                if ($car->image) {
-                    $path = str_replace('/storage/', '', $car->image);
-                    if (Storage::disk('public')->exists($path)) {
-                        Storage::disk('public')->delete($path);
-                    }
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $path = $image->store('cars');
+                    $car->images()->create(['path' => $path]);
                 }
-
-                $image = $request->file('image')->store('cars', 'public');
-                $car->image = Storage::url($image);
             }
-
-            $car->save();
 
             return response()->json([
                 'message' => 'Fahrzeug erfolgreich aktualisiert',

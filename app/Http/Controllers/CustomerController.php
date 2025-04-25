@@ -5,38 +5,43 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Http\Resources\CustomerResource;
-use App\Http\Resources\CustomerCollection;
+use Illuminate\Support\Facades\Log;
 
 class CustomerController extends Controller
 {
     public function store(Request $request)
     {
+        try {
+            $validated = $request->validate([
+                'company' => 'nullable|string|max:255',
+                'firstname' => 'required|string|max:255',
+                'lastname' => 'required|string|max:255',
+                'email' => 'required|email|unique:customers,email',
+                'phonenumber' => 'required|string',
+                'addressline' => 'required|string',
+                'postalcode' => 'required|string',
+                'city' => 'required|string',
+            ]);
 
-        $request->validate([
-            'company' => 'nullable|string|max:255',
-            'firstname' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255',
-            'email' => 'required|email|unique:customers,email',
-            'phonenumber' => 'required|string',
-            'addressline' => 'required|string',
-            'postalcode' => 'required|string',
-            'city' => 'required|string',
-        ]);
+            $customer = Customer::create($validated);
 
-        $customer = new Customer();
-        $customer->company = $request->company;
-        $customer->firstname = $request->firstname;
-        $customer->lastname = $request->lastname;
-        $customer->email = $request->email;
-        $customer->phonenumber = $request->phonenumber;
-        $customer->addressline = $request->addressline;
-        $customer->postalcode = $request->postalcode;
-        $customer->city = $request->city;
-
-        if ($customer->save()) {
-            return response()->json(['success' => true, 'message' => 'Kunde wurde hinzugefügt.']);
-        } else {
-            return response()->json(['success' => false, 'message' => 'Beim Erstellen des Kunden ist ein Fehler aufgetreten.'], 500);
+            return response()->json([
+                'success' => true,
+                'message' => 'Kunde wurde hinzugefügt.',
+                'data' => $customer
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validierungsfehler',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ein Fehler ist aufgetreten',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -82,5 +87,44 @@ class CustomerController extends Controller
     {
         Customer::destroy($request->ids);
         return response()->json(null, 204);
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $customer = Customer::where('id', $id)->firstOrFail();
+
+            $validatedData = $request->validate([
+                'company' => 'nullable|string|max:255',
+                'firstname' => 'required|string|max:255',
+                'lastName' => 'required|string|max:255',
+                'email' => 'required|email|unique:customers,email,' . $id,
+                'phoneNumber' => 'required|string',
+                'addressLine' => 'required|string',
+                'postalCode' => 'required|string',
+                'city' => 'required|string',
+            ]);
+
+            $customer->update([
+                'company' => $validatedData['company'] ?? null,
+                'firstname' => $validatedData['firstname'],
+                'lastname' => $validatedData['lastName'],
+                'email' => $validatedData['email'],
+                'phonenumber' => $validatedData['phoneNumber'],
+                'addressline' => $validatedData['addressLine'],
+                'postalcode' => $validatedData['postalCode'],
+                'city' => $validatedData['city'],
+            ]);
+
+            return response()->json([
+                'message' => 'Kunde erfolgreich aktualisiert',
+                'customer' => new CustomerResource($customer)
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Aktualisieren des Kunden: ' . $e->getMessage());
+            return response()->json(['error' => 'Fehler beim Aktualisieren des Kunden'], 500);
+        }
     }
 }

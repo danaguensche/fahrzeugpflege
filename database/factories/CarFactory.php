@@ -16,7 +16,6 @@ class CarFactory extends Factory
             'typ' => $this->faker->word,
             'farbe' => $this->faker->colorName,
             'sonstiges' => $this->faker->optional()->sentence,
-            'image' => $this->faker->imageUrl(640, 480, 'cars', true),
         ];
     }
 }

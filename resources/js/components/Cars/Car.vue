@@ -114,13 +114,6 @@ export default {
 
 }
 
-.content-container {
-    /* Abstand Formular und Searchbar */
-    margin-top: -110px;
-    display: flex;
-    justify-content: flex-end;
-}
-
 .form-container {
     margin-top: 1vh;
     margin-bottom: 1vh;

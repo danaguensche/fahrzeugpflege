@@ -7,7 +7,6 @@ import ReportForm from './components/Reports/ReportForm.vue';
 import ReportsPage from './components/pages/ReportsPage.vue';
 import ProfilePage from './components/pages/ProfilePage.vue';
 import SettingsPage from './components/pages/SettingsPage.vue';
-import LogoutPage from './components/pages/LogoutPage.vue';
 import LoginPage from './components/pages/LoginPage.vue';
 import SignUpPage from './components/pages/SignUpPage.vue';
 import WelcomePage from './components/pages/WelcomePage.vue';
@@ -60,10 +59,6 @@ const routes = [
     {
         path: '/einstellungen',
         component: SettingsPage
-    },
-    {
-        path: '/abmelden',
-        component: LogoutPage
     },
     {
         path: '/login',

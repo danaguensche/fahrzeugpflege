@@ -10,6 +10,7 @@ class Car extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'Kennzeichen',
         'Fahrzeugklasse',
         'Automarke',
@@ -22,6 +23,11 @@ class Car extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(Image::class);
     }
 
     public function carGroup()
