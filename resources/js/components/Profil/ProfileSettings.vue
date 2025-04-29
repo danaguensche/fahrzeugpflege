@@ -137,7 +137,7 @@
                           d-flex
                           justify-end">
             <CancelButton :cancelEdit="cancelEdit"></CancelButton>
-            <SaveButton :saveLoading="saveLoading"></SaveButton>
+            <SaveButton :saveData="saveUserData"></SaveButton>
           </div>
         </v-sheet>
 

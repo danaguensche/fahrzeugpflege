@@ -50,8 +50,8 @@
 
           <!-- Bearbeitungsmodus Aktionen -->
           <template v-if="editMode">
-            <CancelButton :saveLoading="saveLoading" @cancelEdit="cancelEdit"></CancelButton>
-            <SaveButton :saveLoading="saveLoading" @saveCarData="saveCarData"></SaveButton>
+            <CancelButton :cancelEdit="cancelEdit"></CancelButton>
+            <SaveButton :saveCarData="saveCarData"></SaveButton>
           </template>
 
           <!-- Ansichtsmodus Aktionen -->

@@ -1,5 +1,5 @@
 <template>
-    <v-btn variant="elevated" color="success" prepend-icon="mdi-content-save" class="ml-2" @click="saveCarData"
+    <v-btn variant="elevated" color="success" prepend-icon="mdi-content-save" class="ml-2" @click="saveData"
         :loading="saveLoading">
         Speichern
     </v-btn>
@@ -13,7 +13,7 @@ export default {
             type: Boolean,
             default: false
         },
-        saveCarData: {
+        saveData: {
             type: Function,
             default: () => {}
         }
