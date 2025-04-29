@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('car_groups')) {
         Schema::create('car_groups', function (Blueprint $table) {
             $table->id()->primary()->autoIncrement();
             $table->string('title', 50)->nullable();
@@ -74,6 +75,7 @@ return new class extends Migration
             )->restrictOnDelete()->cascadeOnUpdate();
         });
     }
+}
 
     /**
      * Reverse the migrations.
@@ -81,8 +83,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('cars', function (Blueprint $table) {
-            $table->dropForeign('cars_fahrzeugklasse_foreign');
-            $table->dropIndex('cars_fahrzeugklasse_foreign');
+            $table->dropForeign(['Fahrzeugklasse']);
             $table->text('Fahrzeugklasse')->nullable()->change();
         });
         Schema::dropIfExists('extra_charges');
@@ -91,6 +92,6 @@ return new class extends Migration
         Schema::dropIfExists('services');
         Schema::dropIfExists('price_conditions');
         Schema::dropIfExists('car_groups');
-        
     }
+    
 };

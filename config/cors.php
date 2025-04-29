@@ -19,13 +19,23 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://172.17.100.242', 'localhost:8000/*'],
+    'allowed_origins' => ['*'],
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['Authorization', 'Content-Type'],
+    'allowed_headers' => [
+        'x-requested-with',
+        'authorization',
+        'content-type',
+        'accept',
+        'x-csrf-token'
+    ],
 
-    'exposed_headers' => [],
+    'exposed_headers' => [
+        'x-csrf-token',
+        'x-rate-limit-remaining'
+    ],
+
 
     'max_age' => 86400,
 

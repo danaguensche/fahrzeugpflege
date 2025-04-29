@@ -11,26 +11,28 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cars', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-            $table->text('Kennzeichen');
-            $table->text('Fahrzeugklasse')->nullable();
-            $table->text('Automarke')->nullable();
-            $table->text('Typ')->nullable();
-            $table->text('Farbe')->nullable();
-            $table->text('Sonstiges')->nullable();
-            $table->longText('image')->nullable();
-            $table->unsignedBigInteger('customer_id')->nullable(); 
-            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('set null');
-        });
-    }    
+        if (!Schema::hasTable('cars')) {
+            Schema::create('cars', function (Blueprint $table) {
+                $table->id();
+                $table->timestamps();
+                $table->text('Kennzeichen');
+                $table->text('Fahrzeugklasse')->nullable();
+                $table->text('Automarke')->nullable();
+                $table->text('Typ')->nullable();
+                $table->text('Farbe')->nullable();
+                $table->text('Sonstiges')->nullable();
+                $table->longText('image')->nullable();
+                $table->unsignedBigInteger('customer_id')->nullable();
+                $table->foreign('customer_id')->references('id')->on('customers')->onDelete('set null');
+            });
+        }
+    }
 
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+    public function down()
     {
-        //
+        Schema::dropIfExists('cars');
     }
 };
