@@ -5,169 +5,38 @@
 
     <!-- Skeleton Loader wenn loading true ist -->
     <template v-if="loading">
-      <v-card class="pa-6 rounded-xl" elevation="2">
-        <v-skeleton-loader
-          type="heading,
-                list-item-three-line,
-                table-heading,
-                table-row-divider,
-                table-row,
-                table-row-divider,
-                table-row">
-        </v-skeleton-loader>
-      </v-card>
+      <Loader></Loader>
     </template>
-
-
     <!-- Vollständige Ansicht der Daten wenn loading false ist -->
 
     <template v-else>
-
       <!-- Header der Karte -->
-      <v-card class="rounded-xl"
-              elevation="3">
-
-        <v-card-title class="d-flex
-                            align-center
-                            pa-4 bg-primary
-                            text-white
-                            rounded-t-xl">
-
-          <v-icon size="24"
-                  class="mr-2">
-                  mdi-account
-          </v-icon>
-
-          <span class="text-h5
-                       font-weight-medium">
-            Kundendetails
-          </span>
-
-          <v-spacer></v-spacer>
-
-          <v-btn icon @click="switchEditMode"
-                      variant="text"
-                      color="white">
-
-            <v-tooltip activator="parent"
-                       location="bottom">
-                       Bearbeiten
-            </v-tooltip>
-
-            <v-icon>mdi-pencil</v-icon>
-          </v-btn>
-
-        </v-card-title>
-
+      <v-card class="rounded-xl" elevation="3">
+        <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon">
+        </Header>
 
         <!-- Persönliche Informationen -->
-        <v-card-text class="px-4
-                            pt-4
-                            pb-0">
-
-          <v-sheet class="rounded-lg
-                          mb-4"
-                   elevation="1">
-
-            <div class="pa-4
-                        bg-primary-lighten-5
-                        rounded-t-lg
-                        d-flex align-center
-                        justify-space-between">
-
-              <span class="text-h6
-                          font-weight-medium">
-                          Persönliche Informationen
-              </span>
-
-              <div v-if="editMode">
-                <v-chip color="warning"
-                        variant="flat">
-                        Bearbeitungsmodus
-              </v-chip>
-              </div>
-              <div v-else>
-                <v-chip color="success"
-                        variant="flat">
-                        Ansichtsmodus
-                </v-chip>
-              </div>
-            </div>
+        <v-card-text class="px-4 pt-4 pb-0">
+          <v-sheet>
+            <InformationHeader :title="'Persönliche Informationen'" :editMode="editMode" :icon="headerIcon"
+              :getIconForField="getIconForField">
+            </InformationHeader>
 
             <!-- Ansichtsmodus -->
-            <v-list class="bg-transparent"
-                    v-if="!editMode">
-              <template v-for="key in personalInfoKeys" :key="key">
-
-                <v-list-item v-if="customerDetails.data[key] !== undefined">
-
-                  <template v-slot:prepend>
-                    <v-icon :icon="getIconForField(key)"
-                            color="primary" 
-                            class="mr-2">
-                  </v-icon>
-                  </template>
-
-                  <v-list-item-title class="font-weight-medium">
-                    {{ labels[key] || key }}
-                  </v-list-item-title>
-
-                  <v-list-item-subtitle class="mt-1 text-body-1">
-
-                    <template v-if="customerDetails.data[key] === null || customerDetails.data[key] === ''">
-                      <span class="text-grey">
-                        Keine Daten vorhanden
-                      </span>
-                    </template>
-
-                    <template v-else>
-                      {{ customerDetails.data[key] }}
-                    </template>
-
-                  </v-list-item-subtitle>
-                </v-list-item>
-                <v-divider v-if="key !== personalInfoKeys[personalInfoKeys.length - 1]"></v-divider>
-              </template>
-            </v-list>
+            <InfoList v-if="!editMode" :details="customerDetails" :labels="labels" :infoKeys="personalInfoKeys"
+              :getIconForField="getIconForField">
+            </InfoList>
 
 
             <!-- Bearbeitungsmodus -->
-
-            <div class="pa-4" v-else>
-              <v-form ref="personalInfoForm">
-                <template v-for="key in personalInfoKeys" :key="key">
-                  <v-row no-gutters class="mb-4">
-                    <v-col cols="12">
-                      <div class="d-flex align-center mb-1">
-                        <v-icon :icon="getIconForField(key)"
-                                color="primary"
-                                class="mr-2">
-                        </v-icon>
-                        <span class="font-weight-medium">
-                          {{ labels[key] }}
-                        </span>
-                      </div>
-                      <v-text-field v-model="editedCustomerData[key]"
-                                    variant="outlined" 
-                                    density="comfortable"
-                                    hide-details="auto"
-                                    :readonly="key === 'id'" 
-                                    :disabled="key === 'id'"
-                                    :hint="key === 'id' ? 'Kundennummer kann nicht bearbeitet werden' : ''"
-                                    :persistent-hint="key === 'id'">
-                      </v-text-field>
-                    </v-col>
-                  </v-row>
-                </template>
-              </v-form>
-            </div>
+            <InfoListEditMode v-else :personalInfoKeys="personalInfoKeys" :labels="labels"
+              :editedData="editedCustomerData" :getIconForField="getIconForField">
+            </InfoListEditMode>
           </v-sheet>
 
           <!-- Adressinformationen -->
 
-          <v-sheet class="rounded-lg 
-                          mb-4"
-                   elevation="1">
+          <v-sheet>
 
             <div class="pa-4
                         bg-primary-lighten-5
@@ -178,18 +47,16 @@
               </span>
             </div>
 
-            <v-list class="bg-transparent"
-                          v-if="!editMode">
+            <!-- Ansichtsmodus -->
+            <v-list class="bg-transparent" v-if="!editMode">
 
               <template v-for="key in addressInfoKeys" :key="key">
 
                 <v-list-item v-if="customerDetails.data[key] !== undefined">
 
                   <template v-slot:prepend>
-                    <v-icon :icon="getIconForField(key)"
-                            color="primary"
-                            class="mr-2">
-                          </v-icon>
+                    <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
+                    </v-icon>
                   </template>
 
                   <v-list-item-title class="font-weight-medium">
@@ -219,24 +86,19 @@
               <v-form ref="addressInfoForm">
 
                 <template v-for="key in addressInfoKeys" :key="key">
-                  <v-row no-gutters
-                         class="mb-4">
+                  <v-row no-gutters class="mb-4">
                     <v-col cols="12">
                       <div class="d-flex
                                   align-center
                                   mb-1">
-                        <v-icon :icon="getIconForField(key)"
-                                 color="primary" 
-                                 class="mr-2">
+                        <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
                         </v-icon>
                         <span class="font-weight-medium">
                           {{ labels[key] }}
                         </span>
                       </div>
-                      <v-text-field v-model="editedCustomerData[key]"
-                                    variant="outlined"
-                                    density="comfortable"
-                                    hide-details="auto">
+                      <v-text-field v-model="editedCustomerData[key]" variant="outlined" density="comfortable"
+                        hide-details="auto">
                       </v-text-field>
                     </v-col>
                   </v-row>
@@ -248,8 +110,7 @@
 
 
           <!-- Fahrzeuge -->
-          <v-sheet class="rounded-lg mb-4"
-                   elevation="1">
+          <v-sheet>
             <div class="pa-4
                         bg-primary-lighten-5
                         rounded-t-lg
@@ -258,31 +119,26 @@
 
               <span class="text-h6
                            font-weight-medium">
-                           Fahrzeuge
+                Fahrzeuge
               </span>
 
-              <v-chip class="ml-2"
-                      color="primary"
-                      size="small"
-                      variant="flat">
+              <v-chip class="ml-2" color="primary" size="small" variant="flat">
                 {{ customerDetails.data.cars && customerDetails.data.cars.length || 0 }}
               </v-chip>
             </div>
 
             <template v-if="customerDetails.data.cars && customerDetails.data.cars.length > 0">
               <v-list class="bg-transparent">
-                
+
                 <template v-for="(car, index) in customerDetails.data.cars" :key="index">
                   <v-list-item :to="`/fahrzeuge/fahrzeugdetails/${car.Kennzeichen}`">
-                    
+
                     <template v-slot:prepend>
-                      <v-icon icon="mdi-car"
-                              color="primary"
-                              class="mr-2">
+                      <v-icon icon="mdi-car" color="primary" class="mr-2">
                       </v-icon>
-                    
+
                     </template>
-                    
+
                     <v-list-item-title class="font-weight-medium">
                       {{ car.Kennzeichen }}
                     </v-list-item-title>
@@ -304,7 +160,6 @@
               </v-list>
             </template>
 
-
             <!-- Wenn keine Fahrzeuge vorhanden sind -->
 
             <template v-else>
@@ -314,10 +169,7 @@
                               align-center
                               justify-center
                               pa-4">
-                    <v-icon icon="mdi-car-off"
-                            color="grey-lighten-1"
-                            size="32"
-                            class="mr-2">
+                    <v-icon icon="mdi-car-off" color="grey-lighten-1" size="32" class="mr-2">
                     </v-icon>
                     <span>Keine Fahrzeuge zugeordnet</span>
                   </div>
@@ -328,131 +180,72 @@
           </v-sheet>
 
           <!-- Metadaten -->
-          <v-sheet class="rounded-lg"
-                   elevation="1">
-            <div class="pa-4
-                        bg-primary-lighten-5
-                        rounded-t-lg">
-              <span class="text-h6
-                           font-weight-medium">
-                           Metadaten
-              </span>
-            </div>
-            <v-list class="bg-transparent">
-              <v-list-item>
-
-                <template v-slot:prepend>
-                  <v-icon icon="mdi-calendar-plus"
-                          color="primary"
-                          class="mr-2">
-                  </v-icon>
-                </template>
-
-                <v-list-item-title class="font-weight-medium">
-                  {{ labels.createdAt || 'Erstellt am' }}
-                </v-list-item-title>
-                <v-list-item-subtitle class="mt-1 text-body-1">
-                  {{ formattedCreatedAt }}
-                </v-list-item-subtitle>
-              </v-list-item>
-              <v-divider></v-divider>
-              <v-list-item>
-                
-                <template v-slot:prepend>
-                  <v-icon icon="mdi-calendar-refresh"
-                          color="primary"
-                          class="mr-2">
-                  </v-icon>
-                </template>
-
-                <v-list-item-title class="font-weight-medium">
-                  {{ labels.updatedAt || 'Zuletzt aktualisiert am'}}
-                </v-list-item-title>
-                <v-list-item-subtitle class="mt-1
-                                             text-body-1">
-                  {{ formattedUpdatedAt }}
-                </v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
-          </v-sheet>
+          <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt" :formattedUpdatedAt="formattedUpdatedAt">
+          </MetaData>
         </v-card-text>
 
         <v-card-actions class="pa-4">
-          <v-btn variant="outlined"
-                 color="primary"
-                 prepend-icon="mdi-arrow-left"
-                 @click="goBack">
-            Zurück
-          </v-btn>
+          <BackButton></BackButton>
           <v-spacer></v-spacer>
 
           <!-- Bearbeitungsmodus Aktionen -->
           <template v-if="editMode">
-            <v-btn variant="tonal"
-                   color="error" 
-                   prepend-icon="mdi-cancel" 
-                   @click="cancelEdit" 
-                   :loading="saveLoading">
-              Abbrechen
-            </v-btn>
-            <v-btn variant="elevated"
-                   color="success"
-                   prepend-icon="mdi-content-save"
-                   class="ml-2"
-                   @click="saveCustomerData" 
-                   :loading="saveLoading">
-              Speichern
-            </v-btn>
+            <CancelButton :saveLoading="saveLoading" @cancelEdit="cancelEdit"></CancelButton>
+            <SaveButton :saveLoading="saveLoading" @saveCarData="saveCarData"></SaveButton>
           </template>
 
           <!-- Ansichtsmodus Aktionen -->
           <template v-else>
-            <v-btn variant="tonal"
-                   color="secondary"
-                   prepend-icon="mdi-file-document-edit"
-                   @click="switchEditMode">
-              Bearbeiten
-            </v-btn>
-            <v-btn variant="elevated"
-                   color="primary" 
-                   prepend-icon="mdi-printer"
-                   class="ml-2"
-                  @click="printCustomerDetails">
-              Drucken
-            </v-btn>
+            <EditButton :switchEditMode="switchEditMode"></EditButton>
+            <PrintButton></PrintButton>
           </template>
         </v-card-actions>
       </v-card>
     </template>
 
     <!-- Snackbar für Benachrichtigungen -->
-    <v-snackbar v-model="snackbar.show"
-                :color="snackbar.color"
-                timeout="3000">
-      {{ snackbar.text }}
-
-      <template v-slot:actions>
-        <v-btn variant="text"
-        @click="snackbar.show = false">
-          Schließen
-        </v-btn>
-      </template>
-      
-    </v-snackbar>
+    <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false">
+    </SnackBar>
   </v-container>
 </template>
 
 <script>
 import axios from "axios";
 import SvgIcon from '@jamescoyle/vue-icon';
+import Loader from '../../Details/Loader.vue';
+import Header from '../../Details/Header.vue';
+import InformationHeader from "../../Details/InformationHeader.vue";
+import MetaData from '../../Details/MetaData.vue';
+import SnackBar from "../../Details/SnackBar.vue";
+import BackButton from '../../CommonSlots/BackButton.vue';
+import EditButton from '../../Details/EditButton.vue';
+import PrintButton from '../../CommonSlots/PrintButton.vue';
+import CancelButton from '../../Details/CancelButton.vue';
+import SaveButton from '../../Details/SaveButton.vue';
+import InfoList from "../../Details/InfoList.vue";
+import InfoListEditMode from "../../Details/InfoListEditMode.vue";
 
 export default {
   name: "Details",
   components: {
     SvgIcon,
+    Loader,
+    Header,
+    InformationHeader,
+    MetaData,
+    SnackBar,
+    BackButton,
+    EditButton,
+    PrintButton,
+    CancelButton,
+    SaveButton,
+    InfoList,
+    InfoListEditMode,
   },
   data() {
     return {
+      headerTitle: "Kundendetails",
+      headerIcon: "mdi-account",
       editMode: false,
       saveLoading: false,
       customerDetails: {
@@ -470,8 +263,8 @@ export default {
         postalCode: "Postleitzahl",
         city: "Stadt",
         cars: "Fahrzeuge",
-        createdAt: "Erstellt am",
-        updatedAt: "Zuletzt aktualisiert am",
+        created_at: "Erstellt am",
+        updated_at: "Zuletzt aktualisiert am",
       },
       loading: true,
       error: null,
@@ -489,16 +282,14 @@ export default {
       return ['id', 'company', 'firstName', 'lastName', 'email', 'phoneNumber'];
     },
 
-
     addressInfoKeys() {
       return ['addressLine', 'postalCode', 'city'];
     },
 
-
     formattedCreatedAt() {
       try {
-        return this.customerDetails.data?.createdAt
-          ? new Date(this.customerDetails.data.createdAt).toLocaleDateString('de-DE', {
+        return this.customerDetails.data?.created_at
+          ? new Date(this.customerDetails.data.created_at).toLocaleDateString('de-DE', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -515,8 +306,8 @@ export default {
 
     formattedUpdatedAt() {
       try {
-        return this.customerDetails.data?.updatedAt
-          ? new Date(this.customerDetails.data.updatedAt).toLocaleDateString('de-DE', {
+        return this.customerDetails.data?.updated_at
+          ? new Date(this.customerDetails.data.updated_at).toLocaleDateString('de-DE', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -647,12 +438,6 @@ export default {
         this.saveLoading = false;
       }
     },
-
-    showSnackbar(text, color = 'success') {
-      this.snackbar.text = text;
-      this.snackbar.color = color;
-      this.snackbar.show = true;
-    }
   }
 };
 </script>
