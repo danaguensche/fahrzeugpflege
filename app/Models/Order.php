@@ -9,6 +9,7 @@ class Order extends Model
 {
     /** @use HasFactory<\Database\Factories\OrderFactory> */
     use HasFactory;
+    public $timestamps = false;
     protected $fillable = [
         'id',
         'id_customer',
@@ -16,4 +17,21 @@ class Order extends Model
         'id_service_pricing',
         'created_at'
     ];
+
+    public function servicePricing()
+    {
+        return $this->belongsTo(ServicePricing::class, 'id');
+    }
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'id');
+    }
+    public function car()
+    {
+        return $this->belongsTo(Car::class, 'id');
+    }
+    public function orderExtraCharges()
+    {
+        return $this->hasMany(OrderExtraCharge::class); 
+    }
 }
