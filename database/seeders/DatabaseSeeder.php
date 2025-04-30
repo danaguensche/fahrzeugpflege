@@ -16,8 +16,14 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CarGroupSeeder::class,
             CarGroupSubgroupSeeder::class,
+            ServiceSeeder::class,
+            PriceConditionSeeder::class,
+            ServicePricingSeeder::class,
+            ExtraChargeSeeder::class,
             CarSeeder::class,
-            CustomerSeeder::class
+            CustomerSeeder::class,
+            OrderSeeder::class,
+            OrderExtraChargeSeeder::class
         ]);
     }
 }
