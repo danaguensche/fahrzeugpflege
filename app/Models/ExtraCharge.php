@@ -12,17 +12,18 @@ class ExtraCharge extends Model
     use HasFactory;
     protected $fillable = [
         'id',
-        'id_order',
+        #'id_order',
         'price',
-        'id_price_condition'
+        'id_price_condition',
+        'comment'
     ];
 
-    public function order()
-    {
-        return $this->belongsTo(Order::class, 'id');
-    }
     public function priceCondition()
     {
         return $this->belongsTo(PriceCondition::class, 'id');
+    }
+    public function orderExtraCharges()
+    {
+        return $this->hasMany(OrderExtraCharge::class); 
     }
 }
