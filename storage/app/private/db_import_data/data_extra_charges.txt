@@ -1,0 +1,5 @@
+8|einmalig|Felgenreinigung
+10|einmalig|Wachsversiegelung
+25|einmalig|Politur
+20|einmalig|Imprägnierung
+25|pro Stunde

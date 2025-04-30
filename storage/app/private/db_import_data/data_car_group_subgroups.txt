@@ -1,0 +1,12 @@
+1|Kleinwagen
+1|Cabrio
+1|Limousine Klein
+2|Mittelklassewagen Groß
+2|Oberklassefahrzeug
+2|SUV Klein
+2|Minivan Klein
+2|Kastenwagen Klein
+3|Transporter
+3|SUV Groß
+3|Sonderfahrzeug
+3|Luxusfahrzeug
