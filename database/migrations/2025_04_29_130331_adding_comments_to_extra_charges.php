@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('extra_charges', function (Blueprint $table) {
             //
-            $table->string('comment', 200)->nullable();
+            $table->string('comment', 200)->nullable()->after('id_price_condition');
         });
     }
 
