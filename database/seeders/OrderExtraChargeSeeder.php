@@ -4,9 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Order;
+use App\Models\OrderExtraCharge;
 
-class OrderSeeder extends Seeder
+class OrderExtraChargeSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,8 +14,8 @@ class OrderSeeder extends Seeder
     public function run(): void
     {
         //
-        Order::factory()
-            ->count(25)
-            ->create();
+        OrderExtraCharge::factory()
+        ->count(10)
+        ->create();
     }
 }
