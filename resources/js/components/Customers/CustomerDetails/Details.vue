@@ -1,14 +1,11 @@
-<!-- Wer diese Seite formatiert kommt in die Hölle -->
-
 <template>
   <v-container class="details-card">
-
     <!-- Skeleton Loader wenn loading true ist -->
     <template v-if="loading">
       <Loader></Loader>
     </template>
-    <!-- Vollständige Ansicht der Daten wenn loading false ist -->
 
+    <!-- Vollständige Ansicht der Daten wenn loading false ist -->
     <template v-else>
       <!-- Header der Karte -->
       <v-card class="rounded-xl" elevation="3">
@@ -27,7 +24,6 @@
               :getIconForField="getIconForField">
             </InfoList>
 
-
             <!-- Bearbeitungsmodus -->
             <InfoListEditMode v-else :personalInfoKeys="personalInfoKeys" :labels="labels"
               :editedData="editedCustomerData" :getIconForField="getIconForField">
@@ -35,25 +31,12 @@
           </v-sheet>
 
           <!-- Adressinformationen -->
-
           <v-sheet>
-
-            <div class="pa-4
-                        bg-primary-lighten-5
-                        rounded-t-lg">
-              <span class="text-h6
-                          font-weight-medium">
-                Adressinformationen
-              </span>
-            </div>
-
+            <DefaultHeader :title="'Adressinformationen'"></DefaultHeader>
             <!-- Ansichtsmodus -->
             <v-list class="bg-transparent" v-if="!editMode">
-
               <template v-for="key in addressInfoKeys" :key="key">
-
                 <v-list-item v-if="customerDetails.data[key] !== undefined">
-
                   <template v-slot:prepend>
                     <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
                     </v-icon>
@@ -63,17 +46,13 @@
                     {{ labels[key] || key }}
                   </v-list-item-title>
 
-                  <v-list-item-subtitle class="mt-1
-                                              text-body-1">
-
+                  <v-list-item-subtitle class="mt-1 text-body-1">
                     <template v-if="customerDetails.data[key] === null || customerDetails.data[key] === ''">
                       <span class="text-grey">Keine Daten vorhanden</span>
                     </template>
-
                     <template v-else>
                       {{ customerDetails.data[key] }}
                     </template>
-
                   </v-list-item-subtitle>
                 </v-list-item>
                 <v-divider v-if="key !== addressInfoKeys[addressInfoKeys.length - 1]">
@@ -84,13 +63,10 @@
             <!-- Bearbeitungsmodus -->
             <div class="pa-4" v-else>
               <v-form ref="addressInfoForm">
-
                 <template v-for="key in addressInfoKeys" :key="key">
                   <v-row no-gutters class="mb-4">
                     <v-col cols="12">
-                      <div class="d-flex
-                                  align-center
-                                  mb-1">
+                      <div class="d-flex align-center mb-1">
                         <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
                         </v-icon>
                         <span class="font-weight-medium">
@@ -103,72 +79,21 @@
                     </v-col>
                   </v-row>
                 </template>
-
               </v-form>
             </div>
           </v-sheet>
 
-
           <!-- Fahrzeuge -->
           <v-sheet>
-            <div class="pa-4
-                        bg-primary-lighten-5
-                        rounded-t-lg
-                        d-flex
-                        align-center">
-
-              <span class="text-h6
-                           font-weight-medium">
-                Fahrzeuge
-              </span>
-
-              <v-chip class="ml-2" color="primary" size="small" variant="flat">
-                {{ customerDetails.data.cars && customerDetails.data.cars.length || 0 }}
-              </v-chip>
-            </div>
-
-            <template v-if="customerDetails.data.cars && customerDetails.data.cars.length > 0">
-              <v-list class="bg-transparent">
-
-                <template v-for="(car, index) in customerDetails.data.cars" :key="index">
-                  <v-list-item :to="`/fahrzeuge/fahrzeugdetails/${car.Kennzeichen}`">
-
-                    <template v-slot:prepend>
-                      <v-icon icon="mdi-car" color="primary" class="mr-2">
-                      </v-icon>
-
-                    </template>
-
-                    <v-list-item-title class="font-weight-medium">
-                      {{ car.Kennzeichen }}
-                    </v-list-item-title>
-                    <v-list-item-subtitle class="mt-1
-                                                 text-body-1">
-                      {{ car.Automarke }} {{ car.Typ }}
-                    </v-list-item-subtitle>
-
-                    <template v-slot:append>
-                      <v-icon color="primary">
-                        mdi-chevron-right
-                      </v-icon>
-                    </template>
-
-                  </v-list-item>
-                  <v-divider v-if="index !== customerDetails.data.cars.length - 1"></v-divider>
-                </template>
-
-              </v-list>
-            </template>
-
+            <HeaderWithChip :customerDetails="customerDetails"></HeaderWithChip>
+            <CarList v-if="customerDetails.data.cars && customerDetails.data.cars.length > 0"
+              :cars="customerDetails.data.cars">
+            </CarList>
             <!-- Wenn keine Fahrzeuge vorhanden sind -->
-
             <template v-else>
               <v-list-item>
                 <v-list-item-subtitle class="text-grey">
-                  <div class="d-flex
-                              align-center
-                              justify-center
-                              pa-4">
+                  <div class="d-flex align-center justify-center pa-4">
                     <v-icon icon="mdi-car-off" color="grey-lighten-1" size="32" class="mr-2">
                     </v-icon>
                     <span>Keine Fahrzeuge zugeordnet</span>
@@ -176,7 +101,6 @@
                 </v-list-item-subtitle>
               </v-list-item>
             </template>
-
           </v-sheet>
 
           <!-- Metadaten -->
@@ -224,6 +148,9 @@ import CancelButton from '../../Details/CancelButton.vue';
 import SaveButton from '../../Details/SaveButton.vue';
 import InfoList from "../../Details/InfoList.vue";
 import InfoListEditMode from "../../Details/InfoListEditMode.vue";
+import DefaultHeader from "../../Details/DefaultHeader.vue";
+import HeaderWithChip from "../../Details/HeaderWithChip.vue";
+import CarList from "../../Details/CarList.vue";
 
 export default {
   name: "Details",
@@ -241,6 +168,9 @@ export default {
     SaveButton,
     InfoList,
     InfoListEditMode,
+    DefaultHeader,
+    HeaderWithChip,
+    CarList,
   },
   data() {
     return {
@@ -276,7 +206,6 @@ export default {
     };
   },
 
-
   computed: {
     personalInfoKeys() {
       return ['id', 'company', 'firstName', 'lastName', 'email', 'phoneNumber'];
@@ -287,51 +216,18 @@ export default {
     },
 
     formattedCreatedAt() {
-      try {
-        return this.customerDetails.data?.created_at
-          ? new Date(this.customerDetails.data.created_at).toLocaleDateString('de-DE', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          })
-          : 'Unbekannt';
-      } catch (e) {
-        console.error('Fehler beim Formatieren des Erstellungsdatums:', e);
-        return 'Ungültiges Datum';
-      }
+      return this.formatDate(this.customerDetails.data?.created_at);
     },
-
 
     formattedUpdatedAt() {
-      try {
-        return this.customerDetails.data?.updated_at
-          ? new Date(this.customerDetails.data.updated_at).toLocaleDateString('de-DE', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          })
-          : 'Unbekannt';
-      } catch (e) {
-        console.error('Fehler beim Formatieren des Aktualisierungsdatums:', e);
-        return 'Ungültiges Datum';
-      }
+      return this.formatDate(this.customerDetails.data?.updated_at);
     },
-  },
-
-  async created() {
-    // Initialisieren der Daten
-    this.editedCustomerData = {};
   },
 
   async mounted() {
     try {
       await this.getCustomer();
     } catch (error) {
-      console.error("Fehler beim Laden der Komponente:", error);
       this.error = error.message;
       this.showSnackbar(error.message, 'error');
     } finally {
@@ -339,8 +235,23 @@ export default {
     }
   },
 
-
   methods: {
+    formatDate(dateString) {
+      if (!dateString) return 'Unbekannt';
+
+      try {
+        return new Date(dateString).toLocaleDateString('de-DE', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch {
+        return 'Ungültiges Datum';
+      }
+    },
+
     async getCustomer() {
       try {
         if (!this.$route?.params?.id) {
@@ -356,16 +267,21 @@ export default {
         }
 
         this.customerDetails = data;
-        // Kopieren der Daten für die Bearbeitung
         this.editedCustomerData = { ...this.customerDetails.data };
-        console.log("Kundendetails:", this.customerDetails);
       } catch (error) {
         this.error = error.response?.data?.message || error.message;
-        console.error("Fehler beim Abrufen der Kundendetails:", this.error);
         this.showSnackbar("Fehler beim Laden der Kundendetails: " + this.error, 'error');
       } finally {
         this.loading = false;
       }
+    },
+
+    showSnackbar(text, color = 'success') {
+      this.snackbar = {
+        show: true,
+        text,
+        color,
+      };
     },
 
     getIconForField(key) {
@@ -385,27 +301,12 @@ export default {
       return iconMap[key] || "mdi-information-outline";
     },
 
-    goBack() {
-      try {
-        this.$router.back();
-      } catch (e) {
-        console.error("Fehler beim Navigieren zurück:", e);
-        // Fallback, falls $router.back() nicht funktioniert
-        window.history.back();
-      }
-    },
-
     switchEditMode() {
       this.editMode = !this.editMode;
 
       if (this.editMode) {
         this.editedCustomerData = { ...this.customerDetails.data };
       }
-    },
-
-    printCustomerDetails() {
-      console.log("Drucken der Kundendetails gestartet");
-      window.print();
     },
 
     cancelEdit() {
@@ -416,10 +317,22 @@ export default {
     async saveCustomerData() {
       this.saveLoading = true;
       this.error = null;
+
       try {
-        const response = await axios.put(
-          `/api/customer/customerdetails/${this.customerDetails.data.id}`,
-          this.editedCustomerData
+        // Validierung der Eingabedaten, weil Namen in CamelCase sind und Backend sie kleingeschrieben erwartet
+        const dataToSend = {
+          firstname: this.editedCustomerData.firstName,
+          lastname: this.editedCustomerData.lastName,
+          email: this.editedCustomerData.email,
+          phonenumber: this.editedCustomerData.phoneNumber,
+          addressline: this.editedCustomerData.addressLine,
+          postalcode: this.editedCustomerData.postalCode,
+          city: this.editedCustomerData.city,
+          company: this.editedCustomerData.company
+        };
+        await axios.put(
+          `/api/customer/customerdetails/${this.$route.params.id}`,
+          dataToSend
         );
 
         // Aktualisieren der Kundendaten nach erfolgreicher Speicherung
@@ -431,7 +344,6 @@ export default {
         this.editMode = false;
         this.showSnackbar("Kundendaten erfolgreich gespeichert", 'success');
       } catch (error) {
-        console.error("Fehler beim Speichern der Kundendaten:", error);
         const errorMessage = error.response?.data?.message || "Fehler beim Speichern der Kundendaten";
         this.showSnackbar(errorMessage, 'error');
       } finally {
@@ -443,7 +355,6 @@ export default {
 </script>
 
 <style scoped>
-/* Responsive adjustments */
 @media (max-width: 600px) {
   .details-card {
     padding: 12px;

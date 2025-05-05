@@ -15,11 +15,13 @@ Route::middleware('auth:sanctum')->get('/users/me', [UserController::class, 'me'
 Route::apiResource('cars', CarController::class)->parameters(['cars' => 'kennzeichen']);
 Route::get('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'details']);
 Route::delete('cars', [CarController::class, 'destroyMultiple']);
+Route::put('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'update']);
 
 // Customers Routes
 Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
 Route::get('customer/customerdetails/{id}', [CustomerDetailsController::class, 'details']);
 Route::delete('customers', [CustomerController::class, 'destroyMultiple']);
+Route::put('customer/customerdetails/{id}', [CustomerDetailsController::class, 'update']);
 
 // Logout Routes
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
