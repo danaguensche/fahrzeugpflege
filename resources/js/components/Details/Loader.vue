@@ -1,5 +1,5 @@
 <template>
-    <v-card class="pa-6 rounded-xl" elevation="2">
+    <v-card>
         <v-skeleton-loader
           type="heading,
                 list-item-three-line,
