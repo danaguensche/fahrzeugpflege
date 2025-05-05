@@ -13,7 +13,7 @@ return new class extends Migration
     {
         if (!Schema::hasTable('car_groups')) {
         Schema::create('car_groups', function (Blueprint $table) {
-            $table->id()->primary()->autoIncrement();
+            $table->id()->primary()->autoIncrement(False);
             $table->string('title', 50)->nullable();
         });
 

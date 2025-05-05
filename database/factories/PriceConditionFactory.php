@@ -18,6 +18,7 @@ class PriceConditionFactory extends Factory
     {
         return [
             //
+            'condition' => $this->faker->unique()->word,
         ];
     }
 }

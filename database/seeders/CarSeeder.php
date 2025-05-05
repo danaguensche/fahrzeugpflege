@@ -9,10 +9,9 @@ class CarSeeder extends Seeder
 {
     public function run(): void
     {
-        CarGroup::factory(5)->create()->each(function ($carGroup) {
-            Car::factory(10)->create([
-                'Fahrzeugklasse' => $carGroup->id 
-            ]);
-        });
+        Car::factory()
+            ->count(10)
+            ->create();
+
     }
 }

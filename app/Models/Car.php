@@ -39,5 +39,14 @@ class Car extends Model
     {
         return 'Kennzeichen';
     }
+        
+    public function carGroupSubgroup()
+    {
+        return $this->belongsTo(CarGroupSubgroup::class, 'Fahrzeugklasse');
+    }
+    public function orders()
+    {
+        return $this->hasMany(Order::class); 
+    }
 }
  

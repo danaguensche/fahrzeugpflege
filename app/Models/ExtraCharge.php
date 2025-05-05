@@ -7,6 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 
 class ExtraCharge extends Model
 {
+    public $timestamps = false;
     /** @use HasFactory<\Database\Factories\ExtraChargeFactory> */
     use HasFactory;
+    protected $fillable = [
+        'id',
+        #'id_order',
+        'price',
+        'id_price_condition',
+        'comment'
+    ];
+
+    public function priceCondition()
+    {
+        return $this->belongsTo(PriceCondition::class, 'id');
+    }
+    public function orderExtraCharges()
+    {
+        return $this->hasMany(OrderExtraCharge::class); 
+    }
 }

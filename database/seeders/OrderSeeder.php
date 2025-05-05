@@ -2,19 +2,20 @@
 
 namespace Database\Seeders;
 
-use App\Models\CarGroup;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Order;
 
-class CarGroupSeeder extends Seeder
+class OrderSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $POSSIBLE_GROUPS = 4;
-        CarGroup::factory()
-            ->count($POSSIBLE_GROUPS)
+        //
+        Order::factory()
+            ->count(25)
             ->create();
     }
 }
