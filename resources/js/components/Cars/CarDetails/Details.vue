@@ -1,12 +1,12 @@
 <template>
-    <v-container class="details-card">
+    <v-container>
         <!-- Skeleton Loader wenn loading true ist -->
         <Loader v-if="loading"></Loader>
 
         <!-- Vollständige Ansicht der Daten wenn loading false ist -->
         <template v-else>
             <!-- Header -->
-            <v-card class="rounded-xl" elevation="3">
+            <v-card>
                 <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon"></Header>
 
                 <ImageCarousel :images="images"></ImageCarousel>
@@ -283,11 +283,7 @@ export default {
 </script>
 
 <style scoped>
-.details-card {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
+
 
 @media (max-width: 600px) {
     .details-card {

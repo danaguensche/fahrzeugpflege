@@ -1,5 +1,5 @@
 <template>
-  <v-container class="details-card">
+  <v-container>
     <!-- Skeleton Loader wenn loading true ist -->
     <template v-if="loading">
       <Loader></Loader>
@@ -8,7 +8,7 @@
     <!-- Vollständige Ansicht der Daten wenn loading false ist -->
     <template v-else>
       <!-- Header der Karte -->
-      <v-card class="rounded-xl" elevation="3">
+      <v-card >
         <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon">
         </Header>
 
