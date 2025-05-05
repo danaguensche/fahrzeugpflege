@@ -145,7 +145,6 @@ export default {
     border-radius: 10px;
     box-shadow: 2px 0 5px var(--clr-box-shadow);
     user-select: none;
-
     transition: width 0.6s ease;
 }
 

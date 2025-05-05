@@ -2,9 +2,9 @@
     <v-card-title class="d-flex
                              align-center
                              pa-4
-                             bg-primary
+                             bg-blue-grey-darken-3
                              text-white
-                             rounded-t-xl">
+                             ">
         <v-icon size="24" class="mr-2">{{ icon }}</v-icon>
         <span class="text-h5 font-weight-medium">{{ title }}</span>
         <v-spacer></v-spacer>

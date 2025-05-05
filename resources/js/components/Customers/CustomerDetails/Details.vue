@@ -8,7 +8,7 @@
     <!-- Vollständige Ansicht der Daten wenn loading false ist -->
     <template v-else>
       <!-- Header der Karte -->
-      <v-card class="rounded-xl" elevation="3">
+      <v-card>
         <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon">
         </Header>
 
