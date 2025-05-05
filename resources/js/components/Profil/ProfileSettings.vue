@@ -15,7 +15,7 @@
 
     <template v-else>
       <!-- Header der Karte -->
-      <v-card>
+      <v-card class="rounded-xl" elevation="3">
         <Header :title="'Accountdetails'" :switchEditMode="switchEditMode" :editMode="editMode" :icon="'mdi-account'">
         </Header>
         <!-- Persönliche Informationen -->

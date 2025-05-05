@@ -1,10 +1,10 @@
 <template>
     <v-card-title class="d-flex
-                        align-center
-                        pa-4
-                        bg-blue-grey-darken-3
-                        text-white
-                        rounded-t-lg">
+                             align-center
+                             pa-4
+                             bg-primary
+                             text-white
+                             rounded-t-xl">
         <v-icon size="24" class="mr-2">{{ icon }}</v-icon>
         <span class="text-h5 font-weight-medium">{{ title }}</span>
         <v-spacer></v-spacer>
@@ -28,7 +28,7 @@ export default {
 
         switchEditMode: {
             type: Function,
-            default: () => { }
+            default: () => {}
         },
         icon: {
             type: String,

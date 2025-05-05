@@ -1,5 +1,8 @@
 <template>
+    <div class="page" :class="{ 'page-opened': isSidebarOpen }">
+        <BreadCrumbs :links="customLinks"></BreadCrumbs>
         <Details></Details>
+    </div>
 </template>
 
 <script>
@@ -29,14 +32,14 @@ export default {
 
 <style scoped>
 .page {
-    margin-left: 0px;
+    margin-left: 250px;
     transition: margin-left 0.3s ease;
     font-family: var(--font-family);
    
 }
 
 .page-opened {
-    margin-left: 120px;
+    margin-left: 370px;
     transition: margin-left 0.3s ease;
 }
 </style>

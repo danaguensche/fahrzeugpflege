@@ -1,5 +1,6 @@
 <template>
     <div class="page" :class="{ 'page-opened': isSidebarOpen }">
+        <BreadCrumbs :links="customLinks"></BreadCrumbs>
         <Details></Details>
     </div>
 </template>

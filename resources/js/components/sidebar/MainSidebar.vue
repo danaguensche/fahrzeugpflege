@@ -1,24 +1,30 @@
 <template>
-<v-navigation-drawer
-  v-model="isSidebarOpen"
-  app
-  class="sidebar-container"
-  :class="{ closed: !isSidebarOpen }"
-  :width="isSidebarOpen ? 250 : 100"
-  :mini-variant="!isSidebarOpen"
-  >
-  
-  </v-navigation-drawer>
+  <div id="sidebar">
+    <SidebarState></SidebarState>
+    <ReduceButton v-if="isSidebarOpen" @click="toggleSidebar">
+      <img class="arrow" src="../../../img/sidebar-img/arrow-icon.png">
+    </ReduceButton>
+    <ExpandButton v-else @click="toggleSidebar">
+      <img class="arrow" src="../../../img/sidebar-img/arrow-icon-mirrored.png">
+    </ExpandButton>
+
+  </div>
 </template>
 
 <script>
 
 import { mapState, mapMutations } from "vuex"
+import ReduceButton from "./Slots/ReduceButton.vue";
+import ExpandButton from "./Slots/ExpandButton.vue";
+import SidebarState from "./SidebarState.vue";
 
 export default {
   name: "MainSidebar",
   components: {
+    SidebarState,
 
+    ReduceButton,
+    ExpandButton,
   },
 
   computed: {
