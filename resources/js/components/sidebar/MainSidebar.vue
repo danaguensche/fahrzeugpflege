@@ -1,5 +1,5 @@
 <template>
-  <div id="sidebar">
+  <div class="main-sidebar-container">
     <SidebarState></SidebarState>
     <ReduceButton v-if="isSidebarOpen" @click="toggleSidebar">
       <img class="arrow" src="../../../img/sidebar-img/arrow-icon.png">
@@ -7,7 +7,7 @@
     <ExpandButton v-else @click="toggleSidebar">
       <img class="arrow" src="../../../img/sidebar-img/arrow-icon-mirrored.png">
     </ExpandButton>
-
+HALLO
   </div>
 </template>
 
@@ -38,31 +38,20 @@ export default {
 </script>
 
 <style scoped>
-.sidebar-container,
-.sidebar-container.closed {
-  transition: width 0.3s ease;
+.main-sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
 }
 
-
+.sidebar-container,
 .sidebar-container.closed {
-  width: 100px;
-  transition: width 0.3s ease;
-
-
-  height: 100vh;
-  background-color: var(--clr-bg-sidebar);
-  color: var(--clr-dark);
-  padding: 2.5vh;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: fixed;
-  border-radius: 10px;
-  box-shadow: 2px 0 5px var(--clr-box-shadow);
-  user-select: none;
-
+  transition: width 0.6s ease;
+  position: absolute;
+  height: 100%;
 }
 
 /* Reduce Button */
@@ -101,7 +90,7 @@ export default {
 @media (max-width: 768px) {
   .sidebar-container.closed {
     width: auto;
-    transition: width 0.3s ease;
+    transition: width 0.6s ease;
   }
 
 }

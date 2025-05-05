@@ -120,11 +120,39 @@ export default {
 }
 </script>
 <style scoped>
+
+.sidebar-container-closed {
+    width: 110px;
+    height: 100vh;
+    background-color: var(--clr-bg-sidebar);
+    color: var(--clr-dark);
+    padding: 2.5vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    border-radius: 10px;
+    box-shadow: 2px 0 5px var(--clr-box-shadow);
+    user-select: none;
+    transition: width 0.6s ease;
+}
+
+.sidebar-buttons-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    transform: scale(1.05);
+}
+
 /* Menu Button Styles */
 .menu-button-content {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
+    
     width: 100%;
     background-color: var(--clr-light);
     border-radius: 10px;
@@ -136,7 +164,7 @@ export default {
     box-shadow: 0 2px 5px var(--clr-box-shadow);
     margin-top: 15px;
 
-    transition: all 0.3s ease;
+    transition: all 0.6s ease;
 }
 
 .sidebar-button.closed {
@@ -147,10 +175,6 @@ export default {
     margin-top: 50px;
 }
 
-.sidebar-button.closed:hover {
-    background-color: var(--clr-hover);
-    transform: scale(1.06);
-}
 
 .icon.closed {
     width: 24px;
@@ -164,7 +188,7 @@ export default {
 
 .menu-button-content:hover {
     background-color: var(--clr-hover);
-    transform: scale(1.05);
+    transform: scale(1.06);
     color: var(--clr-light);
 }
 
