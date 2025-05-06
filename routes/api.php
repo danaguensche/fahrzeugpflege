@@ -10,7 +10,7 @@ use App\Http\Controllers\CustomerDetailsController;
 
 // Auth Routes
 Route::middleware('auth:sanctum')->get('/users/me', [UserController::class, 'me']);
-
+Route::put('/users/me', [UserController::class, 'update']);
 // Cars Routes
 Route::apiResource('cars', CarController::class)->parameters(['cars' => 'kennzeichen']);
 Route::get('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'details']);

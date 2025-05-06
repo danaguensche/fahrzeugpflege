@@ -31,14 +31,13 @@ export default {
 
 <style scoped>
 .page {
-    margin-left: 250px;
     transition: margin-left 0.3s ease;
     font-family: var(--font-family);
    
 }
 
 .page-opened {
-    margin-left: 370px;
+    margin-left: 200px;
     transition: margin-left 0.3s ease;
 }
 </style>

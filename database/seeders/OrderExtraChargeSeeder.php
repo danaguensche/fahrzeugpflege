@@ -14,8 +14,8 @@ class OrderExtraChargeSeeder extends Seeder
     public function run(): void
     {
         //
-        OrderExtraCharge::factory()
-        ->count(10)
-        ->create();
+        // OrderExtraCharge::factory()
+        // ->count(10)
+        // ->create();
     }
 }

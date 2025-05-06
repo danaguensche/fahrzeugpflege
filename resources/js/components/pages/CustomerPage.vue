@@ -1,7 +1,6 @@
 <template>
     <MainSidebar></MainSidebar>
     <Customer></Customer>
-    <Footer></Footer>
 </template>
 
 <script>

@@ -1,7 +1,6 @@
 <template>
     <MainSidebar></MainSidebar>
     <ProfilPage></ProfilPage>
-    <Footer></Footer>
 </template>
 
 <script>

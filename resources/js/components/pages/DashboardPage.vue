@@ -1,6 +1,5 @@
 <template>
     <MainSidebar></MainSidebar>
-    <Footer></Footer>
 </template>
 
 <script>

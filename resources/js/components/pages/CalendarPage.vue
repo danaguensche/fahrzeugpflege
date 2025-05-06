@@ -1,7 +1,6 @@
 <template>
     <MainSidebar></MainSidebar>
     <FullCalendar></FullCalendar>
-    <Footer></Footer>
 </template>
 <script>
 

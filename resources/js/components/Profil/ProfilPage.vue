@@ -30,10 +30,14 @@ export default {
 </script>
 
 <style scoped>
-.hr {
-    border: none;
-    height: 1px;
-    background-color: black;
-    margin: 20px 0;
+.page {
+    transition: margin-left 0.3s ease;
+    font-family: var(--font-family);
+   
+}
+
+.page-opened {
+    margin-left: 200px;
+    transition: margin-left 0.3s ease;
 }
 </style>

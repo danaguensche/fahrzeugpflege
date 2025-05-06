@@ -1,5 +1,4 @@
 <template>
-    <Footer></Footer>
 </template>
 
 <script>

@@ -1,12 +1,12 @@
 <template>
-    <v-container class="details-card">
+    <v-container class="card-container">
         <!-- Skeleton Loader wenn loading true ist -->
         <Loader v-if="loading"></Loader>
 
         <!-- Vollständige Ansicht der Daten wenn loading false ist -->
         <template v-else>
             <!-- Header -->
-            <v-card>
+            <v-card style="height: 850px; overflow-y: auto; ;" class="card">
                 <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon"></Header>
 
                 <ImageCarousel :images="images"></ImageCarousel>
@@ -180,7 +180,7 @@ export default {
     methods: {
         formatDate(dateString) {
             if (!dateString) return 'Unbekannt';
-            
+
             try {
                 return new Date(dateString).toLocaleDateString('de-DE', {
                     day: '2-digit',
@@ -193,7 +193,7 @@ export default {
                 return 'Ungültiges Datum';
             }
         },
-        
+
         async getCar() {
             try {
                 if (!this.$route?.params?.kennzeichen) {
@@ -217,7 +217,7 @@ export default {
                 this.loading = false;
             }
         },
-        
+
         switchEditMode() {
             this.editMode = !this.editMode;
 
@@ -225,7 +225,7 @@ export default {
                 this.editedCarData = { ...this.carDetails.data };
             }
         },
-        
+
         getIconForField(key) {
             const iconMap = {
                 id: "mdi-pound",
@@ -244,11 +244,11 @@ export default {
             this.editMode = false;
             this.editedCarData = { ...this.carDetails.data };
         },
-        
+
         async saveCarData() {
             this.saveLoading = true;
             this.error = null;
-            
+
             try {
                 await axios.put(
                     `/api/cars/cardetails/${this.$route.params.kennzeichen}`,
@@ -270,7 +270,7 @@ export default {
                 this.saveLoading = false;
             }
         },
-        
+
         showSnackbar(text, color = 'success') {
             this.snackbar = {
                 show: true,
@@ -283,21 +283,82 @@ export default {
 </script>
 
 <style scoped>
-.details-card {
-    max-width: 1200px;
-    margin: 0 auto;
+.card-container {
+    width: 100%;
+    height: calc(100vh - 40px);
     padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
-@media (max-width: 600px) {
-    .details-card {
-        padding: 12px;
+.card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+@media (max-width: 575.98px) {
+    .card-container {
+        padding: 10px;
+        height: calc(100vh - 20px);
+
+    }
+
+    .card {
+        font-size: 14px;
     }
 }
 
-@media print {
-    .v-btn {
-        display: none !important;
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .card-container {
+        padding: 15px;
+        height: calc(100vh - 30px);
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .card-container {
+        max-width: calc(100% - 80px);
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .card-container {
+        max-width: calc(100% - 250px);
+    }
+}
+
+@media (min-width: 1200px) {
+    .card-container {
+        max-width: calc(100% - 280px);
+    }
+}
+
+.v-card-text {
+    flex: 1;
+    overflow-y: auto;
+}
+
+@media (max-width: 767.98px) {
+    .v-card-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .v-card-actions button {
+        margin-bottom: 8px;
+        width: 100%;
+    }
+
+    .v-spacer {
+        display: none;
     }
 }
 </style>

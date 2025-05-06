@@ -32,14 +32,19 @@ export default {
 
 <style scoped>
 .page {
-    margin-left: 250px;
     transition: margin-left 0.3s ease;
     font-family: var(--font-family);
+    margin-left: 50px;
    
 }
 
 .page-opened {
-    margin-left: 370px;
+    margin-left: 200px;
     transition: margin-left 0.3s ease;
+}
+
+.page {
+    background-image: url('../../../../../../images/background.png');
+    background-size: cover;
 }
 </style>

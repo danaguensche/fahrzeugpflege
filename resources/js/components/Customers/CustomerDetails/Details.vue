@@ -1,5 +1,5 @@
 <template>
-  <v-container class="details-card">
+  <v-container class="card-container">
     <!-- Skeleton Loader wenn loading true ist -->
     <template v-if="loading">
       <Loader></Loader>
@@ -8,7 +8,7 @@
     <!-- Vollständige Ansicht der Daten wenn loading false ist -->
     <template v-else>
       <!-- Header der Karte -->
-      <v-card>
+      <v-card class="card">
         <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon">
         </Header>
 
@@ -27,7 +27,7 @@
             <!-- Bearbeitungsmodus -->
             <InfoListEditMode v-else :personalInfoKeys="personalInfoKeys" :labels="labels"
               :editedData="editedCustomerData" :getIconForField="getIconForField">
-            </InfoListEditMode>
+            </InfoListEditMode class="list-edit-mode">
           </v-sheet>
 
           <!-- Adressinformationen -->
@@ -74,7 +74,7 @@
                         </span>
                       </div>
                       <v-text-field v-model="editedCustomerData[key]" variant="outlined" density="comfortable"
-                        hide-details="auto">
+                        hide-details="auto" class="w-50">
                       </v-text-field>
                     </v-col>
                   </v-row>
@@ -189,7 +189,7 @@ export default {
         lastName: "Nachname",
         email: "E-Mail",
         phoneNumber: "Telefonnummer",
-        addressLine: "Adresse",
+        addressLine: "Straße und Hausnummer",
         postalCode: "Postleitzahl",
         city: "Stadt",
         cars: "Fahrzeuge",
@@ -355,15 +355,83 @@ export default {
 </script>
 
 <style scoped>
-@media (max-width: 600px) {
-  .details-card {
-    padding: 12px;
-  }
+.card-container {
+    width: 100%;
+    height: calc(100vh - 40px);
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
-@media print {
-  .v-btn {
-    display: none !important;
-  }
+.card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+@media (max-width: 575.98px) {
+    .card-container {
+        padding: 10px;
+        height: calc(100vh - 20px);
+
+    }
+
+    .card {
+        font-size: 14px;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .card-container {
+        padding: 15px;
+        height: calc(100vh - 30px);
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .card-container {
+        max-width: calc(100% - 80px);
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .card-container {
+        max-width: calc(100% - 250px);
+    }
+}
+
+@media (min-width: 1200px) {
+    .card-container {
+        max-width: calc(100% - 280px);
+        margin-left: 200px;
+    }
+}
+
+.v-card-text {
+    flex: 1;
+    overflow-y: auto;
+}
+
+@media (max-width: 767.98px) {
+    .v-card-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .v-card-actions button {
+        margin-bottom: 8px;
+        width: 100%;
+    }
+
+    .v-spacer {
+        display: none;
+    }
 }
 </style>

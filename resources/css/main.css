@@ -1,3 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 /* CSS-Variablen für Wiederverwendbarkeit */
 :root {
     --primary-color: darkslategray;
@@ -32,7 +37,7 @@
 }
 
 body {
-    background-color: snow;
+    background-image: url("public\images\background.png") no-repeat center center fixed;
     padding: 0px;
 }
 

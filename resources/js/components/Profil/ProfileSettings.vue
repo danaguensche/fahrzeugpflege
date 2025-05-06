@@ -1,21 +1,17 @@
 <!-- Wer diese Seite formatiert kommt in die Hölle -->
 
 <template>
-  <v-container class="details-card">
+  <v-container class="card-container">
     <!-- Skeleton Loader wenn loading true ist -->
-
     <Loader v-if="loading"></Loader>
-
     <!-- Fehlerbehandlung -->
     <v-alert v-if="error" type="error" dismissible>
       {{ error }}
     </v-alert>
-
     <!-- Vollständige Ansicht der Daten wenn loading false ist -->
-
     <template v-else>
       <!-- Header der Karte -->
-      <v-card>
+      <v-card class="card">
         <Header :title="'Accountdetails'" :switchEditMode="switchEditMode" :editMode="editMode" :icon="'mdi-account'">
         </Header>
         <!-- Persönliche Informationen -->
@@ -32,8 +28,7 @@
 
               <v-list-item-title class="font-weight-medium">{{ labels[key] }}</v-list-item-title>
               <v-list-item-subtitle class="mt-1
-                                                 text-body-1">
-
+                                          text-body-1">
                 <template v-if="userData[key] === null || userData[key] === ''">
                   <span class="text-grey">Keine Daten vorhanden</span>
                 </template>
@@ -71,8 +66,7 @@
         <!-- Adressinformationen -->
         <v-sheet>
           <div class="pa-4
-                          bg-primary-lighten-5
-                          rounded-t-lg">
+                      bg-primary-lighten-5">
             <span class="text-h6
                              font-weight-medium">
               Adressinformationen
@@ -83,17 +77,15 @@
           <v-list class="bg-transparent" v-if="!editMode">
             <template v-for="key in addressInfoKeys" :key="key">
               <v-list-item v-if="userData[key] !== undefined">
-
                 <template v-slot:prepend>
                   <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
                   </v-icon>
                 </template>
-
                 <v-list-item-title class="font-weight-medium">
                   {{ labels[key] }}
                 </v-list-item-title>
                 <v-list-item-subtitle class="mt-1 text-body-1">
-                  <template v-if="userData[key] === null || userData[key] === ''">
+                  <template v-if="!userData[key]">
                     <span class="text-grey">
                       Keine Daten vorhanden
                     </span>
@@ -114,7 +106,7 @@
                 <v-row no-gutters class="mb-4">
                   <v-col cols="12">
                     <div class="d-flex 
-                                    align-center mb-1">
+                              align-center mb-1">
                       <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
                       </v-icon>
                       <span class="font-weight-medium">
@@ -122,7 +114,7 @@
                       </span>
                     </div>
                     <v-text-field v-model="editedUserData[key]" variant="outlined" density="comfortable"
-                      hide-details="auto">
+                      hide-details="auto" class="w-50">
                     </v-text-field>
                   </v-col>
                 </v-row>
@@ -132,10 +124,10 @@
         </v-sheet>
 
         <!-- Bearbeitungsoptionen -->
-        <v-sheet  v-if="editMode">
+        <v-sheet v-if="editMode">
           <div class="pa-4 
-                          d-flex
-                          justify-end">
+                      d-flex
+                      justify-end">
             <CancelButton :cancelEdit="cancelEdit"></CancelButton>
             <SaveButton :saveData="saveUserData"></SaveButton>
           </div>
@@ -201,7 +193,6 @@
           <BackButton></BackButton>
           <v-spacer></v-spacer>
           <EditButton :switchEditMode="switchEditMode" v-if="!editMode"></EditButton>
-          <PrintButton></PrintButton>
         </v-card-actions>
       </v-card>
     </template>
@@ -377,6 +368,7 @@ export default {
 
     async saveUserData() {
       this.saveLoading = true;
+      this.error = null;
 
       try {
         const token = localStorage.getItem('token');
@@ -384,9 +376,17 @@ export default {
           throw new Error("Kein Authentifizierungs-Token gefunden");
         }
 
-        const response = await axios.put(
+        const dataToSend = {
+          firstname: this.editedUserData.firstName,
+          lastname: this.editedUserData.lastName,
+          phonenumber: this.editedUserData.phoneNumber,
+          addressline: this.editedUserData.addressLine,
+          postalcode: this.editedUserData.postalCode,
+          city: this.editedUserData.city
+        };
+        await axios.put(
           "http://localhost:8000/api/users/me",
-          this.editedUserData,
+          dataToSend,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -416,11 +416,6 @@ export default {
         // Fallback, falls $router.back() nicht funktioniert
         window.history.back();
       }
-    },
-
-    printDetails() {
-      console.log("Drucken der Accountdetails gestartet");
-      window.print();
     },
 
     async changePassword() {
@@ -474,27 +469,82 @@ export default {
 </script>
 
 <style scoped>
-.details-card {
-  max-width: 1200px;
-  margin: 0 auto;
+.card-container {
+  width: 100%;
+  height: calc(100vh - 40px);
   padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .details-card {
-    padding: 12px;
+.card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+@media (max-width: 575.98px) {
+  .card-container {
+    padding: 10px;
+    height: calc(100vh - 20px);
+
+  }
+
+  .card {
+    font-size: 14px;
   }
 }
 
-@media print {
-  .v-btn {
-    display: none !important;
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .card-container {
+    padding: 15px;
+    height: calc(100vh - 30px);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .card-container {
+    max-width: calc(100% - 80px);
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .card-container {
+    max-width: calc(100% - 250px);
+  }
+}
+
+@media (min-width: 1200px) {
+  .card-container {
+    max-width: calc(100% - 280px);
+  }
+}
+
+.v-card-text {
+  flex: 1;
+  overflow-y: auto;
+}
+
+@media (max-width: 767.98px) {
+  .v-card-actions {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  /* Passwort-Änderungsbereich und Bearbeitungsmodus beim Drucken ausblenden */
-  .v-sheet:has(.v-form) {
-    display: none !important;
+  .v-card-actions button {
+    margin-bottom: 8px;
+    width: 100%;
+  }
+
+  .v-spacer {
+    display: none;
   }
 }
 </style>

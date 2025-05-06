@@ -7,7 +7,6 @@
     <ExpandButton v-else @click="toggleSidebar">
       <img class="arrow" src="../../../img/sidebar-img/arrow-icon-mirrored.png">
     </ExpandButton>
-HALLO
   </div>
 </template>
 

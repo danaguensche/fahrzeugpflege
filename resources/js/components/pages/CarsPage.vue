@@ -1,7 +1,6 @@
 <template>
     <MainSidebar></MainSidebar>
     <Car></Car>
-    <Footer></Footer>
 </template>
 
 <script>
