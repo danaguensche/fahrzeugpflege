@@ -1,9 +1,11 @@
 <template>
     <div class="car-page" :class="{ 'car-page-sidebar-opened': isSidebarOpen }">
+        <div class="search-container">
         <Search :context="context" class="searchbar"></Search>
+        </div>
 
         <div class="content-container">
-            <DefaultButton class="addCar" @click="addCar">Fahrzeug hinzufügen</DefaultButton>
+            <DefaultButton @click="addCar">Fahrzeug hinzufügen</DefaultButton>
         </div>
 
         <div class="form-container">
@@ -52,6 +54,7 @@ export default {
     },
     methods: {
         addCar() {
+            console.log('Fahrzeug hinzufügen');
             this.showCarForm = !this.showCarForm;
         },
         changePage(page) {
@@ -114,6 +117,12 @@ export default {
 
 }
 
+.search-container {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+}
+
 .form-container {
     margin-top: 1vh;
     margin-bottom: 1vh;
@@ -163,6 +172,7 @@ export default {
     margin-top: -110px;
     display: flex;
     justify-content: flex-end;
+    z-index: 10;
 }
 
 .form-container {

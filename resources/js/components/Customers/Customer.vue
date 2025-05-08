@@ -1,8 +1,8 @@
 <template>
     <div class="customer-page" :class="{ 'customer-page-sidebar-opened': isSidebarOpen }">
-
-        <Search :context="context" class="searchbar"></Search>
-
+        <div class="search-container">
+            <Search :context="context" class="searchbar"></Search>
+        </div>
         <div class="content-container">
             <DefaultButton class="addCustomer" @click="addCustomer">Kunde hinzufügen</DefaultButton>
         </div>
@@ -125,6 +125,15 @@ export default {
     margin-top: -110px;
     display: flex;
     justify-content: flex-end;
+    z-index: 5;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    z-index: 5;
+    width: 100%;
 }
 
 .form-container {

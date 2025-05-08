@@ -6,7 +6,7 @@
         <!-- Vollständige Ansicht der Daten wenn loading false ist -->
         <template v-else>
             <!-- Header -->
-            <v-card style="height: 850px; overflow-y: auto; ;" class="card">
+            <v-card class="card">
                 <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon"></Header>
 
                 <ImageCarousel :images="images"></ImageCarousel>

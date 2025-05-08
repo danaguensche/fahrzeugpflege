@@ -1,7 +1,7 @@
 <template>
-    <v-container>
+    <div class="page" :class="{ 'page-opened': isSidebarOpen }">
         <ProfileSettings/>
-    </v-container>
+    </div>
     <div class="profil-page" :class="{ 'profile-page-sidebar-opened': isSidebarOpen }">
 
 
@@ -11,8 +11,6 @@
 <script>
 
 import ProfileSettings from './ProfileSettings.vue';
-
-
 import { mapState } from 'vuex';
 
 export default {
@@ -33,6 +31,7 @@ export default {
 .page {
     transition: margin-left 0.3s ease;
     font-family: var(--font-family);
+    margin-left: 50px;
    
 }
 

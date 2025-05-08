@@ -356,82 +356,81 @@ export default {
 
 <style scoped>
 .card-container {
-    width: 100%;
-    height: calc(100vh - 40px);
-    padding: 20px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+  width: 100%;
+  height: calc(100vh - 40px);
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .card {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 @media (max-width: 575.98px) {
-    .card-container {
-        padding: 10px;
-        height: calc(100vh - 20px);
+  .card-container {
+    padding: 10px;
+    height: calc(100vh - 20px);
 
-    }
+  }
 
-    .card {
-        font-size: 14px;
-    }
+  .card {
+    font-size: 14px;
+  }
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
-    .card-container {
-        padding: 15px;
-        height: calc(100vh - 30px);
-    }
+  .card-container {
+    padding: 15px;
+    height: calc(100vh - 30px);
+  }
 }
 
 @media (min-width: 768px) and (max-width: 991.98px) {
-    .card-container {
-        max-width: calc(100% - 80px);
-    }
+  .card-container {
+    max-width: calc(100% - 80px);
+  }
 }
 
 @media (min-width: 992px) and (max-width: 1199.98px) {
-    .card-container {
-        max-width: calc(100% - 250px);
-    }
+  .card-container {
+    max-width: calc(100% - 250px);
+  }
 }
 
 @media (min-width: 1200px) {
-    .card-container {
-        max-width: calc(100% - 280px);
-        margin-left: 200px;
-    }
+  .card-container {
+    max-width: calc(100% - 280px);
+  }
 }
 
 .v-card-text {
-    flex: 1;
-    overflow-y: auto;
+  flex: 1;
+  overflow-y: auto;
 }
 
 @media (max-width: 767.98px) {
-    .v-card-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
+  .v-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-    .v-card-actions button {
-        margin-bottom: 8px;
-        width: 100%;
-    }
+  .v-card-actions button {
+    margin-bottom: 8px;
+    width: 100%;
+  }
 
-    .v-spacer {
-        display: none;
-    }
+  .v-spacer {
+    display: none;
+  }
 }
 </style>

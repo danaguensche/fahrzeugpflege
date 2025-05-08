@@ -1,6 +1,6 @@
 <template>
     <input v-model="searchText" class="searchbar forms-field forms-field-input" type="search" :placeholder="context">
-    <SearchButton></SearchButton>
+    <SearchButton class="search-button"></SearchButton>
     <CloseButton :isVisible="!!searchText" @close="clearSearch"></CloseButton>
 
     <slot></slot>
@@ -61,15 +61,25 @@ export default {
 }
 
 .searchbar {
-    margin-right: 10px;
-}
-
-.searchbar {
+    background-color: white;
     margin-top: 50px;
     margin-bottom: 100px;
     width: 100%;
     box-shadow: var(--box-shadow);
+    margin-right: 10px;
 
+}
+
+.search-button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 50px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
 }
 
 .searchbar.forms-field {

@@ -33,7 +33,7 @@ export default {
 .page {
     transition: margin-left 0.3s ease;
     font-family: var(--font-family);
-   
+    margin-left: 50px;
 }
 
 .page-opened {

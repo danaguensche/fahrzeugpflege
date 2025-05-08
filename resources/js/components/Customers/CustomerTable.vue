@@ -19,8 +19,9 @@
         <div class="table-container">
             <div v-if="loading"><v-progress-circular indeterminate></v-progress-circular></div>
             <div class="scrollable-table">
-                <v-data-table-server :headers="headers" :items="customers" :options.sync="options"
-                    :server-items-length="totalItems" :loading="loading" @update:options="loadItems" height="800">
+                <v-data-table-server :headers="headers" :items="customers" :server-items-length="totalItems"
+                    :loading="loading" @update:options="loadItems" single-sort item-key="id" :sort-by="[]">
+
                     <template v-slot:item="{ item }">
                         <tr>
                             <td class="checkbox fixed-width">
@@ -35,8 +36,7 @@
                                     </template>
                                     <template v-else>
                                         <v-text-field v-model="editCustomer[field]" :rules="getFieldRules(field)"
-                                            :error-messages="fieldErrors[field]" dense outlined
-                                            hide-details="auto"></v-text-field>
+                                            :error-messages="fieldErrors[field]"></v-text-field>
                                     </template>
                                 </template>
                                 <template v-else>
@@ -46,8 +46,6 @@
                                     <span v-else>{{ item[field] || '' }}</span>
                                 </template>
                             </td>
-
-
                             <td class="table-icon fixed-width">
                                 <v-btn icon class="delete-button" variant="plain" @click="confirmDelete(item.id)">
                                     <v-icon>mdi-delete</v-icon>
@@ -57,7 +55,7 @@
                                 <v-btn variant="plain" icon
                                     @click="editCustomerId === item.id ? saveCustomer() : editCustomerDetails(item)">
                                     <v-icon>{{ editCustomerId === item.id ? 'mdi-content-save' : 'mdi-pencil'
-                                    }}</v-icon>
+                                        }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
@@ -69,7 +67,6 @@
             :alertHeading="alertHeading" :alertParagraph="alertParagraph" :alertOkayButton="alertOkayButton"
             alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
         </VuetifyAlert>
-
     </div>
 </template>
 
@@ -106,8 +103,8 @@ export default {
                 { title: "Straße und Hausnummer", key: "addressLine" },
                 { title: "PLZ", key: "postalCode" },
                 { title: "Stadt", key: "city" },
-                { title: "Bearbeiten", key: "edit", sortable: false },
-                { title: "Löschen", key: "delete", sortable: false }
+                { title: "Löschen", key: "delete", sortable: false },
+                { title: "Bearbeiten", key: "edit", sortable: false }
             ],
             fields: ["id", "firstName", "lastName", "email", "phoneNumber", "addressLine", "postalCode", "city"],
             editCustomerId: null,
@@ -120,8 +117,8 @@ export default {
             options: {
                 page: 1,
                 itemsPerPage: 10,
-                sortBy: [{ key: 'id' }],
-                sortDesc: [false],
+                sortBy: [],
+                sortDesc: [],
             },
             confirmAction: null,
             fieldErrors: {}
@@ -192,22 +189,31 @@ export default {
 
         async loadItems() {
             this.loading = true;
-            const { page, itemsPerPage, sortBy, sortDesc } = this.options;
+
             try {
-                const response = await axios.get('/api/customers', {
-                    params: {
-                        page,
-                        itemsPerPage,
-                        sortBy: sortBy.length > 0 ? sortBy[0].key : 'id',
-                        sortDesc: sortDesc.length > 0 ? sortDesc[0] : false,
-                    },
-                });
+                const params = {
+                    page: this.options.page,
+                    itemsPerPage: this.options.itemsPerPage,
+                    orderByNewest: true
+                };
+
+                if (this.options.sortBy && this.options.sortBy.length > 0) {
+                    params.sortBy = this.options.sortBy[0];
+                    params.sortDesc = this.options.sortDesc[0] ? 'true' : 'false';
+                    params.orderByNewest = false;
+                }
+
+                const response = await axios.get('/api/customers', { params });
                 this.customers = response.data.items;
                 this.totalItems = response.data.total;
             } catch (error) {
                 console.error('Fehler beim Laden der Daten:', error);
+                if (error.response) {
+                    console.error('Response data:', error.response.data);
+                }
+            } finally {
+                this.loading = false;
             }
-            this.loading = false;
         },
 
         confirmDelete(id) {
@@ -226,8 +232,12 @@ export default {
                     ? 'Möchten Sie den ausgewählten Kunden wirklich löschen?'
                     : 'Möchten Sie die ausgewählten Kunden wirklich löschen?';
 
+                const heading = this.selectedCustomers.length === 1
+                    ? 'Kunde löschen'
+                    : 'Kunden löschen';
+
                 this.showAlert(
-                    'Kunden löschen',
+                    heading,
                     message,
                     'Löschen',
                     this.deleteCustomers
@@ -250,12 +260,11 @@ export default {
             if (this.customerToDelete) {
                 try {
                     await axios.delete(`/api/customers/${this.customerToDelete}`);
-                    this.customers = this.customers.filter(customer => customer.id !== this.customerToDelete);
-                    this.customerToDelete = null;
-
+                    await this.loadItems();
                     this.selectedCustomers = this.selectedCustomers.filter(id => id !== this.customerToDelete);
+                    this.customerToDelete = null;
                 } catch (error) {
-                    console.error('Fehler beim Löschen des Kunden:', error);
+                    console.error('Fehler beim Löschen des Kunden:', error.response?.data || error.message);
                 }
             }
         },
@@ -266,7 +275,7 @@ export default {
                     await axios.delete(`/api/customers`, {
                         data: { ids: this.selectedCustomers }
                     });
-                    this.customers = this.customers.filter(customer => !this.selectedCustomers.includes(customer.id));
+                    await this.loadItems();
                     this.selectedCustomers = [];
                     this.$emit('customersDeleted');
                 } catch (error) {
@@ -278,7 +287,6 @@ export default {
         editCustomerDetails(customer) {
             this.editCustomerId = customer.id;
             this.editCustomer = { ...customer };
-            delete this.editCustomer.id;
         },
 
         async updateCustomer() {
@@ -299,7 +307,6 @@ export default {
                 await this.loadItems();
             } catch (error) {
                 console.error('Fehler beim Aktualisieren des Kunden:', error.response?.data?.error || error.message);
-                alert('Fehler beim Aktualisieren des Kunden: ' + (error.response?.data?.error || error.message));
             }
         },
 
@@ -318,21 +325,17 @@ export default {
 <style scoped>
 .button-group {
     display: flex;
-    align-items: flex-start;
-    margin-bottom: 20px;
-    flex-direction: row;
-}
-
-.scrollable-table {
-    min-height: 900px !important;
-    overflow-y: auto;
+    align-items: center;
+    gap: 12px;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0px;
+    margin-bottom: 16px;
+    padding: 8px 0;
+    margin-right: 20px;
 }
 
 .spacer {
@@ -341,45 +344,180 @@ export default {
 
 .table-container {
     position: relative;
-    width: 1500px;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    max-width: 100%;
+    margin-right: 20px;
 }
 
-.custom-table {
-    width: 100%;
+.scrollable-table {
+    min-height: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+    background-color: #fff;
+    width: 90vw;
+    max-width: 100%;
 }
 
 .fixed-width {
     width: 150px;
-}
-
-.edit-field {
-    padding: 10px 12px;
-}
-
-.edit-field input {
-    padding: 8px;
-    font-size: 1em;
-    box-sizing: border-box;
-    width: 100%;
-}
-
-.edit-button,
-.delete-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.delete-button:hover {
-    background-color: red !important;
-}
-
-.table {
-    margin: 25px 0;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    padding: 12px 16px;
 }
 
 .table-icon {
-    width: 0.5vh;
+    width: 48px;
+    text-align: center;
+}
+
+/* Tabellenstil */
+:deep(.v-data-table) {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+}
+
+:deep(.v-data-table th) {
+    background-color: #f5f7fa;
+    color: #2c3e50;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+:deep(.v-data-table td) {
+    border-bottom: 1px solid #edf2f7;
+    padding: 14px 16px;
+    color: #333;
+}
+
+:deep(.v-data-table tr:hover) {
+    background-color: #f9fafc;
+}
+
+/* Button-Styling */
+.refresh-button :deep(.v-btn),
+.confirm-button :deep(.v-btn),
+.cancel-button :deep(.v-btn),
+.delete-button :deep(.v-btn) {
+    text-transform: none;
+    font-weight: 500;
+    border-radius: 6px;
+    padding: 0 16px;
+    height: 40px;
+    transition: all 0.2s;
+}
+
+.confirm-button :deep(.v-btn) {
+    background-color: #4caf50;
+    color: white;
+}
+
+.confirm-button :deep(.v-btn:hover) {
+    background-color: #388e3c;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.cancel-button :deep(.v-btn) {
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+.cancel-button :deep(.v-btn:hover) {
+    background-color: #e0e0e0;
+}
+
+.delete-button :deep(.v-btn) {
+    background-color: #f44336;
+    color: white;
+}
+
+.delete-button :deep(.v-btn:hover) {
+    background-color: #d32f2f;
+    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+.refresh-button :deep(.v-btn) {
+    background-color: #2196f3;
+    color: white;
+}
+
+.refresh-button :deep(.v-btn:hover) {
+    background-color: #1976d2;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+/* Icons in Tabelle */
+:deep(.v-btn.v-btn--icon) {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+:deep(.v-btn.v-btn--icon:hover) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Icon-Farben */
+:deep(.mdi-delete) {
+    color: #f44336;
+}
+
+:deep(.mdi-pencil) {
+    color: #2196f3;
+}
+
+:deep(.mdi-content-save) {
+    color: #4caf50;
+}
+
+/* Bearbeitungsfelder */
+:deep(.v-text-field) {
+    margin: 0;
+    padding: 0;
+}
+
+:deep(.v-text-field .v-input__control) {
+    min-height: 36px;
+}
+
+:deep(.v-checkbox) {
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    color: #1976d2;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #0d47a1;
+    text-decoration: underline;
+}
+
+:deep(.v-progress-circular) {
+    margin: 16px auto;
+    display: block;
+}
+
+/* Responsives Design */
+@media (max-width: 960px) {
+    .button-group {
+        flex-wrap: wrap;
+    }
+
+    .fixed-width {
+        width: auto;
+    }
 }
 </style>

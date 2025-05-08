@@ -4,196 +4,199 @@
   <v-container class="card-container">
     <!-- Skeleton Loader wenn loading true ist -->
     <Loader v-if="loading"></Loader>
-    <!-- Fehlerbehandlung -->
-    <v-alert v-if="error" type="error" dismissible>
-      {{ error }}
-    </v-alert>
+
     <!-- Vollständige Ansicht der Daten wenn loading false ist -->
     <template v-else>
       <!-- Header der Karte -->
       <v-card class="card">
         <Header :title="'Accountdetails'" :switchEditMode="switchEditMode" :editMode="editMode" :icon="'mdi-account'">
         </Header>
+
         <!-- Persönliche Informationen -->
-        <InformationHeader :title="'Persönliche Informationen'" :editMode="editMode"></InformationHeader>
+        <v-card-text class="px-4 pt-4 pb-0">
+          <v-sheet>
+            <InformationHeader :title="'Persönliche Informationen'" :editMode="editMode"></InformationHeader>
 
-        <!-- Ansichtsmodus -->
-        <v-list class="bg-transparent" v-if="!editMode">
-          <template v-for="key in personalInfoKeys" :key="key">
-            <v-list-item v-if="userData[key] !== undefined">
+            <!-- Ansichtsmodus -->
+            <v-list class="bg-transparent" v-if="!editMode">
+              <template v-for="key in personalInfoKeys" :key="key">
+                <v-list-item v-if="userData[key] !== undefined">
 
-              <template v-slot:prepend>
-                <v-icon :icon="getIconForField(key)" color="primary" class="mr-2"></v-icon>
-              </template>
+                  <template v-slot:prepend>
+                    <v-icon :icon="getIconForField(key)" color="primary" class="mr-2"></v-icon>
+                  </template>
 
-              <v-list-item-title class="font-weight-medium">{{ labels[key] }}</v-list-item-title>
-              <v-list-item-subtitle class="mt-1
+                  <v-list-item-title class="font-weight-medium">{{ labels[key] }}</v-list-item-title>
+                  <v-list-item-subtitle class="mt-1
                                           text-body-1">
-                <template v-if="userData[key] === null || userData[key] === ''">
-                  <span class="text-grey">Keine Daten vorhanden</span>
-                </template>
-                <template v-else>
-                  {{ userData[key] }}
-                </template>
-              </v-list-item-subtitle>
-            </v-list-item>
-            <v-divider v-if="key !== personalInfoKeys[personalInfoKeys.length - 1]"></v-divider>
-          </template>
-        </v-list>
+                    <template v-if="userData[key] === null || userData[key] === ''">
+                      <span class="text-grey">Keine Daten vorhanden</span>
+                    </template>
+                    <template v-else>
+                      {{ userData[key] }}
+                    </template>
+                  </v-list-item-subtitle>
+                </v-list-item>
+                <v-divider v-if="key !== personalInfoKeys[personalInfoKeys.length - 1]"></v-divider>
+              </template>
+            </v-list>
 
-        <!-- Bearbeitungsmodus -->
-        <div class="pa-4" v-else>
-          <v-form ref="personalInfoForm">
-            <template v-for="key in personalInfoKeys" :key="key">
-              <v-row no-gutters class="mb-4">
-                <v-col cols="12">
-                  <div class="d-flex
+            <!-- Bearbeitungsmodus -->
+            <div class="pa-4" v-else>
+              <v-form ref="personalInfoForm">
+                <template v-for="key in personalInfoKeys" :key="key">
+                  <v-row no-gutters class="mb-4">
+                    <v-col cols="12">
+                      <div class="d-flex
                                     align-center
                                     mb-1">
-                    <v-icon :icon="getIconForField(key)" color="primary" class="mr-2"></v-icon>
-                    <span class="font-weight-medium">{{ labels[key] }}</span>
-                  </div>
-                  <v-text-field v-model="editedUserData[key]" variant="outlined" density="comfortable"
-                    hide-details="auto" :readonly="key === 'email'" :disabled="key === 'email'"
-                    :hint="key === 'email' ? 'E-Mail kann nicht geändert werden' : ''"
-                    :persistent-hint="key === 'email'"></v-text-field>
-                </v-col>
-              </v-row>
-            </template>
-          </v-form>
-        </div>
-
-        <!-- Adressinformationen -->
-        <v-sheet>
-          <div class="pa-4
-                      bg-primary-lighten-5">
-            <span class="text-h6
-                             font-weight-medium">
-              Adressinformationen
-            </span>
-          </div>
-
-          <!-- Ansichtsmodus -->
-          <v-list class="bg-transparent" v-if="!editMode">
-            <template v-for="key in addressInfoKeys" :key="key">
-              <v-list-item v-if="userData[key] !== undefined">
-                <template v-slot:prepend>
-                  <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
-                  </v-icon>
+                        <v-icon :icon="getIconForField(key)" color="primary" class="mr-2"></v-icon>
+                        <span class="font-weight-medium">{{ labels[key] }}</span>
+                      </div>
+                      <v-text-field v-model="editedUserData[key]" variant="outlined" density="comfortable"
+                        hide-details="auto" :readonly="key === 'email'" :disabled="key === 'email'"
+                        :hint="key === 'email' ? 'E-Mail kann nicht geändert werden' : ''"
+                        :persistent-hint="key === 'email'"></v-text-field>
+                    </v-col>
+                  </v-row>
                 </template>
-                <v-list-item-title class="font-weight-medium">
-                  {{ labels[key] }}
-                </v-list-item-title>
-                <v-list-item-subtitle class="mt-1 text-body-1">
-                  <template v-if="!userData[key]">
-                    <span class="text-grey">
-                      Keine Daten vorhanden
-                    </span>
-                  </template>
-                  <template v-else>
-                    {{ userData[key] }}
-                  </template>
-                </v-list-item-subtitle>
-              </v-list-item>
-              <v-divider v-if="key !== addressInfoKeys[addressInfoKeys.length - 1]"></v-divider>
-            </template>
-          </v-list>
+              </v-form>
+            </div>
+          </v-sheet>
 
-          <!-- Bearbeitungsmodus -->
-          <div class="pa-4" v-else>
-            <v-form ref="addressInfoForm">
+          <!-- Adressinformationen -->
+          <v-sheet>
+            <div class="pa-4
+                      bg-primary-lighten-5">
+              <span class="text-h6
+                             font-weight-medium">
+                Adressinformationen
+              </span>
+            </div>
+
+            <!-- Ansichtsmodus -->
+            <v-list class="bg-transparent" v-if="!editMode">
               <template v-for="key in addressInfoKeys" :key="key">
-                <v-row no-gutters class="mb-4">
-                  <v-col cols="12">
-                    <div class="d-flex 
-                              align-center mb-1">
-                      <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
-                      </v-icon>
-                      <span class="font-weight-medium">
-                        {{ labels[key] }}
+                <v-list-item v-if="userData[key] !== undefined">
+                  <template v-slot:prepend>
+                    <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
+                    </v-icon>
+                  </template>
+                  <v-list-item-title class="font-weight-medium">
+                    {{ labels[key] }}
+                  </v-list-item-title>
+                  <v-list-item-subtitle class="mt-1 text-body-1">
+                    <template v-if="!userData[key]">
+                      <span class="text-grey">
+                        Keine Daten vorhanden
                       </span>
-                    </div>
-                    <v-text-field v-model="editedUserData[key]" variant="outlined" density="comfortable"
-                      hide-details="auto" class="w-50">
-                    </v-text-field>
-                  </v-col>
-                </v-row>
+                    </template>
+                    <template v-else>
+                      {{ userData[key] }}
+                    </template>
+                  </v-list-item-subtitle>
+                </v-list-item>
+                <v-divider v-if="key !== addressInfoKeys[addressInfoKeys.length - 1]"></v-divider>
               </template>
-            </v-form>
-          </div>
-        </v-sheet>
+            </v-list>
 
-        <!-- Bearbeitungsoptionen -->
-        <v-sheet v-if="editMode">
-          <div class="pa-4 
+            <!-- Bearbeitungsmodus -->
+            <div class="pa-4" v-else>
+              <v-form ref="addressInfoForm">
+                <template v-for="key in addressInfoKeys" :key="key">
+                  <v-row no-gutters class="mb-4">
+                    <v-col cols="12">
+                      <div class="d-flex 
+                              align-center mb-1">
+                        <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
+                        </v-icon>
+                        <span class="font-weight-medium">
+                          {{ labels[key] }}
+                        </span>
+                      </div>
+                      <v-text-field v-model="editedUserData[key]" variant="outlined" density="comfortable"
+                        hide-details="auto" class="w-50">
+                      </v-text-field>
+                    </v-col>
+                  </v-row>
+                </template>
+              </v-form>
+            </div>
+          </v-sheet>
+
+          <!-- Bearbeitungsoptionen -->
+          <v-sheet v-if="editMode">
+            <div class="pa-4 
                       d-flex
                       justify-end">
-            <CancelButton :cancelEdit="cancelEdit"></CancelButton>
-            <SaveButton :saveData="saveUserData"></SaveButton>
-          </div>
-        </v-sheet>
+              <CancelButton :cancelEdit="cancelEdit"></CancelButton>
+              <SaveButton :saveData="saveUserData"></SaveButton>
+            </div>
+          </v-sheet>
 
-        <!-- Passwort ändern -->
-        <v-sheet>
-          <div class="pa-4
+          <!-- Passwort ändern -->
+          <v-sheet>
+            <div class="pa-4
                           bg-primary-lighten-5
                           rounded-t-lg
                           d-flex
                           align-center">
-            <v-icon size="24" class="mr-2" color="primary">
-              mdi-lock
-            </v-icon>
-            <span class="text-h6
+              <v-icon size="24" class="mr-2" color="primary">
+                mdi-lock
+              </v-icon>
+              <span class="text-h6
                       font-weight-medium">
-              Passwort ändern
-            </span>
-          </div>
-          <div class="pa-4">
-            <v-form ref="passwordForm" v-model="passwordFormValid" @submit.prevent="changePassword">
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field v-model="passwordData.currentPassword"
-                    :append-icon="showCurrentPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                    :type="showCurrentPassword ? 'text' : 'password'" label="Aktuelles Passwort" variant="outlined"
-                    density="comfortable" :rules="[rules.required]"
-                    @click:append="showCurrentPassword = !showCurrentPassword">
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" md="6">
-                  <v-text-field v-model="passwordData.newPassword"
-                    :append-icon="showNewPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                    :type="showNewPassword ? 'text' : 'password'" label="Neues Passwort" variant="outlined"
-                    density="comfortable" :rules="[rules.required, rules.min]"
-                    @click:append="showNewPassword = !showNewPassword">
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" md="6">
-                  <v-text-field v-model="passwordData.confirmPassword"
-                    :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                    :type="showConfirmPassword ? 'text' : 'password'" label="Neues Passwort bestätigen"
-                    variant="outlined" density="comfortable" :rules="[rules.required, rules.passwordMatch]"
-                    @click:append="showConfirmPassword = !showConfirmPassword">
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <div class="d-flex
+                Passwort ändern
+              </span>
+            </div>
+            <div class="pa-4">
+              <v-form ref="passwordForm" v-model="passwordFormValid" @submit.prevent="changePassword">
+                <v-row>
+                  <v-col cols="12">
+                    <v-text-field v-model="passwordData.currentPassword"
+                      :append-icon="showCurrentPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                      :type="showCurrentPassword ? 'text' : 'password'" label="Aktuelles Passwort" variant="outlined"
+                      density="comfortable" :rules="[rules.required]"
+                      @click:append="showCurrentPassword = !showCurrentPassword">
+                    </v-text-field>
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-text-field v-model="passwordData.newPassword"
+                      :append-icon="showNewPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                      :type="showNewPassword ? 'text' : 'password'" label="Neues Passwort" variant="outlined"
+                      density="comfortable" :rules="[rules.required, rules.min]"
+                      @click:append="showNewPassword = !showNewPassword">
+                    </v-text-field>
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-text-field v-model="passwordData.confirmPassword"
+                      :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                      :type="showConfirmPassword ? 'text' : 'password'" label="Neues Passwort bestätigen"
+                      variant="outlined" density="comfortable" :rules="[rules.required, rules.passwordMatch]"
+                      @click:append="showConfirmPassword = !showConfirmPassword">
+                    </v-text-field>
+                  </v-col>
+                  <v-col cols="12">
+                    <div class="d-flex
                                   justify-end">
-                    <v-btn color="primary" variant="elevated" type="submit" :loading="passwordLoading"
-                      :disabled="!passwordFormValid" prepend-icon="mdi-lock-reset">
-                      Passwort ändern
-                    </v-btn>
-                  </div>
-                </v-col>
-              </v-row>
-            </v-form>
-          </div>
-        </v-sheet>
+                      <v-btn color="primary" variant="elevated" type="submit" :loading="passwordLoading"
+                        :disabled="!passwordFormValid" prepend-icon="mdi-lock-reset">
+                        Passwort ändern
+                      </v-btn>
+                    </div>
+                  </v-col>
+                </v-row>
+              </v-form>
+            </div>
+          </v-sheet>
+        </v-card-text>
 
         <v-card-actions class="pa-4">
           <BackButton></BackButton>
           <v-spacer></v-spacer>
           <EditButton :switchEditMode="switchEditMode" v-if="!editMode"></EditButton>
         </v-card-actions>
+
       </v-card>
     </template>
 

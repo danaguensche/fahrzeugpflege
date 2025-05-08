@@ -1,13 +1,19 @@
 <template>
-    <button type="submit" class="forms-buttons-action"><slot></slot></button>
+    <button class="forms-buttons-action" @click="handleClick">
+        <slot></slot>
+    </button>
 </template>
 
 <script>
-
 export default {
     name: "DefaultButton",
+    emits: ['click'],
+    methods: {
+        handleClick(event) {
+            this.$emit('click', event)
+        }
+    }
 }
-
 </script>
 
 <style scoped>

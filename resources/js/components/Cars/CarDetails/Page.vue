@@ -43,8 +43,4 @@ export default {
     transition: margin-left 0.3s ease;
 }
 
-.page {
-    background-image: url('../../../../../../images/background.png');
-    background-size: cover;
-}
 </style>

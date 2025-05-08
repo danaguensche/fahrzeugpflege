@@ -301,25 +301,20 @@ export default {
     }
 }
 </script>
-
 <style scoped>
 .button-group {
     display: flex;
-    align-items: flex-start;
-    margin-bottom: 20px;
-    flex-direction: row;
-}
-
-.scrollable-table {
-    min-height: 900px !important;
-    overflow-y: auto;
+    align-items: center;
+    gap: 12px;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0px;
+    margin-bottom: 16px;
+    padding: 8px 0;
+    margin-right: 20px;
 }
 
 .spacer {
@@ -328,45 +323,181 @@ export default {
 
 .table-container {
     position: relative;
-    width: 1500px;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    max-width: 100%;
+    margin-right: 20px;
 }
 
-.custom-table {
-    width: 100%;
+.scrollable-table {
+    min-height: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+    background-color: #fff;
+    width: 90vw;
+    max-width: 100%;
+
 }
 
 .fixed-width {
     width: 150px;
-}
-
-.edit-field {
-    padding: 10px 12px;
-}
-
-.edit-field input {
-    padding: 8px;
-    font-size: 1em;
-    box-sizing: border-box;
-    width: 100%;
-}
-
-.edit-button,
-.delete-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.delete-button:hover {
-    background-color: red !important;
-}
-
-.table {
-    margin: 25px 0;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    padding: 12px 16px;
 }
 
 .table-icon {
-    width: 0.5vh;
+    width: 48px;
+    text-align: center;
+}
+
+/* Tabellenstil */
+:deep(.v-data-table) {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+}
+
+:deep(.v-data-table th) {
+    background-color: #f5f7fa;
+    color: #2c3e50;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+:deep(.v-data-table td) {
+    border-bottom: 1px solid #edf2f7;
+    padding: 14px 16px;
+    color: #333;
+}
+
+:deep(.v-data-table tr:hover) {
+    background-color: #f9fafc;
+}
+
+/* Button-Styling */
+.refresh-button :deep(.v-btn),
+.confirm-button :deep(.v-btn),
+.cancel-button :deep(.v-btn),
+.delete-button :deep(.v-btn) {
+    text-transform: none;
+    font-weight: 500;
+    border-radius: 6px;
+    padding: 0 16px;
+    height: 40px;
+    transition: all 0.2s;
+}
+
+.confirm-button :deep(.v-btn) {
+    background-color: #4caf50;
+    color: white;
+}
+
+.confirm-button :deep(.v-btn:hover) {
+    background-color: #388e3c;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.cancel-button :deep(.v-btn) {
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+.cancel-button :deep(.v-btn:hover) {
+    background-color: #e0e0e0;
+}
+
+.delete-button :deep(.v-btn) {
+    background-color: #f44336;
+    color: white;
+}
+
+.delete-button :deep(.v-btn:hover) {
+    background-color: #d32f2f;
+    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+.refresh-button :deep(.v-btn) {
+    background-color: #2196f3;
+    color: white;
+}
+
+.refresh-button :deep(.v-btn:hover) {
+    background-color: #1976d2;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+/* Icons in Tabelle */
+:deep(.v-btn.v-btn--icon) {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+:deep(.v-btn.v-btn--icon:hover) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Icon-Farben */
+:deep(.mdi-delete) {
+    color: #f44336;
+}
+
+:deep(.mdi-pencil) {
+    color: #2196f3;
+}
+
+:deep(.mdi-content-save) {
+    color: #4caf50;
+}
+
+:deep(.v-text-field) {
+    margin: 0;
+    padding: 0;
+}
+
+:deep(.v-text-field .v-input__control) {
+    min-height: 36px;
+}
+
+:deep(.v-checkbox) {
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    color: #1976d2;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #0d47a1;
+    text-decoration: underline;
+}
+
+/* Loading-Anzeige */
+:deep(.v-progress-circular) {
+    margin: 16px auto;
+    display: block;
+}
+
+/* Responsives Design */
+@media (max-width: 960px) {
+    .button-group {
+        flex-wrap: wrap;
+    }
+
+    .fixed-width {
+        width: auto;
+    }
 }
 </style>

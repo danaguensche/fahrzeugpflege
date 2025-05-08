@@ -1,5 +1,5 @@
 <template>
-    <v-btn prepend-icon="mdi-cancel" variant="text" class="fixed-button-width">
+    <v-btn prepend-icon="mdi-cancel" variant="text" class="fixed-button-width bg-blue-grey-lighten-5">
         <slot></slot>
     </v-btn>
 </template>

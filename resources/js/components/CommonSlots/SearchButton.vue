@@ -1,29 +1,17 @@
 <template>
-    <button class="search-button" :class="{ 'tooltip': showTooltip }" :title="tooltipText">
-        <img src="../../../img/icons/search.png" class="search-icon">
-        <slot></slot>
-    </button>
-
+    <v-tooltip text="Suchen">
+        <v-btn 
+            :icon="true"
+            :prepend-icon="'mdi-magnify'"
+            class="search-button"
+        > Suche
+        </v-btn>
+    </v-tooltip>
 </template>
 
 <script>
 export default {
     name: "SearchButton",
-
-    props: {
-        tooltipText: {
-            type: String,
-            default: null
-        }
-    },
-
-    methods: {
-        showTooltip() {
-            if (this.tooltipText !== null && this.tooltipText !== '') {
-                return true;
-            }
-        }
-    }
 }
 </script>
 
@@ -31,22 +19,5 @@ export default {
 .search-button {
     align-self: flex-end;
     position: absolute;
-    transform: scale(0.3);
-    background-color: transparent;
-    margin-top: 25px;
-
 }
-
-.search-icon {
-    filter: brightness(50%);
-}
-
-.search-icon:hover {
-    cursor: pointer;
-    filter: brightness(0%);
-}
-</style>
-
-<style>
-@import url("../../../css/tooltips.css");
 </style>

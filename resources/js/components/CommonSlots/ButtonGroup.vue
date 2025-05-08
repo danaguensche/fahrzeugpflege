@@ -1,5 +1,5 @@
 <template>
-    <div >
+    <div>
     <v-btn prepend-icon="mdi-check-circle" variant="text" class="fixed-width">
         Bestätigen
     </v-btn>
@@ -24,11 +24,6 @@ export default {
 </script>
 
 <style scoped>
-.button-group {
-    justify-content: first baseline;
-    margin-bottom: 20px;
-    flex-direction: row;
-}
 
 .fixed-width {
     width: 150px;
