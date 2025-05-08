@@ -20,7 +20,8 @@
             <div v-if="loading"><v-progress-circular indeterminate></v-progress-circular></div>
             <div class="scrollable-table">
                 <v-data-table-server :headers="headers" :items="customers" :server-items-length="totalItems"
-                    :loading="loading" @update:options="loadItems" single-sort item-key="id" :sort-by="[]">
+                    height="calc(100vh - 450px)" fixed-header :loading="loading" @update:options="loadItems" single-sort
+                    item-key="id" :sort-by="[]" :items-per-page="options.itemsPerPage" hide-default-footer>
 
                     <template v-slot:item="{ item }">
                         <tr>
@@ -55,12 +56,17 @@
                                 <v-btn variant="plain" icon
                                     @click="editCustomerId === item.id ? saveCustomer() : editCustomerDetails(item)">
                                     <v-icon>{{ editCustomerId === item.id ? 'mdi-content-save' : 'mdi-pencil'
-                                        }}</v-icon>
+                                    }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
                     </template>
                 </v-data-table-server>
+
+                <!-- Pagination Komponente -->
+                <Pagination v-model:page="options.page" v-model:itemsPerPage="options.itemsPerPage"
+                    :total-items="totalItems" :items-per-page-options="[10, 20, 50, 100]"
+                    @update:page="handlePageChange" @update:itemsPerPage="handleItemsPerPageChange" />
             </div>
         </div>
         <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
@@ -77,6 +83,7 @@ import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
 import ConfirmButton from '../CommonSlots/ConfirmButton.vue';
 import CancelButton from '../CommonSlots/CancelButton.vue';
 import DeleteButton from '../CommonSlots/DeleteButton.vue';
+import Pagination from '../CommonSlots/Pagination.vue';
 
 export default {
     name: "CustomerTable",
@@ -85,7 +92,8 @@ export default {
         VuetifyAlert,
         ConfirmButton,
         CancelButton,
-        DeleteButton
+        DeleteButton,
+        Pagination
     },
     data() {
         return {
@@ -95,7 +103,7 @@ export default {
             customerToDelete: null,
             headers: [
                 { title: "Auswählen", key: "checkbox", sortable: false },
-                { title: "Kundennummer", key: "id", sortable: true },
+                { title: "ID", key: "id", sortable: true },
                 { title: "Vorname", key: "firstName" },
                 { title: "Nachname", key: "lastName" },
                 { title: "Email", key: "email" },
@@ -116,7 +124,7 @@ export default {
             alertOkayButton: '',
             options: {
                 page: 1,
-                itemsPerPage: 10,
+                itemsPerPage: 20,
                 sortBy: [],
                 sortDesc: [],
             },
@@ -134,7 +142,7 @@ export default {
         },
         isEditing() {
             return this.editCustomerId !== null;
-        },
+        }
     },
 
     mounted() {
@@ -144,6 +152,17 @@ export default {
     methods: {
         isEditableField(field) {
             return field !== 'id' && field !== 'checkbox' && field !== 'edit' && field !== 'delete';
+        },
+
+        handlePageChange(page) {
+            this.options.page = page;
+            this.loadItems();
+        },
+
+        handleItemsPerPageChange(itemsPerPage) {
+            this.options.itemsPerPage = itemsPerPage;
+            this.options.page = 1; // Reset auf Seite 1 wenn sich die Anzahl pro Seite ändert
+            this.loadItems();
         },
 
         getFieldRules(field) {
@@ -187,8 +206,18 @@ export default {
             this.isAlertVisible = false;
         },
 
-        async loadItems() {
+        async loadItems(options) {
             this.loading = true;
+
+            // Wenn options als Parameter übergeben werden, aktualisieren wir das options-Objekt
+            if (options) {
+                this.options = {
+                    page: options.page || this.options.page,
+                    itemsPerPage: options.itemsPerPage || this.options.itemsPerPage,
+                    sortBy: options.sortBy || this.options.sortBy,
+                    sortDesc: options.sortDesc || this.options.sortDesc,
+                };
+            }
 
             try {
                 const params = {
@@ -335,7 +364,7 @@ export default {
     align-items: center;
     margin-bottom: 16px;
     padding: 8px 0;
-    margin-right: 20px;
+    margin-right: 7vh;
 }
 
 .spacer {
@@ -344,7 +373,7 @@ export default {
 
 .table-container {
     position: relative;
-    width: 100%;
+    width: 95%;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -353,9 +382,8 @@ export default {
 }
 
 .scrollable-table {
-    min-height: 90%;
-    max-height: 90%;
-    overflow-y: auto;
+    max-height: 75vh;
+    overflow-y: scroll;
     background-color: #fff;
     width: 90vw;
     max-width: 100%;

@@ -14,7 +14,7 @@ class CarController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'Kennzeichen' => 'required|string',
+                'Kennzeichen' => 'required|string|unique:cars',
                 'Fahrzeugklasse' => 'nullable|integer',
                 'Automarke' => 'nullable|string',
                 'Typ' => 'nullable|string',

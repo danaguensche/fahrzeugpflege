@@ -16,11 +16,12 @@
 
         </div>
         <div class="table-container">
-            <div v-if="loading"><v-progress-circular indeterminate></v-progress-circular></div>
+            <div v-if="loading" class="loader-container"><v-progress-circular indeterminate></v-progress-circular></div>
             <div class="scrollable-table">
                 <v-data-table-server :headers="headers" :items="cars" :server-items-length="totalItems"
-                    :loading="loading" @update:options="loadItems" single-sort item-key="Kennzeichen" :sort-by="[]">
-
+                    height="calc(100vh - 400px)" fixed-header :loading="loading" @update:options="onOptionsUpdate"
+                    single-sort item-key="Kennzeichen" :sort-by="options.sortBy" :items-per-page="options.itemsPerPage"
+                    :page="options.page" hide-default-footer>
                     <template v-slot:item="{ item }">
                         <tr>
                             <td class="checkbox fixed-width">
@@ -49,12 +50,19 @@
                                 <v-btn variant="plain" icon
                                     @click="editCarId === item.Kennzeichen ? saveCar() : editCarDetails(item)">
                                     <v-icon>{{ editCarId === item.Kennzeichen ? 'mdi-content-save' : 'mdi-pencil'
-                                    }}</v-icon>
+                                        }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
                     </template>
                 </v-data-table-server>
+
+                <!-- Pagination Komponente -->
+                <div class="pagination-container">
+                    <Pagination v-model:page="options.page" v-model:itemsPerPage="options.itemsPerPage"
+                        :total-items="totalItems" :items-per-page-options="[10, 20, 50, 100]"
+                        @update:page="handlePageChange" @update:itemsPerPage="handleItemsPerPageChange" />
+                </div>
             </div>
         </div>
         <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
@@ -71,6 +79,7 @@ import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
 import ConfirmButton from '../CommonSlots/ConfirmButton.vue';
 import CancelButton from '../CommonSlots/CancelButton.vue';
 import DeleteButton from '../CommonSlots/DeleteButton.vue';
+import Pagination from '../CommonSlots/Pagination.vue';
 
 export default {
     name: "CarTable",
@@ -79,7 +88,8 @@ export default {
         CancelButton,
         DeleteButton,
         RefreshButton,
-        VuetifyAlert
+        VuetifyAlert,
+        Pagination
     },
     data() {
         return {
@@ -107,7 +117,7 @@ export default {
             alertOkayButton: '',
             options: {
                 page: 1,
-                itemsPerPage: 10,
+                itemsPerPage: 20,
                 sortBy: [],
                 sortDesc: [],
             },
@@ -125,15 +135,45 @@ export default {
         isEditing() {
             return this.editCarId !== null;
         },
+        pageItems() {
+            return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        }
     },
 
-
     mounted() {
-        console.log('Initial options:', JSON.stringify(this.options));
         this.loadItems();
     },
 
     methods: {
+        // Callback für v-data-table-server, wenn sich Optionen ändern
+        onOptionsUpdate(newOptions) {
+            // Sortierung merken
+            if (newOptions.sortBy && newOptions.sortBy.length > 0) {
+                this.options.sortBy = newOptions.sortBy;
+                this.options.sortDesc = newOptions.sortDesc;
+            }
+
+            // Wenn die Seite oder Elemente pro Seite durch die Tabelle geändert wurden
+            if (newOptions.page !== this.options.page) {
+                this.handlePageChange(newOptions.page);
+            }
+
+            if (newOptions.itemsPerPage !== this.options.itemsPerPage) {
+                this.handleItemsPerPageChange(newOptions.itemsPerPage);
+            }
+        },
+
+        handlePageChange(page) {
+            this.options.page = page;
+            this.loadItems();
+        },
+
+        handleItemsPerPageChange(itemsPerPage) {
+            this.options.itemsPerPage = itemsPerPage;
+            this.options.page = 1; // Reset auf Seite 1 wenn sich die Anzahl pro Seite ändert
+            this.loadItems();
+        },
+
         getFieldRules(field) {
             if (field === 'Fahrzeugklasse') {
                 return [
@@ -254,6 +294,16 @@ export default {
                 try {
                     await axios.delete(`/api/cars/${this.carToDelete}`);
                     console.log('Car deleted successfully:', this.carToDelete);
+
+                    // Prüfen, ob nach dem Löschen die aktuelle Seite noch Elemente hat
+                    const isLastItemOnPage = this.cars.length === 1;
+                    const isNotFirstPage = this.options.page > 1;
+
+                    // Wenn letztes Element auf einer Seite (nicht der ersten) gelöscht wurde, zur vorherigen Seite wechseln
+                    if (isLastItemOnPage && isNotFirstPage) {
+                        this.options.page -= 1;
+                    }
+
                     await this.loadItems();  // Tabelle nach dem Löschen neu laden
                     this.selectedCars = this.selectedCars.filter(kennzeichen => kennzeichen !== this.carToDelete);
                     this.carToDelete = null;
@@ -269,6 +319,17 @@ export default {
                     await axios.delete(`/api/cars`, {
                         data: { ids: this.selectedCars }
                     });
+
+                    // Prüfen, ob nach dem Löschen die aktuelle Seite noch Elemente hat
+                    const itemsBeingDeleted = this.selectedCars.length;
+                    const remainingItemsOnPage = this.cars.length - itemsBeingDeleted;
+                    const isNotFirstPage = this.options.page > 1;
+
+                    // Wenn alle Elemente auf einer Seite (nicht der ersten) gelöscht wurden, zur vorherigen Seite wechseln
+                    if (remainingItemsOnPage <= 0 && isNotFirstPage) {
+                        this.options.page -= 1;
+                    }
+
                     await this.loadItems();
                     this.selectedCars = [];
                     this.$emit('carsDeleted');
@@ -290,7 +351,6 @@ export default {
                 await this.loadItems();
             } catch (error) {
                 console.error('Fehler beim Speichern des Fahrzeuges:', error.response?.data || error.message);
-
             }
         },
 
@@ -332,13 +392,23 @@ export default {
 }
 
 .scrollable-table {
-    min-height: 90%;
-    max-height: 90%;
+    max-height: 75vh;
     overflow-y: auto;
     background-color: #fff;
     width: 90vw;
     max-width: 100%;
+}
 
+.pagination-container {
+    background-color: #fff;
+    padding: 12px;
+    border-top: 1px solid #edf2f7;
+}
+
+.loader-container {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
 }
 
 .fixed-width {
