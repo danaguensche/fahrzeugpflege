@@ -17,14 +17,28 @@
         </div>
 
         <div class="table-container">
-            <div v-if="loading"><v-progress-circular indeterminate></v-progress-circular></div>
+            <div v-if="loading" class="loading-indicator">
+                <v-progress-circular indeterminate></v-progress-circular>
+            </div>
             <div class="scrollable-table">
-                <v-data-table-server :headers="headers" :items="customers" :server-items-length="totalItems"
-                    height="calc(100vh - 450px)" fixed-header :loading="loading" @update:options="loadItems" single-sort
-                    item-key="id" :sort-by="[]" :items-per-page="options.itemsPerPage" hide-default-footer>
+                <v-data-table-server 
+                    :headers="headers" 
+                    :items="customers" 
+                    :server-items-length="totalItems"
+                    height="calc(100vh - 450px)" 
+                    fixed-header 
+                    :loading="loading" 
+                    @update:options="onUpdateOptions" 
+                    single-sort
+                    item-key="id" 
+                    :sort-by="sortBy"
+                    :sort-desc="sortDesc"
+                    :items-per-page="options.itemsPerPage" 
+                    hide-default-footer
+                    class="customer-table">
 
                     <template v-slot:item="{ item }">
-                        <tr>
+                        <tr :class="{ 'edited-row': editCustomerId === item.id }">
                             <td class="checkbox fixed-width">
                                 <v-checkbox v-model="selectedCustomers" :value="item.id"></v-checkbox>
                             </td>
@@ -37,7 +51,7 @@
                                     </template>
                                     <template v-else>
                                         <v-text-field v-model="editCustomer[field]" :rules="getFieldRules(field)"
-                                            :error-messages="fieldErrors[field]"></v-text-field>
+                                            :error-messages="fieldErrors[field]" density="compact"></v-text-field>
                                     </template>
                                 </template>
                                 <template v-else>
@@ -102,19 +116,19 @@ export default {
             selectedCustomers: [],
             customerToDelete: null,
             headers: [
-                { title: "Auswählen", key: "checkbox", sortable: false },
-                { title: "ID", key: "id", sortable: true },
-                { title: "Vorname", key: "firstName" },
-                { title: "Nachname", key: "lastName" },
-                { title: "Email", key: "email" },
-                { title: "Telefonnummer", key: "phoneNumber" },
-                { title: "Straße und Hausnummer", key: "addressLine" },
-                { title: "PLZ", key: "postalCode" },
-                { title: "Stadt", key: "city" },
-                { title: "Löschen", key: "delete", sortable: false },
-                { title: "Bearbeiten", key: "edit", sortable: false }
+                { title: "Auswählen", key: "checkbox", sortable: false, width: '80px' },
+                { title: "ID", key: "id", sortable: true, align: 'start' },
+                { title: "Vorname", key: "firstname", sortable: true },
+                { title: "Nachname", key: "lastname", sortable: true },
+                { title: "Email", key: "email", sortable: true },
+                { title: "Telefonnummer", key: "phonenumber", sortable: true },
+                { title: "Straße und Hausnummer", key: "addressline", sortable: true },
+                { title: "PLZ", key: "postalcode", sortable: true },
+                { title: "Stadt", key: "city", sortable: true },
+                { title: "Löschen", key: "delete", sortable: false, width: '60px' },
+                { title: "Bearbeiten", key: "edit", sortable: false, width: '60px' }
             ],
-            fields: ["id", "firstName", "lastName", "email", "phoneNumber", "addressLine", "postalCode", "city"],
+            fields: ["id", "firstname", "lastname", "email", "phonenumber", "addressline", "postalcode", "city"],
             editCustomerId: null,
             editCustomer: {},
             loading: false,
@@ -128,6 +142,8 @@ export default {
                 sortBy: [],
                 sortDesc: [],
             },
+            sortBy: [],
+            sortDesc: [],
             confirmAction: null,
             fieldErrors: {}
         };
@@ -162,6 +178,27 @@ export default {
         handleItemsPerPageChange(itemsPerPage) {
             this.options.itemsPerPage = itemsPerPage;
             this.options.page = 1; // Reset auf Seite 1 wenn sich die Anzahl pro Seite ändert
+            this.loadItems();
+        },
+        
+        onUpdateOptions(newOptions) {
+            // Extrahieren der Sortierinformationen
+            const sortBy = Array.isArray(newOptions.sortBy) && newOptions.sortBy.length ? [newOptions.sortBy[0]] : [];
+            const sortDesc = Array.isArray(newOptions.sortDesc) && newOptions.sortDesc.length ? [newOptions.sortDesc[0]] : [];
+            
+            // Für die Anzeige in der Tabelle
+            this.sortBy = sortBy;
+            this.sortDesc = sortDesc;
+            
+            // Für die API-Anfrage
+            this.options = {
+                page: newOptions.page || this.options.page,
+                itemsPerPage: newOptions.itemsPerPage || this.options.itemsPerPage,
+                sortBy: sortBy,
+                sortDesc: sortDesc
+            };
+            
+            // Daten neu laden
             this.loadItems();
         },
 
@@ -206,18 +243,8 @@ export default {
             this.isAlertVisible = false;
         },
 
-        async loadItems(options) {
+        async loadItems() {
             this.loading = true;
-
-            // Wenn options als Parameter übergeben werden, aktualisieren wir das options-Objekt
-            if (options) {
-                this.options = {
-                    page: options.page || this.options.page,
-                    itemsPerPage: options.itemsPerPage || this.options.itemsPerPage,
-                    sortBy: options.sortBy || this.options.sortBy,
-                    sortDesc: options.sortDesc || this.options.sortDesc,
-                };
-            }
 
             try {
                 const params = {
@@ -399,8 +426,21 @@ export default {
     text-align: center;
 }
 
+.loading-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+}
+
+/* Markierung für die bearbeitete Zeile */
+.edited-row {
+    background-color: #e3f2fd !important;
+}
+
 /* Tabellenstil */
-:deep(.v-data-table) {
+:deep(.customer-table) {
     border-collapse: collapse;
     width: 100%;
     table-layout: fixed;

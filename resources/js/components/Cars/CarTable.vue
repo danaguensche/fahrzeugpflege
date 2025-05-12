@@ -317,7 +317,7 @@ export default {
             if (this.selectedCars.length > 0) {
                 try {
                     await axios.delete(`/api/cars`, {
-                        data: { ids: this.selectedCars }
+                        data: { kennzeichen: this.selectedCars }
                     });
 
                     // Prüfen, ob nach dem Löschen die aktuelle Seite noch Elemente hat

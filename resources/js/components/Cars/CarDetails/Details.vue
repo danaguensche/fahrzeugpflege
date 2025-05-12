@@ -148,8 +148,9 @@ export default {
             return ['id', 'Kennzeichen', 'Fahrzeugklasse', 'Automarke', 'Typ', 'Farbe', 'Sonstiges'];
         },
         images() {
-            const img = this.carDetails.data?.images;
 
+            const img = this.carDetails.data?.images;
+            console.log("images", img);
             if (!img) {
                 return [];
             }

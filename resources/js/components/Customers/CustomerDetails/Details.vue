@@ -185,12 +185,12 @@ export default {
       labels: {
         id: "Kundennummer",
         company: "Firma",
-        firstName: "Vorname",
-        lastName: "Nachname",
+        firstname: "Vorname",
+        lastname: "Nachname",
         email: "E-Mail",
-        phoneNumber: "Telefonnummer",
-        addressLine: "Straße und Hausnummer",
-        postalCode: "Postleitzahl",
+        phonenumber: "Telefonnummer",
+        addressline: "Straße und Hausnummer",
+        postalcode: "Postleitzahl",
         city: "Stadt",
         cars: "Fahrzeuge",
         created_at: "Erstellt am",
@@ -208,11 +208,11 @@ export default {
 
   computed: {
     personalInfoKeys() {
-      return ['id', 'company', 'firstName', 'lastName', 'email', 'phoneNumber'];
+      return ['id', 'company', 'firstname', 'lastname', 'email', 'phonenumber'];
     },
 
     addressInfoKeys() {
-      return ['addressLine', 'postalCode', 'city'];
+      return ['addressline', 'postalcode', 'city'];
     },
 
     formattedCreatedAt() {
@@ -319,20 +319,9 @@ export default {
       this.error = null;
 
       try {
-        // Validierung der Eingabedaten, weil Namen in CamelCase sind und Backend sie kleingeschrieben erwartet
-        const dataToSend = {
-          firstname: this.editedCustomerData.firstName,
-          lastname: this.editedCustomerData.lastName,
-          email: this.editedCustomerData.email,
-          phonenumber: this.editedCustomerData.phoneNumber,
-          addressline: this.editedCustomerData.addressLine,
-          postalcode: this.editedCustomerData.postalCode,
-          city: this.editedCustomerData.city,
-          company: this.editedCustomerData.company
-        };
         await axios.put(
           `/api/customer/customerdetails/${this.$route.params.id}`,
-          dataToSend
+          this.editedCustomerData
         );
 
         // Aktualisieren der Kundendaten nach erfolgreicher Speicherung

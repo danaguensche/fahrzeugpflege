@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Http\Resources\CarResource;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Resources\CarResource;
+use Illuminate\Support\Facades\DB;
 
 class CarController extends Controller
 {
@@ -28,8 +29,11 @@ class CarController extends Controller
 
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
-                    $path = $image->store('cars');
-                    $car->images()->create(['path' => $path]);
+                    $path = $image->store('cars', 'public');
+
+                    $car->images()->create([
+                        'path' => $path,
+                    ]);
                 }
             }
             $car->load('images');
@@ -80,7 +84,10 @@ class CarController extends Controller
 
         if ($car) {
             foreach ($car->images as $image) {
-                Storage::disk('cars/')->delete($image->path);
+                $imagePath = str_replace('storage/', '', $image->path);
+                if (Storage::disk('public')->exists($imagePath)) {
+                    Storage::disk('public')->delete($imagePath);
+                }
                 $image->delete();
             }
 
@@ -93,22 +100,52 @@ class CarController extends Controller
 
     public function destroyMultiple(Request $request)
     {
-        $ids = $request->input('ids');
+        try {
+            $kennzeichen = $request->input('kennzeichen');
 
-        if (!is_array($ids) || empty($ids)) {
-            return response()->json(['error' => 'Keine IDs angegeben.'], 400);
-        }
-
-        $cars = Car::whereIn('id', $ids)->with('images')->get();
-        foreach ($cars as $car) {
-            foreach ($car->images as $image) {
-                Storage::disk('cars/')->delete($image->path);
-                $image->delete();
+            if (!is_array($kennzeichen) || empty($kennzeichen)) {
+                return response()->json([
+                    'error' => 'Keine Kennzeichen angegeben.'
+                ], 400);
             }
-            $car->delete();
-        }
 
-        return response()->json(['success' => true, 'message' => 'Fahrzeuge gelöscht.']);
+            DB::beginTransaction();
+
+            $cars = Car::whereIn('Kennzeichen', $kennzeichen)->with('images')->get();
+
+            if ($cars->isEmpty()) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => 'Keine Fahrzeuge gefunden.'
+                ], 404);
+            }
+
+            foreach ($cars as $car) {
+                foreach ($car->images as $image) {
+                    $imagePath = str_replace('storage/', '', $image->path);
+                    if (Storage::disk('public')->exists($imagePath)) {
+                        Storage::disk('public')->delete($imagePath);
+                    }
+                    $image->delete();
+                }
+                $car->delete();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => count($cars) . ' Fahrzeuge wurden gelöscht.'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Fehler beim Löschen mehrerer Fahrzeuge: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler beim Löschen der Fahrzeuge.'
+            ], 500);
+        }
     }
 
     public function update(Request $request, $kennzeichen)
