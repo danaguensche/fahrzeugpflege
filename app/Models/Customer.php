@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Customer extends Model
 {
-    use HasFactory;
-
+    use HasFactory, Searchable;
+    
     protected $fillable = [
         'id',
         'created_at',
@@ -31,5 +32,20 @@ class Customer extends Model
     public function orders()
     {
         return $this->hasMany(Order::class); 
+    }
+
+    public function toSearchableArray()
+    {
+        return [
+            'id' => $this->id,
+            'company' => $this->company,
+            'firstname' => $this->firstname,
+            'lastname' => $this->lastname,
+            'email' => $this->email,
+            'phonenumber' => $this->phonenumber,
+            'addressline' => $this->addressline,
+            'postalcode' => $this->postalcode,
+            'city' => $this->city
+        ];
     }
 }

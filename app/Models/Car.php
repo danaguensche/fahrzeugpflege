@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Car extends Model
 {
     use HasFactory;
+    use Searchable;
 
     protected $fillable = [
         'id',
@@ -47,6 +49,19 @@ class Car extends Model
     public function orders()
     {
         return $this->hasMany(Order::class); 
+    }
+
+    public function toSearchableArray()
+    {
+        return [
+            'id' => $this->id,
+            'Kennzeichen' => $this->Kennzeichen,
+            'Fahrzeugklasse' => $this->Fahrzeugklasse,
+            'Automarke' => $this->Automarke,
+            'Typ' => $this->Typ,
+            'Farbe' => $this->Farbe,
+            'Sonstiges' => $this->Sonstiges,
+        ];
     }
 }
  

@@ -34,14 +34,17 @@
                         <CustomerInfoList :customer="carDetails.data.customer" :customerId="carDetails.data.customer_id"
                             :labels="labels">
                         </CustomerInfoList>
+                        <v-btn class="mt-4" color="primary" @click="openCustomerAddDialog">
+                            Kunde hinzufügen
+                        </v-btn>
                     </v-sheet>
 
                     <!-- Metadaten -->
                     <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt"
                         :formattedUpdatedAt="formattedUpdatedAt">
                     </MetaData>
-
                 </v-card-text>
+
                 <v-card-actions class="pa-4">
                     <BackButton></BackButton>
                     <v-spacer></v-spacer>
@@ -60,6 +63,10 @@
                 </v-card-actions>
             </v-card>
         </template>
+
+        <!-- Kunde hinzufügen Dialog -->
+        <CustomerAddDialog ref="customerAddDialog" @customer-added="handleNewCustomer" @error="handleCustomerAddError">
+        </CustomerAddDialog>
 
         <!-- Snackbar für Benachrichtigungen -->
         <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false">
@@ -84,6 +91,7 @@ import InfoList from "../../Details/InfoList.vue";
 import InfoListEditMode from "../../Details/InfoListEditMode.vue";
 import DefaultHeader from "../../Details/DefaultHeader.vue";
 import CustomerInfoList from "../../Details/CustomerInfoList.vue";
+import CustomerAddDialog from "./CustomerAddDialog.vue";
 
 export default {
     name: "CarDetails",
@@ -102,7 +110,8 @@ export default {
         InfoList,
         InfoListEditMode,
         DefaultHeader,
-        CustomerInfoList
+        CustomerInfoList,
+        CustomerAddDialog
     },
     data() {
         return {
@@ -148,7 +157,6 @@ export default {
             return ['id', 'Kennzeichen', 'Fahrzeugklasse', 'Automarke', 'Typ', 'Farbe', 'Sonstiges'];
         },
         images() {
-
             const img = this.carDetails.data?.images;
             console.log("images", img);
             if (!img) {
@@ -279,6 +287,41 @@ export default {
                 color,
             };
         },
+
+        openCustomerAddDialog() {
+            if (this.$refs.customerAddDialog) {
+                this.$refs.customerAddDialog.open();
+            }
+        },
+
+        async handleNewCustomer(newCustomer) {
+            try {
+                // Attempt to associate the new customer with the current car
+                const updatedCarData = {
+                    ...this.carDetails.data,
+                    customer_id: newCustomer.id,
+                    customer: newCustomer
+                };
+
+                await axios.put(
+                    `/api/cars/cardetails/${this.$route.params.kennzeichen}`,
+                    updatedCarData
+                );
+
+                // Refresh car details to get the latest data
+                await this.getCar();
+
+                // Show success message
+                this.showSnackbar('Kunde erfolgreich hinzugefügt und mit Fahrzeug verknüpft', 'success');
+            } catch (error) {
+                const errorMessage = error.response?.data?.message || "Fehler beim Aktualisieren des Fahrzeugs";
+                this.handleCustomerAddError(errorMessage);
+            }
+        },
+
+        handleCustomerAddError(errorMessage) {
+            this.showSnackbar(errorMessage, 'error');
+        }
     }
 };
 </script>
