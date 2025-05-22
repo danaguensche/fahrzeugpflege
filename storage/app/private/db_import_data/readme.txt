@@ -1,1 +1,0 @@
-Reihenfolge der Datei-Imports ist ersichtlich in DatabaseSeeder.php. Manche Table-Seeder & Datei-Imports werden bewusst vor anderen ausgeführt, weil die betroffene Tabellen Spalten haben, die in den späteren Tabellen/Seeder mit Foreign Key referenziert werden.
