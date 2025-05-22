@@ -1,98 +1,154 @@
 <!-- CustomerAddDialog.vue -->
 <template>
-  <v-dialog v-model="dialog" max-width="600px">
-    <v-card>
-      <!-- Existierender Kunde Schritt -->
+  <v-dialog v-model="dialog" max-width="700px">
+    <v-card class="rounded-lg elevation-5">
+
+      <v-card-title class="headline primary white--text py-5">
+        <v-icon left large color="white">mdi-account-search</v-icon>
+        <span class="text-h5">Kundenauswahl</span>
+      </v-card-title>
+
       <template v-if="step === 'checkExisting'">
-        <v-card-title class="headline">
-          <span class="text-h5">Kunde bereits vorhanden?</span>
-        </v-card-title>
-        <v-card-text>
-          <v-form ref="existingCustomerForm" v-model="existingFormValid">
-            <v-text-field v-model="existingCustomerSearch" label="E-Mail oder Nachname"
-              :rules="[v => !!v || 'Suchbegriff ist erforderlich']" @keyup.enter="searchCustomer"></v-text-field>
-          </v-form>
+
+        <!-- Schritt: Vorhandenen Kunden suchen -->
+        <v-card-text class="pa-7">
+          <v-row>
+            <v-col cols="12">
+              <v-form ref="existingCustomerForm" v-model="existingFormValid">
+                <v-text-field v-model="existingCustomerSearch" label="Suchen Sie nach einem Kunden"
+                  :rules="[v => !!v || 'Suchbegriff ist erforderlich']" @keyup.enter="searchCustomer"
+                  prepend-icon="mdi-magnify" clearable outlined class="rounded-lg">
+                </v-text-field>
+              </v-form>
+            </v-col>
+          </v-row>
 
           <!-- Suchergebnisse -->
-          <v-list v-if="searchResults.length > 0">
-            <v-list-item v-for="customer in searchResults" :key="customer.id" @click="selectExistingCustomer(customer)">
-              <v-list-item-content>
-                <v-list-item-title>
-                  {{ customer.firstname }} {{ customer.lastname }}
-                </v-list-item-title>
-                <v-list-item-subtitle>
-                  {{ customer.email }}
-                </v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
+          <v-card v-if="searchResults.length > 0" class="mt-4" style="max-height: 500px; overflow-y: auto;">
+            <v-card-title>
+              <v-icon left class="mr-4" color="primary">mdi-format-list-bulleted</v-icon>
+              <span class="ga-10"></span>
+              Gefundene Kunden ({{ searchResults.length }})
+            </v-card-title>
+            <v-list two-line>
+              <v-list-item v-for="customer in searchResults" :key="customer.id"
+                @click="selectExistingCustomer(customer)" class="list-item-hover">
+                <v-list-item-avatar>
+                  <v-icon color="primary">mdi-account</v-icon>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title class="font-weight-bold">
+                    {{ customer.firstname }} {{ customer.lastname }}
+                  </v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{ customer.email }} - {{ customer.phonenumber }}
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+                <v-list-item-action style="position: absolute; top: 10px; right: 0;">
+                  <v-btn icon variant="plain" @click.stop="selectExistingCustomer(customer)">
+                    <v-icon color="primary">mdi-plus-circle</v-icon>
+                  </v-btn>
+                </v-list-item-action>
+              </v-list-item>
+            </v-list>
+          </v-card>
 
-          <div v-if="showNoResultsMessage" class="text-center mt-4">
-            <p>Keine Kunden gefunden.</p>
-            <v-btn color="primary" @click="step = 'createNew'">
-              Neuen Kunden erstellen
-            </v-btn>
-          </div>
+          <!-- Keine Suchergebnisse -->
+          <v-alert v-if="showNoResultsMessage" type="info" text class="mt-4 rounded-lg">
+            <div class="text-center">
+              <v-icon large color="info" class="mb-2">mdi-account-off-outline</v-icon>
+              <p class="mb-2">Kein Kunde gefunden.</p>
+            </div>
+          </v-alert>
+
+          <!-- Erfolgsmeldung -->
+          <v-snackbar v-model="showSuccessMessage" color="success" timeout="3000" top>
+            <v-icon left>mdi-check-circle</v-icon>
+            {{ successMessage }}
+          </v-snackbar>
         </v-card-text>
-        <v-card-actions>
+
+        <v-card-actions class="pa-4 grey lighten-4">
+          <v-btn color="secondary" @click="step = 'createNew'">
+            <v-icon left>mdi-account-plus</v-icon>
+            Neuer Kunde
+          </v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDialog">
+          <v-btn color="grey darken-1" text @click="closeDialog">
+            <v-icon left>mdi-close</v-icon>
             Abbrechen
           </v-btn>
-          <v-btn color="blue darken-1" text @click="searchCustomer" :disabled="!existingFormValid">
-            Suchen
+          <v-btn color="primary" @click="searchCustomer" :disabled="!existingFormValid" :loading="isSearching">
+            <v-icon left>mdi-magnify</v-icon>
+            Kunde suchen
           </v-btn>
         </v-card-actions>
       </template>
 
       <!-- Neuer Kunde Schritt -->
       <template v-else-if="step === 'createNew'">
-        <v-card-title class="headline">
+        <v-card-title class="headline primary white--text py-4">
+          <v-icon left large color="white">mdi-account-plus</v-icon>
           <span class="text-h5">Neuen Kunden hinzufügen</span>
         </v-card-title>
-        <v-card-text>
+        <v-card-text class="pa-5">
           <v-form ref="customerForm" v-model="valid" lazy-validation>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="newCustomer.company" label="Firma" outlined>
+                  </v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
                   <v-text-field v-model="newCustomer.firstname" :rules="[v => !!v || 'Vorname ist erforderlich']"
-                    label="Vorname" required></v-text-field>
+                    label="Vorname" outlined required>
+                  </v-text-field>
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col cols="12" md="6">
                   <v-text-field v-model="newCustomer.lastname" :rules="[v => !!v || 'Nachname ist erforderlich']"
-                    label="Nachname" required></v-text-field>
+                    label="Nachname" outlined required>
+                  </v-text-field>
                 </v-col>
-                <v-col cols="12">
-                  <v-text-field v-model="newCustomer.email" :rules="[
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="newCustomer.email" label="E-Mail" :rules="[
                     v => !!v || 'E-Mail ist erforderlich',
-                    v => /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
-                  ]" label="E-Mail" type="email" required></v-text-field>
+                    v => /.+@.+\..+/.test(v) || 'E-Mail muss gültig sein'
+                  ]" outlined required>
+                  </v-text-field>
                 </v-col>
-                <v-col cols="12">
-                  <v-text-field v-model="newCustomer.phonenumber" label="Telefonnummer" type="tel"></v-text-field>
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="newCustomer.phonenumber" label="Telefonnummer" outlined>
+                  </v-text-field>
                 </v-col>
-                <v-col cols="12">
-                  <v-text-field v-model="newCustomer.addressline" label="Adresse"></v-text-field>
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="newCustomer.addressline" label="Straße und Hausnummer" outlined>
+                  </v-text-field>
                 </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field v-model="newCustomer.postalcode" label="Postleitzahl"></v-text-field>
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="newCustomer.postalcode" label="PLZ" outlined>
+                  </v-text-field>
                 </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field v-model="newCustomer.city" label="Stadt"></v-text-field>
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="newCustomer.city" label="Stadt" outlined>
+                  </v-text-field>
                 </v-col>
               </v-row>
             </v-container>
           </v-form>
         </v-card-text>
-        <v-card-actions>
-          <v-btn color="blue darken-1" text @click="step = 'checkExisting'">
+
+        <v-card-actions class="pa-4 grey lighten-4">
+          <v-btn color="grey" text @click="step = 'checkExisting'">
+            <v-icon left>mdi-arrow-left</v-icon>
             Zurück
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDialog">
+          <v-btn color="grey darken-1" text @click="closeDialog">
+            <v-icon left>mdi-close</v-icon>
             Abbrechen
           </v-btn>
-          <v-btn color="blue darken-1" text @click="saveCustomer" :disabled="!valid">
+          <v-btn color="success" @click="saveCustomer" :disabled="!valid" :loading="isSaving">
+            <v-icon left>mdi-content-save</v-icon>
             Speichern
           </v-btn>
         </v-card-actions>
@@ -115,7 +171,12 @@ export default {
       existingCustomerSearch: '',
       searchResults: [],
       showNoResultsMessage: false,
+      isSearching: false,
+      isSaving: false,
+      showSuccessMessage: false,
+      successMessage: '',
       newCustomer: {
+        company: '',
         firstname: '',
         lastname: '',
         email: '',
@@ -126,18 +187,22 @@ export default {
       },
     };
   },
+
   methods: {
     open() {
       this.dialog = true;
       this.step = 'checkExisting';
       this.resetForm();
     },
+
     closeDialog() {
       this.dialog = false;
       this.resetForm();
     },
+
     resetForm() {
       this.newCustomer = {
+        company: '',
         firstname: '',
         lastname: '',
         email: '',
@@ -149,8 +214,11 @@ export default {
       this.existingCustomerSearch = '';
       this.searchResults = [];
       this.showNoResultsMessage = false;
+      this.showSuccessMessage = false;
+      this.successMessage = '';
+      this.isSearching = false;
+      this.isSaving = false;
 
-      // Formular zurücksetzen, wenn sie existieren
       this.$nextTick(() => {
         if (this.$refs.customerForm) {
           this.$refs.customerForm.resetValidation();
@@ -160,25 +228,40 @@ export default {
         }
       });
     },
+
     async searchCustomer() {
       if (this.$refs.existingCustomerForm && !this.$refs.existingCustomerForm.validate()) {
-        this.showNoResultsMessage = true;
         return;
       }
+
+      this.isSearching = true;
+      this.showNoResultsMessage = false;
 
       try {
         const response = await axios.get('/api/customers/search', {
           params: { query: this.existingCustomerSearch }
         });
 
-        // Erwartetes Format: { data: [...] }
         this.searchResults = Array.isArray(response.data.data) ? response.data.data : [];
         this.showNoResultsMessage = this.searchResults.length === 0;
       } catch (error) {
+        console.error('Fehler bei der Kundensuche:', error);
         this.$emit('error', error.response?.data?.message || 'Fehler bei der Kundensuche');
         this.searchResults = [];
         this.showNoResultsMessage = true;
+      } finally {
+        this.isSearching = false;
       }
+    },
+
+    selectExistingCustomer(customer) {
+      this.successMessage = `${customer.firstname} ${customer.lastname} wurde ausgewählt!`;
+      this.showSuccessMessage = true;
+
+      setTimeout(() => {
+        this.$emit('customer-selected', customer);
+        this.closeDialog();
+      }, 1500);
     },
 
     async saveCustomer() {
@@ -187,14 +270,21 @@ export default {
         return;
       }
 
+      this.isSaving = true;
+
       try {
-        // POST-Anfrage zum Erstellen eines neuen Kunden
+        console.log('Neuer Kunde:', this.newCustomer);
         const response = await axios.post('/api/customers', this.newCustomer);
 
         if (response.data) {
-          // Emit-Ereignis mit neuen Kundendaten
-          this.$emit('customer-added', response.data);
-          this.closeDialog();
+          const newCustomer = response.data;
+          this.successMessage = `Neuer Kunde ${newCustomer.firstname} ${newCustomer.lastname} wurde erfolgreich erstellt!`;
+          this.showSuccessMessage = true;
+
+          setTimeout(() => {
+            this.$emit('customer-added', newCustomer);
+            this.closeDialog();
+          }, 1500);
         } else {
           throw new Error('Keine Daten vom Server erhalten');
         }
@@ -202,8 +292,21 @@ export default {
         console.error('Fehler beim Hinzufügen des Kunden:', error);
         const errorMessage = error.response?.data?.message || 'Fehler beim Hinzufügen des Kunden';
         this.$emit('error', errorMessage);
+      } finally {
+        this.isSaving = false;
       }
     }
   }
 };
 </script>
+
+<style scoped>
+.list-item-hover {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.list-item-hover:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+</style>

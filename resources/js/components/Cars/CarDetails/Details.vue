@@ -34,7 +34,11 @@
                         <CustomerInfoList :customer="carDetails.data.customer" :customerId="carDetails.data.customer_id"
                             :labels="labels">
                         </CustomerInfoList>
-                        <v-btn class="mt-4" color="primary" @click="openCustomerAddDialog">
+
+                        <!-- Button wird nur angezeigt wenn noch kein Kunde eingetragen wurde -->
+                        <v-btn class="mt-4" color="primary"
+                            v-if="!carDetails.data.customer || carDetails.data.customer === 0"
+                            @click="openCustomerAddDialog">
                             Kunde hinzufügen
                         </v-btn>
                     </v-sheet>
@@ -65,7 +69,8 @@
         </template>
 
         <!-- Kunde hinzufügen Dialog -->
-        <CustomerAddDialog ref="customerAddDialog" @customer-added="handleNewCustomer" @error="handleCustomerAddError">
+        <CustomerAddDialog ref="customerAddDialog" @customer-added="handleCustomerAdded"
+            @customer-selected="handleCustomerSelected" @error="handleCustomerAddError">
         </CustomerAddDialog>
 
         <!-- Snackbar für Benachrichtigungen -->
@@ -264,7 +269,6 @@ export default {
                     this.editedCarData
                 );
 
-                // Aktualisieren der Fahrzeugdaten nach erfolgreicher Speicherung
                 const { data } = await axios.get(
                     `/api/cars/cardetails/${this.$route.params.kennzeichen}`
                 );
@@ -294,13 +298,31 @@ export default {
             }
         },
 
-        async handleNewCustomer(newCustomer) {
+        async handleCustomerAdded(newCustomer) {
             try {
-                // Attempt to associate the new customer with the current car
                 const updatedCarData = {
                     ...this.carDetails.data,
-                    customer_id: newCustomer.id,
-                    customer: newCustomer
+                    customer_id: newCustomer.id
+                };
+
+                await axios.put(
+                    `/api/cars/cardetails/${this.$route.params.kennzeichen}`,
+                    updatedCarData
+                );
+                await this.getCar();
+
+                this.showSnackbar(`Neuer Kunde ${newCustomer.firstname} ${newCustomer.lastname} wurde erfolgreich erstellt und mit dem Fahrzeug verknüpft`, 'success');
+            } catch (error) {
+                const errorMessage = error.response?.data?.message || "Fehler beim Verknüpfen des Kunden mit dem Fahrzeug";
+                this.handleCustomerAddError(errorMessage);
+            }
+        },
+
+        async handleCustomerSelected(customer) {
+            try {
+                const updatedCarData = {
+                    ...this.carDetails.data,
+                    customer_id: customer.id
                 };
 
                 await axios.put(
@@ -308,13 +330,10 @@ export default {
                     updatedCarData
                 );
 
-                // Refresh car details to get the latest data
                 await this.getCar();
-
-                // Show success message
-                this.showSnackbar('Kunde erfolgreich hinzugefügt und mit Fahrzeug verknüpft', 'success');
+                this.showSnackbar(`Kunde ${customer.firstname} ${customer.lastname} wurde erfolgreich mit dem Fahrzeug verknüpft`, 'success');
             } catch (error) {
-                const errorMessage = error.response?.data?.message || "Fehler beim Aktualisieren des Fahrzeugs";
+                const errorMessage = error.response?.data?.message || "Fehler beim Verknüpfen des Kunden mit dem Fahrzeug";
                 this.handleCustomerAddError(errorMessage);
             }
         },

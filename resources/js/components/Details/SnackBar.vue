@@ -13,6 +13,20 @@
 <script>
 export default {
     name: 'SnackBar',
+    props: {
+        text: {
+            type: String,
+            default: '',
+        },
+        color: {
+            type: String,
+            default: 'success',
+        },
+        show: {
+            type: Boolean,
+            default: false,
+        },
+    },
     data() {
         return {
             snackbar: {

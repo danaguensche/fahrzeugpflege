@@ -43,6 +43,27 @@ class CarDetailsController extends CarController
             ]);
 
             $updated = $car->update($validatedData);
+            
+            if ($request->has('customer_id')) {
+                Log::info('Car assignment request received', [
+                    'Kennzeichen' => $kennzeichen,
+                    'request_data' => $request->all(),
+                    'customer_id' => $request->input('customer_id'),
+                    'content_type' => $request->header('Content-Type')
+                ]);
+
+                $validatedData = $request->validate([
+                    'customer_id' => 'required|numeric'
+                ]);
+                $car->customer_id = (int)$validatedData['customer_id'];
+
+                Log::info('Car assignment successful', [
+                    'Kennzeichen' => $kennzeichen,
+                    'customer_id' => $car->customer_id
+                ]);
+            }
+
+            $car->save();
 
             if (!$updated) {
                 throw new \Exception('Failed to update car data');

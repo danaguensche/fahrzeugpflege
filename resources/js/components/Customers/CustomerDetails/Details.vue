@@ -27,7 +27,7 @@
             <!-- Bearbeitungsmodus -->
             <InfoListEditMode v-else :personalInfoKeys="personalInfoKeys" :labels="labels"
               :editedData="editedCustomerData" :getIconForField="getIconForField">
-            </InfoListEditMode class="list-edit-mode">
+            </InfoListEditMode>
           </v-sheet>
 
           <!-- Adressinformationen -->
@@ -101,7 +101,15 @@
                 </v-list-item-subtitle>
               </v-list-item>
             </template>
+            <v-btn class="mt-4" color="primary" @click="openCarAddDialog">
+              Fahrzeug hinzufügen
+            </v-btn>
           </v-sheet>
+
+          <!-- Fahrzeug hinzufügen Dialog -->
+          <CarAddDialog ref="carAddDialog" :kundeId="$route.params.id" @car-added="handleNewCar"
+            @car-assigned="handleCarAssigned" @car-selected="handleCarSelected" @error="handleCarAddError">
+          </CarAddDialog>
 
           <!-- Metadaten -->
           <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt" :formattedUpdatedAt="formattedUpdatedAt">
@@ -151,6 +159,7 @@ import InfoListEditMode from "../../Details/InfoListEditMode.vue";
 import DefaultHeader from "../../Details/DefaultHeader.vue";
 import HeaderWithChip from "../../Details/HeaderWithChip.vue";
 import CarList from "../../Details/CarList.vue";
+import CarAddDialog from "./CarAddDialog.vue";
 
 export default {
   name: "Details",
@@ -171,6 +180,7 @@ export default {
     DefaultHeader,
     HeaderWithChip,
     CarList,
+    CarAddDialog,
   },
   data() {
     return {
@@ -221,7 +231,7 @@ export default {
 
     formattedUpdatedAt() {
       return this.formatDate(this.customerDetails.data?.updated_at);
-    },
+    }
   },
 
   async mounted() {
@@ -288,12 +298,12 @@ export default {
       const iconMap = {
         id: "mdi-identifier",
         company: "mdi-office-building",
-        firstName: "mdi-account",
-        lastName: "mdi-account-details",
+        firstname: "mdi-account",
+        lastname: "mdi-account-details",
         email: "mdi-email",
-        phoneNumber: "mdi-phone",
-        addressLine: "mdi-map-marker",
-        postalCode: "mdi-mail",
+        phonenumber: "mdi-phone",
+        addressline: "mdi-map-marker",
+        postalcode: "mdi-mail",
         city: "mdi-city",
         cars: "mdi-car-multiple"
       };
@@ -339,8 +349,105 @@ export default {
         this.saveLoading = false;
       }
     },
+
+    openCarAddDialog() {
+      if (this.$refs.carAddDialog) {
+        this.$refs.carAddDialog.open();
+      }
+    },
+
+    async handleNewCar(newCar) {
+      try {
+        const customerId = this.$route.params.id;
+
+        const requestPayload = {
+          customer_id: customerId,
+          Kennzeichen: newCar.car.Kennzeichen,
+          Fahrzeugklasse: newCar.car.Fahrzeugklasse || null,
+          Automarke: newCar.car.Automarke || null,
+          Typ: newCar.car.Typ || null,
+          Farbe: newCar.car.Farbe || null,
+          Sonstiges: newCar.car.Sonstiges || null
+        };
+
+        const endpoint = `/api/cars/cardetails/${newCar.car.Kennzeichen}`;
+
+        console.log('Sende Anfrage an:', endpoint);
+        console.log('Mit Payload:', JSON.stringify(requestPayload));
+
+        // Setze explizite Header
+        const response = await axios.put(
+          endpoint,
+          requestPayload,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          }
+        );
+
+        console.log('Server-Antwort:', response.data);
+
+        // Refresh car details to get the latest data
+        await this.getCustomer();
+
+        // Show success message
+        this.showSnackbar('Fahrzeug erfolgreich hinzugefügt und mit Kunden verknüpft', 'success');
+      } catch (error) {
+        console.error('Fehler beim Zuweisen des Fahrzeugs:', error);
+
+        // Detaillierte Fehlerinformationen loggen
+        if (error.response) {
+          console.error('Server-Antwort:', error.response.status);
+          console.error('Fehlerdaten:', error.response.data);
+
+          // Verbesserte Fehlerbehandlung für Validierungsfehler
+          if (error.response.status === 422 && error.response.data.errors) {
+            const validationErrors = Object.values(error.response.data.errors).flat();
+            const errorMessage = validationErrors.length > 0
+              ? validationErrors.join(', ')
+              : error.response.data.message || "Validierungsfehler";
+            this.handleCarAddError(errorMessage);
+            return;
+          }
+
+          console.error('Headers:', error.response.headers);
+        } else if (error.request) {
+          console.error('Keine Antwort erhalten:', error.request);
+        } else {
+          console.error('Fehler beim Erstellen der Anfrage:', error.message);
+        }
+
+        const errorMessage = error.response?.data?.message || "Fehler beim Aktualisieren des Kunden";
+        this.handleCarAddError(errorMessage);
+      }
+    },
+
+    handleCarAddError(errorMessage) {
+      this.showSnackbar(errorMessage, 'error');
+    },
+
+    async handleCarAssigned(data) {
+      try {
+        // Refresh car details to get the latest data
+        await this.getCustomer();
+
+        // Show success message
+        this.showSnackbar(`Fahrzeug ${data.car.Kennzeichen} erfolgreich mit Kunden verknüpft`, 'success');
+      } catch (error) {
+        const errorMessage = error.response?.data?.message || "Fehler beim Aktualisieren der Kundenfahrzeuge";
+        this.showSnackbar(errorMessage, 'error');
+      }
+    },
+
+    handleCarSelected(car) {
+      // Dieser Handler wird aufgerufen, wenn ein Auto aus der Liste ausgewählt wurde
+      console.log('Auto ausgewählt:', car);
+    }
   }
-};
+}
 </script>
 
 <style scoped>
@@ -369,7 +476,6 @@ export default {
   .card-container {
     padding: 10px;
     height: calc(100vh - 20px);
-
   }
 
   .card {
