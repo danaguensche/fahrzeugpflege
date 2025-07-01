@@ -6,34 +6,67 @@
             von {{ totalItems }} Einträgen
         </div>
         <div class="pagination-buttons">
-            <v-btn icon variant="plain" :disabled="page <= 1" @click="$emit('update:page', 1)" class="pagination-btn">
+            <v-btn 
+                icon 
+                variant="plain" 
+                :disabled="page <= 1" 
+                @click="$emit('update:page', 1)" 
+                class="pagination-btn"
+            >
                 <v-icon>mdi-page-first</v-icon>
             </v-btn>
-            <v-btn icon variant="plain" :disabled="page <= 1" @click="$emit('update:page', page - 1)"
-                class="pagination-btn">
+            <v-btn 
+                icon 
+                variant="plain" 
+                :disabled="page <= 1" 
+                @click="$emit('update:page', page - 1)"
+                class="pagination-btn"
+            >
                 <v-icon>mdi-chevron-left</v-icon>
             </v-btn>
-
             <div class="page-selector">
                 Seite
-                <v-select :model-value="page" :items="pageItems" variant="outlined" density="compact"
-                    class="page-select" hide-details @update:model-value="$emit('update:page', $event)"></v-select>
+                <v-select 
+                    :model-value="page" 
+                    :items="pageItems" 
+                    variant="outlined" 
+                    density="compact"
+                    class="page-select" 
+                    hide-details 
+                    @update:model-value="handlePageSelect"
+                ></v-select>
                 von {{ totalPages }}
             </div>
-
-            <v-btn icon variant="plain" :disabled="page >= totalPages" @click="$emit('update:page', page + 1)"
-                class="pagination-btn">
+            <v-btn 
+                icon 
+                variant="plain" 
+                :disabled="page >= totalPages" 
+                @click="$emit('update:page', page + 1)"
+                class="pagination-btn"
+            >
                 <v-icon>mdi-chevron-right</v-icon>
             </v-btn>
-            <v-btn icon variant="plain" :disabled="page >= totalPages" @click="$emit('update:page', totalPages)"
-                class="pagination-btn">
+            <v-btn 
+                icon 
+                variant="plain" 
+                :disabled="page >= totalPages" 
+                @click="$emit('update:page', totalPages)"
+                class="pagination-btn"
+            >
                 <v-icon>mdi-page-last</v-icon>
             </v-btn>
         </div>
         <div class="items-per-page">
             <span>Einträge pro Seite:</span>
-            <v-select :model-value="itemsPerPage" :items="itemsPerPageOptions" variant="outlined" density="compact"
-                class="items-select" hide-details @update:model-value="$emit('update:itemsPerPage', $event)"></v-select>
+            <v-select 
+                :model-value="itemsPerPage" 
+                :items="itemsPerPageOptions" 
+                variant="outlined" 
+                density="compact"
+                class="items-select" 
+                hide-details 
+                @update:model-value="handleItemsPerPageSelect"
+            ></v-select>
         </div>
     </div>
 </template>
@@ -59,14 +92,37 @@ export default {
             default: () => [10, 20, 50, 100]
         }
     },
+    
     computed: {
         totalPages() {
-            return Math.ceil(this.totalItems / this.itemsPerPage);
+            return Math.ceil(this.totalItems / this.itemsPerPage) || 1;
         },
+        
         pageItems() {
-            return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+            const pages = [];
+            for (let i = 1; i <= this.totalPages; i++) {
+                pages.push(i);
+            }
+            return pages;
         }
     },
+    
+    methods: {
+        handlePageSelect(selectedPage) {
+            const pageNumber = parseInt(selectedPage);
+            if (pageNumber && pageNumber !== this.page) {
+                this.$emit('update:page', pageNumber);
+            }
+        },
+        
+        handleItemsPerPageSelect(selectedItemsPerPage) {
+            const itemsPerPage = parseInt(selectedItemsPerPage);
+            if (itemsPerPage && itemsPerPage !== this.itemsPerPage) {
+                this.$emit('update:itemsPerPage', itemsPerPage);
+            }
+        }
+    },
+    
     emits: ['update:page', 'update:itemsPerPage']
 }
 </script>

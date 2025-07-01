@@ -1,88 +1,83 @@
 <template>
-    <input v-model="searchText" class="searchbar forms-field forms-field-input" type="search" :placeholder="context">
-    <SearchButton class="search-button"></SearchButton>
-    <CloseButton :isVisible="!!searchText" @close="clearSearch"></CloseButton>
-
-    <slot></slot>
-    </input>
+    <input 
+        v-model="localSearchString" 
+        class="searchbar forms-field forms-field-input" 
+        type="search" 
+        :placeholder="context"
+        @input="handleInput"
+    >
 </template>
 
 <script>
-import SearchButton from './SearchButton.vue';
-import CloseButton from './CloseButton.vue'
-
 export default {
-    name: "Search",
-
-    components: {
-        SearchButton,
-        CloseButton
-    },
-
+    name: "Searchbar",
     props: {
         context: {
             type: String,
             default: ""
         },
-
-        data: {
-            type: Array,
-            required: true
+        searchText: {
+            type: String,
+            default: ""
         }
     },
-
+    emits: ['update:searchString', 'clearSearch'],
     data() {
         return {
-            searchText: ""
+            localSearchString: this.searchText
         }
     },
-
-    computed: {
-
+    watch: {
+        searchText(newValue) {
+            this.localSearchString = newValue;
+        }
     },
-
     methods: {
-        _set_context(newtext) {
-            this.context = newtext;
+        handleInput() {
+            this.$emit('update:searchString', this.localSearchString);
         },
-
         clearSearch() {
-            this.searchText = "";
+            this.localSearchString = "";
+            this.$emit('update:searchString', "");
+            this.$emit('clearSearch');
         }
     }
 }
 </script>
 
 <style scoped>
-.search-container {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
-
 .searchbar {
     background-color: white;
     margin-top: 50px;
-    margin-bottom: 100px;
+    margin-bottom: 50px;
     width: 100%;
+    min-height: 50px;
+    padding: 12px 80px 12px 20px;
+    border: 1px solid #ddd;
+    border-radius: 30px;
     box-shadow: var(--box-shadow);
-    margin-right: 10px;
-
+    font-size: 16px;
+    outline: none;
+    transition: all 0.2s ease;
 }
 
-.search-button {
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    width: 50px;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    cursor: pointer;
+.searchbar:focus {
+    border-color: var(--primary-color, #007bff);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
 .searchbar.forms-field {
     border-radius: 30px;
+}
+
+@media only screen and (max-width: 650px) {
+    .searchbar {
+        width: 100%;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        padding-right: 20px;
+        font-size: 14px;
+        min-height: 45px;
+    }
 }
 </style>

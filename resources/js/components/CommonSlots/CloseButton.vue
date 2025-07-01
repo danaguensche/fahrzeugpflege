@@ -34,12 +34,7 @@ export default {
 
 <style scoped>
 .close-button {
-  align-self: flex-end;
-  margin-right: 45px;
-  position: absolute;
   transform: scale(0.3);
-  background-color: transparent;
-  margin-top: 25px;
   transition: 0.6s ease;
 }
 

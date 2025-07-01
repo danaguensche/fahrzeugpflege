@@ -20,8 +20,7 @@
             <div class="scrollable-table">
                 <v-data-table-server :headers="headers" :items="cars" :server-items-length="totalItems"
                     height="calc(100vh - 400px)" fixed-header :loading="loading" @update:options="onOptionsUpdate"
-                    single-sort item-key="Kennzeichen" :sort-by="options.sortBy" :items-per-page="options.itemsPerPage"
-                    :page="options.page" hide-default-footer>
+                    :items-per-page="options.itemsPerPage" :page="options.page" hide-default-footer>
                     <template v-slot:item="{ item }">
                         <tr>
                             <td class="checkbox fixed-width">
@@ -50,7 +49,7 @@
                                 <v-btn variant="plain" icon
                                     @click="editCarId === item.Kennzeichen ? saveCar() : editCarDetails(item)">
                                     <v-icon>{{ editCarId === item.Kennzeichen ? 'mdi-content-save' : 'mdi-pencil'
-                                        }}</v-icon>
+                                    }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
@@ -83,6 +82,12 @@ import Pagination from '../CommonSlots/Pagination.vue';
 
 export default {
     name: "CarTable",
+    props: {
+        searchString: {
+            type: String,
+            default: ''
+        }
+    },
     components: {
         ConfirmButton,
         CancelButton,
@@ -118,8 +123,6 @@ export default {
             options: {
                 page: 1,
                 itemsPerPage: 20,
-                sortBy: [],
-                sortDesc: [],
             },
             confirmAction: null
         };
@@ -148,10 +151,10 @@ export default {
         // Callback für v-data-table-server, wenn sich Optionen ändern
         onOptionsUpdate(newOptions) {
             // Sortierung merken
-            if (newOptions.sortBy && newOptions.sortBy.length > 0) {
-                this.options.sortBy = newOptions.sortBy;
-                this.options.sortDesc = newOptions.sortDesc;
-            }
+            // if (newOptions.sortBy && newOptions.sortBy.length > 0) {
+            //     this.options.sortBy = newOptions.sortBy;
+            //     this.options.sortDesc = newOptions.sortDesc;
+            // }
 
             // Wenn die Seite oder Elemente pro Seite durch die Tabelle geändert wurden
             if (newOptions.page !== this.options.page) {

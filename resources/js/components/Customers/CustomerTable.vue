@@ -1,7 +1,7 @@
 <template>
     <div class="component">
         <div class="header">
-            <RefreshButton class="refresh-button" @refresh="loadItems"></RefreshButton>
+            <RefreshButton class="refresh-button" @refresh="refreshData"></RefreshButton>
             <div class="spacer"></div>
 
             <div class="button-group">
@@ -21,21 +21,9 @@
                 <v-progress-circular indeterminate></v-progress-circular>
             </div>
             <div class="scrollable-table">
-                <v-data-table-server 
-                    :headers="headers" 
-                    :items="customers" 
-                    :server-items-length="totalItems"
-                    height="calc(100vh - 450px)" 
-                    fixed-header 
-                    :loading="loading" 
-                    @update:options="onUpdateOptions" 
-                    single-sort
-                    item-key="id" 
-                    :sort-by="sortBy"
-                    :sort-desc="sortDesc"
-                    :items-per-page="options.itemsPerPage" 
-                    hide-default-footer
-                    class="customer-table">
+                <v-data-table-server :headers="headers" :items="customers" :server-items-length="totalItems"
+                    height="calc(100vh - 400px)" fixed-header :loading="loading" @update:options="onOptionsUpdate"
+                    :items-per-page="options.itemsPerPage" :page="options.page" hide-default-footer>
 
                     <template v-slot:item="{ item }">
                         <tr :class="{ 'edited-row': editCustomerId === item.id }">
@@ -78,9 +66,11 @@
                 </v-data-table-server>
 
                 <!-- Pagination Komponente -->
-                <Pagination v-model:page="options.page" v-model:itemsPerPage="options.itemsPerPage"
-                    :total-items="totalItems" :items-per-page-options="[10, 20, 50, 100]"
-                    @update:page="handlePageChange" @update:itemsPerPage="handleItemsPerPageChange" />
+                <div class="pagination-container">
+                    <Pagination v-model:page="options.page" v-model:itemsPerPage="options.itemsPerPage"
+                        :total-items="totalItems" :items-per-page-options="[10, 20, 50, 100]"
+                        @update:page="handlePageChange" @update:itemsPerPage="handleItemsPerPageChange" />
+                </div>
             </div>
         </div>
         <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
@@ -109,65 +99,128 @@ export default {
         DeleteButton,
         Pagination
     },
+
+    props: {
+        customers: {
+            type: Array,
+            default: () => []
+        },
+        editCustomerId: {
+            type: [Number, String, null],
+            default: null
+        },
+        editCustomer: {
+            type: Object,
+            default: () => ({})
+        },
+        currentPage: {
+            type: Number,
+            default: 1
+        },
+        itemsPerPage: {
+            type: Number,
+            required: true
+        },
+        totalItems: {
+            type: Number,
+            required: true
+        },
+        loading: {
+            type: Boolean,
+            default: false
+        },
+        searchString: {
+            type: String,
+            default: ''
+        },
+        isSearchActive: {
+            type: Boolean,
+            default: false
+        }
+    },
+
     data() {
         return {
             isAlertVisible: false,
-            customers: [],
             selectedCustomers: [],
             customerToDelete: null,
             headers: [
                 { title: "Auswählen", key: "checkbox", sortable: false, width: '80px' },
-                { title: "ID", key: "id", sortable: true, align: 'start' },
-                { title: "Vorname", key: "firstname", sortable: true },
-                { title: "Nachname", key: "lastname", sortable: true },
-                { title: "Email", key: "email", sortable: true },
-                { title: "Telefonnummer", key: "phonenumber", sortable: true },
-                { title: "Straße und Hausnummer", key: "addressline", sortable: true },
-                { title: "PLZ", key: "postalcode", sortable: true },
-                { title: "Stadt", key: "city", sortable: true },
+                { title: "ID", key: "id", sortable: false, align: 'start' },
+                { title: "Vorname", key: "firstname", sortable: false },
+                { title: "Nachname", key: "lastname", sortable: false },
+                { title: "Email", key: "email", sortable: false },
+                { title: "Telefonnummer", key: "phonenumber", sortable: false },
+                { title: "Straße und Hausnummer", key: "addressline", sortable: false },
+                { title: "PLZ", key: "postalcode", sortable: false },
+                { title: "Stadt", key: "city", sortable: false },
                 { title: "Löschen", key: "delete", sortable: false, width: '60px' },
                 { title: "Bearbeiten", key: "edit", sortable: false, width: '60px' }
             ],
             fields: ["id", "firstname", "lastname", "email", "phonenumber", "addressline", "postalcode", "city"],
-            editCustomerId: null,
-            editCustomer: {},
-            loading: false,
-            totalItems: 0,
             alertHeading: '',
             alertParagraph: '',
             alertOkayButton: '',
+            confirmAction: null,
+            fieldErrors: {},
             options: {
                 page: 1,
                 itemsPerPage: 20,
-                sortBy: [],
-                sortDesc: [],
-            },
-            sortBy: [],
-            sortDesc: [],
-            confirmAction: null,
-            fieldErrors: {}
+            }
         };
     },
 
     computed: {
-        currentPage() {
-            return this.options.page;
+        isEditing() {
+            return this.editCustomerId !== null;
         },
         totalPages() {
             return Math.ceil(this.totalItems / this.options.itemsPerPage);
         },
         isEditing() {
-            return this.editCustomerId !== null;
+            return this.editCarId !== null;
+        },
+        pageItems() {
+            return Array.from({ length: this.totalPages }, (_, i) => i + 1);
         }
-    },
-
-    mounted() {
-        this.loadItems();
     },
 
     methods: {
         isEditableField(field) {
             return field !== 'id' && field !== 'checkbox' && field !== 'edit' && field !== 'delete';
+        },
+
+        handlePageChange(page) {
+            console.log('Page change event in CustomerTable:', page);
+            this.$emit('pageChanged', page);
+        },
+
+        handleItemsPerPageChange(itemsPerPage) {
+            console.log('Items per page change event in CustomerTable:', itemsPerPage);
+            this.$emit('itemsPerPageChanged', itemsPerPage);
+        },
+
+        // Refresh-Button delegiert an Parent
+        refreshData() {
+            this.$emit('refresh-data');
+        },
+
+        // Callback für v-data-table-server, wenn sich Optionen ändern
+        onOptionsUpdate(newOptions) {
+            // Sortierung merken
+            // if (newOptions.sortBy && newOptions.sortBy.length > 0) {
+            //     this.options.sortBy = newOptions.sortBy;
+            //     this.options.sortDesc = newOptions.sortDesc;
+            // }
+
+            // Wenn die Seite oder Elemente pro Seite durch die Tabelle geändert wurden
+            if (newOptions.page !== this.options.page) {
+                this.handlePageChange(newOptions.page);
+            }
+
+            if (newOptions.itemsPerPage !== this.options.itemsPerPage) {
+                this.handleItemsPerPageChange(newOptions.itemsPerPage);
+            }
         },
 
         handlePageChange(page) {
@@ -180,46 +233,25 @@ export default {
             this.options.page = 1; // Reset auf Seite 1 wenn sich die Anzahl pro Seite ändert
             this.loadItems();
         },
-        
-        onUpdateOptions(newOptions) {
-            // Extrahieren der Sortierinformationen
-            const sortBy = Array.isArray(newOptions.sortBy) && newOptions.sortBy.length ? [newOptions.sortBy[0]] : [];
-            const sortDesc = Array.isArray(newOptions.sortDesc) && newOptions.sortDesc.length ? [newOptions.sortDesc[0]] : [];
-            
-            // Für die Anzeige in der Tabelle
-            this.sortBy = sortBy;
-            this.sortDesc = sortDesc;
-            
-            // Für die API-Anfrage
-            this.options = {
-                page: newOptions.page || this.options.page,
-                itemsPerPage: newOptions.itemsPerPage || this.options.itemsPerPage,
-                sortBy: sortBy,
-                sortDesc: sortDesc
-            };
-            
-            // Daten neu laden
-            this.loadItems();
-        },
 
         getFieldRules(field) {
             switch (field) {
                 case 'id':
                     return [];
-                case 'firstName':
+                case 'firstname':
                     return [value => !!value || 'Vorname ist erforderlich'];
-                case 'lastName':
+                case 'lastname':
                     return [value => !!value || 'Nachname ist erforderlich'];
                 case 'email':
                     return [
                         value => !!value || 'Email ist erforderlich',
                         value => /.+@.+\..+/.test(value) || 'Email muss gültig sein'
                     ];
-                case 'phoneNumber':
+                case 'phonenumber':
                     return [value => !!value || 'Telefonnummer ist erforderlich'];
-                case 'addressLine':
+                case 'addressline':
                     return [value => !!value || 'Adresse ist erforderlich'];
-                case 'postalCode':
+                case 'postalcode':
                     return [value => !!value || 'PLZ ist erforderlich'];
                 case 'city':
                     return [value => !!value || 'Stadt ist erforderlich'];
@@ -241,35 +273,6 @@ export default {
                 this.confirmAction();
             }
             this.isAlertVisible = false;
-        },
-
-        async loadItems() {
-            this.loading = true;
-
-            try {
-                const params = {
-                    page: this.options.page,
-                    itemsPerPage: this.options.itemsPerPage,
-                    orderByNewest: true
-                };
-
-                if (this.options.sortBy && this.options.sortBy.length > 0) {
-                    params.sortBy = this.options.sortBy[0];
-                    params.sortDesc = this.options.sortDesc[0] ? 'true' : 'false';
-                    params.orderByNewest = false;
-                }
-
-                const response = await axios.get('/api/customers', { params });
-                this.customers = response.data.items;
-                this.totalItems = response.data.total;
-            } catch (error) {
-                console.error('Fehler beim Laden der Daten:', error);
-                if (error.response) {
-                    console.error('Response data:', error.response.data);
-                }
-            } finally {
-                this.loading = false;
-            }
         },
 
         confirmDelete(id) {
@@ -316,7 +319,8 @@ export default {
             if (this.customerToDelete) {
                 try {
                     await axios.delete(`/api/customers/${this.customerToDelete}`);
-                    await this.loadItems();
+                    // Emit an Parent-Komponente statt direkte Manipulation
+                    this.$emit('customer-deleted', this.customerToDelete);
                     this.selectedCustomers = this.selectedCustomers.filter(id => id !== this.customerToDelete);
                     this.customerToDelete = null;
                 } catch (error) {
@@ -331,9 +335,9 @@ export default {
                     await axios.delete(`/api/customers`, {
                         data: { ids: this.selectedCustomers }
                     });
-                    await this.loadItems();
+                    // Emit an Parent-Komponente statt direkte Manipulation
+                    this.$emit('customers-deleted', this.selectedCustomers);
                     this.selectedCustomers = [];
-                    this.$emit('customersDeleted');
                 } catch (error) {
                     console.error('Fehler beim Löschen der Kunden:', error);
                 }
@@ -341,26 +345,25 @@ export default {
         },
 
         editCustomerDetails(customer) {
-            this.editCustomerId = customer.id;
-            this.editCustomer = { ...customer };
+            this.$emit('edit-customer', customer);
         },
 
         async updateCustomer() {
             try {
                 const formattedData = {
-                    firstname: this.editCustomer.firstName,
-                    lastName: this.editCustomer.lastName,
+                    firstname: this.editCustomer.firstname,
+                    lastname: this.editCustomer.lastname,
                     email: this.editCustomer.email,
-                    phoneNumber: this.editCustomer.phoneNumber,
-                    addressLine: this.editCustomer.addressLine,
-                    postalCode: this.editCustomer.postalCode,
+                    phonenumber: this.editCustomer.phonenumber,
+                    addressline: this.editCustomer.addressline,
+                    postalcode: this.editCustomer.postalcode,
                     city: this.editCustomer.city,
                     company: this.editCustomer.company
                 };
 
                 await axios.put(`/api/customers/${this.editCustomerId}`, formattedData);
+                this.$emit('save-customer', this.editCustomerId);
                 this.cancelEdit();
-                await this.loadItems();
             } catch (error) {
                 console.error('Fehler beim Aktualisieren des Kunden:', error.response?.data?.error || error.message);
             }
@@ -371,8 +374,7 @@ export default {
         },
 
         cancelEdit() {
-            this.editCustomerId = null;
-            this.editCustomer = {};
+            this.$emit('cancel-edit');
         }
     }
 }
@@ -424,6 +426,12 @@ export default {
 .table-icon {
     width: 48px;
     text-align: center;
+}
+
+.pagination-container {
+    background-color: #fff;
+    padding: 12px;
+    border-top: 1px solid #edf2f7;
 }
 
 .loading-indicator {
