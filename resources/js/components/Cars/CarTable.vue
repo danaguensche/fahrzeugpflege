@@ -86,6 +86,10 @@ export default {
         searchString: {
             type: String,
             default: ''
+        },
+        isSearchActive: {
+            type: Boolean,
+            default: false
         }
     },
     components: {
@@ -124,7 +128,8 @@ export default {
                 page: 1,
                 itemsPerPage: 20,
             },
-            confirmAction: null
+            confirmAction: null,
+            searchDebounceTimer: null
         };
     },
 
@@ -143,19 +148,115 @@ export default {
         }
     },
 
+    watch: {
+        searchString: {
+            handler(newValue, oldValue) {
+                // Nur reagieren wenn sich der Wert tatsächlich geändert hat
+                if (newValue !== oldValue) {
+                    this.handleSearchChange(newValue);
+                }
+            },
+            immediate: false
+        },
+        isSearchActive: {
+            handler(newValue) {
+                if (!newValue && !this.searchString) {
+                    // Suche wurde deaktiviert, zurück zur normalen Ansicht
+                    this.options.page = 1;
+                    this.loadItems();
+                }
+            }
+        }
+    },
+
     mounted() {
         this.loadItems();
     },
 
     methods: {
+        handleSearchChange(searchValue) {
+            // Bestehenden Timer löschen
+            if (this.searchDebounceTimer) {
+                clearTimeout(this.searchDebounceTimer);
+            }
+
+            // Wenn leer, normale Daten laden
+            if (!searchValue || !searchValue.trim()) {
+                this.options.page = 1;
+                this.loadItems();
+                return;
+            }
+
+            // Debounce für 300ms
+            this.searchDebounceTimer = setTimeout(() => {
+                this.options.page = 1; // Bei neuer Suche auf Seite 1 zurücksetzen
+                this.searchCars(searchValue);
+            }, 300);
+        },
+
+        async searchCars(query = this.searchString, page = this.options.page) {
+            if (!query || !query.trim()) {
+                this.loadItems();
+                return;
+            }
+
+            this.loading = true;
+            try {
+                console.log('Searching for:', query, 'Page:', page);
+
+                const params = {
+                    query: query.trim(),
+                    page: page,
+                    itemsPerPage: this.options.itemsPerPage
+                };
+
+                const response = await axios.get('/api/cars/search', { params });
+                console.log('Search API Response:', response.data);
+
+                // Datenverarbeitung - verschiedene Antwortformate unterstützen
+                let items = [];
+                let total = 0;
+
+                if (response.data?.items) {
+                    items = response.data.items;
+                    total = response.data.total || response.data.totalItems || 0;
+                } else if (response.data?.data && Array.isArray(response.data.data)) {
+                    items = response.data.data;
+                    total = response.data.total || response.data.data.length;
+                } else if (Array.isArray(response.data)) {
+                    items = response.data;
+                    total = response.data.length;
+                }
+
+                this.cars = items;
+                this.totalItems = total;
+                this.options.page = page;
+
+                console.log('Search results:', {
+                    query,
+                    itemsFound: items.length,
+                    totalItems: total,
+                    currentPage: page
+                });
+
+            } catch (error) {
+                console.error('Fehler beim Suchen der Fahrzeuge:', error);
+                if (error.response) {
+                    console.error('Response data:', error.response.data);
+                    console.error('Response status:', error.response.status);
+                }
+
+                // Bei Fehler leere Ergebnisse anzeigen
+                this.cars = [];
+                this.totalItems = 0;
+                this.$emit('show-error', 'Fehler beim Durchsuchen der Fahrzeuge');
+            } finally {
+                this.loading = false;
+            }
+        },
+
         // Callback für v-data-table-server, wenn sich Optionen ändern
         onOptionsUpdate(newOptions) {
-            // Sortierung merken
-            // if (newOptions.sortBy && newOptions.sortBy.length > 0) {
-            //     this.options.sortBy = newOptions.sortBy;
-            //     this.options.sortDesc = newOptions.sortDesc;
-            // }
-
             // Wenn die Seite oder Elemente pro Seite durch die Tabelle geändert wurden
             if (newOptions.page !== this.options.page) {
                 this.handlePageChange(newOptions.page);
@@ -168,13 +269,24 @@ export default {
 
         handlePageChange(page) {
             this.options.page = page;
-            this.loadItems();
+
+            // Entscheiden ob Suche oder normale Daten geladen werden sollen
+            if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                this.searchCars(this.searchString, page);
+            } else {
+                this.loadItems();
+            }
         },
 
         handleItemsPerPageChange(itemsPerPage) {
             this.options.itemsPerPage = itemsPerPage;
             this.options.page = 1; // Reset auf Seite 1 wenn sich die Anzahl pro Seite ändert
-            this.loadItems();
+
+            if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                this.searchCars(this.searchString, 1);
+            } else {
+                this.loadItems();
+            }
         },
 
         getFieldRules(field) {
@@ -184,7 +296,7 @@ export default {
                         return !!value || 'Fahrzeugklasse ist erforderlich';
                     },
                     function (value) {
-                        return typeof value === 'int' || 'Muss eine Zahl sein';
+                        return typeof value === 'string' || !isNaN(value) || 'Muss eine Zahl sein';
                     }
                 ];
             } else if (field === 'Kennzeichen') {
@@ -243,7 +355,13 @@ export default {
                 await axios.put(`/api/cars/${this.editCarId}`, this.editCar);
                 this.editCarId = null;
                 this.editCar = {};
-                await this.loadItems();
+
+                // Nach dem Bearbeiten entsprechende Daten neu laden
+                if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                    await this.searchCars(this.searchString, this.options.page);
+                } else {
+                    await this.loadItems();
+                }
             } catch (error) {
                 console.error('Error data:', error.response?.data);
                 this.$emit('show-error', 'Fehler beim Speichern des Fahrzeuges');
@@ -268,25 +386,27 @@ export default {
                 };
 
                 // Sortierung nur anwenden, wenn explizit in der Tabelle gesetzt
-                if (this.options.sortBy && this.options.sortBy.length > 0) {
-                    params.sortBy = this.options.sortBy[0];
-                    params.sortDesc = this.options.sortDesc[0] ? 'true' : 'false';
-                    params.orderByNewest = false;  // Eigene Sortierung deaktivieren wenn Tabellensortierung aktiv
-                    console.log('Sortierung nach:', params.sortBy, 'absteigend:', params.sortDesc);
-                }
+                // if (this.options.sortBy && this.options.sortBy.length > 0) {
+                //     params.sortBy = this.options.sortBy[0];
+                //     params.sortDesc = this.options.sortDesc[0] ? 'true' : 'false';
+                //     params.orderByNewest = false;  // Eigene Sortierung deaktivieren wenn Tabellensortierung aktiv
+                //     console.log('Sortierung nach:', params.sortBy, 'absteigend:', params.sortDesc);
+                // }
 
                 console.log('Request params:', params);
 
                 const response = await axios.get('/api/cars', { params });
                 console.log('API Response:', response.data);
 
-                this.cars = response.data.items;
-                this.totalItems = response.data.total;
+                this.cars = response.data.items || response.data || [];
+                this.totalItems = response.data.total || response.data.totalItems || this.cars.length;
             } catch (error) {
                 console.error('Fehler beim Laden der Daten:', error);
                 if (error.response) {
                     console.error('Response data:', error.response.data);
                 }
+                this.cars = [];
+                this.totalItems = 0;
             } finally {
                 this.loading = false;
             }
@@ -307,11 +427,18 @@ export default {
                         this.options.page -= 1;
                     }
 
-                    await this.loadItems();  // Tabelle nach dem Löschen neu laden
+                    // Nach dem Löschen entsprechende Daten neu laden
+                    if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                        await this.searchCars(this.searchString, this.options.page);
+                    } else {
+                        await this.loadItems();
+                    }
+
                     this.selectedCars = this.selectedCars.filter(kennzeichen => kennzeichen !== this.carToDelete);
                     this.carToDelete = null;
                 } catch (error) {
                     console.error('Fehler beim Löschen des Fahrzeuges:', error.response?.data || error.message);
+                    this.$emit('show-error', 'Fehler beim Löschen des Fahrzeuges');
                 }
             }
         },
@@ -333,11 +460,18 @@ export default {
                         this.options.page -= 1;
                     }
 
-                    await this.loadItems();
+                    // Nach dem Löschen entsprechende Daten neu laden
+                    if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                        await this.searchCars(this.searchString, this.options.page);
+                    } else {
+                        await this.loadItems();
+                    }
+
                     this.selectedCars = [];
                     this.$emit('carsDeleted');
                 } catch (error) {
                     console.error('Fehler beim Löschen der Fahrzeuge:', error);
+                    this.$emit('show-error', 'Fehler beim Löschen der Fahrzeuge');
                 }
             }
         },
@@ -351,15 +485,29 @@ export default {
             try {
                 await axios.put(`/api/cars/${this.editCarId}`, this.editCar);
                 this.cancelEdit();
-                await this.loadItems();
+
+                // Nach dem Speichern entsprechende Daten neu laden
+                if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                    await this.searchCars(this.searchString, this.options.page);
+                } else {
+                    await this.loadItems();
+                }
             } catch (error) {
                 console.error('Fehler beim Speichern des Fahrzeuges:', error.response?.data || error.message);
+                this.$emit('show-error', 'Fehler beim Speichern des Fahrzeuges');
             }
         },
 
         cancelEdit() {
             this.editCarId = null;
             this.editCar = {};
+        },
+
+        // Cleanup bei Component Destroy
+        beforeUnmount() {
+            if (this.searchDebounceTimer) {
+                clearTimeout(this.searchDebounceTimer);
+            }
         }
     }
 }

@@ -22,10 +22,8 @@
             <CustomerForm :isOpen="showCustomerForm" @close="showCustomerForm = false" />
         </div>
 
-        <CustomerTable :customers="customers" :editCustomerId="editCustomerId" :editCustomer="editCustomer"
-            :currentPage="currentPage" :totalPages="totalPages" :searchString="searchText"
-            :isSearchActive="isSearchActive" @edit-customer="editCustomerDetails" @save-customer="saveCustomer"
-            @page-changed="changePage" @update:options="handleSortChange" />
+        <CustomerTable :searchString="searchText" :isSearchActive="isSearchActive"
+            @customersDeleted="handleCustomersDeleted" @show-error="handleError"></CustomerTable>
     </div>
 </template>
 
@@ -50,26 +48,13 @@ export default {
 
     data() {
         return {
-            //Search
             searchContext: "Suchen Sie nach einem Kunden...",
             searchText: '',
             isSearchActive: false,
             searchDebounceTimer: null,
-
             showCustomerForm: false,
 
-            // Customer data
-            customers: [],
-            editCustomer: {},
-            editCustomerId: null,
 
-            // Pagination
-            currentPage: 1,
-            totalPages: 1,
-            totalItems: 0,
-            itemsPerPage: 20,
-
-            loading: false,
         }
     },
 
@@ -86,84 +71,28 @@ export default {
         }
     },
 
-    mounted() {
-        this.loadCustomers();
-    },
-
     methods: {
+
         // UI Actions
         toggleCustomerForm() {
             this.showCustomerForm = !this.showCustomerForm;
         },
 
-        changePage(page) {
-            if (this.isSearchActive) {
-                this.searchCustomers(page);
-            } else {
-                this.loadCustomers(page);
-            }
+        handleCustomersDeleted() {
+            // Wird von CustomerTable emittiert nach erfolgreichem Löschen
+            console.log('Customers deleted, table will refresh automatically');
         },
 
-        editCustomerDetails(customer) {
-            this.editCustomerId = customer.id;
-            this.editCustomer = { ...customer };
+        handleError(message) {
+            console.error('Error from CustomerTable:', message);
+            // Hier können Sie eine Toast-Nachricht oder ähnliches anzeigen
         },
 
-        cancelEdit() {
-            this.editCustomerId = null;
-            this.editCustomer = {};
-        },
-
-        // Data loading
-        async loadCustomers(page = 1) {
-            try {
-                const response = await axios.get(`/api/customers`, {
-                    params: {
-                        page: page,
-                        itemsPerPage: this.itemsPerPage,
-                    }
-                });
-
-                this.customers = response.data.items || [];
-                this.totalItems = response.data.totalItems || 0;
-                this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
-                this.currentPage = page;
-                this.isSearchActive = false;
-                
-                console.log('LoadCustomers:', {
-                    page,
-                    totalItems: this.totalItems,
-                    totalPages: this.totalPages,
-                    customersCount: this.customers.length
-                });
-            } catch (error) {
-                console.error('Fehler beim Abrufen der Kundendaten:', error);
-            }
-        },
-
-        // Customer operations
-        async saveCustomer(id) {
-            try {
-                await axios.put(`/api/customers/${id}`, this.editCustomer);
-                if (this.isSearchActive) {
-                    await this.searchCustomers(this.currentPage);
-                } else {
-                    await this.loadCustomers(this.currentPage);
-                }
-                this.cancelEdit();
-                this.editCustomerId = null;
-                this.editCustomer = {};
-            } catch (error) {
-                console.error('Fehler beim Speichern des Kunden:', error);
-            }
-        },
-
-        // Search handling
+        //Search Handling
         clearSearch() {
             this.searchText = '';
             this.isSearchActive = false;
             this.clearSearchTimer();
-            this.loadCustomers(1);
         },
 
         handleSearchInput(newValue) {
@@ -176,8 +105,9 @@ export default {
                 return;
             }
 
+            // Debounce für 300ms
             this.searchDebounceTimer = setTimeout(() => {
-                this.searchCustomers(1);
+                this.isSearchActive = true;
             }, 300);
         },
 
@@ -188,98 +118,11 @@ export default {
             }
         },
 
-        async searchCustomers(page = 1) {
-            if (!this.searchText?.trim()) {
-                this.clearSearch();
-                return;
-            }
-            
-            try {
-                const response = await axios.get('/api/customers/search', {
-                    params: {
-                        query: this.searchText,
-                        page,
-                        per_page: this.itemsPerPage
-                    }
-                });
-
-                const { items, totalItems } = this.extractDataFromResponse(response.data);
-                
-                this.customers = items || [];
-                this.totalItems = totalItems || 0;
-                this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
-                this.currentPage = page;
+        searchCustomers() {
+            if (this.searchText?.trim()) {
                 this.isSearchActive = true;
-                
-                console.log('SearchCustomers:', {
-                    searchText: this.searchText,
-                    page,
-                    totalItems: this.totalItems,
-                    totalPages: this.totalPages,
-                    customersCount: this.customers.length
-                });
-            } catch (error) {
-                console.error('Fehler beim Suchen der Kunden:', error);
-                this.resetCustomerData(page);
             }
-        },
-
-        async fetchData(url, params, isSearch) {
-            this.loading = true;
-            this.isSearchActive = isSearch;
-
-            try {
-                const response = await axios.get(url, { params });
-                this.processApiResponse(response.data, params.page);
-            } catch (error) {
-                console.error(`Fehler beim ${isSearch ? 'Suchen' : 'Laden'} der Kunden:`, error);
-                this.resetCustomerData(params.page);
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        processApiResponse(data, page) {
-            console.log('Processing API Response:', data);
-            const { items, totalItems } = this.extractDataFromResponse(data);
-
-            this.customers = items || [];
-            this.totalItems = totalItems || 0;
-            this.currentPage = page || 1;
-            this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
-
-            console.log('Processed data:', {
-                customersCount: this.customers.length,
-                totalItems: this.totalItems,
-                currentPage: this.currentPage,
-                totalPages: this.totalPages
-            });
-        },
-
-        extractDataFromResponse(data) {
-            // Handle various API response formats
-            if (data?.items) {
-                return { items: data.items, totalItems: data.totalItems || 0 };
-            }
-
-            if (data?.data && Array.isArray(data.data)) {
-                return { items: data.data, totalItems: data.total || data.data.length };
-            }
-
-            if (Array.isArray(data)) {
-                return { items: data, totalItems: data.length };
-            }
-
-            return { items: [], totalItems: 0 };
-        },
-
-        resetCustomerData(page = 1) {
-            this.customers = [];
-            this.totalItems = 0;
-            this.totalPages = 1;
-            this.currentPage = page;
-        },
-
+        }
     }
 }
 </script>
@@ -312,6 +155,7 @@ export default {
     display: flex;
     align-items: center;
 }
+
 .search-buttons {
     display: flex;
     align-items: center;
