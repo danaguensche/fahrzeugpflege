@@ -1,7 +1,7 @@
 <template>
     <div class="component">
         <div class="header">
-            <RefreshButton class="refresh-button" @refresh="refreshData"></RefreshButton>
+            <RefreshButton class="refresh-button" @refresh="loadItems"></RefreshButton>
             <div class="spacer"></div>
 
             <div class="button-group">
@@ -10,14 +10,14 @@
                 </ConfirmButton>
                 <CancelButton class="cancel-button" @click="cancelEdit">Abbrechen</CancelButton>
                 <DeleteButton class="delete-button" :disabled="selectedCustomers.length === 0"
-                    @click="confirmDeleteCustomers">
+                    @click="confirmDeleteSelectedCustomers">
                     Löschen
                 </DeleteButton>
             </div>
         </div>
 
         <div class="table-container">
-            <div v-if="loading" class="loading-indicator">
+            <div v-if="loading" class="loader-container">
                 <v-progress-circular indeterminate></v-progress-circular>
             </div>
             <div class="scrollable-table">
@@ -26,21 +26,14 @@
                     :items-per-page="options.itemsPerPage" :page="options.page" hide-default-footer>
 
                     <template v-slot:item="{ item }">
-                        <tr :class="{ 'edited-row': editCustomerId === item.id }">
+                        <tr>
                             <td class="checkbox fixed-width">
                                 <v-checkbox v-model="selectedCustomers" :value="item.id"></v-checkbox>
                             </td>
                             <td v-for="field in fields" :key="field" class="fixed-width">
                                 <template v-if="editCustomerId === item.id">
-                                    <template v-if="field === 'id'">
-                                        <a :href="`/kunden/kundendetails/${editCustomer[field] || ''}`">
-                                            {{ editCustomer[field] || '' }}
-                                        </a>
-                                    </template>
-                                    <template v-else>
-                                        <v-text-field v-model="editCustomer[field]" :rules="getFieldRules(field)"
-                                            :error-messages="fieldErrors[field]" density="compact"></v-text-field>
-                                    </template>
+                                    <v-text-field v-model="editCustomer[field]" :rules="getFieldRules(field)">
+                                    </v-text-field>
                                 </template>
                                 <template v-else>
                                     <a v-if="field === 'id'" :href="`/kunden/kundendetails/${item[field] || ''}`">
@@ -50,7 +43,8 @@
                                 </template>
                             </td>
                             <td class="table-icon fixed-width">
-                                <v-btn icon class="delete-button" variant="plain" @click="confirmDelete(item.id)">
+                                <v-btn icon class="delete-button" variant="plain"
+                                    @click="confirmDeleteCustomer(item.id)">
                                     <v-icon>mdi-delete</v-icon>
                                 </v-btn>
                             </td>
@@ -58,7 +52,7 @@
                                 <v-btn variant="plain" icon
                                     @click="editCustomerId === item.id ? saveCustomer() : editCustomerDetails(item)">
                                     <v-icon>{{ editCustomerId === item.id ? 'mdi-content-save' : 'mdi-pencil'
-                                    }}</v-icon>
+                                        }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
@@ -73,6 +67,7 @@
                 </div>
             </div>
         </div>
+
         <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
             :alertHeading="alertHeading" :alertParagraph="alertParagraph" :alertOkayButton="alertOkayButton"
             alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
@@ -91,44 +86,7 @@ import Pagination from '../CommonSlots/Pagination.vue';
 
 export default {
     name: "CustomerTable",
-    components: {
-        RefreshButton,
-        VuetifyAlert,
-        ConfirmButton,
-        CancelButton,
-        DeleteButton,
-        Pagination
-    },
-
     props: {
-        customers: {
-            type: Array,
-            default: () => []
-        },
-        editCustomerId: {
-            type: [Number, String, null],
-            default: null
-        },
-        editCustomer: {
-            type: Object,
-            default: () => ({})
-        },
-        currentPage: {
-            type: Number,
-            default: 1
-        },
-        itemsPerPage: {
-            type: Number,
-            required: true
-        },
-        totalItems: {
-            type: Number,
-            required: true
-        },
-        loading: {
-            type: Boolean,
-            default: false
-        },
         searchString: {
             type: String,
             default: ''
@@ -138,81 +96,174 @@ export default {
             default: false
         }
     },
-
+    components: {
+        ConfirmButton,
+        CancelButton,
+        DeleteButton,
+        RefreshButton,
+        VuetifyAlert,
+        Pagination
+    },
     data() {
         return {
-            isAlertVisible: false,
+            customers: [],
             selectedCustomers: [],
             customerToDelete: null,
+            isAlertVisible: false,
             headers: [
-                { title: "Auswählen", key: "checkbox", sortable: false, width: '80px' },
-                { title: "ID", key: "id", sortable: false, align: 'start' },
-                { title: "Vorname", key: "firstname", sortable: false },
-                { title: "Nachname", key: "lastname", sortable: false },
-                { title: "Email", key: "email", sortable: false },
-                { title: "Telefonnummer", key: "phonenumber", sortable: false },
-                { title: "Straße und Hausnummer", key: "addressline", sortable: false },
-                { title: "PLZ", key: "postalcode", sortable: false },
-                { title: "Stadt", key: "city", sortable: false },
-                { title: "Löschen", key: "delete", sortable: false, width: '60px' },
-                { title: "Bearbeiten", key: "edit", sortable: false, width: '60px' }
+                { title: 'Auswählen', key: 'checkbox', sortable: false },
+                { title: 'ID', key: 'id', sortable: true },
+                { title: 'Vorname', key: 'firstname', sortable: true },
+                { title: 'Nachname', key: 'lastname', sortable: true },
+                { title: 'Email', key: 'email', sortable: true },
+                { title: 'Telefonnummer', key: 'phonenumber', sortable: true },
+                { title: 'Straße und Hausnummer', key: 'addressline', sortable: true },
+                { title: 'PLZ', key: 'postalcode', sortable: true },
+                { title: 'Stadt', key: 'city', sortable: true },
+                { title: 'Löschen', key: 'delete', sortable: false },
+                { title: 'Bearbeiten', key: 'edit', sortable: false }
             ],
             fields: ["id", "firstname", "lastname", "email", "phonenumber", "addressline", "postalcode", "city"],
+            editCustomerId: null,
+            editCustomer: {},
+            loading: false,
+            totalItems: 0,
             alertHeading: '',
             alertParagraph: '',
             alertOkayButton: '',
-            confirmAction: null,
-            fieldErrors: {},
             options: {
                 page: 1,
                 itemsPerPage: 20,
-            }
+            },
+            confirmAction: null,
+            searchDebounceTimer: null
         };
     },
 
     computed: {
-        isEditing() {
-            return this.editCustomerId !== null;
+        currentPage() {
+            return this.options.page;
         },
         totalPages() {
             return Math.ceil(this.totalItems / this.options.itemsPerPage);
         },
         isEditing() {
-            return this.editCarId !== null;
+            return this.editCustomerId !== null;
         },
         pageItems() {
             return Array.from({ length: this.totalPages }, (_, i) => i + 1);
         }
     },
 
+    watch: {
+        searchString: {
+            handler(newValue, oldValue) {
+                // Nur reagieren wenn sich der Wert tatsächlich geändert hat
+                if (newValue !== oldValue) {
+                    this.handleSearchChange(newValue);
+                }
+            },
+            immediate: false
+        },
+        isSearchActive: {
+            handler(newValue) {
+                if (!newValue && !this.searchString) {
+                    // Suche wurde deaktiviert, zurück zur normalen Ansicht
+                    this.options.page = 1;
+                    this.loadItems();
+                }
+            }
+        }
+    },
+
+    mounted() {
+        this.loadItems();
+    },
+
     methods: {
-        isEditableField(field) {
-            return field !== 'id' && field !== 'checkbox' && field !== 'edit' && field !== 'delete';
+        handleSearchChange(searchValue) {
+            // Bestehenden Timer löschen
+            if (this.searchDebounceTimer) {
+                clearTimeout(this.searchDebounceTimer);
+            }
+
+            // Wenn leer, normale Daten laden
+            if (!searchValue || !searchValue.trim()) {
+                this.options.page = 1;
+                this.loadItems();
+                return;
+            }
+
+            // Debounce für 300ms
+            this.searchDebounceTimer = setTimeout(() => {
+                this.options.page = 1; // Bei neuer Suche auf Seite 1 zurücksetzen
+                this.searchCustomers(searchValue);
+            }, 300);
         },
 
-        handlePageChange(page) {
-            console.log('Page change event in CustomerTable:', page);
-            this.$emit('pageChanged', page);
-        },
+        async searchCustomers(query = this.searchString, page = this.options.page) {
+            if (!query || !query.trim()) {
+                this.loadItems();
+                return;
+            }
 
-        handleItemsPerPageChange(itemsPerPage) {
-            console.log('Items per page change event in CustomerTable:', itemsPerPage);
-            this.$emit('itemsPerPageChanged', itemsPerPage);
-        },
+            this.loading = true;
+            try {
+                console.log('Searching for:', query, 'Page:', page);
 
-        // Refresh-Button delegiert an Parent
-        refreshData() {
-            this.$emit('refresh-data');
+                const params = {
+                    query: query.trim(),
+                    page: page,
+                    itemsPerPage: this.options.itemsPerPage
+                };
+
+                const response = await axios.get('/api/customers/search', { params });
+                console.log('Search API Response:', response.data);
+
+                // Datenverarbeitung - verschiedene Antwortformate unterstützen
+                let items = [];
+                let total = 0;
+
+                if (response.data?.items) {
+                    items = response.data.items;
+                    total = response.data.total || response.data.totalItems || 0;
+                } else if (response.data?.data && Array.isArray(response.data.data)) {
+                    items = response.data.data;
+                    total = response.data.total || response.data.data.length;
+                } else if (Array.isArray(response.data)) {
+                    items = response.data;
+                    total = response.data.length;
+                }
+
+                this.customers = items;
+                this.totalItems = total;
+                this.options.page = page;
+
+                console.log('Search results:', {
+                    query,
+                    itemsFound: items.length,
+                    totalItems: total,
+                    currentPage: page
+                });
+
+            } catch (error) {
+                console.error('Fehler beim Suchen der Kunden:', error);
+                if (error.response) {
+                    console.error('Response data:', error.response.data);
+                    console.error('Response status:', error.response.status);
+                }
+
+                // Bei Fehler leere Ergebnisse anzeigen
+                this.customers = [];
+                this.totalItems = 0;
+                this.$emit('show-error', 'Fehler beim Durchsuchen der Kunden');
+            } finally {
+                this.loading = false;
+            }
         },
 
         // Callback für v-data-table-server, wenn sich Optionen ändern
         onOptionsUpdate(newOptions) {
-            // Sortierung merken
-            // if (newOptions.sortBy && newOptions.sortBy.length > 0) {
-            //     this.options.sortBy = newOptions.sortBy;
-            //     this.options.sortDesc = newOptions.sortDesc;
-            // }
-
             // Wenn die Seite oder Elemente pro Seite durch die Tabelle geändert wurden
             if (newOptions.page !== this.options.page) {
                 this.handlePageChange(newOptions.page);
@@ -225,13 +276,24 @@ export default {
 
         handlePageChange(page) {
             this.options.page = page;
-            this.loadItems();
+
+            // Entscheiden ob Suche oder normale Daten geladen werden sollen
+            if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                this.searchCustomers(this.searchString, page);
+            } else {
+                this.loadItems();
+            }
         },
 
         handleItemsPerPageChange(itemsPerPage) {
             this.options.itemsPerPage = itemsPerPage;
             this.options.page = 1; // Reset auf Seite 1 wenn sich die Anzahl pro Seite ändert
-            this.loadItems();
+
+            if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                this.searchCustomers(this.searchString, 1);
+            } else {
+                this.loadItems();
+            }
         },
 
         getFieldRules(field) {
@@ -268,14 +330,7 @@ export default {
             this.isAlertVisible = true;
         },
 
-        handleConfirmation() {
-            if (this.confirmAction) {
-                this.confirmAction();
-            }
-            this.isAlertVisible = false;
-        },
-
-        confirmDelete(id) {
+        confirmDeleteCustomer(id) {
             this.customerToDelete = id;
             this.showAlert(
                 'Kunde löschen',
@@ -285,7 +340,7 @@ export default {
             );
         },
 
-        confirmDeleteCustomers() {
+        confirmDeleteSelectedCustomers() {
             if (this.selectedCustomers.length > 0) {
                 const message = this.selectedCustomers.length === 1
                     ? 'Möchten Sie den ausgewählten Kunden wirklich löschen?'
@@ -304,14 +359,57 @@ export default {
             }
         },
 
-        confirmEditCustomer() {
-            if (this.editCustomerId) {
-                this.showAlert(
-                    'Kunde bearbeiten',
-                    'Möchten Sie die Änderungen wirklich speichern?',
-                    'Speichern',
-                    this.updateCustomer
-                );
+        async confirmEditCustomer() {
+            try {
+                await axios.put(`/api/customers/${this.editCustomerId}`, this.editCustomer);
+                this.editCustomerId = null;
+                this.editCustomer = {};
+
+                // Nach dem Bearbeiten entsprechende Daten neu laden
+                if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                    await this.searchCustomers(this.searchString, this.options.page);
+                } else {
+                    await this.loadItems();
+                }
+            } catch (error) {
+                console.error('Error data:', error.response?.data);
+                this.$emit('show-error', 'Fehler beim Speichern des Kunden');
+            }
+        },
+
+        handleConfirmation() {
+            if (this.confirmAction) {
+                this.confirmAction();
+            }
+            this.isAlertVisible = false;
+        },
+
+        async loadItems() {
+            this.loading = true;
+
+            try {
+                const params = {
+                    page: this.options.page,
+                    itemsPerPage: this.options.itemsPerPage,
+                    orderByNewest: true  // Standardmäßig nach "zuletzt hinzugefügt" sortieren
+                };
+
+                console.log('Request params:', params);
+
+                const response = await axios.get('/api/customers', { params });
+                console.log('API Response:', response.data);
+
+                this.customers = response.data.items || response.data || [];
+                this.totalItems = response.data.total || response.data.totalItems || this.customers.length;
+            } catch (error) {
+                console.error('Fehler beim Laden der Daten:', error);
+                if (error.response) {
+                    console.error('Response data:', error.response.data);
+                }
+                this.customers = [];
+                this.totalItems = 0;
+            } finally {
+                this.loading = false;
             }
         },
 
@@ -319,12 +417,29 @@ export default {
             if (this.customerToDelete) {
                 try {
                     await axios.delete(`/api/customers/${this.customerToDelete}`);
-                    // Emit an Parent-Komponente statt direkte Manipulation
-                    this.$emit('customer-deleted', this.customerToDelete);
+                    console.log('Customer deleted successfully:', this.customerToDelete);
+
+                    // Prüfen, ob nach dem Löschen die aktuelle Seite noch Elemente hat
+                    const isLastItemOnPage = this.customers.length === 1;
+                    const isNotFirstPage = this.options.page > 1;
+
+                    // Wenn letztes Element auf einer Seite (nicht der ersten) gelöscht wurde, zur vorherigen Seite wechseln
+                    if (isLastItemOnPage && isNotFirstPage) {
+                        this.options.page -= 1;
+                    }
+
+                    // Nach dem Löschen entsprechende Daten neu laden
+                    if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                        await this.searchCustomers(this.searchString, this.options.page);
+                    } else {
+                        await this.loadItems();
+                    }
+
                     this.selectedCustomers = this.selectedCustomers.filter(id => id !== this.customerToDelete);
                     this.customerToDelete = null;
                 } catch (error) {
                     console.error('Fehler beim Löschen des Kunden:', error.response?.data || error.message);
+                    this.$emit('show-error', 'Fehler beim Löschen des Kunden');
                 }
             }
         },
@@ -335,46 +450,64 @@ export default {
                     await axios.delete(`/api/customers`, {
                         data: { ids: this.selectedCustomers }
                     });
-                    // Emit an Parent-Komponente statt direkte Manipulation
-                    this.$emit('customers-deleted', this.selectedCustomers);
+
+                    // Prüfen, ob nach dem Löschen die aktuelle Seite noch Elemente hat
+                    const itemsBeingDeleted = this.selectedCustomers.length;
+                    const remainingItemsOnPage = this.customers.length - itemsBeingDeleted;
+                    const isNotFirstPage = this.options.page > 1;
+
+                    // Wenn alle Elemente auf einer Seite (nicht der ersten) gelöscht wurden, zur vorherigen Seite wechseln
+                    if (remainingItemsOnPage <= 0 && isNotFirstPage) {
+                        this.options.page -= 1;
+                    }
+
+                    // Nach dem Löschen entsprechende Daten neu laden
+                    if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                        await this.searchCustomers(this.searchString, this.options.page);
+                    } else {
+                        await this.loadItems();
+                    }
+
                     this.selectedCustomers = [];
+                    this.$emit('customersDeleted');
                 } catch (error) {
                     console.error('Fehler beim Löschen der Kunden:', error);
+                    this.$emit('show-error', 'Fehler beim Löschen der Kunden');
                 }
             }
         },
 
         editCustomerDetails(customer) {
-            this.$emit('edit-customer', customer);
+            this.editCustomerId = customer.id;
+            this.editCustomer = { ...customer };
         },
 
-        async updateCustomer() {
+        async saveCustomer() {
             try {
-                const formattedData = {
-                    firstname: this.editCustomer.firstname,
-                    lastname: this.editCustomer.lastname,
-                    email: this.editCustomer.email,
-                    phonenumber: this.editCustomer.phonenumber,
-                    addressline: this.editCustomer.addressline,
-                    postalcode: this.editCustomer.postalcode,
-                    city: this.editCustomer.city,
-                    company: this.editCustomer.company
-                };
-
-                await axios.put(`/api/customers/${this.editCustomerId}`, formattedData);
-                this.$emit('save-customer', this.editCustomerId);
+                await axios.put(`/api/customers/${this.editCustomerId}`, this.editCustomer);
                 this.cancelEdit();
+
+                // Nach dem Speichern entsprechende Daten neu laden
+                if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                    await this.searchCustomers(this.searchString, this.options.page);
+                } else {
+                    await this.loadItems();
+                }
             } catch (error) {
-                console.error('Fehler beim Aktualisieren des Kunden:', error.response?.data?.error || error.message);
+                console.error('Fehler beim Speichern des Kunden:', error.response?.data || error.message);
+                this.$emit('show-error', 'Fehler beim Speichern des Kunden');
             }
         },
 
-        saveCustomer() {
-            this.confirmEditCustomer();
+        cancelEdit() {
+            this.editCustomerId = null;
+            this.editCustomer = {};
         },
 
-        cancelEdit() {
-            this.$emit('cancel-edit');
+        beforeUnmount() {
+            if (this.searchDebounceTimer) {
+                clearTimeout(this.searchDebounceTimer);
+            }
         }
     }
 }
@@ -393,7 +526,7 @@ export default {
     align-items: center;
     margin-bottom: 16px;
     padding: 8px 0;
-    margin-right: 7vh;
+    margin-right: 20px;
 }
 
 .spacer {
@@ -402,7 +535,7 @@ export default {
 
 .table-container {
     position: relative;
-    width: 95%;
+    width: 100%;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -412,10 +545,22 @@ export default {
 
 .scrollable-table {
     max-height: 75vh;
-    overflow-y: scroll;
+    overflow-y: auto;
     background-color: #fff;
     width: 90vw;
     max-width: 100%;
+}
+
+.pagination-container {
+    background-color: #fff;
+    padding: 12px;
+    border-top: 1px solid #edf2f7;
+}
+
+.loader-container {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
 }
 
 .fixed-width {
@@ -428,27 +573,8 @@ export default {
     text-align: center;
 }
 
-.pagination-container {
-    background-color: #fff;
-    padding: 12px;
-    border-top: 1px solid #edf2f7;
-}
-
-.loading-indicator {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 100;
-}
-
-/* Markierung für die bearbeitete Zeile */
-.edited-row {
-    background-color: #e3f2fd !important;
-}
-
 /* Tabellenstil */
-:deep(.customer-table) {
+:deep(.v-data-table) {
     border-collapse: collapse;
     width: 100%;
     table-layout: fixed;
@@ -554,7 +680,6 @@ export default {
     color: #4caf50;
 }
 
-/* Bearbeitungsfelder */
 :deep(.v-text-field) {
     margin: 0;
     padding: 0;
@@ -581,6 +706,7 @@ a:hover {
     text-decoration: underline;
 }
 
+/* Loading-Anzeige */
 :deep(.v-progress-circular) {
     margin: 16px auto;
     display: block;

@@ -382,16 +382,8 @@ export default {
                 const params = {
                     page: this.options.page,
                     itemsPerPage: this.options.itemsPerPage,
-                    orderByNewest: true  // Standardmäßig nach "zuletzt hinzugefügt" sortieren
+                    orderByNewest: true 
                 };
-
-                // Sortierung nur anwenden, wenn explizit in der Tabelle gesetzt
-                // if (this.options.sortBy && this.options.sortBy.length > 0) {
-                //     params.sortBy = this.options.sortBy[0];
-                //     params.sortDesc = this.options.sortDesc[0] ? 'true' : 'false';
-                //     params.orderByNewest = false;  // Eigene Sortierung deaktivieren wenn Tabellensortierung aktiv
-                //     console.log('Sortierung nach:', params.sortBy, 'absteigend:', params.sortDesc);
-                // }
 
                 console.log('Request params:', params);
 
