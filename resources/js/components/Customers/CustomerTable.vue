@@ -3,7 +3,7 @@
         <!-- Header with control buttons -->
         <div class="header">
             <!-- Data Update Button -->
-            <RefreshButton class="refresh-button" @refresh="loadItems"></RefreshButton>
+            <RefreshButton class="refresh-button" @refresh="loadItems" :loading="isRefreshing"></RefreshButton>
             <div class="spacer"></div>
 
             <!-- Button group for customer operations -->
@@ -166,6 +166,7 @@ export default {
     data() {
         return {
             // Basic data
+            isRefreshing: false,
             customers: [],                   // List of customers
             selectedCustomers: [],           //// Selected customers for mass operations
             customerToDelete: null,          // Customer ID for deletion

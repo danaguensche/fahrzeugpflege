@@ -3,7 +3,7 @@
         <!-- Header with control buttons -->
         <div class="header">
             <!-- Data Update Button -->
-            <RefreshButton class="refresh-button" @refresh="loadItems"></RefreshButton>
+            <RefreshButton class="refresh-button" @refresh="loadItems" :loading="isRefreshing"></RefreshButton>
             <div class="spacer"></div>
 
             <!-- Button group for vehicle operations -->
@@ -166,6 +166,7 @@ export default {
     data() {
         return {
             // Basic data
+            isRefreshing: false,
             cars: [],                        // List of vehicles
             selectedCars: [],               // Selected vehicles for mass operations
             carToDelete: null,              // Vehicle ID for deletion
