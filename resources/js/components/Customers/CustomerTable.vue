@@ -21,24 +21,37 @@
                 <v-progress-circular indeterminate></v-progress-circular>
             </div>
             <div class="scrollable-table">
-                <v-data-table-server :headers="headers" :items="customers" :server-items-length="totalItems"
+                <v-data-table-server :headers="headers" :items="customers" :itemsLength="totalItems"
                     height="calc(100vh - 400px)" fixed-header :loading="loading" @update:options="onOptionsUpdate"
-                    :items-per-page="options.itemsPerPage" :page="options.page" hide-default-footer>
+                    :items-per-page="options.itemsPerPage" :page="options.page" :sort-by="options.sortBy"
+                    :multi-sort="false" hide-default-footer>
 
                     <template v-slot:item="{ item }">
-                        <tr>
+                        <tr :class="{ 'edited-row': editCustomerId === item.id }">
                             <td class="checkbox fixed-width">
                                 <v-checkbox v-model="selectedCustomers" :value="item.id"></v-checkbox>
                             </td>
                             <td v-for="field in fields" :key="field" class="fixed-width">
                                 <template v-if="editCustomerId === item.id">
-                                    <v-text-field v-model="editCustomer[field]" :rules="getFieldRules(field)">
-                                    </v-text-field>
+                                    <!-- ID - link only, not editable -->
+                                    <template v-if="field === 'id'">
+                                        <a :href="`/kunden/kundendetails/${item[field] || ''}`">
+                                            {{ item[field] || '' }}
+                                        </a>
+                                    </template>
+                                    <!-- The rest of the fields are editable -->
+                                    <template v-else>
+                                        <v-text-field v-model="editCustomer[field]" :rules="getFieldRules(field)"
+                                            :error-messages="fieldErrors[field]" density="compact">
+                                        </v-text-field>
+                                    </template>
                                 </template>
                                 <template v-else>
+                                    <!-- ID as link -->
                                     <a v-if="field === 'id'" :href="`/kunden/kundendetails/${item[field] || ''}`">
                                         {{ item[field] || '' }}
                                     </a>
+                                    <!-- The rest of the fields as plain text -->
                                     <span v-else>{{ item[field] || '' }}</span>
                                 </template>
                             </td>
@@ -106,13 +119,20 @@ export default {
     },
     data() {
         return {
-            customers: [],
-            selectedCustomers: [],
-            customerToDelete: null,
-            isAlertVisible: false,
+            // Basic data
+            customers: [],                   // List of customers
+            selectedCustomers: [],          // Selected customers for mass operations
+            customerToDelete: null,         // Customer ID for deletion
+
+            // Interface state
+            isAlertVisible: false,          // Modal window visibility
+            loading: false,                 // Loading indicator
+            totalItems: 0,                  // Total number of items
+
+            // Table headers
             headers: [
-                { title: 'Auswählen', key: 'checkbox', sortable: false },
-                { title: 'ID', key: 'id', sortable: true },
+                { title: 'Auswählen', key: 'checkbox', sortable: false, width: '80px' },
+                { title: 'ID', key: 'id', sortable: true, align: 'start' },
                 { title: 'Vorname', key: 'firstname', sortable: true },
                 { title: 'Nachname', key: 'lastname', sortable: true },
                 { title: 'Email', key: 'email', sortable: true },
@@ -120,55 +140,76 @@ export default {
                 { title: 'Straße und Hausnummer', key: 'addressline', sortable: true },
                 { title: 'PLZ', key: 'postalcode', sortable: true },
                 { title: 'Stadt', key: 'city', sortable: true },
-                { title: 'Löschen', key: 'delete', sortable: false },
-                { title: 'Bearbeiten', key: 'edit', sortable: false }
+                { title: 'Löschen', key: 'delete', sortable: false, width: '60px' },
+                { title: 'Bearbeiten', key: 'edit', sortable: false, width: '60px' }
             ],
+
+            // Customer data fields
             fields: ["id", "firstname", "lastname", "email", "phonenumber", "addressline", "postalcode", "city"],
-            editCustomerId: null,
-            editCustomer: {},
-            loading: false,
-            totalItems: 0,
-            alertHeading: '',
-            alertParagraph: '',
-            alertOkayButton: '',
+
+            // Editing
+            editCustomerId: null,           // ID of the edited customer
+            editCustomer: {},               // Editable customer data
+            fieldErrors: {},                // Field validation errors
+
+            // Pagination and sorting settings
             options: {
-                page: 1,
-                itemsPerPage: 20,
+                page: 1,                    // Current page
+                itemsPerPage: 20,          // Elements on the page
+                sortBy: [{ key: 'id', order: 'desc' }]  // Default sorting
             },
-            confirmAction: null,
-            searchDebounceTimer: null
+
+            // Modal window
+            alertHeading: '',              // Alert header
+            alertParagraph: '',            // Alert text
+            alertOkayButton: '',           // Confirmation button text
+            confirmAction: null,           // Confirmation function
+
+            // Search
+            searchDebounceTimer: null      // Timer for debounce search
         };
     },
 
     computed: {
+        // Current page
         currentPage() {
             return this.options.page;
         },
+
+        // Total number of pages
         totalPages() {
             return Math.ceil(this.totalItems / this.options.itemsPerPage);
         },
+
+        // Editing mode flag
         isEditing() {
             return this.editCustomerId !== null;
         },
+
+        // Array of page numbers for pagination
         pageItems() {
             return Array.from({ length: this.totalPages }, (_, i) => i + 1);
         }
     },
 
+    // Tracking changes in props
     watch: {
+        // Track changes to the search string
         searchString: {
             handler(newValue, oldValue) {
-                // Nur reagieren wenn sich der Wert tatsächlich geändert hat
+                // React only to real changes
                 if (newValue !== oldValue) {
                     this.handleSearchChange(newValue);
                 }
             },
             immediate: false
         },
+
+        // Tracking the search status
         isSearchActive: {
             handler(newValue) {
                 if (!newValue && !this.searchString) {
-                    // Suche wurde deaktiviert, zurück zur normalen Ansicht
+                    // Search deactivated, return to normal browsing
                     this.options.page = 1;
                     this.loadItems();
                 }
@@ -176,31 +217,43 @@ export default {
         }
     },
 
+    // Loading data when mounting a component
     mounted() {
         this.loadItems();
     },
 
     methods: {
+        // === SEARCH METHODS ===
+
+        /**
+         * Search string modification handling with debounce
+         * @param {string} searchValue - New search value
+         */
         handleSearchChange(searchValue) {
-            // Bestehenden Timer löschen
+            // Clear the previous timer
             if (this.searchDebounceTimer) {
                 clearTimeout(this.searchDebounceTimer);
             }
 
-            // Wenn leer, normale Daten laden
+            // If the string is empty, load normal data
             if (!searchValue || !searchValue.trim()) {
                 this.options.page = 1;
                 this.loadItems();
                 return;
             }
 
-            // Debounce für 300ms
+            // Set debounce to 300ms
             this.searchDebounceTimer = setTimeout(() => {
-                this.options.page = 1; // Bei neuer Suche auf Seite 1 zurücksetzen
+                this.options.page = 1; // Reset to the first page on a new search
                 this.searchCustomers(searchValue);
             }, 300);
         },
 
+        /**
+         * Search customers by query
+         * @param {string} query - Search query
+         * @param {number} page - Page number
+         */
         async searchCustomers(query = this.searchString, page = this.options.page) {
             if (!query || !query.trim()) {
                 this.loadItems();
@@ -209,18 +262,20 @@ export default {
 
             this.loading = true;
             try {
-                console.log('Searching for:', query, 'Page:', page);
+                console.log('Customer Search:', query, 'Page:', page);
 
                 const params = {
                     query: query.trim(),
                     page: page,
-                    itemsPerPage: this.options.itemsPerPage
+                    itemsPerPage: this.options.itemsPerPage,
+                    sortBy: this.options.sortBy.length > 0 ? this.options.sortBy[0].key : 'id',
+                    sortDesc: this.options.sortBy.length > 0 ? this.options.sortBy[0].order === 'desc' : false
                 };
 
                 const response = await axios.get('/api/customers/search', { params });
-                console.log('Search API Response:', response.data);
+                console.log('API Search Response:', response.data);
 
-                // Datenverarbeitung - verschiedene Antwortformate unterstützen
+                // Handling different response formats
                 let items = [];
                 let total = 0;
 
@@ -247,37 +302,70 @@ export default {
                 });
 
             } catch (error) {
-                console.error('Fehler beim Suchen der Kunden:', error);
+                console.error('Error when searching for customers:', error);
                 if (error.response) {
-                    console.error('Response data:', error.response.data);
-                    console.error('Response status:', error.response.status);
+                    console.error('Response Data:', error.response.data);
+                    console.error('Response Status:', error.response.status);
                 }
 
-                // Bei Fehler leere Ergebnisse anzeigen
+                // On error show empty results
                 this.customers = [];
                 this.totalItems = 0;
-                this.$emit('show-error', 'Fehler beim Durchsuchen der Kunden');
+                this.$emit('show-error', 'Error when searching for customers');
             } finally {
                 this.loading = false;
             }
         },
 
-        // Callback für v-data-table-server, wenn sich Optionen ändern
+        // === PAGINATION AND SORTING METHODS ===
+
+        /**
+         * Handling changes to table options (v-data-table-server callback)
+         * @param {Object} newOptions - New table options
+         */
         onOptionsUpdate(newOptions) {
-            // Wenn die Seite oder Elemente pro Seite durch die Tabelle geändert wurden
+            console.log('Updating the table options:', newOptions);
+
+            let needsReload = false;
+
+            // Handling page changes
             if (newOptions.page !== this.options.page) {
-                this.handlePageChange(newOptions.page);
+                this.options.page = newOptions.page;
+                needsReload = true;
             }
 
+            // Handling changes in the number of elements on the page
             if (newOptions.itemsPerPage !== this.options.itemsPerPage) {
-                this.handleItemsPerPageChange(newOptions.itemsPerPage);
+                this.options.itemsPerPage = newOptions.itemsPerPage;
+                this.options.page = 1; // Reset to first page
+                needsReload = true;
+            }
+
+            // Processing a change in sorting
+            if (newOptions.sortBy && JSON.stringify(newOptions.sortBy) !== JSON.stringify(this.options.sortBy)) {
+                this.options.sortBy = newOptions.sortBy;
+                this.options.page = 1; // Reset to the first page when sorting is changed
+                needsReload = true;
+            }
+
+            // Reload data if changes have been made
+            if (needsReload) {
+                if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                    this.searchCustomers(this.searchString, this.options.page);
+                } else {
+                    this.loadItems();
+                }
             }
         },
 
+        /**
+         * Handling page changes
+         * @param {number} page - New page number
+         */
         handlePageChange(page) {
             this.options.page = page;
 
-            // Entscheiden ob Suche oder normale Daten geladen werden sollen
+            // Determine whether to load search results or normal data
             if (this.isSearchActive && this.searchString && this.searchString.trim()) {
                 this.searchCustomers(this.searchString, page);
             } else {
@@ -285,9 +373,13 @@ export default {
             }
         },
 
+        /**
+         * Handling changes in the number of items on the page
+         * @param {number} itemsPerPage - New number of items
+         */
         handleItemsPerPageChange(itemsPerPage) {
             this.options.itemsPerPage = itemsPerPage;
-            this.options.page = 1; // Reset auf Seite 1 wenn sich die Anzahl pro Seite ändert
+            this.options.page = 1; // Reset to the first page
 
             if (this.isSearchActive && this.searchString && this.searchString.trim()) {
                 this.searchCustomers(this.searchString, 1);
@@ -296,6 +388,13 @@ export default {
             }
         },
 
+        // === VALIDATION METHODS ===
+
+        /**
+         * Getting validation rules for a field
+         * @param {string} field - Field name
+         * @returns {Array} Array of validation rules
+         */
         getFieldRules(field) {
             switch (field) {
                 case 'id':
@@ -322,6 +421,15 @@ export default {
             }
         },
 
+        // === MODAL WINDOW METHODS ===
+
+        /**
+         * Display confirmation modal
+         * @param {string} heading - Header
+         * @param {string} paragraph - Message text
+         * @param {string} okayButton - Text of the confirmation button
+         * @param {Function} action - Confirmation function
+         */
         showAlert(heading, paragraph, okayButton, action) {
             this.alertHeading = heading;
             this.alertParagraph = paragraph;
@@ -330,6 +438,22 @@ export default {
             this.isAlertVisible = true;
         },
 
+        /**
+         * Handling confirmation in a modal window
+         */
+        handleConfirmation() {
+            if (this.confirmAction) {
+                this.confirmAction();
+            }
+            this.isAlertVisible = false;
+        },
+
+        // === DELETION METHODS ===
+
+        /**
+         * Confirm deletion of one customer
+         * @param {string} id - Customer ID
+         */
         confirmDeleteCustomer(id) {
             this.customerToDelete = id;
             this.showAlert(
@@ -340,6 +464,9 @@ export default {
             );
         },
 
+        /**
+         * Confirm deletion of selected customers
+         */
         confirmDeleteSelectedCustomers() {
             if (this.selectedCustomers.length > 0) {
                 const message = this.selectedCustomers.length === 1
@@ -359,91 +486,44 @@ export default {
             }
         },
 
-        async confirmEditCustomer() {
-            try {
-                await axios.put(`/api/customers/${this.editCustomerId}`, this.editCustomer);
-                this.editCustomerId = null;
-                this.editCustomer = {};
-
-                // Nach dem Bearbeiten entsprechende Daten neu laden
-                if (this.isSearchActive && this.searchString && this.searchString.trim()) {
-                    await this.searchCustomers(this.searchString, this.options.page);
-                } else {
-                    await this.loadItems();
-                }
-            } catch (error) {
-                console.error('Error data:', error.response?.data);
-                this.$emit('show-error', 'Fehler beim Speichern des Kunden');
-            }
-        },
-
-        handleConfirmation() {
-            if (this.confirmAction) {
-                this.confirmAction();
-            }
-            this.isAlertVisible = false;
-        },
-
-        async loadItems() {
-            this.loading = true;
-
-            try {
-                const params = {
-                    page: this.options.page,
-                    itemsPerPage: this.options.itemsPerPage,
-                    orderByNewest: true  // Standardmäßig nach "zuletzt hinzugefügt" sortieren
-                };
-
-                console.log('Request params:', params);
-
-                const response = await axios.get('/api/customers', { params });
-                console.log('API Response:', response.data);
-
-                this.customers = response.data.items || response.data || [];
-                this.totalItems = response.data.total || response.data.totalItems || this.customers.length;
-            } catch (error) {
-                console.error('Fehler beim Laden der Daten:', error);
-                if (error.response) {
-                    console.error('Response data:', error.response.data);
-                }
-                this.customers = [];
-                this.totalItems = 0;
-            } finally {
-                this.loading = false;
-            }
-        },
-
+        /**
+         * Deleting one customer
+         */
         async deleteCustomer() {
             if (this.customerToDelete) {
                 try {
                     await axios.delete(`/api/customers/${this.customerToDelete}`);
                     console.log('Customer deleted successfully:', this.customerToDelete);
 
-                    // Prüfen, ob nach dem Löschen die aktuelle Seite noch Elemente hat
+                    // Check if the elements remained on the current page after deletion
                     const isLastItemOnPage = this.customers.length === 1;
                     const isNotFirstPage = this.options.page > 1;
 
-                    // Wenn letztes Element auf einer Seite (nicht der ersten) gelöscht wurde, zur vorherigen Seite wechseln
+                    // If we delete the last element not on the first page, go to the previous page
                     if (isLastItemOnPage && isNotFirstPage) {
                         this.options.page -= 1;
                     }
 
-                    // Nach dem Löschen entsprechende Daten neu laden
+                    // Reload the data after deletion
                     if (this.isSearchActive && this.searchString && this.searchString.trim()) {
                         await this.searchCustomers(this.searchString, this.options.page);
                     } else {
                         await this.loadItems();
                     }
 
+                    // Remove the deleted customer from the selected ones
                     this.selectedCustomers = this.selectedCustomers.filter(id => id !== this.customerToDelete);
                     this.customerToDelete = null;
                 } catch (error) {
-                    console.error('Fehler beim Löschen des Kunden:', error.response?.data || error.message);
-                    this.$emit('show-error', 'Fehler beim Löschen des Kunden');
+                    console.error('Error when deleting a customer:', error.response?.data || error.message);
+                    this.$emit('show-error', 'Error when deleting a customer');
                 }
             }
         },
 
+        /**
+         * Deleting multiple customers
+         */
         async deleteCustomers() {
             if (this.selectedCustomers.length > 0) {
                 try {
@@ -451,17 +531,16 @@ export default {
                         data: { ids: this.selectedCustomers }
                     });
 
-                    // Prüfen, ob nach dem Löschen die aktuelle Seite noch Elemente hat
+                    // Logic of going to the previous page if we delete all elements
                     const itemsBeingDeleted = this.selectedCustomers.length;
                     const remainingItemsOnPage = this.customers.length - itemsBeingDeleted;
                     const isNotFirstPage = this.options.page > 1;
 
-                    // Wenn alle Elemente auf einer Seite (nicht der ersten) gelöscht wurden, zur vorherigen Seite wechseln
                     if (remainingItemsOnPage <= 0 && isNotFirstPage) {
                         this.options.page -= 1;
                     }
 
-                    // Nach dem Löschen entsprechende Daten neu laden
+                    // Reload the data after deletion
                     if (this.isSearchActive && this.searchString && this.searchString.trim()) {
                         await this.searchCustomers(this.searchString, this.options.page);
                     } else {
@@ -471,43 +550,144 @@ export default {
                     this.selectedCustomers = [];
                     this.$emit('customersDeleted');
                 } catch (error) {
-                    console.error('Fehler beim Löschen der Kunden:', error);
-                    this.$emit('show-error', 'Fehler beim Löschen der Kunden');
+                    console.error('Error when deleting customers:', error);
+                    this.$emit('show-error', 'Error when deleting customers');
                 }
             }
         },
 
-        editCustomerDetails(customer) {
-            this.editCustomerId = customer.id;
-            this.editCustomer = { ...customer };
-        },
+        // === EDITING METHODS ===
 
-        async saveCustomer() {
+        /**
+         * Customer edit confirmation
+         */
+        async confirmEditCustomer() {
             try {
-                await axios.put(`/api/customers/${this.editCustomerId}`, this.editCustomer);
+                // Prepare data to be sent
+                const formattedData = {
+                    id: this.editCustomer.id,
+                    firstname: this.editCustomer.firstname,
+                    lastname: this.editCustomer.lastname,
+                    email: this.editCustomer.email,
+                    phonenumber: this.editCustomer.phonenumber,
+                    addressline: this.editCustomer.addressline,
+                    postalcode: this.editCustomer.postalcode,
+                    city: this.editCustomer.city
+                };
+
+                await axios.put(`/api/customers/${this.editCustomerId}`, formattedData);
                 this.cancelEdit();
 
-                // Nach dem Speichern entsprechende Daten neu laden
+                // Reload data after saving
                 if (this.isSearchActive && this.searchString && this.searchString.trim()) {
                     await this.searchCustomers(this.searchString, this.options.page);
                 } else {
                     await this.loadItems();
                 }
             } catch (error) {
-                console.error('Fehler beim Speichern des Kunden:', error.response?.data || error.message);
-                this.$emit('show-error', 'Fehler beim Speichern des Kunden');
+                console.error('Error when saving a customer:', error.response?.data || error.message);
+                this.$emit('show-error', 'Error when saving a customer');
             }
         },
 
+        /**
+         * Start editing customer
+         * @param {Object} customer - Customer object
+         */
+        editCustomerDetails(customer) {
+            this.editCustomerId = customer.id;
+            this.editCustomer = { ...customer };
+        },
+
+        /**
+         * Saving the customer (confirmation call)
+         */
+        async saveCustomer() {
+            try {
+                // Prepare data to be sent
+                const formattedData = {
+                    id: this.editCustomer.id,
+                    firstname: this.editCustomer.firstname,
+                    lastname: this.editCustomer.lastname,
+                    email: this.editCustomer.email,
+                    phonenumber: this.editCustomer.phonenumber,
+                    addressline: this.editCustomer.addressline,
+                    postalcode: this.editCustomer.postalcode,
+                    city: this.editCustomer.city
+                };
+
+                await axios.put(`/api/customers/${this.editCustomerId}`, formattedData);
+                this.cancelEdit();
+
+                // Reload data after saving
+                if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                    await this.searchCustomers(this.searchString, this.options.page);
+                } else {
+                    await this.loadItems();
+                }
+            } catch (error) {
+                console.error('Error when saving a customer:', error.response?.data || error.message);
+                this.$emit('show-error', 'Error when saving a customer');
+            }
+        },
+
+        /**
+         * Cancel edit
+         */
         cancelEdit() {
             this.editCustomerId = null;
             this.editCustomer = {};
+            this.fieldErrors = {};
         },
 
-        beforeUnmount() {
-            if (this.searchDebounceTimer) {
-                clearTimeout(this.searchDebounceTimer);
+        // === DATA LOADING METHODS ===
+
+        /**
+         * Loading items from the server
+         */
+        async loadItems() {
+            this.loading = true;
+
+            try {
+                const params = {
+                    page: this.options.page,
+                    itemsPerPage: this.options.itemsPerPage
+                };
+
+                // Add sorting parameters
+                if (this.options.sortBy && this.options.sortBy.length > 0) {
+                    params.sortBy = this.options.sortBy[0].key;
+                    params.sortDesc = this.options.sortBy?.[0]?.order === 'desc';
+                } else {
+                    // Default sorting: newest first
+                    params.sortBy = 'id';
+                    params.sortDesc = true;
+                }
+
+                console.log('Request parameters:', params);
+
+                const response = await axios.get('/api/customers', { params });
+                console.log('API Response:', response.data);
+
+                this.customers = response.data.items || response.data || [];
+                this.totalItems = response.data.total || response.data.totalItems || this.customers.length;
+            } catch (error) {
+                console.error('Error during data loading:', error);
+                if (error.response) {
+                    console.error('Response Data:', error.response.data);
+                }
+                this.customers = [];
+                this.totalItems = 0;
+            } finally {
+                this.loading = false;
             }
+        }
+    },
+
+    // Cleanup when unmounting a component
+    beforeUnmount() {
+        if (this.searchDebounceTimer) {
+            clearTimeout(this.searchDebounceTimer);
         }
     }
 }
