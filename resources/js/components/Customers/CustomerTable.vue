@@ -41,6 +41,8 @@
                     :page="options.page"
                     :sort-by="options.sortBy"
                     :multi-sort="false"
+                    :must-sort="false"
+                    return-object
                     hide-default-footer>
 
                     <!-- Template for each row of the table -->
@@ -321,7 +323,6 @@ export default {
 
                 // Handling different response formats
                 let items = [];
-                const totalItems = ref(0);
                 let total = 0;
 
                 if (response.data?.items) {

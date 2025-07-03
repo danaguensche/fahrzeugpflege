@@ -41,6 +41,8 @@
                     :page="options.page"
                     :sort-by="options.sortBy"
                     :multi-sort="false"
+                    :must-sort="false"
+                    return-object
                     hide-default-footer>
 
                     <!-- Template for each row of the table -->
@@ -683,7 +685,7 @@ export default {
                 // Add sorting parameters
                 if (this.options.sortBy && this.options.sortBy.length > 0) {
                     params.sortBy = this.options.sortBy[0].key;
-                    params.sortDesc = this.options.sortBy?.[0]?.order === 'acs';
+                    params.sortDesc = this.options.sortBy?.[0]?.order === 'asc';
                 } else {
                     // Default sorting: newest first
                     params.sortBy = 'Kennzeichen';
