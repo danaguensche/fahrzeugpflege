@@ -50,11 +50,13 @@ class CustomerController extends Controller
         $perPage = $request->input('itemsPerPage', 20);
         $page = $request->input('page', 1);
         $sortBy = $request->input('sortBy', 'id');
-        $sortDesc = $request->input('sortDesc', 'false') === 'true';
+        $sortDesc = filter_var(request()->input('sortDesc', false), FILTER_VALIDATE_BOOLEAN);
+
+        $allowedSortFields = ['id', 'firstname', 'lastname', 'email', 'phonenumber', 'company', 'addressline', 'postalcode', 'city'];
 
         $query = Customer::query();
 
-        if ($sortBy) {
+        if (in_array($sortBy, $allowedSortFields)) {
             $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
         }
 
@@ -67,6 +69,71 @@ class CustomerController extends Controller
         ]);
     }
 
+    /**
+     * NEW METHOD: Customer Search
+     */
+    public function search(Request $request)
+    {
+        try {
+            $query = $request->input('query', '');
+            $perPage = $request->input('itemsPerPage', 20);
+            $page = $request->input('page', 1);
+            $sortBy = $request->input('sortBy', 'id');
+            $sortDesc = filter_var(request()->input('sortDesc', false), FILTER_VALIDATE_BOOLEAN);
+
+            $allowedSortFields = ['id', 'firstname', 'lastname', 'email', 'phonenumber', 'company', 'addressline', 'postalcode', 'city'];
+
+            // If the query is empty, return an empty result
+            if (empty(trim($query))) {
+                return response()->json([
+                    'items' => [],
+                    'total' => 0,
+                ]);
+            }
+
+            $queryBuilder = Customer::query();
+
+            // Search by all main fields
+            $queryBuilder->where(function($q) use ($query) {
+                $searchTerm = '%' . $query . '%';
+                $q->where('firstname', 'like', $searchTerm)
+                  ->orWhere('lastname', 'like', $searchTerm)
+                  ->orWhere('email', 'like', $searchTerm)
+                  ->orWhere('phonenumber', 'like', $searchTerm)
+                  ->orWhere('company', 'like', $searchTerm)
+                  ->orWhere('addressline', 'like', $searchTerm)
+                  ->orWhere('postalcode', 'like', $searchTerm)
+                  ->orWhere('city', 'like', $searchTerm);
+                
+                // Search by ID if the query is numeric
+                if (is_numeric($query)) {
+                    $q->orWhere('id', '=', (int)$query);
+                }
+            });
+
+            // Applying sorting
+            if (in_array($sortBy, $allowedSortFields)) {
+                $queryBuilder->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
+            }
+
+            $total = $queryBuilder->count();
+            $customers = $queryBuilder->skip(($page - 1) * $perPage)->take($perPage)->get();
+
+            return response()->json([
+                'items' => CustomerResource::collection($customers),
+                'total' => $total,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error in customer search: ' . $e->getMessage());
+            return response()->json([
+                'items' => [],
+                'total' => 0,
+                'error' => 'Error during search'
+            ], 500);
+        }
+    }
+
     public function show(Customer $customer)
     {
         return new CustomerResource($customer);
@@ -74,19 +141,57 @@ class CustomerController extends Controller
 
     public function destroy($id)
     {
-        $customer = Customer::find($id);
-        if ($customer) {
-            $customer->delete();
-            return response()->json(['success' => true, 'message' => 'Kunde wurde gelöscht.']);
-        } else {
-            return response()->json(['success' => false, 'message' => 'Kunde nicht gefunden.'], 404);
+        try {
+            $customer = Customer::find($id);
+            if ($customer) {
+                $customer->delete();
+                return response()->json([
+                    'success' => true, 
+                    'message' => 'Kunde wurde gelöscht.'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Kunde nicht gefunden.'
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Löschen des Kunden: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler beim Löschen des Kunden'
+            ], 500);
         }
     }
 
     public function destroyMultiple(Request $request)
     {
-        Customer::destroy($request->ids);
-        return response()->json(null, 204);
+        try {
+            $validated = $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'integer|exists:customers,id'
+            ]);
+
+            Customer::destroy($validated['ids']);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Kunden wurden erfolgreich gelöscht.'
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validierungsfehler',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Löschen mehrerer Kunden: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler beim Löschen der Kunden'
+            ], 500);
+        }
     }
 
     public function update(Request $request, $id)
@@ -105,26 +210,32 @@ class CustomerController extends Controller
                 'city' => 'required|string',
             ]);
 
-            $customer->update([
-                'company' => $validatedData['company'] ?? null,
-                'firstname' => $validatedData['firstname'],
-                'lastname' => $validatedData['lastname'],
-                'email' => $validatedData['email'],
-                'phonenumber' => $validatedData['phonenumber'],
-                'addressline' => $validatedData['addressline'],
-                'postalcode' => $validatedData['postalcode'],
-                'city' => $validatedData['city'],
-            ]);
+            // CORRECTED: send all validated data
+            $customer->update($validatedData);
 
             return response()->json([
+                'success' => true,
                 'message' => 'Kunde erfolgreich aktualisiert',
                 'customer' => new CustomerResource($customer)
             ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kunde nicht gefunden'
+            ], 404);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['error' => $e->errors()], 422);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validierungsfehler',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             Log::error('Fehler beim Aktualisieren des Kunden: ' . $e->getMessage());
-            return response()->json(['error' => 'Fehler beim Aktualisieren des Kunden'], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler beim Aktualisieren des Kunden'
+            ], 500);
         }
     }
 }

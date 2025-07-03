@@ -11,7 +11,7 @@
         "@babel/preset-env": "^7.25.4",
         "@vitejs/plugin-vue": "^5.1.4",
         "autoprefixer": "^10.4.21",
-        "axios": "^1.7.7",
+        "axios": "^1.10.0",
         "laravel-vite-plugin": "^1.0.5",
         "postcss": "^8.5.3",
         "sass": "^1.56.1",
@@ -39,7 +39,7 @@
         "vue": "^3.5.4",
         "vue-cal": "^4.10.0",
         "vue-router": "^4.4.5",
-        "vuetify": "^3.7.0-beta.1",
-        "vuex": "^4.1.0"
+        "vuetify": "^3.8.11",
+        "vuex": "^4.0.2"
     }
 }

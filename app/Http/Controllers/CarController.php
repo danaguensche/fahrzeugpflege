@@ -50,14 +50,17 @@ class CarController extends Controller
         }
     }
 
-
     public function index()
     {
         $perPage = request()->input('itemsPerPage', 20);
         $page = request()->input('page', 1);
-        $sortBy = request()->input('sortBy', 'id');
-        $sortDesc = request()->input('sortDesc', 'false') === 'true';
+        $sortBy = request()->input('sortBy', 'Kennzeichen');
+
+        // By default (asc)
+        $sortDesc = filter_var(request()->input('sortDesc', true), FILTER_VALIDATE_BOOLEAN);
+
         $query = Car::with('images');
+
         if ($sortBy) {
             $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
         }
@@ -70,13 +73,75 @@ class CarController extends Controller
         ]);
     }
 
+    /**
+     * NEW METHOD: Car Search
+     */
+    public function search(Request $request)
+    {
+        try {
+            $query = $request->input('query', '');
+            $perPage = $request->input('itemsPerPage', 20);
+            $page = $request->input('page', 1);
+            $sortBy = $request->input('sortBy', 'Kennzeichen');
+            $sortDesc = filter_var(request()->input('sortDesc', true), FILTER_VALIDATE_BOOLEAN);
+
+            $allowedSortFields = ['Kennzeichen', 'Fahrzeugklasse', 'Automarke', 'Typ', 'Farbe', 'Sonstiges'];
+
+            // If the query is empty, return an empty result
+            if (empty(trim($query))) {
+                return response()->json([
+                    'items' => [],
+                    'total' => 0,
+                ]);
+            }
+
+            $queryBuilder = Car::with('images');
+
+            // Search by all main fields
+            $queryBuilder->where(function($q) use ($query) {
+                $searchTerm = '%' . $query . '%';
+                $q->where('Kennzeichen', 'like', $searchTerm)
+                  ->orWhere('Automarke', 'like', $searchTerm)
+                  ->orWhere('Typ', 'like', $searchTerm)
+                  ->orWhere('Farbe', 'like', $searchTerm)
+                  ->orWhere('Sonstiges', 'like', $searchTerm);
+                
+                // Search by ID if the query is numeric
+                if (is_numeric($query)) {
+                    $q->orWhere('id', '=', (int)$query);
+                    // Search by Fahrzeugklasse if the query is numeric
+                    $q->orWhere('Fahrzeugklasse', '=', (int)$query);
+                }
+            });
+
+            // Applying sorting
+            if (in_array($sortBy, $allowedSortFields)) {
+                $queryBuilder->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
+            }
+
+            $total = $queryBuilder->count();
+            $cars = $queryBuilder->skip(($page - 1) * $perPage)->take($perPage)->get();
+
+            return response()->json([
+                'items' => CarResource::collection($cars),
+                'total' => $total,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error in car search: ' . $e->getMessage());
+            return response()->json([
+                'items' => [],
+                'total' => 0,
+                'error' => 'Error during search'
+            ], 500);
+        }
+    }
+
     public function show($kennzeichen)
     {
         $car = Car::with('images')->where('Kennzeichen', $kennzeichen)->firstOrFail();
         return new CarResource($car);
     }
-
-
 
     public function destroy($kennzeichen)
     {

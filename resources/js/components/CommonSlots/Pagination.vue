@@ -173,7 +173,7 @@ export default {
 }
 
 .items-select {
-    width: 80px;
+    width: 90px;
 }
 
 @media (max-width: 960px) {
