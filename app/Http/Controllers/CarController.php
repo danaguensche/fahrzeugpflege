@@ -212,6 +212,27 @@ class CarController extends Controller
             ], 500);
         }
     }
+    public function uploadImages(Request $request, $kennzeichen)
+    {
+        $car = Car::where('Kennzeichen', $kennzeichen)->firstOrFail();
+
+        $request->validate([
+            'images' => 'required|array',
+            'images.*' => 'image|max:16384|mimes:jpeg,png,jpg,gif,svg',
+        ]);
+
+        foreach ($request->file('images') as $image) {
+            $path = $image->store('cars', 'public');
+            $car->images()->create(['path' => $path]);
+        }
+
+        $car->load('images');
+
+        return response()->json([
+            'message' => 'Bilder erfolgreich hochgeladen',
+            'car' => new CarResource($car),
+        ]);
+    }
 
     public function update(Request $request, $kennzeichen)
     {
