@@ -33,62 +33,95 @@ class CarDetailsController extends CarController
             $kennzeichen = str_replace('+', ' ', $kennzeichen);
             $car = Car::where('Kennzeichen', $kennzeichen)->firstOrFail();
 
-            $validatedData = $request->validate([
+            // Prepare validation rules
+            $validationRules = [
                 'Kennzeichen' => 'required|string',
                 'Fahrzeugklasse' => 'nullable|integer',
                 'Automarke' => 'nullable|string',
                 'Typ' => 'nullable|string',
                 'Farbe' => 'nullable|string',
                 'Sonstiges' => 'nullable|string',
-                'customer_id' => 'nullable|exists:customers,id',
-            ]);
+            ];
 
-            $updated = $car->update($validatedData);
+            // Handle customer_id validation - allow null/0 or valid customer ID
+            $customerId = $request->input('customer_id');
             
+            // If customer_id is provided and not null/0, validate it exists
+            if ($customerId !== null && $customerId !== 0 && $customerId !== '0' && $customerId !== '') {
+                $validationRules['customer_id'] = 'exists:customers,id';
+            } else {
+                // Allow null/0 values for customer_id
+                $validationRules['customer_id'] = 'nullable';
+            }
+
+            $validatedData = $request->validate($validationRules);
+
+            // Handle customer_id assignment
             if ($request->has('customer_id')) {
+                $customerIdValue = $request->input('customer_id');
+                
                 Log::info('Car assignment request received', [
                     'Kennzeichen' => $kennzeichen,
-                    'request_data' => $request->all(),
-                    'customer_id' => $request->input('customer_id'),
-                    'content_type' => $request->header('Content-Type')
+                    'customer_id' => $customerIdValue,
+                    'customer_id_type' => gettype($customerIdValue)
                 ]);
 
-                $validatedData = $request->validate([
-                    'customer_id' => 'required|numeric'
-                ]);
-                $car->customer_id = (int)$validatedData['customer_id'];
+                // Convert to integer, but allow null/0
+                if ($customerIdValue === null || $customerIdValue === '' || $customerIdValue === 0 || $customerIdValue === '0') {
+                    $validatedData['customer_id'] = null;
+                } else {
+                    $validatedData['customer_id'] = (int)$customerIdValue;
+                }
 
-                Log::info('Car assignment successful', [
-                    'Kennzeichen' => $kennzeichen,
-                    'customer_id' => $car->customer_id
+                Log::info('Customer ID processed', [
+                    'original' => $customerIdValue,
+                    'processed' => $validatedData['customer_id']
                 ]);
             }
 
-            $car->save();
+            $updated = $car->update($validatedData);
 
             if (!$updated) {
                 throw new \Exception('Failed to update car data');
             }
 
+            Log::info('Car assignment successful', [
+                'Kennzeichen' => $kennzeichen,
+                'customer_id' => $car->customer_id
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Fahrzeugdaten aktualisiert',
-                'data' => new CarResource($car->fresh())
+                'data' => new CarResource($car->fresh(['images', 'customer']))
             ]);
+
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            Log::error('Car not found for update', [
+                'kennzeichen' => $kennzeichen,
+                'error' => $e->getMessage()
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Fahrzeug nicht gefunden'
             ], 404);
         } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation error during car update', [
+                'kennzeichen' => $kennzeichen,
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Validierungsfehler',
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            Log::error('Error updating car: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
+            Log::error('Error updating car: ' . $e->getMessage(), [
+                'kennzeichen' => $kennzeichen,
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
 
             return response()->json([
                 'success' => false,

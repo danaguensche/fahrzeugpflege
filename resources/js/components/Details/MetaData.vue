@@ -37,14 +37,14 @@ export default {
             required: true
         },
         formattedCreatedAt: {
-            type: function () {
-                return String;
-            },
+            type: String,
+            required: false,
+            default: ''
         },
         formattedUpdatedAt: {
-            type: function () {
-                return String;
-            },
+            type: String,
+            required: false,
+            default: ''
         }
     },
 

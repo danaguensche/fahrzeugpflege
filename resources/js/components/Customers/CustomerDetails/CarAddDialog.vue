@@ -27,24 +27,21 @@
                             Gefundene Fahrzeuge ({{ filteredSearchResults.length }})
                         </v-card-title>
                         <v-list two-line>
-                            <v-list-item v-for="car in filteredSearchResults" :key="car.Kennzeichen"
-                                @click="selectExistingCar(car)" class="list-item-hover">
-                                <v-list-item-avatar>
-                                    <v-icon color="primary">mdi-car</v-icon>
-                                </v-list-item-avatar>
-                                <v-list-item-content>
-                                    <v-list-item-title class="font-weight-bold">
-                                        {{ car.Kennzeichen }}
-                                    </v-list-item-title>
-                                    <v-list-item-subtitle>
-                                        {{ car.Automarke }} {{ car.Typ }} | {{ car.Farbe || 'Keine Farbangabe' }}
-                                    </v-list-item-subtitle>
-                                </v-list-item-content>
-                                <v-list-item-action style="position: absolute; top: 10px; right: 0;">
-                                    <v-btn icon variant="plain" @click="selectExistingCar(car)">
-                                        <v-icon color="primary">mdi-plus-circle</v-icon>
-                                    </v-btn>
-                                </v-list-item-action>
+                            <v-list-item v-for="car in filteredSearchResults" :key="car.Kennzeichen" @click="selectExistingCar(car)" class="list-item-hover">
+                            <v-avatar>
+                                <v-icon color="primary">mdi-car</v-icon>
+                            </v-avatar>
+                            <v-list-item-title class="font-weight-bold">
+                                {{ car.Kennzeichen }}
+                            </v-list-item-title>
+                            <v-list-item-subtitle>
+                                {{ car.Automarke }} {{ car.Typ }} | {{ car.Farbe || 'Keine Farbangabe' }}
+                            </v-list-item-subtitle>
+                            <v-list-item-action style="position: absolute; top: 10px; right: 0;">
+                                <v-btn icon variant="plain" @click="selectExistingCar(car)">
+                                <v-icon color="primary">mdi-plus-circle</v-icon>
+                                </v-btn>
+                            </v-list-item-action>
                             </v-list-item>
                         </v-list>
                     </v-card>
