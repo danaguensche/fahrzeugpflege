@@ -22,9 +22,9 @@ Route::get('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'detai
 Route::delete('cars', [CarController::class, 'destroyMultiple']);
 Route::put('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'update']);
 // Image management routes
-Route::post('cars/cardetails/{kennzeichen}/images', [CarController::class, 'uploadImages']);
-Route::delete('cars/cardetails/{kennzeichen}/images/{imageId}', [CarController::class, 'deleteImage']);
-Route::post('cars/cardetails/{kennzeichen}/images/{imageId}', [CarController::class, 'replaceImage']);
+Route::post('cars/cardetails/{kennzeichen}/images', [CarDetailsController::class, 'uploadImages']);
+Route::delete('cars/cardetails/{kennzeichen}/images/{imageId}', [CarDetailsController::class, 'deleteImage']);
+Route::post('cars/cardetails/{kennzeichen}/images/{imageId}', [CarDetailsController::class, 'replaceImage']);
 
 
 // Customers Routes
