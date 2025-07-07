@@ -17,9 +17,9 @@
                             :hint="key === 'id' ? `${labels[key]} kann nicht bearbeitet werden` : ''"
                             :persistent-hint="key === 'id'">
                         </v-text-field>
-                        <v-textarea v-if="key === 'Sonstiges'" class="w-50 tw-resize-y rounded-md"
-                            v-model="editedData[key]" variant="outlined" density="comfortable"
-                            no-resize="false"></v-textarea>
+                        <v-textarea v-if="key === 'Sonstiges'" class="w-50 tw-resize-y rounded-md" 
+                            v-model="editedData[key]" variant="outlined" density="comfortable" 
+                            :no-resize="false"></v-textarea>
                     </v-col>
 
                 </v-row>

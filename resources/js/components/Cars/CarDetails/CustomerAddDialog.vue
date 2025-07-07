@@ -33,22 +33,28 @@
             <v-list two-line>
               <v-list-item v-for="customer in searchResults" :key="customer.id"
                 @click="selectExistingCustomer(customer)" class="list-item-hover">
-                <v-list-item-avatar>
-                  <v-icon color="primary">mdi-account</v-icon>
-                </v-list-item-avatar>
-                <v-list-item-content>
-                  <v-list-item-title class="font-weight-bold">
-                    {{ customer.firstname }} {{ customer.lastname }}
-                  </v-list-item-title>
-                  <v-list-item-subtitle>
-                    {{ customer.email }} - {{ customer.phonenumber }}
-                  </v-list-item-subtitle>
-                </v-list-item-content>
-                <v-list-item-action style="position: absolute; top: 10px; right: 0;">
+                
+                <!-- Исправлено: используем template v-slot:prepend для avatar -->
+                <template v-slot:prepend>
+                  <v-avatar>
+                    <v-icon color="primary">mdi-account</v-icon>
+                  </v-avatar>
+                </template>
+
+                <!-- Исправлено: убрали v-list-item-content, используем напрямую -->
+                <v-list-item-title class="font-weight-bold">
+                  {{ customer.firstname }} {{ customer.lastname }}
+                </v-list-item-title>
+                <v-list-item-subtitle>
+                  {{ customer.email }} - {{ customer.phonenumber }}
+                </v-list-item-subtitle>
+
+                <!-- Исправлено: используем template v-slot:append для action -->
+                <template v-slot:append>
                   <v-btn icon variant="plain" @click.stop="selectExistingCustomer(customer)">
                     <v-icon color="primary">mdi-plus-circle</v-icon>
                   </v-btn>
-                </v-list-item-action>
+                </template>
               </v-list-item>
             </v-list>
           </v-card>

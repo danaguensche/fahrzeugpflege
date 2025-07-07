@@ -304,11 +304,11 @@ export default {
             
             // Handle image objects with path
             if (image && image.path) {
-                // Если path уже полный URL, возвращаем как есть
+                // If path is already a full URL, return as is
                 if (image.path.startsWith('http')) {
                     return image.path;
                 }
-                // Если path уже содержит storage, не добавляем его снова
+                // If path already contains storage, do not add it again
                 if (image.path.startsWith('storage/')) {
                     return `/${image.path}`;
                 }
@@ -336,17 +336,15 @@ export default {
             this.replaceIndex = null;
         },
 
-        // Исправленный метод обработки выбора файла
         onReplaceFileChange(file) {
             console.log('File change event triggered:', file);
             
-            // Очистка предыдущего превью
             this.replacePreview = null;
             
             if (file && file instanceof File) {
                 console.log('Valid file selected:', file.name, file.size, file.type);
                 
-                // Валидация файла
+
                 const isValidSize = file.size < 10000000; // 10MB
                 const isValidType = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type);
 
@@ -368,7 +366,6 @@ export default {
                     return;
                 }
 
-                // Создаем превью
                 this.createReplacePreview(file);
             } else {
                 console.log('No file selected or invalid file');
@@ -414,14 +411,11 @@ export default {
             });
             
             if (this.deleteIndex !== null) {
-                // Эмитим событие для удаления изображения
                 this.$emit('delete-image', this.deleteIndex);
                 
-                // Закрываем диалог
                 this.deleteDialog = false;
                 this.deleteIndex = null;
                 
-                // Сбрасываем выбранное действие
                 this.selectedAction = null;
             }
         }
