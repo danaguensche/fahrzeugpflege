@@ -319,7 +319,7 @@ export default {
                 isDragOver: false,
                 dragCounter: 0,
                 maxFileSize: 10000000, // 10MB
-                acceptedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+                acceptedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg']
             }
         };
     },
@@ -377,9 +377,9 @@ export default {
         fileRules() {
             return [
                 value => !value || value.size < this.imageUploadDialog.maxFileSize || `Bild darf nicht größer als ${this.formatFileSize(this.imageUploadDialog.maxFileSize)} sein`,
-                value => !value || this.imageUploadDialog.acceptedTypes.includes(value.type) || `Nur Bilder im Format ${this.imageUploadDialog.acceptedTypes.map(t => t.split('/')[1].toUpperCase()).join(', ')} sind erlaubt`
+                value => !value || this.imageUploadDialog.acceptedTypes.includes(value.type.toLowerCase()) || `Nur Bilder im Format ${this.imageUploadDialog.acceptedTypes.map(t => t.split('/')[1].toUpperCase()).join(', ')} sind erlaubt`
             ];
-        }
+        },
     },
     async mounted() {
         try {
@@ -818,6 +818,27 @@ export default {
 </script>
 
 <style scoped>
+.card-container {
+  width: 100%;
+  height: calc(100vh - 40px);
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
 /* Drag & Drop Zone */
 .drag-drop-zone {
     border: 2px dashed #ccc;
@@ -876,5 +897,57 @@ export default {
 
 .v-alert {
     margin-top: 16px;
+}
+
+@media (max-width: 575.98px) {
+  .card-container {
+    padding: 10px;
+    height: calc(100vh - 20px);
+  }
+
+  .card {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .card-container {
+    padding: 15px;
+    height: calc(100vh - 30px);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .card-container {
+    max-width: calc(100% - 80px);
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .card-container {
+    max-width: calc(100% - 250px);
+  }
+}
+
+@media (min-width: 1200px) {
+  .card-container {
+    max-width: calc(100% - 280px);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .v-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .v-card-actions button {
+    margin-bottom: 8px;
+    width: 100%;
+  }
+
+  .v-spacer {
+    display: none;
+  }
 }
 </style>

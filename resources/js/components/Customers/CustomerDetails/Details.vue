@@ -83,7 +83,7 @@
             </div>
           </v-sheet>
 
-          <!-- Fahrzeuge -->
+          <!-- Fahrzeuge --> 
           <v-sheet>
             <HeaderWithChip :customerDetails="customerDetails"></HeaderWithChip>
             <CarList v-if="customerDetails.data.cars && customerDetails.data.cars.length > 0"

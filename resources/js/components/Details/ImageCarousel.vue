@@ -1,21 +1,8 @@
 <template>
     <v-card-text class="px-4 pt-0 pb-4" v-if="images.length > 0 || editMode">
-        <!-- Header with Add Button in Edit Mode -->
-        <div class="d-flex justify-space-between align-center mb-3">
-            <h3 class="subtitle-1 font-weight-bold">Bilder</h3>
-            <v-btn
-                v-if="editMode"
-                color="primary"
-                small
-                @click="$emit('upload-image')"
-                :disabled="loading"
-            >
-                <v-icon left small>mdi-plus</v-icon>
-                Bild hinzufügen
-            </v-btn>
-        </div>
-
         <!-- No Images Message -->
+        <div class ="mt-4"></div>
+
         <v-alert
             v-if="images.length === 0 && !editMode"
             type="info"
@@ -51,7 +38,7 @@
             v-if="images.length > 0"
             v-model="currentSlide"
             :show-arrows="images.length > 1"
-            :hide-delimiters="images.length <= 1"
+            hide-delimiters
             height="400"
             class="rounded-lg"
         >
@@ -236,6 +223,16 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+        <div class ="mt-4"></div>
+        <v-btn
+                v-if="editMode && images.length > 0"
+                color="primary"
+                small
+                @click="$emit('upload-image')"
+                :disabled="loading"
+            >
+                Bild hinzufügen
+            </v-btn>
     </v-card-text>
 </template>
 
