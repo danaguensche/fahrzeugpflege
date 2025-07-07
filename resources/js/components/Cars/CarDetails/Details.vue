@@ -327,6 +327,23 @@ export default {
         vehicleInfoKeys() {
             return ['id', 'Kennzeichen', 'Fahrzeugklasse', 'Automarke', 'Typ', 'Farbe', 'Sonstiges'];
         },
+        // Add this computed property to safely handle customer display
+        customerDisplay() {
+            const customer = this.carDetails.data?.customer;
+            if (!customer || customer.id === 0) {
+                return 'Kein Kunde zugewiesen';
+            }
+            return `${customer.firstname} ${customer.lastname}`;
+        },
+        
+        // Add this to safely handle customer ID
+        customerIdDisplay() {
+            const customerId = this.carDetails.data?.customer_id;
+            if (!customerId || customerId === 0) {
+                return 'Keine Kunden-ID';
+            }
+            return customerId;
+        },
         images() {
             const img = this.carDetails.data?.images;
             console.log("Raw images data:", img);
@@ -337,7 +354,7 @@ export default {
 
             if (Array.isArray(img)) {
                 return img.filter(Boolean).map(image => {
-                    // Обеспечиваем корректную структуру данных изображения
+                    // Ensure correct image data structure
                     if (typeof image === 'string') {
                         return {
                             id: null,
@@ -353,7 +370,7 @@ export default {
                 });
             }
 
-            // Если img не массив, но есть данные
+            // If img is not an array, but has data
             if (typeof img === 'string') {
                 return [{
                     id: null,
@@ -464,11 +481,22 @@ export default {
             this.error = null;
 
             try {
+                // Prepare data for submission
+                const dataToSubmit = { ...this.editedCarData };
+                
+                // Handle customer_id - convert empty/null values to null
+                if (dataToSubmit.customer_id === '' || dataToSubmit.customer_id === 0 || dataToSubmit.customer_id === '0') {
+                    dataToSubmit.customer_id = null;
+                }
+
+                console.log('Submitting car data:', dataToSubmit);
+
                 await axios.put(
                     `/api/cars/cardetails/${this.$route.params.kennzeichen}`,
-                    this.editedCarData
+                    dataToSubmit
                 );
 
+                // Reload the car details
                 const { data } = await axios.get(
                     `/api/cars/cardetails/${this.$route.params.kennzeichen}`
                 );
@@ -477,12 +505,25 @@ export default {
                 this.editMode = false;
                 this.showSnackbar("Fahrzeugdaten erfolgreich gespeichert", 'success');
             } catch (error) {
-                const errorMessage = error.response?.data?.message || "Fehler beim Speichern der Fahrzeugdaten";
+                console.error('Error saving car data:', error);
+                console.error('Error response:', error.response?.data);
+                
+                let errorMessage = "Fehler beim Speichern der Fahrzeugdaten";
+                
+                if (error.response?.data?.message) {
+                    errorMessage = error.response.data.message;
+                } else if (error.response?.data?.errors) {
+                    // Handle validation errors
+                    const validationErrors = Object.values(error.response.data.errors).flat();
+                    errorMessage = validationErrors.join(', ');
+                }
+                
                 this.showSnackbar(errorMessage, 'error');
             } finally {
                 this.saveLoading = false;
             }
         },
+
 
         showSnackbar(text, color = 'success') {
             this.snackbar = {
