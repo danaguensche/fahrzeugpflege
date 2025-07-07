@@ -1,9 +1,12 @@
 <template>
     <div class="component">
+        <!-- Header with control buttons -->
         <div class="header">
-            <RefreshButton class="refresh-button" @refresh="loadItems"></RefreshButton>
+            <!-- Data Update Button -->
+            <RefreshButton class="refresh-button" @refresh="loadItems" :loading="isRefreshing"></RefreshButton>
             <div class="spacer"></div>
 
+            <!-- Button group for customer operations -->
             <div class="button-group">
                 <ConfirmButton class="confirm-button" @click="confirmEditCustomer" :disabled="!editCustomerId">
                     Bestätigen
@@ -16,22 +19,43 @@
             </div>
         </div>
 
+        <!-- Table Container -->
         <div class="table-container">
+            <!-- Download indicator -->
             <div v-if="loading" class="loader-container">
                 <v-progress-circular indeterminate></v-progress-circular>
             </div>
+            
+            <!-- Scrolling Table -->
             <div class="scrollable-table">
-                <v-data-table-server :headers="headers" :items="customers" :itemsLength="totalItems"
-                    height="calc(100vh - 400px)" fixed-header :loading="loading" @update:options="onOptionsUpdate"
-                    :items-per-page="options.itemsPerPage" :page="options.page" :sort-by="options.sortBy"
-                    :multi-sort="false" hide-default-footer>
+                <!-- Vuetify server table with pagination and sorting -->
+                <v-data-table-server 
+                    :headers="headers" 
+                    :items="customers" 
+                    :itemsLength="totalItems"
+                    height="calc(100vh - 400px)" 
+                    fixed-header 
+                    :loading="loading" 
+                    @update:options="onOptionsUpdate"
+                    :items-per-page="options.itemsPerPage" 
+                    :page="options.page"
+                    :sort-by="options.sortBy"
+                    :multi-sort="false"
+                    :must-sort="false"
+                    return-object
+                    hide-default-footer>
 
+                    <!-- Template for each row of the table -->
                     <template v-slot:item="{ item }">
                         <tr :class="{ 'edited-row': editCustomerId === item.id }">
+                            <!-- Checkbox for client selection -->
                             <td class="checkbox fixed-width">
                                 <v-checkbox v-model="selectedCustomers" :value="item.id"></v-checkbox>
                             </td>
+                            
+                            <!-- Customer Data Fields -->
                             <td v-for="field in fields" :key="field" class="fixed-width">
+                                <!-- Edit Mode -->
                                 <template v-if="editCustomerId === item.id">
                                     <!-- ID - link only, not editable -->
                                     <template v-if="field === 'id'">
@@ -41,13 +65,18 @@
                                     </template>
                                     <!-- The rest of the fields are editable -->
                                     <template v-else>
-                                        <v-text-field v-model="editCustomer[field]" :rules="getFieldRules(field)"
-                                            :error-messages="fieldErrors[field]" density="compact">
+                                        <v-text-field 
+                                            v-model="editCustomer[field]" 
+                                            :rules="getFieldRules(field)"
+                                            :error-messages="fieldErrors[field]" 
+                                            density="compact">
                                         </v-text-field>
                                     </template>
                                 </template>
+                                
+                                <!-- View Mode -->
                                 <template v-else>
-                                    <!-- ID as link -->
+                                    <!-- ID as reference -->
                                     <a v-if="field === 'id'" :href="`/kunden/kundendetails/${item[field] || ''}`">
                                         {{ item[field] || '' }}
                                     </a>
@@ -55,35 +84,48 @@
                                     <span v-else>{{ item[field] || '' }}</span>
                                 </template>
                             </td>
+                            
+                            <!-- Delete Button -->
                             <td class="table-icon fixed-width">
-                                <v-btn icon class="delete-button" variant="plain"
-                                    @click="confirmDeleteCustomer(item.id)">
+                                <v-btn icon class="delete-button" variant="plain" @click="confirmDeleteCustomer(item.id)">
                                     <v-icon>mdi-delete</v-icon>
                                 </v-btn>
                             </td>
+                            
+                            <!-- Edit/Save button -->
                             <td class="table-icon fixed-width">
                                 <v-btn variant="plain" icon
                                     @click="editCustomerId === item.id ? saveCustomer() : editCustomerDetails(item)">
-                                    <v-icon>{{ editCustomerId === item.id ? 'mdi-content-save' : 'mdi-pencil'
-                                        }}</v-icon>
+                                    <v-icon>{{ editCustomerId === item.id ? 'mdi-content-save' : 'mdi-pencil' }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
                     </template>
                 </v-data-table-server>
 
-                <!-- Pagination Komponente -->
+                <!-- Pagination Component -->
                 <div class="pagination-container">
-                    <Pagination v-model:page="options.page" v-model:itemsPerPage="options.itemsPerPage"
-                        :total-items="totalItems" :items-per-page-options="[10, 20, 50, 100]"
-                        @update:page="handlePageChange" @update:itemsPerPage="handleItemsPerPageChange" />
+                    <Pagination 
+                        v-model:page="options.page" 
+                        v-model:itemsPerPage="options.itemsPerPage"
+                        :total-items="totalItems" 
+                        :items-per-page-options="[10, 20, 50, 100]"
+                        @update:page="handlePageChange" 
+                        @update:itemsPerPage="handleItemsPerPageChange" />
                 </div>
             </div>
         </div>
 
-        <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
-            :alertHeading="alertHeading" :alertParagraph="alertParagraph" :alertOkayButton="alertOkayButton"
-            alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
+        <!-- Modal confirmation window -->
+        <VuetifyAlert 
+            v-model="isAlertVisible" 
+            maxWidth="500" 
+            alertTypeClass="alertTypeConfirmation"
+            :alertHeading="alertHeading" 
+            :alertParagraph="alertParagraph" 
+            :alertOkayButton="alertOkayButton"
+            alertCloseButton="Abbrechen" 
+            @confirmation="handleConfirmation">
         </VuetifyAlert>
     </div>
 </template>
@@ -99,6 +141,8 @@ import Pagination from '../CommonSlots/Pagination.vue';
 
 export default {
     name: "CustomerTable",
+    
+    // Props for searching and filtering
     props: {
         searchString: {
             type: String,
@@ -109,6 +153,7 @@ export default {
             default: false
         }
     },
+    
     components: {
         ConfirmButton,
         CancelButton,
@@ -117,18 +162,20 @@ export default {
         VuetifyAlert,
         Pagination
     },
+    
     data() {
         return {
             // Basic data
+            isRefreshing: false,
             customers: [],                   // List of customers
-            selectedCustomers: [],          // Selected customers for mass operations
-            customerToDelete: null,         // Customer ID for deletion
-
+            selectedCustomers: [],           //// Selected customers for mass operations
+            customerToDelete: null,          // Customer ID for deletion
+            
             // Interface state
-            isAlertVisible: false,          // Modal window visibility
-            loading: false,                 // Loading indicator
-            totalItems: 0,                  // Total number of items
-
+            isAlertVisible: false,           // Modal window visibility
+            loading: false,                  // Loading indicator
+            totalItems: 0,                   // Total number of items
+            
             // Table headers
             headers: [
                 { title: 'Auswählen', key: 'checkbox', sortable: false, width: '80px' },
@@ -143,30 +190,30 @@ export default {
                 { title: 'Löschen', key: 'delete', sortable: false, width: '60px' },
                 { title: 'Bearbeiten', key: 'edit', sortable: false, width: '60px' }
             ],
-
+            
             // Customer data fields
             fields: ["id", "firstname", "lastname", "email", "phonenumber", "addressline", "postalcode", "city"],
-
+            
             // Editing
-            editCustomerId: null,           // ID of the edited customer
-            editCustomer: {},               // Editable customer data
-            fieldErrors: {},                // Field validation errors
-
+            editCustomerId: null,            // ID of the edited client
+            editCustomer: {},                // Editable client data
+            fieldErrors: {},                 // Field validation errors
+            
             // Pagination and sorting settings
             options: {
-                page: 1,                    // Current page
-                itemsPerPage: 20,          // Elements on the page
+                page: 1,                     // Current page
+                itemsPerPage: 20,           // Elements on the page
                 sortBy: [{ key: 'id', order: 'desc' }]  // Default sorting
             },
-
+            
             // Modal window
-            alertHeading: '',              // Alert header
-            alertParagraph: '',            // Alert text
-            alertOkayButton: '',           // Confirmation button text
-            confirmAction: null,           // Confirmation function
-
+            alertHeading: '',               // Alert header
+            alertParagraph: '',             // Alerte Text
+            alertOkayButton: '',            // Confirmation button text
+            confirmAction: null,            // Confirmation function
+            
             // Search
-            searchDebounceTimer: null      // Timer for debounce search
+            searchDebounceTimer: null       // Timer for debaunce search
         };
     },
 
@@ -175,17 +222,17 @@ export default {
         currentPage() {
             return this.options.page;
         },
-
+        
         // Total number of pages
         totalPages() {
             return Math.ceil(this.totalItems / this.options.itemsPerPage);
         },
-
+        
         // Editing mode flag
         isEditing() {
             return this.editCustomerId !== null;
         },
-
+        
         // Array of page numbers for pagination
         pageItems() {
             return Array.from({ length: this.totalPages }, (_, i) => i + 1);
@@ -204,7 +251,7 @@ export default {
             },
             immediate: false
         },
-
+        
         // Tracking the search status
         isSearchActive: {
             handler(newValue) {
@@ -224,7 +271,7 @@ export default {
 
     methods: {
         // === SEARCH METHODS ===
-
+        
         /**
          * Search string modification handling with debounce
          * @param {string} searchValue - New search value
@@ -250,7 +297,7 @@ export default {
         },
 
         /**
-         * Search customers by query
+         * Search clients by query
          * @param {string} query - Search query
          * @param {number} page - Page number
          */
@@ -269,7 +316,7 @@ export default {
                     page: page,
                     itemsPerPage: this.options.itemsPerPage,
                     sortBy: this.options.sortBy.length > 0 ? this.options.sortBy[0].key : 'id',
-                    sortDesc: this.options.sortBy.length > 0 ? this.options.sortBy[0].order === 'desc' : false
+                    sortDesc: this.options.sortBy.length > 0 ? this.options.sortBy[0].order === 'desc' : true
                 };
 
                 const response = await axios.get('/api/customers/search', { params });
@@ -302,30 +349,30 @@ export default {
                 });
 
             } catch (error) {
-                console.error('Error when searching for customers:', error);
+                console.error('Error when searching for clients:', error);
                 if (error.response) {
                     console.error('Response Data:', error.response.data);
                     console.error('Response Status:', error.response.status);
                 }
 
-                // On error show empty results
+                // При ошибке показываем пустые результаты
                 this.customers = [];
                 this.totalItems = 0;
-                this.$emit('show-error', 'Error when searching for customers');
+                this.$emit('show-error', 'Error when searching for clients');
             } finally {
                 this.loading = false;
             }
         },
 
         // === PAGINATION AND SORTING METHODS ===
-
+        
         /**
-         * Handling changes to table options (v-data-table-server callback)
+         * Handling changes to table options (v-data-table-server colback)
          * @param {Object} newOptions - New table options
          */
         onOptionsUpdate(newOptions) {
             console.log('Updating the table options:', newOptions);
-
+            
             let needsReload = false;
 
             // Handling page changes
@@ -337,7 +384,7 @@ export default {
             // Handling changes in the number of elements on the page
             if (newOptions.itemsPerPage !== this.options.itemsPerPage) {
                 this.options.itemsPerPage = newOptions.itemsPerPage;
-                this.options.page = 1; // Reset to first page
+                this.options.page = 1; // Reset on first page
                 needsReload = true;
             }
 
@@ -389,7 +436,7 @@ export default {
         },
 
         // === VALIDATION METHODS ===
-
+        
         /**
          * Getting validation rules for a field
          * @param {string} field - Field name
@@ -398,7 +445,7 @@ export default {
         getFieldRules(field) {
             switch (field) {
                 case 'id':
-                    return [];
+                    return []; // ID not eddit
                 case 'firstname':
                     return [value => !!value || 'Vorname ist erforderlich'];
                 case 'lastname':
@@ -422,7 +469,7 @@ export default {
         },
 
         // === MODAL WINDOW METHODS ===
-
+        
         /**
          * Display confirmation modal
          * @param {string} heading - Header
@@ -448,11 +495,11 @@ export default {
             this.isAlertVisible = false;
         },
 
-        // === DELETION METHODS ===
-
+        // ===DELETION METHODS ===
+        
         /**
-         * Confirm deletion of one customer
-         * @param {string} id - Customer ID
+         * Confirm deletion of one client
+         * @param {number} id - client ID
          */
         confirmDeleteCustomer(id) {
             this.customerToDelete = id;
@@ -465,7 +512,7 @@ export default {
         },
 
         /**
-         * Confirm deletion of selected customers
+         * Confirm deletion of selected clients
          */
         confirmDeleteSelectedCustomers() {
             if (this.selectedCustomers.length > 0) {
@@ -487,13 +534,13 @@ export default {
         },
 
         /**
-         * Deleting one customer
+         * Deleting one client
          */
         async deleteCustomer() {
             if (this.customerToDelete) {
                 try {
                     await axios.delete(`/api/customers/${this.customerToDelete}`);
-                    console.log('Customer deleted successfully:', this.customerToDelete);
+                    console.log('The client has been successfully deleted:', this.customerToDelete);
 
                     // Check if the elements remained on the current page after deletion
                     const isLastItemOnPage = this.customers.length === 1;
@@ -511,18 +558,18 @@ export default {
                         await this.loadItems();
                     }
 
-                    // Remove the deleted customer from the selected ones
+                    // Remove the remote client from the selected ones
                     this.selectedCustomers = this.selectedCustomers.filter(id => id !== this.customerToDelete);
                     this.customerToDelete = null;
                 } catch (error) {
-                    console.error('Error when deleting a customer:', error.response?.data || error.message);
-                    this.$emit('show-error', 'Error when deleting a customer');
+                    console.error('Error when deleting a client:', error.response?.data || error.message);
+                    this.$emit('show-error', 'Error when deleting a client');
                 }
             }
         },
 
         /**
-         * Deleting multiple customers
+         * Deleting multiple clients
          */
         async deleteCustomers() {
             if (this.selectedCustomers.length > 0) {
@@ -550,29 +597,29 @@ export default {
                     this.selectedCustomers = [];
                     this.$emit('customersDeleted');
                 } catch (error) {
-                    console.error('Error when deleting customers:', error);
-                    this.$emit('show-error', 'Error when deleting customers');
+                    console.error('Error when deleting clients:', error);
+                    this.$emit('show-error', 'Error when deleting clients');
                 }
             }
         },
 
         // === EDITING METHODS ===
-
+        
         /**
-         * Customer edit confirmation
+         * Client edit confirmation
          */
         async confirmEditCustomer() {
             try {
                 // Prepare data to be sent
                 const formattedData = {
-                    id: this.editCustomer.id,
                     firstname: this.editCustomer.firstname,
                     lastname: this.editCustomer.lastname,
                     email: this.editCustomer.email,
                     phonenumber: this.editCustomer.phonenumber,
                     addressline: this.editCustomer.addressline,
                     postalcode: this.editCustomer.postalcode,
-                    city: this.editCustomer.city
+                    city: this.editCustomer.city,
+                    company: this.editCustomer.company
                 };
 
                 await axios.put(`/api/customers/${this.editCustomerId}`, formattedData);
@@ -585,13 +632,13 @@ export default {
                     await this.loadItems();
                 }
             } catch (error) {
-                console.error('Error when saving a customer:', error.response?.data || error.message);
-                this.$emit('show-error', 'Error when saving a customer');
+                console.error('Error when saving a client:', error.response?.data || error.message);
+                this.$emit('show-error', 'Error when saving a client');
             }
         },
 
         /**
-         * Start editing customer
+         * Start editing client
          * @param {Object} customer - Customer object
          */
         editCustomerDetails(customer) {
@@ -600,7 +647,7 @@ export default {
         },
 
         /**
-         * Saving the customer (confirmation call)
+         * Saving the client (confirmation call)
          */
         async saveCustomer() {
             try {
@@ -626,8 +673,8 @@ export default {
                     await this.loadItems();
                 }
             } catch (error) {
-                console.error('Error when saving a customer:', error.response?.data || error.message);
-                this.$emit('show-error', 'Error when saving a customer');
+                console.error('Error when saving a client:', error.response?.data || error.message);
+                this.$emit('show-error', 'Error when saving a client');
             }
         },
 
@@ -640,10 +687,10 @@ export default {
             this.fieldErrors = {};
         },
 
-        // === DATA LOADING METHODS ===
-
+        // === DATA DOWNLOAD METHODS ===
+        
         /**
-         * Loading items from the server
+         * Downloading items from the server
          */
         async loadItems() {
             this.loading = true;
@@ -657,11 +704,11 @@ export default {
                 // Add sorting parameters
                 if (this.options.sortBy && this.options.sortBy.length > 0) {
                     params.sortBy = this.options.sortBy[0].key;
-                    params.sortDesc = this.options.sortBy?.[0]?.order === 'desc';
+                    params.sortDesc = this.options.sortBy[0].order === 'desc';
                 } else {
-                    // Default sorting: newest first
+                    // Default sorting: new first
                     params.sortBy = 'id';
-                    params.sortDesc = true;
+                    params.sortDesc = false;
                 }
 
                 console.log('Request parameters:', params);

@@ -3,7 +3,7 @@
         <!-- Header with control buttons -->
         <div class="header">
             <!-- Data Update Button -->
-            <RefreshButton class="refresh-button" @refresh="loadItems"></RefreshButton>
+            <RefreshButton class="refresh-button" @refresh="loadItems" :loading="isRefreshing"></RefreshButton>
             <div class="spacer"></div>
 
             <!-- Button group for vehicle operations -->
@@ -41,6 +41,8 @@
                     :page="options.page"
                     :sort-by="options.sortBy"
                     :multi-sort="false"
+                    :must-sort="false"
+                    return-object
                     hide-default-footer>
 
                     <!-- Template for each row of the table -->
@@ -164,6 +166,7 @@ export default {
     data() {
         return {
             // Basic data
+            isRefreshing: false,
             cars: [],                        // List of vehicles
             selectedCars: [],               // Selected vehicles for mass operations
             carToDelete: null,              // Vehicle ID for deletion
@@ -683,7 +686,7 @@ export default {
                 // Add sorting parameters
                 if (this.options.sortBy && this.options.sortBy.length > 0) {
                     params.sortBy = this.options.sortBy[0].key;
-                    params.sortDesc = this.options.sortBy?.[0]?.order === 'acs';
+                    params.sortDesc = this.options.sortBy?.[0]?.order === 'asc';
                 } else {
                     // Default sorting: newest first
                     params.sortBy = 'Kennzeichen';

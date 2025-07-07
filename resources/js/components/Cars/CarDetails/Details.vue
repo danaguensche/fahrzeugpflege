@@ -9,7 +9,14 @@
             <v-card class="card">
                 <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon"></Header>
 
-                <ImageCarousel :images="images"></ImageCarousel>
+                <!-- Image Carousel with Upload functionality -->
+                <ImageCarousel 
+                    :images="images" 
+                    :editMode="editMode"
+                    @upload-image="openImageUploadDialog"
+                    @delete-image="handleImageDelete"
+                    @replace-image="handleImageReplace">
+                </ImageCarousel>
 
                 <!-- Fahrzeug information -->
                 <v-card-text class="px-4 pt-4 pb-0">
@@ -72,6 +79,151 @@
         <CustomerAddDialog ref="customerAddDialog" @customer-added="handleCustomerAdded"
             @customer-selected="handleCustomerSelected" @error="handleCustomerAddError">
         </CustomerAddDialog>
+
+        <!-- Image Upload Dialog -->
+        <v-dialog v-model="imageUploadDialog.show" max-width="700px" persistent>
+            <v-card>
+                <v-card-title class="d-flex align-center">
+                    <v-icon left>mdi-upload</v-icon>
+                    <span class="headline">Bild hochladen</span>
+                </v-card-title>
+
+                <v-card-text>
+                    <v-container>
+                        <v-row>
+                            <!-- Drag & Drop Zone -->
+                            <v-col cols="12">
+                                <div
+                                    class="drag-drop-zone"
+                                    :class="{ 'drag-over': imageUploadDialog.isDragOver, 'disabled': imageUploadDialog.uploading }"
+                                    @dragover.prevent="handleDragOver"
+                                    @dragleave.prevent="handleDragLeave"
+                                    @drop.prevent="handleDrop"
+                                    @click="triggerFileInput"
+                                >
+                                    <input
+                                        ref="fileInput"
+                                        type="file"
+                                        accept="image/*"
+                                        style="display: none;"
+                                        @change="handleFileSelect"
+                                    />
+
+                                    <div class="drag-drop-content">
+                                        <v-icon size="48" :color="imageUploadDialog.isDragOver ? 'primary' : 'grey lighten-1'">
+                                            {{ imageUploadDialog.isDragOver ? 'mdi-cloud-upload' : 'mdi-cloud-upload-outline' }}
+                                        </v-icon>
+                                        
+                                        <h3 class="mt-4 mb-2">
+                                            {{ imageUploadDialog.isDragOver ? 'Dateien hier ablegen' : 'Bilder hochladen' }}
+                                        </h3>
+                                        
+                                        <p class="grey--text">
+                                            Ziehen Sie Bilder hierher oder klicken Sie zum Auswählen
+                                        </p>
+                                    </div>
+
+                                    <!-- Loading Overlay -->
+                                    <v-overlay v-if="imageUploadDialog.uploading" absolute>
+                                        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+                                    </v-overlay>
+                                </div>
+                            </v-col>
+
+                            <!-- File Input Alternative -->
+                            <v-col cols="12">
+                                <v-file-input
+                                    v-model="imageUploadDialog.selectedFile"
+                                    accept="image/*"
+                                    label="Bild auswählen"
+                                    prepend-icon="mdi-camera"
+                                    show-size
+                                    @change="handleFileChange"
+                                    :rules="fileRules"
+                                    outlined
+                                    class="mt-4"
+                                ></v-file-input>
+                            </v-col>
+
+                            <!-- Image Preview -->
+                            <v-col cols="12" v-if="imageUploadDialog.imagePreview">
+                                <v-card outlined>
+                                    <v-card-subtitle class="d-flex align-center">
+                                        <v-icon left small>mdi-eye</v-icon>
+                                        Vorschau:
+                                    </v-card-subtitle>
+                                    <v-img
+                                        :src="imageUploadDialog.imagePreview"
+                                        max-height="300"
+                                        contain
+                                        class="ma-2"
+                                    ></v-img>
+                                    
+                                    <!-- Image Info -->
+                                    <v-card-text v-if="imageUploadDialog.selectedFile" class="pt-0">
+                                        <v-chip small color="primary" outlined class="mr-2">
+                                            {{ formatFileSize(imageUploadDialog.selectedFile.size) }}
+                                        </v-chip>
+                                        <v-chip small color="grey" outlined>
+                                            {{ imageUploadDialog.selectedFile.name }}
+                                        </v-chip>
+                                    </v-card-text>
+                                </v-card>
+                            </v-col>
+
+                            <!-- Upload Progress -->
+                            <v-col cols="12" v-if="imageUploadDialog.uploading">
+                                <v-progress-linear
+                                    :value="imageUploadDialog.uploadProgress"
+                                    color="primary"
+                                    height="25"
+                                    rounded
+                                >
+                                    <template v-slot:default="{ value }">
+                                        <strong>{{ Math.ceil(value) }}%</strong>
+                                    </template>
+                                </v-progress-linear>
+                                <p class="text-center mt-2 grey--text">
+                                    Bild wird hochgeladen...
+                                </p>
+                            </v-col>
+
+                            <!-- Error Message -->
+                            <v-col cols="12" v-if="imageUploadDialog.errorMessage">
+                                <v-alert
+                                    type="error"
+                                    dismissible
+                                    @input="imageUploadDialog.errorMessage = ''"
+                                >
+                                    {{ imageUploadDialog.errorMessage }}
+                                </v-alert>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                </v-card-text>
+
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        color="grey darken-1"
+                        text
+                        @click="closeImageUploadDialog"
+                        :disabled="imageUploadDialog.uploading"
+                    >
+                        Abbrechen
+                    </v-btn>
+                    <v-btn
+                        color="primary"
+                        @click="uploadImage"
+                        :disabled="!imageUploadDialog.selectedFile || imageUploadDialog.uploading"
+                        :loading="imageUploadDialog.uploading"
+                    >
+                        <v-icon left>mdi-upload</v-icon>
+                        Hochladen
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
 
         <!-- Snackbar für Benachrichtigungen -->
         <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false">
@@ -150,11 +302,25 @@ export default {
             error: null,
             editMode: false,
             saveLoading: false,
+            imageUploadLoading: false,
             snackbar: {
                 show: false,
                 text: '',
                 color: 'success',
             },
+            // Image upload dialog data
+            imageUploadDialog: {
+                show: false,
+                selectedFile: null,
+                imagePreview: null,
+                uploading: false,
+                uploadProgress: 0,
+                errorMessage: '',
+                isDragOver: false,
+                dragCounter: 0,
+                maxFileSize: 10000000, // 10MB
+                acceptedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+            }
         };
     },
     computed: {
@@ -163,22 +329,56 @@ export default {
         },
         images() {
             const img = this.carDetails.data?.images;
-            console.log("images", img);
+            console.log("Raw images data:", img);
+            
             if (!img) {
                 return [];
             }
 
             if (Array.isArray(img)) {
-                return img.filter(Boolean);
+                return img.filter(Boolean).map(image => {
+                    // Обеспечиваем корректную структуру данных изображения
+                    if (typeof image === 'string') {
+                        return {
+                            id: null,
+                            path: image,
+                            url: image
+                        };
+                    }
+                    return {
+                        id: image.id,
+                        path: image.path,
+                        url: image.url || `/storage/${image.path}`
+                    };
+                });
             }
 
-            return img ? [img] : [];
+            // Если img не массив, но есть данные
+            if (typeof img === 'string') {
+                return [{
+                    id: null,
+                    path: img,
+                    url: img
+                }];
+            }
+
+            return img ? [{
+                id: img.id,
+                path: img.path,
+                url: img.url || `/storage/${img.path}`
+            }] : [];
         },
         formattedCreatedAt() {
             return this.formatDate(this.carDetails.data?.created_at);
         },
         formattedUpdatedAt() {
             return this.formatDate(this.carDetails.data?.updated_at);
+        },
+        fileRules() {
+            return [
+                value => !value || value.size < this.imageUploadDialog.maxFileSize || `Bild darf nicht größer als ${this.formatFileSize(this.imageUploadDialog.maxFileSize)} sein`,
+                value => !value || this.imageUploadDialog.acceptedTypes.includes(value.type) || `Nur Bilder im Format ${this.imageUploadDialog.acceptedTypes.map(t => t.split('/')[1].toUpperCase()).join(', ')} sind erlaubt`
+            ];
         }
     },
     async mounted() {
@@ -340,88 +540,341 @@ export default {
 
         handleCustomerAddError(errorMessage) {
             this.showSnackbar(errorMessage, 'error');
+        },
+
+        // Image Upload Dialog Methods
+        openImageUploadDialog() {
+            this.imageUploadDialog.show = true;
+            this.resetImageUploadForm();
+        },
+
+        closeImageUploadDialog() {
+            this.imageUploadDialog.show = false;
+            this.resetImageUploadForm();
+        },
+
+        resetImageUploadForm() {
+            this.imageUploadDialog.selectedFile = null;
+            this.imageUploadDialog.imagePreview = null;
+            this.imageUploadDialog.uploading = false;
+            this.imageUploadDialog.uploadProgress = 0;
+            this.imageUploadDialog.errorMessage = '';
+            this.imageUploadDialog.isDragOver = false;
+            this.imageUploadDialog.dragCounter = 0;
+        },
+
+        // Drag & Drop handlers
+        handleDragOver(e) {
+            if (this.imageUploadDialog.uploading) return;
+            e.preventDefault();
+            this.imageUploadDialog.dragCounter++;
+            this.imageUploadDialog.isDragOver = true;
+        },
+
+        handleDragLeave(e) {
+            if (this.imageUploadDialog.uploading) return;
+            e.preventDefault();
+            this.imageUploadDialog.dragCounter--;
+            if (this.imageUploadDialog.dragCounter === 0) {
+                this.imageUploadDialog.isDragOver = false;
+            }
+        },
+
+        handleDrop(e) {
+            if (this.imageUploadDialog.uploading) return;
+            e.preventDefault();
+            this.imageUploadDialog.isDragOver = false;
+            this.imageUploadDialog.dragCounter = 0;
+
+            const files = Array.from(e.dataTransfer.files);
+            if (files.length > 0) {
+                this.handleFileChange(files[0]);
+            }
+        },
+
+        triggerFileInput() {
+            if (this.imageUploadDialog.uploading) return;
+            this.$refs.fileInput.click();
+        },
+
+        handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                this.handleFileChange(files[0]);
+            }
+            // Reset input
+            e.target.value = '';
+        },
+
+        // File validation and processing
+        handleFileChange(file) {
+            if (!file) {
+                this.imageUploadDialog.selectedFile = null;
+                this.imageUploadDialog.imagePreview = null;
+                return;
+            }
+
+            // Validate file
+            const validation = this.validateFile(file);
+            if (!validation.valid) {
+                this.handleImageUploadError(validation.message);
+                this.imageUploadDialog.selectedFile = null;
+                this.imageUploadDialog.imagePreview = null;
+                return;
+            }
+
+            this.imageUploadDialog.selectedFile = file;
+            this.imageUploadDialog.errorMessage = '';
+            this.createImagePreview(file);
+        },
+
+        validateFile(file) {
+            if (file.size > this.imageUploadDialog.maxFileSize) {
+                return {
+                    valid: false,
+                    message: `Bild darf nicht größer als ${this.formatFileSize(this.imageUploadDialog.maxFileSize)} sein`
+                };
+            }
+
+            if (!this.imageUploadDialog.acceptedTypes.includes(file.type)) {
+                return {
+                    valid: false,
+                    message: `Nur Bilder im Format ${this.imageUploadDialog.acceptedTypes.map(t => t.split('/')[1].toUpperCase()).join(', ')} sind erlaubt`
+                };
+            }
+
+            return { valid: true };
+        },
+
+        createImagePreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.imageUploadDialog.imagePreview = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        },
+
+        // Upload functionality
+        async uploadImage() {
+            if (!this.imageUploadDialog.selectedFile) {
+                this.handleImageUploadError('Bitte wählen Sie ein Bild aus');
+                return;
+            }
+
+            this.imageUploadDialog.uploading = true;
+            this.imageUploadDialog.uploadProgress = 0;
+            this.imageUploadDialog.errorMessage = '';
+
+            const formData = new FormData();
+            formData.append('images[]', this.imageUploadDialog.selectedFile);
+
+            try {
+                const response = await axios.post(
+                    `/api/cars/cardetails/${this.$route.params.kennzeichen}/images`,
+                    formData,
+                    {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                        onUploadProgress: progressEvent => {
+                            if (progressEvent.lengthComputable) {
+                                this.imageUploadDialog.uploadProgress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                            }
+                        }
+                    }
+                );
+
+                // Refresh car details to get updated images
+                await this.getCar();
+                this.imageUploadDialog.uploadProgress = 100;
+                this.showSnackbar('Bild erfolgreich hochgeladen', 'success');
+                setTimeout(() => this.closeImageUploadDialog(), 500);
+
+            } catch (error) {
+                const errorMessage = error.response?.data?.message || 'Fehler beim Hochladen des Bildes';
+                this.handleImageUploadError(errorMessage);
+            } finally {
+                this.imageUploadDialog.uploading = false;
+            }
+        },
+
+        handleImageUploadError(message) {
+            this.imageUploadDialog.errorMessage = message;
+            this.showSnackbar(message, 'error');
+        },
+
+        handleImageDelete(index) {
+            try {
+                console.log('Attempting to delete image at index:', index);
+                console.log('Image data:', this.images[index]);
+                
+                const image = this.images[index];
+                
+                if (image && image.id) {
+                    this.deleteImageFromServer(image.id, index);
+                } else {
+                    this.images.splice(index, 1);
+                    console.log('Image removed from local array (no ID)');
+                    
+                    if (this.$toast) {
+                        this.$toast.success('Bild erfolgreich entfernt');
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error deleting image:', error);
+                if (this.$toast) {
+                    this.$toast.error('Fehler beim Löschen des Bildes');
+                }
+            }
+        },
+
+        async deleteImageFromServer(imageId, index) {
+            try {
+                this.loading = true;
+                
+                // send DELETE query
+                const response = await fetch(`/api/images/${imageId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // add CSRF token
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                    }
+                });
+                
+                if (response.ok) {
+                    // delete image from local array 
+                    this.images.splice(index, 1);
+                    console.log('Image deleted successfully from server');
+                    
+                    if (this.$toast) {
+                        this.$toast.success('Bild erfolgreich gelöscht');
+                    }
+                } else {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.error('Error deleting image from server:', error);
+                if (this.$toast) {
+                    this.$toast.error('Fehler beim Löschen des Bildes vom Server');
+                }
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async handleImageReplace(imageIndex, newImageFile) {
+            this.imageUploadLoading = true;
+            try {
+                // Get image by index
+                const image = this.images[imageIndex];
+                if (!image) {
+                    throw new Error('Bild nicht gefunden');
+                }
+
+                //Get image ID
+                const imageId = image.id;
+                if (!imageId) {
+                    throw new Error('Bild-ID nicht gefunden');
+                }
+
+                console.log('Replacing image with ID:', imageId);
+
+                const formData = new FormData();
+                formData.append('image', newImageFile);
+
+                await axios.post(
+                    `/api/cars/${this.$route.params.kennzeichen}/images/${imageId}`,
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                );
+
+                // Refresh car details to get updated images
+                await this.getCar();
+                this.showSnackbar('Bild erfolgreich ersetzt', 'success');
+            } catch (error) {
+                console.error('Error replacing image:', error);
+                const errorMessage = error.response?.data?.error || error.message || 'Fehler beim Ersetzen des Bildes';
+                this.showSnackbar(errorMessage, 'error');
+            } finally {
+                this.imageUploadLoading = false;
+            }
+        },
+
+        // Utility methods
+        formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
-    }
+    },
 };
 </script>
 
 <style scoped>
-.card-container {
-    width: 100%;
-    height: calc(100vh - 40px);
-    padding: 20px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-}
-
-.card {
-    background-color: #ffffff;
+/* Drag & Drop Zone */
+.drag-drop-zone {
+    border: 2px dashed #ccc;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
     transition: all 0.3s ease;
-    flex: 1;
+    background-color: #fafafa;
+    position: relative;
+    min-height: 200px;
     display: flex;
-    flex-direction: column;
-    overflow-y: auto;
+    align-items: center;
+    justify-content: center;
 }
 
-@media (max-width: 575.98px) {
-    .card-container {
-        padding: 10px;
-        height: calc(100vh - 20px);
-
-    }
-
-    .card {
-        font-size: 14px;
-    }
+.drag-drop-zone:hover:not(.disabled) {
+    border-color: #1976d2;
+    background-color: #f3f8ff;
 }
 
-@media (min-width: 576px) and (max-width: 767.98px) {
-    .card-container {
-        padding: 15px;
-        height: calc(100vh - 30px);
-    }
+.drag-drop-zone.drag-over {
+    border-color: #1976d2;
+    background-color: #e3f2fd;
+    transform: scale(1.02);
 }
 
-@media (min-width: 768px) and (max-width: 991.98px) {
-    .card-container {
-        max-width: calc(100% - 80px);
-    }
+.drag-drop-zone.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f5f5f5;
 }
 
-@media (min-width: 992px) and (max-width: 1199.98px) {
-    .card-container {
-        max-width: calc(100% - 250px);
-    }
+.drag-drop-content {
+    width: 100%;
 }
 
-@media (min-width: 1200px) {
-    .card-container {
-        max-width: calc(100% - 280px);
-    }
+.drag-drop-content h3 {
+    font-weight: 500;
+    color: #424242;
 }
 
-.v-card-text {
-    flex: 1;
-    overflow-y: auto;
+.drag-drop-content p {
+    font-size: 14px;
+    margin-bottom: 0;
 }
 
-@media (max-width: 767.98px) {
-    .v-card-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
+/* General styling */
+.v-file-input {
+    margin-bottom: 16px;
+}
 
-    .v-card-actions button {
-        margin-bottom: 8px;
-        width: 100%;
-    }
+.v-img {
+    border-radius: 8px;
+}
 
-    .v-spacer {
-        display: none;
-    }
+.v-alert {
+    margin-top: 16px;
 }
 </style>
