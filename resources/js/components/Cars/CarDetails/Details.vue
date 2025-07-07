@@ -347,43 +347,28 @@ export default {
         images() {
             const img = this.carDetails.data?.images;
             console.log("Raw images data:", img);
-            
+
             if (!img) {
                 return [];
             }
 
-            if (Array.isArray(img)) {
-                return img.filter(Boolean).map(image => {
-                    // Ensure correct image data structure
-                    if (typeof image === 'string') {
-                        return {
-                            id: null,
-                            path: image,
-                            url: image
-                        };
-                    }
+            const mapImage = (image) => {
+                if (image && image.id) {
                     return {
                         id: image.id,
-                        path: image.path,
-                        url: image.url || `/storage/${image.path}`
+                        path: image.path, // Keep path for consistency if needed
+                        url: image.url
                     };
-                });
+                }
+                return null;
+            };
+
+            if (Array.isArray(img)) {
+                return img.filter(Boolean).map(mapImage).filter(Boolean);
             }
 
-            // If img is not an array, but has data
-            if (typeof img === 'string') {
-                return [{
-                    id: null,
-                    path: img,
-                    url: img
-                }];
-            }
-
-            return img ? [{
-                id: img.id,
-                path: img.path,
-                url: img.url || `/storage/${img.path}`
-            }] : [];
+            const singleImage = mapImage(img);
+            return singleImage ? [singleImage] : [];
         },
         formattedCreatedAt() {
             return this.formatDate(this.carDetails.data?.created_at);
@@ -742,63 +727,41 @@ export default {
             this.showSnackbar(message, 'error');
         },
 
-        handleImageDelete(index) {
+        handleImageDelete(imageId) {
             try {
-                console.log('Attempting to delete image at index:', index);
-                console.log('Image data:', this.images[index]);
-                
-                const image = this.images[index];
-                
-                if (image && image.id) {
-                    this.deleteImageFromServer(image.id, index);
+                console.log('Attempting to delete image with ID:', imageId);
+                if (imageId) {
+                    this.deleteImageFromServer(imageId);
                 } else {
-                    this.images.splice(index, 1);
-                    console.log('Image removed from local array (no ID)');
-                    
-                    if (this.$toast) {
-                        this.$toast.success('Bild erfolgreich entfernt');
-                    }
+                    console.error('Image ID is missing, cannot delete from server.');
+                    this.showSnackbar('Fehler: Bild-ID fehlt.', 'error');
                 }
-                
             } catch (error) {
-                console.error('Error deleting image:', error);
-                if (this.$toast) {
-                    this.$toast.error('Fehler beim Löschen des Bildes');
-                }
+                console.error('Error in handleImageDelete:', error);
+                this.showSnackbar('Fehler beim Löschen des Bildes', 'error');
             }
         },
 
-        async deleteImageFromServer(imageId, index) {
+        async deleteImageFromServer(imageId) {
             try {
                 this.loading = true;
-                
-                // send DELETE query
                 const response = await fetch(`/api/images/${imageId}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
-                        // add CSRF token
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
                     }
                 });
-                
+
                 if (response.ok) {
-                    // delete image from local array 
-                    this.images.splice(index, 1);
-                    console.log('Image deleted successfully from server');
-                    
-                    if (this.$toast) {
-                        this.$toast.success('Bild erfolgreich gelöscht');
-                    }
+                    await this.getCar(); // Refresh car details to update images
+                    this.showSnackbar('Bild erfolgreich gelöscht', 'success');
                 } else {
                     throw new Error(`Server responded with status: ${response.status}`);
                 }
-                
             } catch (error) {
                 console.error('Error deleting image from server:', error);
-                if (this.$toast) {
-                    this.$toast.error('Fehler beim Löschen des Bildes vom Server');
-                }
+                this.showSnackbar('Fehler beim Löschen des Bildes vom Server', 'error');
             } finally {
                 this.loading = false;
             }
