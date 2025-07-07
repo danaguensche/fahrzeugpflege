@@ -12,6 +12,8 @@ use App\Http\Controllers\CarSearchController;
 
 
 // Auth Routes
+Route::post('/forgot-password', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::post('/reset-password', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
 Route::middleware('auth:sanctum')->get('/users/me', [UserController::class, 'me']);
 Route::put('/users/me', [UserController::class, 'update']);
 

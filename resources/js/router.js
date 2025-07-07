@@ -13,6 +13,8 @@ import WelcomePage from './components/pages/WelcomePage.vue';
 import CustomerPage from './components/pages/CustomerPage.vue';
 import CarDetailsPage from './components/pages/CarDetailsPage.vue';
 import CustomerDetailsPage from './components/pages/CustomerDetailsPage.vue';
+import ForgotPassword from './components/Auth/ForgotPassword.vue';
+import ResetPassword from './components/Auth/ResetPassword.vue';
 
 const routes = [
     {
@@ -71,6 +73,14 @@ const routes = [
     {
         path: '/',
         component: WelcomePage
+    },
+    {
+        path: '/forgot-password',
+        component: ForgotPassword
+    },
+    {
+        path: '/reset-password/:token',
+        component: ResetPassword
     }
 ];
 

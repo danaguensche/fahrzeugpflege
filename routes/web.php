@@ -21,6 +21,9 @@ Route::controller(PageController::class)->group(function () {
     Route::get('/', 'login')->name('login');
     Route::get('/login', 'login')->name('login');
     Route::get('/signup', 'signup')->name('signup');
+    Route::get('/reset-password/{token}', function () {
+        return view('welcome'); // Or your main app view
+    })->name('password.reset');
 });
 
 // Auth Routes
