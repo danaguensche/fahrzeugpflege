@@ -21,9 +21,10 @@ Route::apiResource('cars', CarController::class)->parameters(['cars' => 'kennzei
 Route::get('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'details']);
 Route::delete('cars', [CarController::class, 'destroyMultiple']);
 Route::put('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'update']);
-// Image Upload
-Route::post('/cars/cardetails/{kennzeichen}/images', [CarController::class, 'uploadImages']);
-Route::put('/cars/cardetails/{kennzeichen}/images', [CarController::class, 'uploadImages']);
+// Image management routes
+Route::post('cars/cardetails/{kennzeichen}/images', [CarController::class, 'uploadImages']);
+Route::delete('cars/cardetails/{kennzeichen}/images/{imageId}', [CarController::class, 'deleteImage']);
+Route::post('cars/cardetails/{kennzeichen}/images/{imageId}', [CarController::class, 'replaceImage']);
 
 
 // Customers Routes

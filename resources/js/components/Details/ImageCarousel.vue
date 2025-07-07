@@ -166,9 +166,18 @@
                         label="Neues Bild auswählen"
                         prepend-icon="mdi-camera"
                         show-size
-                        @change="handleReplaceFileChange"
                         :rules="fileRules"
+                        clearable
+                        @change="onReplaceFileChange"
+                        ref="fileInput"
                     ></v-file-input>
+
+                    <!-- Debug info -->
+                    <div v-if="replaceFile" class="mt-2">
+                        <small class="text--secondary">
+                            Ausgewählte Datei: {{ replaceFile.name }} ({{ Math.round(replaceFile.size / 1024) }} KB)
+                        </small>
+                    </div>
 
                     <!-- Preview of new image -->
                     <v-img
@@ -276,28 +285,38 @@ export default {
     },
     methods: {
         getImageUrl(image) {
+            console.log('Getting image URL for:', image);
+            
             // Handle different image formats
             if (typeof image === 'string') {
                 // If it's already a URL, return as is
                 if (image.startsWith('http') || image.startsWith('data:')) {
                     return image;
                 }
-                // If it's a relative path, prepend base URL
-                return `/api/images/${image}`;
+                // If it's a relative path, prepend storage URL
+                return `/storage/${image}`;
             }
             
-            // Handle image objects
+            // Handle image objects with URL (priority)
             if (image && image.url) {
                 return image.url;
             }
             
             // Handle image objects with path
             if (image && image.path) {
-                return `/api/images/${image.path}`;
+                // Если path уже полный URL, возвращаем как есть
+                if (image.path.startsWith('http')) {
+                    return image.path;
+                }
+                // Если path уже содержит storage, не добавляем его снова
+                if (image.path.startsWith('storage/')) {
+                    return `/${image.path}`;
+                }
+                return `/storage/${image.path}`;
             }
             
             // Fallback
-            return '/api/images/placeholder.jpg';
+            return '/storage/placeholder.jpg';
         },
 
         handleImageError(index) {
@@ -317,33 +336,66 @@ export default {
             this.replaceIndex = null;
         },
 
-        handleReplaceFileChange(file) {
-            if (file) {
-                // Validate file
+        // Исправленный метод обработки выбора файла
+        onReplaceFileChange(file) {
+            console.log('File change event triggered:', file);
+            
+            // Очистка предыдущего превью
+            this.replacePreview = null;
+            
+            if (file && file instanceof File) {
+                console.log('Valid file selected:', file.name, file.size, file.type);
+                
+                // Валидация файла
                 const isValidSize = file.size < 10000000; // 10MB
                 const isValidType = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type);
 
-                if (!isValidSize || !isValidType) {
-                    this.replaceFile = null;
-                    this.replacePreview = null;
+                if (!isValidSize) {
+                    console.error('File too large:', file.size);
+                    this.$nextTick(() => {
+                        this.replaceFile = null;
+                        this.replacePreview = null;
+                    });
                     return;
                 }
 
+                if (!isValidType) {
+                    console.error('Invalid file type:', file.type);
+                    this.$nextTick(() => {
+                        this.replaceFile = null;
+                        this.replacePreview = null;
+                    });
+                    return;
+                }
+
+                // Создаем превью
                 this.createReplacePreview(file);
             } else {
+                console.log('No file selected or invalid file');
                 this.replacePreview = null;
             }
         },
 
         createReplacePreview(file) {
+            console.log('Creating preview for:', file.name);
             const reader = new FileReader();
             reader.onload = (e) => {
+                console.log('Preview created successfully');
                 this.replacePreview = e.target.result;
+            };
+            reader.onerror = (e) => {
+                console.error('Error creating preview:', e);
             };
             reader.readAsDataURL(file);
         },
 
         replaceImage() {
+            console.log('Replace image called with:', {
+                file: this.replaceFile,
+                index: this.replaceIndex,
+                image: this.images[this.replaceIndex]
+            });
+            
             if (this.replaceFile && this.replaceIndex !== null) {
                 this.$emit('replace-image', this.replaceIndex, this.replaceFile);
                 this.closeReplaceDialog();
@@ -356,10 +408,21 @@ export default {
         },
 
         deleteImage() {
+            console.log('Delete image called with:', {
+                index: this.deleteIndex,
+                image: this.images[this.deleteIndex]
+            });
+            
             if (this.deleteIndex !== null) {
+                // Эмитим событие для удаления изображения
                 this.$emit('delete-image', this.deleteIndex);
+                
+                // Закрываем диалог
                 this.deleteDialog = false;
                 this.deleteIndex = null;
+                
+                // Сбрасываем выбранное действие
+                this.selectedAction = null;
             }
         }
     }

@@ -329,16 +329,44 @@ export default {
         },
         images() {
             const img = this.carDetails.data?.images;
-            console.log("images", img);
+            console.log("Raw images data:", img);
+            
             if (!img) {
                 return [];
             }
 
             if (Array.isArray(img)) {
-                return img.filter(Boolean);
+                return img.filter(Boolean).map(image => {
+                    // Обеспечиваем корректную структуру данных изображения
+                    if (typeof image === 'string') {
+                        return {
+                            id: null,
+                            path: image,
+                            url: image
+                        };
+                    }
+                    return {
+                        id: image.id,
+                        path: image.path,
+                        url: image.url || `/storage/${image.path}`
+                    };
+                });
             }
 
-            return img ? [img] : [];
+            // Если img не массив, но есть данные
+            if (typeof img === 'string') {
+                return [{
+                    id: null,
+                    path: img,
+                    url: img
+                }];
+            }
+
+            return img ? [{
+                id: img.id,
+                path: img.path,
+                url: img.url || `/storage/${img.path}`
+            }] : [];
         },
         formattedCreatedAt() {
             return this.formatDate(this.carDetails.data?.created_at);
@@ -641,7 +669,7 @@ export default {
             formData.append('images[]', this.imageUploadDialog.selectedFile);
 
             try {
-                const response = await axios.put(
+                const response = await axios.post(
                     `/api/cars/cardetails/${this.$route.params.kennzeichen}/images`,
                     formData,
                     {
@@ -673,31 +701,90 @@ export default {
             this.showSnackbar(message, 'error');
         },
 
-        async handleImageDelete(imageIndex) {
-            if (confirm('Sind Sie sicher, dass Sie dieses Bild löschen möchten?')) {
-                try {
-                    await axios.delete(
-                        `/api/cars/cardetails/${this.$route.params.kennzeichen}/images/${imageIndex}`
-                    );
-
-                    // Refresh car details to get updated images
-                    await this.getCar();
-                    this.showSnackbar('Bild erfolgreich gelöscht', 'success');
-                } catch (error) {
-                    const errorMessage = error.response?.data?.message || 'Fehler beim Löschen des Bildes';
-                    this.showSnackbar(errorMessage, 'error');
+        handleImageDelete(index) {
+            try {
+                console.log('Attempting to delete image at index:', index);
+                console.log('Image data:', this.images[index]);
+                
+                const image = this.images[index];
+                
+                if (image && image.id) {
+                    this.deleteImageFromServer(image.id, index);
+                } else {
+                    this.images.splice(index, 1);
+                    console.log('Image removed from local array (no ID)');
+                    
+                    if (this.$toast) {
+                        this.$toast.success('Bild erfolgreich entfernt');
+                    }
                 }
+                
+            } catch (error) {
+                console.error('Error deleting image:', error);
+                if (this.$toast) {
+                    this.$toast.error('Fehler beim Löschen des Bildes');
+                }
+            }
+        },
+
+        async deleteImageFromServer(imageId, index) {
+            try {
+                this.loading = true;
+                
+                // send DELETE query
+                const response = await fetch(`/api/images/${imageId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // add CSRF token
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                    }
+                });
+                
+                if (response.ok) {
+                    // delete image from local array 
+                    this.images.splice(index, 1);
+                    console.log('Image deleted successfully from server');
+                    
+                    if (this.$toast) {
+                        this.$toast.success('Bild erfolgreich gelöscht');
+                    }
+                } else {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.error('Error deleting image from server:', error);
+                if (this.$toast) {
+                    this.$toast.error('Fehler beim Löschen des Bildes vom Server');
+                }
+            } finally {
+                this.loading = false;
             }
         },
 
         async handleImageReplace(imageIndex, newImageFile) {
             this.imageUploadLoading = true;
             try {
+                // Get image by index
+                const image = this.images[imageIndex];
+                if (!image) {
+                    throw new Error('Bild nicht gefunden');
+                }
+
+                //Get image ID
+                const imageId = image.id;
+                if (!imageId) {
+                    throw new Error('Bild-ID nicht gefunden');
+                }
+
+                console.log('Replacing image with ID:', imageId);
+
                 const formData = new FormData();
                 formData.append('image', newImageFile);
 
-                await axios.put(
-                    `/api/cars/cardetails/${this.$route.params.kennzeichen}/images/${imageIndex}`,
+                await axios.post(
+                    `/api/cars/${this.$route.params.kennzeichen}/images/${imageId}`,
                     formData,
                     {
                         headers: {
@@ -710,7 +797,8 @@ export default {
                 await this.getCar();
                 this.showSnackbar('Bild erfolgreich ersetzt', 'success');
             } catch (error) {
-                const errorMessage = error.response?.data?.message || 'Fehler beim Ersetzen des Bildes';
+                console.error('Error replacing image:', error);
+                const errorMessage = error.response?.data?.error || error.message || 'Fehler beim Ersetzen des Bildes';
                 this.showSnackbar(errorMessage, 'error');
             } finally {
                 this.imageUploadLoading = false;
