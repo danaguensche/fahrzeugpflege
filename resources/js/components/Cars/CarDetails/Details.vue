@@ -38,9 +38,39 @@
                     <!-- Customer information -->
                     <v-sheet>
                         <DefaultHeader :title="'Kundeninformation'"></DefaultHeader>
-                        <CustomerInfoList :customer="carDetails.data.customer" :customerId="carDetails.data.customer_id"
+                        <CustomerInfoList v-if="!editMode" :customer="carDetails.data.customer" :customerId="carDetails.data.customer_id"
                             :labels="labels">
                         </CustomerInfoList>
+
+                        <v-autocomplete
+                            v-else
+                            v-model="editedCarData.customer"
+                            :items="customers"
+                            item-title="full_name"
+                            item-value="id"
+                            label="Kunde"
+                            placeholder="Kunde auswählen oder suchen"
+                            prepend-inner-icon="mdi-account"
+                            variant="outlined"
+                            density="comfortable"
+                            hide-details="auto"
+                            clearable
+                            :loading="customersLoading"
+                            :search-input.sync="customerSearch"
+                            @update:search-input="searchCustomers"
+                            return-object
+                        >
+                            <template v-slot:item="{ props, item }">
+                                <v-list-item
+                                    v-bind="props"
+                                    :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                    :subtitle="item.raw.email"
+                                ></v-list-item>
+                            </template>
+                            <template v-slot:selection="{ item }">
+                                {{ item.raw.email }}
+                            </template>
+                        </v-autocomplete>
 
                         <!-- Button wird nur angezeigt wenn noch kein Kunde eingetragen wurde -->
                         <v-btn class="mt-4" color="primary"
@@ -303,6 +333,10 @@ export default {
             editMode: false,
             saveLoading: false,
             imageUploadLoading: false,
+            customers: [],
+            customersLoading: false,
+            customerSearch: null,
+            customerSearchTimeout: null,
             snackbar: {
                 show: false,
                 text: '',
@@ -386,6 +420,7 @@ export default {
     async mounted() {
         try {
             await this.getCar();
+            await this.fetchCustomers(); 
         } catch (error) {
             this.error = error.message;
             this.showSnackbar(error.message, 'error');
@@ -426,6 +461,15 @@ export default {
 
                 this.carDetails = data;
                 this.editedCarData = { ...this.carDetails.data };
+                if (this.carDetails.data.customer) {
+                    this.editedCarData.customer = {
+                        id: this.carDetails.data.customer.id,
+                        full_name: `${this.carDetails.data.customer.firstname} ${this.carDetails.data.customer.lastname}`,
+                        email: this.carDetails.data.customer.email
+                    };
+                } else {
+                    this.editedCarData.customer = null;
+                }
             } catch (error) {
                 this.error = error.response?.data?.message || error.message;
                 this.showSnackbar("Fehler beim Laden der Fahrzeugdetails: " + this.error, 'error');
@@ -470,7 +514,9 @@ export default {
                 const dataToSubmit = { ...this.editedCarData };
                 
                 // Handle customer_id - convert empty/null values to null
-                if (dataToSubmit.customer_id === '' || dataToSubmit.customer_id === 0 || dataToSubmit.customer_id === '0') {
+                if (dataToSubmit.customer) {
+                    dataToSubmit.customer_id = dataToSubmit.customer.id;
+                } else {
                     dataToSubmit.customer_id = null;
                 }
 
@@ -816,6 +862,38 @@ export default {
             const sizes = ['Bytes', 'KB', 'MB', 'GB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        },
+
+        async fetchCustomers(query = '') {
+            this.customersLoading = true;
+            console.log('Fetching customers with query:', query);
+            try {
+                const response = await axios.get(`/api/customers/search?query=${query}`);
+                console.log('Customer API response:', response.data);
+                this.customers = response.data.data.map(customer => ({
+                    id: customer.id,
+                    firstname: customer.firstname,
+                    lastname: customer.lastname,
+                    full_name: `${customer.firstname} ${customer.lastname}`,
+                    email: customer.email
+                }));
+                console.log('Mapped customers:', this.customers);
+            } catch (error) {
+                console.error('Error fetching customers:', error.response || error);
+                this.showSnackbar('Fehler beim Laden der Kunden', 'error');
+            } finally {
+                this.customersLoading = false;
+            }
+        },
+
+        searchCustomers(query) {
+            // Debounce the search to avoid too many API calls
+            if (this.customerSearchTimeout) {
+                clearTimeout(this.customerSearchTimeout);
+            }
+            this.customerSearchTimeout = setTimeout(() => {
+                this.fetchCustomers(query);
+            }, 300);
         }
     },
 };

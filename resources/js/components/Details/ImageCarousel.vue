@@ -282,7 +282,7 @@ export default {
     },
     methods: {
         getImageUrl(image) {
-            console.log('Getting image URL for:', image);
+            //console.log('Getting image URL for:', image);
             
             // Handle different image formats
             if (typeof image === 'string') {
