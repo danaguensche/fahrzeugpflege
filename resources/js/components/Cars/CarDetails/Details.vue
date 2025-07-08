@@ -134,6 +134,7 @@
                                     <input
                                         ref="fileInput"
                                         type="file"
+                                        multiple
                                         accept="image/*"
                                         style="display: none;"
                                         @change="handleFileSelect"
@@ -163,41 +164,45 @@
                             <!-- File Input Alternative -->
                             <v-col cols="12">
                                 <v-file-input
-                                    v-model="imageUploadDialog.selectedFile"
+                                    v-model="imageUploadDialog.selectedFiles"
+                                    multiple
                                     accept="image/*"
-                                    label="Bild auswählen"
+                                    label="Bilder auswählen"
                                     prepend-icon="mdi-camera"
                                     show-size
                                     @change="handleFileChange"
-                                    :rules="fileRules"
                                     outlined
                                     class="mt-4"
                                 ></v-file-input>
                             </v-col>
 
                             <!-- Image Preview -->
-                            <v-col cols="12" v-if="imageUploadDialog.imagePreview">
+                            <v-col cols="12" v-if="imageUploadDialog.imagePreviews.length > 0">
                                 <v-card outlined>
                                     <v-card-subtitle class="d-flex align-center">
                                         <v-icon left small>mdi-eye</v-icon>
                                         Vorschau:
                                     </v-card-subtitle>
-                                    <v-img
-                                        :src="imageUploadDialog.imagePreview"
-                                        max-height="300"
-                                        contain
-                                        class="ma-2"
-                                    ></v-img>
-                                    
-                                    <!-- Image Info -->
-                                    <v-card-text v-if="imageUploadDialog.selectedFile" class="pt-0">
-                                        <v-chip small color="primary" outlined class="mr-2">
-                                            {{ formatFileSize(imageUploadDialog.selectedFile.size) }}
-                                        </v-chip>
-                                        <v-chip small color="grey" outlined>
-                                            {{ imageUploadDialog.selectedFile.name }}
-                                        </v-chip>
-                                    </v-card-text>
+                                    <v-row dense class="pa-2">
+                                        <v-col v-for="(preview, index) in imageUploadDialog.imagePreviews" :key="index" cols="12" sm="6" md="4">
+                                            <v-card outlined>
+                                                <v-img
+                                                    :src="preview.src"
+                                                    height="150"
+                                                    contain
+                                                    class="ma-2"
+                                                ></v-img>
+                                                <v-card-text class="pt-0">
+                                                    <v-chip small color="primary" outlined class="mr-2">
+                                                        {{ formatFileSize(preview.size) }}
+                                                    </v-chip>
+                                                    <v-chip small color="grey" outlined>
+                                                        {{ preview.name }}
+                                                    </v-chip>
+                                                </v-card-text>
+                                            </v-card>
+                                        </v-col>
+                                    </v-row>
                                 </v-card>
                             </v-col>
 
@@ -244,8 +249,8 @@
                     </v-btn>
                     <v-btn
                         color="primary"
-                        @click="uploadImage"
-                        :disabled="!imageUploadDialog.selectedFile || imageUploadDialog.uploading"
+                        @click="uploadImages"
+                        :disabled="imageUploadDialog.selectedFiles.length === 0 || imageUploadDialog.uploading"
                         :loading="imageUploadDialog.uploading"
                     >
                         <v-icon left>mdi-upload</v-icon>
@@ -345,14 +350,14 @@ export default {
             // Image upload dialog data
             imageUploadDialog: {
                 show: false,
-                selectedFile: null,
-                imagePreview: null,
+                selectedFiles: [],
+                imagePreviews: [],
                 uploading: false,
                 uploadProgress: 0,
                 errorMessage: '',
                 isDragOver: false,
                 dragCounter: 0,
-                maxFileSize: 10000000, // 10MB
+                maxFileSize: 5242880, // 5MB
                 acceptedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg']
             }
         };
@@ -409,12 +414,6 @@ export default {
         },
         formattedUpdatedAt() {
             return this.formatDate(this.carDetails.data?.updated_at);
-        },
-        fileRules() {
-            return [
-                value => !value || value.size < this.imageUploadDialog.maxFileSize || `Bild darf nicht größer als ${this.formatFileSize(this.imageUploadDialog.maxFileSize)} sein`,
-                value => !value || this.imageUploadDialog.acceptedTypes.includes(value.type.toLowerCase()) || `Nur Bilder im Format ${this.imageUploadDialog.acceptedTypes.map(t => t.split('/')[1].toUpperCase()).join(', ')} sind erlaubt`
-            ];
         },
     },
     async mounted() {
@@ -626,8 +625,8 @@ export default {
         },
 
         resetImageUploadForm() {
-            this.imageUploadDialog.selectedFile = null;
-            this.imageUploadDialog.imagePreview = null;
+            this.imageUploadDialog.selectedFiles = [];
+            this.imageUploadDialog.imagePreviews = [];
             this.imageUploadDialog.uploading = false;
             this.imageUploadDialog.uploadProgress = 0;
             this.imageUploadDialog.errorMessage = '';
@@ -660,7 +659,7 @@ export default {
 
             const files = Array.from(e.dataTransfer.files);
             if (files.length > 0) {
-                this.handleFileChange(files[0]);
+                this.handleFileChange(files);
             }
         },
 
@@ -672,39 +671,40 @@ export default {
         handleFileSelect(e) {
             const files = Array.from(e.target.files);
             if (files.length > 0) {
-                this.handleFileChange(files[0]);
+                this.handleFileChange(files);
             }
             // Reset input
             e.target.value = '';
         },
 
         // File validation and processing
-        handleFileChange(file) {
-            if (!file) {
-                this.imageUploadDialog.selectedFile = null;
-                this.imageUploadDialog.imagePreview = null;
+        handleFileChange(files) {
+            if (!files || files.length === 0) {
+                this.imageUploadDialog.selectedFiles = [];
+                this.imageUploadDialog.imagePreviews = [];
                 return;
             }
 
-            // Validate file
-            const validation = this.validateFile(file);
-            if (!validation.valid) {
-                this.handleImageUploadError(validation.message);
-                this.imageUploadDialog.selectedFile = null;
-                this.imageUploadDialog.imagePreview = null;
-                return;
+            const validFiles = [];
+            for (const file of files) {
+                const validation = this.validateFile(file);
+                if (validation.valid) {
+                    validFiles.push(file);
+                } else {
+                    this.handleImageUploadError(validation.message);
+                }
             }
 
-            this.imageUploadDialog.selectedFile = file;
+            this.imageUploadDialog.selectedFiles = validFiles;
             this.imageUploadDialog.errorMessage = '';
-            this.createImagePreview(file);
+            this.createImagePreviews(validFiles);
         },
 
         validateFile(file) {
             if (file.size > this.imageUploadDialog.maxFileSize) {
                 return {
                     valid: false,
-                    message: `Bild darf nicht größer als ${this.formatFileSize(this.imageUploadDialog.maxFileSize)} sein`
+                    message: `Jede Datei darf maximal ${this.formatFileSize(this.imageUploadDialog.maxFileSize)} groß sein.`
                 };
             }
 
@@ -718,18 +718,21 @@ export default {
             return { valid: true };
         },
 
-        createImagePreview(file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                this.imageUploadDialog.imagePreview = e.target.result;
-            };
-            reader.readAsDataURL(file);
+        createImagePreviews(files) {
+            this.imageUploadDialog.imagePreviews = [];
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.imageUploadDialog.imagePreviews.push({ src: e.target.result, name: file.name, size: file.size });
+                };
+                reader.readAsDataURL(file);
+            }
         },
 
         // Upload functionality
-        async uploadImage() {
-            if (!this.imageUploadDialog.selectedFile) {
-                this.handleImageUploadError('Bitte wählen Sie ein Bild aus');
+        async uploadImages() {
+            if (this.imageUploadDialog.selectedFiles.length === 0) {
+                this.handleImageUploadError('Bitte wählen Sie ein oder mehrere Bilder aus');
                 return;
             }
 
@@ -738,7 +741,9 @@ export default {
             this.imageUploadDialog.errorMessage = '';
 
             const formData = new FormData();
-            formData.append('images[]', this.imageUploadDialog.selectedFile);
+            for (const file of this.imageUploadDialog.selectedFiles) {
+                formData.append('images[]', file);
+            }
 
             try {
                 const response = await axios.post(
@@ -757,11 +762,11 @@ export default {
                 // Refresh car details to get updated images
                 await this.getCar();
                 this.imageUploadDialog.uploadProgress = 100;
-                this.showSnackbar('Bild erfolgreich hochgeladen', 'success');
+                this.showSnackbar('Bilder erfolgreich hochgeladen', 'success');
                 setTimeout(() => this.closeImageUploadDialog(), 500);
 
             } catch (error) {
-                const errorMessage = error.response?.data?.message || 'Fehler beim Hochladen des Bildes';
+                const errorMessage = error.response?.data?.message || 'Fehler beim Hochladen der Bilder';
                 this.handleImageUploadError(errorMessage);
             } finally {
                 this.imageUploadDialog.uploading = false;
