@@ -47,10 +47,11 @@ class CustomerController extends Controller
 
     public function index(Request $request)
     {
-        $perPage = $request->input('itemsPerPage', 20);
-        $page = $request->input('page', 1);
-        $sortBy = $request->input('sortBy', 'id');
-        $sortDesc = filter_var(request()->input('sortDesc', false), FILTER_VALIDATE_BOOLEAN);
+        $maxPerPage = 100;
+        $perPage = min((int) request()->input('itemsPerPage', 20), $maxPerPage);
+        $page = max((int) request()->input('page', 1), 1);
+        $sortBy = request()->input('sortBy', 'id');
+        $sortDesc = filter_var(request()->input('sortDesc', 'false'), FILTER_VALIDATE_BOOLEAN);
 
         $allowedSortFields = ['id', 'firstname', 'lastname', 'email', 'phonenumber', 'company', 'addressline', 'postalcode', 'city'];
 
@@ -75,8 +76,9 @@ class CustomerController extends Controller
     public function search(Request $request)
     {
         try {
+            $maxPerPage = 100;
             $query = $request->input('query', '');
-            $perPage = $request->input('itemsPerPage', 20);
+            $perPage = min((int) request()->input('itemsPerPage', 20), $maxPerPage);
             $page = $request->input('page', 1);
             $sortBy = $request->input('sortBy', 'id');
             $sortDesc = filter_var(request()->input('sortDesc', false), FILTER_VALIDATE_BOOLEAN);

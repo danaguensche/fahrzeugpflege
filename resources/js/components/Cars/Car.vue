@@ -22,8 +22,19 @@
             <CarForm :isOpen="showCarForm" @close="showCarForm = false" />
         </div>
 
-        <CarTable :searchString="searchText" :isSearchActive="isSearchActive" @carsDeleted="handleCarsDeleted"
-            @show-error="handleError" />
+        <DataTable
+            :searchString="searchText"
+            :isSearchActive="isSearchActive"
+            endpoint="cars"
+            :headers="carHeaders"
+            :fields="carFields"
+            itemKey="Kennzeichen"
+            detailsPage="fahrzeugdetails"
+            detailsUrlBasePath="fahrzeuge"
+            deleteKey="kennzeichen"
+            @itemsDeleted="handleItemsDeleted"
+            @show-error="handleError"
+        />
     </div>
 </template>
 
@@ -32,7 +43,7 @@ import { mapState } from 'vuex';
 import Search from '../CommonSlots/Searchbar.vue';
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
 import CarForm from './addCar/CarForm.vue';
-import CarTable from './CarTable.vue';
+import DataTable from '../DataTable.vue';
 import CloseButton from '../CommonSlots/CloseButton.vue';
 
 export default {
@@ -42,7 +53,7 @@ export default {
         Search,
         DefaultButton,
         CarForm,
-        CarTable,
+        DataTable,
         CloseButton
     },
 
@@ -54,6 +65,17 @@ export default {
             isSearchActive: false,
             searchDebounceTimer: null,
             showCarForm: false,
+            carHeaders: [
+                { title: 'Auswählen', key: 'checkbox', sortable: false, width: '80px' },
+                { title: 'Kennzeichen', key: 'Kennzeichen', sortable: true, align: 'start' },
+                { title: 'Fahrzeugklasse', key: 'Fahrzeugklasse', sortable: true },
+                { title: 'Automarke', key: 'Automarke', sortable: true },
+                { title: 'Typ', key: 'Typ', sortable: true },
+                { title: 'Farbe', key: 'Farbe', sortable: true },
+                { title: 'Löschen', key: 'delete', sortable: false, width: '60px' },
+                { title: 'Bearbeiten', key: 'edit', sortable: false, width: '60px' }
+            ],
+            carFields: ["Kennzeichen", "Fahrzeugklasse", "Automarke", "Typ", "Farbe"]
         }
     },
 
@@ -76,13 +98,13 @@ export default {
             this.showCarForm = !this.showCarForm;
         },
 
-        handleCarsDeleted() {
-            // Wird von CarTable emittiert nach erfolgreichem Löschen
+        handleItemsDeleted() {
+            // Wird von DataTable emittiert nach erfolgreichem Löschen
             console.log('Cars deleted, table will refresh automatically');
         },
 
         handleError(message) {
-            console.error('Error from CarTable:', message);
+            console.error('Error from DataTable:', message);
             // Hier können Sie eine Toast-Nachricht oder ähnliches anzeigen
         },
 

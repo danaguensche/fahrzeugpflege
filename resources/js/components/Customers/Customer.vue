@@ -22,8 +22,18 @@
             <CustomerForm :isOpen="showCustomerForm" @close="showCustomerForm = false" />
         </div>
 
-        <CustomerTable :searchString="searchText" :isSearchActive="isSearchActive"
-            @customersDeleted="handleCustomersDeleted" @show-error="handleError"></CustomerTable>
+        <DataTable
+            :searchString="searchText"
+            :isSearchActive="isSearchActive"
+            endpoint="customers"
+            :headers="customerHeaders"
+            :fields="customerFields"
+            itemKey="id"
+            detailsPage="kundendetails"
+            detailsUrlBasePath="kunden"
+            @itemsDeleted="handleItemsDeleted"
+            @show-error="handleError"
+        />
     </div>
 </template>
 
@@ -32,7 +42,7 @@ import CloseButton from '../CommonSlots/CloseButton.vue';
 import Search from '../CommonSlots/Searchbar.vue';
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
 import CustomerForm from './addCustomer/CustomerForm.vue';
-import CustomerTable from './CustomerTable.vue';
+import DataTable from '../DataTable.vue';
 import { mapState } from 'vuex';
 
 export default {
@@ -43,7 +53,7 @@ export default {
         CloseButton,
         DefaultButton,
         CustomerForm,
-        CustomerTable,
+        DataTable,
     },
 
     data() {
@@ -53,8 +63,20 @@ export default {
             isSearchActive: false,
             searchDebounceTimer: null,
             showCustomerForm: false,
-
-
+            customerHeaders: [
+                { title: 'Auswählen', key: 'checkbox', sortable: false, width: '80px' },
+                { title: 'ID', key: 'id', sortable: true, align: 'start' },
+                { title: 'Vorname', key: 'firstname', sortable: true },
+                { title: 'Nachname', key: 'lastname', sortable: true },
+                { title: 'Email', key: 'email', sortable: true },
+                { title: 'Telefonnummer', key: 'phonenumber', sortable: true },
+                { title: 'Straße und Hausnummer', key: 'addressline', sortable: true },
+                { title: 'PLZ', key: 'postalcode', sortable: true },
+                { title: 'Stadt', key: 'city', sortable: true },
+                { title: 'Löschen', key: 'delete', sortable: false, width: '60px' },
+                { title: 'Bearbeiten', key: 'edit', sortable: false, width: '60px' }
+            ],
+            customerFields: ["id", "firstname", "lastname", "email", "phonenumber", "addressline", "postalcode", "city"]
         }
     },
 
@@ -78,13 +100,13 @@ export default {
             this.showCustomerForm = !this.showCustomerForm;
         },
 
-        handleCustomersDeleted() {
-            // Wird von CustomerTable emittiert nach erfolgreichem Löschen
+        handleItemsDeleted() {
+            // Wird von DataTable emittiert nach erfolgreichem Löschen
             console.log('Customers deleted, table will refresh automatically');
         },
 
         handleError(message) {
-            console.error('Error from CustomerTable:', message);
+            console.error('Error from DataTable:', message);
             // Hier können Sie eine Toast-Nachricht oder ähnliches anzeigen
         },
 
