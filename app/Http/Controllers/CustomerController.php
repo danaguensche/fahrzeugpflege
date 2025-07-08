@@ -238,4 +238,20 @@ class CustomerController extends Controller
             ], 500);
         }
     }
+
+    public function removeCarFromCustomer($customerId, $carId)
+    {
+        try {
+            $customer = Customer::findOrFail($customerId);
+            $car = $customer->cars()->findOrFail($carId);
+
+            // Assuming a one-to-many relationship where Car has a customer_id
+            $car->customer_id = null;
+            $car->save();
+
+            return response()->json(['success' => true, 'message' => 'Fahrzeug erfolgreich vom Kunden entfernt.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Fehler beim Entfernen des Fahrzeugs.'], 500);
+        }
+    }
 }

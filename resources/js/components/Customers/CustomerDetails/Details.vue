@@ -87,7 +87,7 @@
           <v-sheet>
             <HeaderWithChip :customerDetails="customerDetails"></HeaderWithChip>
             <CarList v-if="customerDetails.data.cars && customerDetails.data.cars.length > 0"
-              :cars="customerDetails.data.cars">
+              :cars="customerDetails.data.cars" :edit-mode="editMode" @delete-car="deleteCar">
             </CarList>
             <!-- Wenn keine Fahrzeuge vorhanden sind -->
             <template v-else>
@@ -445,6 +445,19 @@ export default {
     handleCarSelected(car) {
       // Dieser Handler wird aufgerufen, wenn ein Auto aus der Liste ausgewählt wurde
       console.log('Auto ausgewählt:', car);
+    },
+
+    async deleteCar(car) {
+      if (confirm(`Möchten Sie das Fahrzeug ${car.Kennzeichen} wirklich von diesem Kunden entfernen?`)) {
+        try {
+          await axios.delete(`/api/customer/${this.$route.params.id}/car/${car.id}`);
+          this.showSnackbar('Fahrzeug erfolgreich vom Kunden entfernt', 'success');
+          await this.getCustomer(); // Refresh customer details
+        } catch (error) {
+          const errorMessage = error.response?.data?.message || "Fehler beim Entfernen des Fahrzeugs";
+          this.showSnackbar(errorMessage, 'error');
+        }
+      }
     }
   }
 }

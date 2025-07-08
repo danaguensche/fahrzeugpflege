@@ -35,6 +35,7 @@ Route::apiResource('customers', CustomerController::class)->parameters(['custome
 Route::get('customer/customerdetails/{id}', [CustomerDetailsController::class, 'details']);
 Route::delete('customers', [CustomerController::class, 'destroyMultiple']);
 Route::put('customer/customerdetails/{id}', [CustomerDetailsController::class, 'update']);
+Route::delete('customer/{customerId}/car/{carId}', [CustomerController::class, 'removeCarFromCustomer']);
 
 
 
