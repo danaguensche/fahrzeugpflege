@@ -20,6 +20,9 @@
                         </v-form>
                     </v-card-text>
                     <v-card-actions>
+                        <v-btn text @click="$router.push('/login')">
+                            Zurück zum Login
+                        </v-btn>
                         <v-spacer></v-spacer>
                         <v-btn color="primary" @click="submit" :disabled="!valid || loading" :loading="loading">
                             Link senden
