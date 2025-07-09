@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import Table from '../DataTable/Table.vue';
+import DataTable from '../Table/DataTable.vue';
 import { mapState } from 'vuex';
 import Search from '../CommonSlots/Searchbar.vue';
 import CloseButton from '../CommonSlots/CloseButton.vue';
@@ -39,7 +39,7 @@ import CloseButton from '../CommonSlots/CloseButton.vue';
 export default {
     name: 'Jobs',
     components: {
-        Table,
+        DataTable,
         Search,
         CloseButton
     },
