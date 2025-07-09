@@ -13,15 +13,10 @@ class CarSearchController extends Controller
         $query = $request->input('query');
 
         if (!$query) {
-            // If no query, return all cars (or an empty array, depending on desired behavior)
-            // For now, let's return an empty array if no query is provided.
-            return CarResource::collection(Car::all());
+            return response()->json(['data' => []]);
         }
 
-        $results = Car::where('Kennzeichen', 'LIKE', '%' . $query . '%')
-                       ->orWhere('Automarke', 'LIKE', '%' . $query . '%')
-                       ->orWhere('Typ', 'LIKE', '%' . $query . '%')
-                       ->get();
+        $results = Car::search($query)->get();
 
         return CarResource::collection($results);
     }
