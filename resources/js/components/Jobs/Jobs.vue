@@ -13,7 +13,14 @@
                 </div>
             </div>
         </div>
+        <div class="action-buttons">
+            <v-btn color="primary" @click="openTaskCreationModal">
+                <v-icon left>mdi-plus</v-icon>
+                Neue Aufgabe hinzufügen
+            </v-btn>
+        </div>
         <DataTable
+            ref="dataTable"
             :searchString="searchText"
             :isSearchActive="isSearchActive"
             endpoint="jobs"
@@ -23,9 +30,11 @@
             detailsPage="jobdetails"
             detailsUrlBasePath="jobs"
             deleteKey="id"
-            @itemsDeleted="handleItemsDeleted"
+            @itemsDeleted="handleJobsDeleted"
             @show-error="handleError"
         />
+
+        <TaskCreationModal :show="showTaskCreationModal" @close="closeTaskCreationModal" @taskCreated="handleTaskCreated" />
 
     </div>
 </template>
@@ -35,13 +44,14 @@ import DataTable from '../Table/DataTable.vue';
 import { mapState } from 'vuex';
 import Search from '../CommonSlots/Searchbar.vue';
 import CloseButton from '../CommonSlots/CloseButton.vue';
+import TaskCreationModal from './TaskCreationModal.vue'; // New import
 
 export default {
     name: 'Jobs',
     components: {
         DataTable,
         Search,
-        CloseButton
+        CloseButton,
     },
 
     data() {
@@ -59,7 +69,8 @@ export default {
                 { title: 'Abholtermin', key: 'scheduled_at', sortable: true },
                 { title: 'Status', key: 'status', sortable: true },
             ],
-            jobFields: ["id", "title", "description", "scheduled_at", "status"]
+            jobFields: ["id", "title", "description", "scheduled_at", "status"],
+            showTaskCreationModal: false // New data property
         }
     },
 
@@ -77,6 +88,16 @@ export default {
     },
 
     methods: {
+        openTaskCreationModal() {
+            this.showTaskCreationModal = true;
+        },
+        closeTaskCreationModal() {
+            this.showTaskCreationModal = false;
+        },
+        handleTaskCreated() {
+            console.log('Task created, refreshing table...');
+            this.$refs.dataTable.fetchData();
+        },
 
         handleJobsDeleted() {
             // Wird von JobsTable emittiert nach erfolgreichem Löschen
@@ -266,5 +287,12 @@ export default {
     .search-button .v-icon {
         font-size: 18px;
     }
+}
+
+.action-buttons {
+    margin-bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end; /* Align button to the right */
 }
 </style>
