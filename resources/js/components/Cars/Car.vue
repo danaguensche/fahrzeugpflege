@@ -43,7 +43,7 @@ import { mapState } from 'vuex';
 import Search from '../CommonSlots/Searchbar.vue';
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
 import CarForm from './addCar/CarForm.vue';
-import DataTable from '../DataTable.vue';
+import DataTable from '../Table/DataTable.vue';
 import CloseButton from '../CommonSlots/CloseButton.vue';
 
 export default {

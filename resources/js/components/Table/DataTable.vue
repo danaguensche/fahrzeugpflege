@@ -131,13 +131,13 @@
 </template>
 
 <script>
-import RefreshButton from './CommonSlots/RefreshButton.vue';
+import RefreshButton from '../CommonSlots/RefreshButton.vue';
 import axios from 'axios';
-import VuetifyAlert from './Alerts/VuetifyAlert.vue';
-import ConfirmButton from './CommonSlots/ConfirmButton.vue';
-import CancelButton from './CommonSlots/CancelButton.vue';
-import DeleteButton from './CommonSlots/DeleteButton.vue';
-import Pagination from './CommonSlots/Pagination.vue';
+import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
+import ConfirmButton from '../CommonSlots/ConfirmButton.vue';
+import CancelButton from '../CommonSlots/CancelButton.vue';
+import DeleteButton from '../CommonSlots/DeleteButton.vue';
+import Pagination from '../CommonSlots/Pagination.vue';
 
 export default {
     name: "DataTable",

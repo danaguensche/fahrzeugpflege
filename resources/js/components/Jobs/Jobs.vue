@@ -1,87 +1,70 @@
 <template>
-    <div class="customer-page" :class="{ 'customer-page-sidebar-opened': isSidebarOpen }">
+    <div class="jobs-page" :class="{ 'jobs-page-sidebar-opened': isSidebarOpen }">
         <div class="search-wrapper">
             <div class="search-input-container">
                 <Search :context="searchContext" v-model="searchText" @clearSearch="clearSearch" />
                 <div class="search-buttons">
                     <v-btn :icon="true" :prepend-icon="'mdi-magnify'" class="search-button" variant="text"
-                        @click="searchCustomers">
+                        @click="searchJobs">
                         <v-icon>mdi-magnify</v-icon>
                     </v-btn>
-                    <CloseButton :isVisible="searchText.length > 0" class="close-button" @close="clearSearch">
+                    <CloseButton :isVisible="searchText.length > 0" class="close-button" @click="clearSearch">
                     </CloseButton>
                 </div>
             </div>
         </div>
-
-        <div class="content-container">
-            <DefaultButton @click="toggleCustomerForm">Kunde hinzufügen</DefaultButton>
-        </div>
-
-        <div class="form-container">
-            <CustomerForm :isOpen="showCustomerForm" @close="showCustomerForm = false" />
-        </div>
-
         <DataTable
             :searchString="searchText"
             :isSearchActive="isSearchActive"
-            endpoint="customers"
-            :headers="customerHeaders"
-            :fields="customerFields"
+            endpoint="jobs"
+            :headers="jobHeaders"
+            :fields="jobFields"
             itemKey="id"
-            detailsPage="kundendetails"
-            detailsUrlBasePath="kunden"
+            detailsPage="jobdetails"
+            detailsUrlBasePath="jobs"
+            deleteKey="id"
             @itemsDeleted="handleItemsDeleted"
             @show-error="handleError"
         />
+
     </div>
 </template>
 
 <script>
-import CloseButton from '../CommonSlots/CloseButton.vue';
-import Search from '../CommonSlots/Searchbar.vue';
-import DefaultButton from '../CommonSlots/DefaultButton.vue';
-import CustomerForm from './addCustomer/CustomerForm.vue';
-import DataTable from '../Table/DataTable.vue';
+import Table from '../DataTable/Table.vue';
 import { mapState } from 'vuex';
+import Search from '../CommonSlots/Searchbar.vue';
+import CloseButton from '../CommonSlots/CloseButton.vue';
 
 export default {
-    name: "Customer",
-
+    name: 'Jobs',
     components: {
+        Table,
         Search,
-        CloseButton,
-        DefaultButton,
-        CustomerForm,
-        DataTable,
+        CloseButton
     },
 
     data() {
         return {
-            searchContext: "Suchen Sie nach einem Kunden...",
+            //Search
+            searchContext: "Suchen Sie nach einem Auftrag...",
             searchText: '',
             isSearchActive: false,
             searchDebounceTimer: null,
-            showCustomerForm: false,
-            customerHeaders: [
+            jobHeaders: [
                 { title: 'Auswählen', key: 'checkbox', sortable: false, width: '80px' },
-                { title: 'ID', key: 'id', sortable: true, align: 'start' },
-                { title: 'Vorname', key: 'firstname', sortable: true },
-                { title: 'Nachname', key: 'lastname', sortable: true },
-                { title: 'Email', key: 'email', sortable: true },
-                { title: 'Telefonnummer', key: 'phonenumber', sortable: true },
-                { title: 'Straße und Hausnummer', key: 'addressline', sortable: true },
-                { title: 'PLZ', key: 'postalcode', sortable: true },
-                { title: 'Stadt', key: 'city', sortable: true },
-                { title: 'Löschen', key: 'delete', sortable: false, width: '60px' },
-                { title: 'Bearbeiten', key: 'edit', sortable: false, width: '60px' }
+                { title: 'id', key: 'id', sortable: true, align: 'start' },
+                { title: 'Titel', key: 'title', sortable: true },
+                { title: 'Beschreibung', key: 'description', sortable: true },
+                { title: 'Abholtermin', key: 'scheduled_at', sortable: true },
+                { title: 'Status', key: 'status', sortable: true },
             ],
-            customerFields: ["id", "firstname", "lastname", "email", "phonenumber", "addressline", "postalcode", "city"]
+            jobFields: ["id", "title", "description", "scheduled_at", "status"]
         }
     },
 
     computed: {
-        ...mapState(['isSidebarOpen']),
+        ...mapState(['isSidebarOpen'])
     },
 
     watch: {
@@ -95,18 +78,13 @@ export default {
 
     methods: {
 
-        // UI Actions
-        toggleCustomerForm() {
-            this.showCustomerForm = !this.showCustomerForm;
-        },
-
-        handleItemsDeleted() {
-            // Wird von DataTable emittiert nach erfolgreichem Löschen
-            console.log('Customers deleted, table will refresh automatically');
+        handleJobsDeleted() {
+            // Wird von JobsTable emittiert nach erfolgreichem Löschen
+            console.log('Jobs deleted, table will refresh automatically');
         },
 
         handleError(message) {
-            console.error('Error from DataTable:', message);
+            console.error('Error from JobTable:', message);
             // Hier können Sie eine Toast-Nachricht oder ähnliches anzeigen
         },
 
@@ -140,7 +118,7 @@ export default {
             }
         },
 
-        searchCustomers() {
+        searchJobs() {
             if (this.searchText?.trim()) {
                 this.isSearchActive = true;
             }
@@ -150,7 +128,7 @@ export default {
 </script>
 
 <style scoped>
-.customer-page {
+.jobs-page {
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
@@ -161,8 +139,13 @@ export default {
     font-family: var(--font-family);
 }
 
-.customer-page-sidebar-opened {
-    margin-left: 330px;
+.content-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: -80px;
+    z-index: 5;
 }
 
 .search-wrapper {
@@ -191,8 +174,30 @@ export default {
     padding: 2px;
 }
 
+.search-button {
+    min-width: 36px !important;
+    width: 36px;
+    height: 36px;
+    border-radius: 6px !important;
+    transition: all 0.2s ease;
+    background-color: transparent;
+}
+
+.search-button:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.search-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.search-button .v-icon {
+    font-size: 25px;
+    color: #666;
+}
+
 .close-button {
-    z-index: 10;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -206,17 +211,60 @@ export default {
     background-color: transparent;
 }
 
-.content-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-top: -80px;
-    z-index: 5;
+.close-button:hover {
+    background-color: rgba(0, 0, 0, 0.04);
 }
 
 .form-container {
     margin-top: 1vh;
     margin-bottom: 1vh;
+}
+
+.jobs-page-sidebar-opened {
+    margin-left: 330px;
+    transition: margin-left 0.3s ease;
+}
+
+@media only screen and (max-width: 650px) {
+    .jobs-page {
+        margin-left: 160px;
+        font-size: 12px;
+    }
+
+    .jobs-page-sidebar-opened {
+        margin-left: 260px;
+    }
+
+    .content-container {
+        flex-direction: column;
+    }
+
+    .form-container {
+        width: 100%;
+    }
+
+    .search-input-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-buttons {
+        right: 6px;
+        gap: 2px;
+        padding: 1px;
+    }
+
+    .search-button,
+    .close-button {
+        min-width: 32px;
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+    }
+
+    .search-button .v-icon {
+        font-size: 18px;
+    }
 }
 </style>
