@@ -63,6 +63,12 @@
                                             {{ editItem[field] || '' }}
                                         </a>
                                     </template>
+                                    <!-- Services field - not editable -->
+                                    <template v-else-if="field === 'services'">
+                                        <span v-for="(service, index) in item[field]" :key="service.id">
+                                            {{ service.title }}{{ index < item[field].length - 1 ? ', ' : '' }}
+                                        </span>
+                                    </template>
                                     <!-- The rest of the fields are editable -->
                                     <template v-else>
                                         <template v-if="getHeader(field).type === 'select'">
@@ -95,9 +101,14 @@
                                     </a>
                                     <!-- The rest of the fields as plain text -->
                                 <span v-else-if="field === 'services'">
-                                    <span v-for="(service, index) in item[field]" :key="service.id">
-                                        {{ service.title }}{{ index < item[field].length - 1 ? ', ' : '' }}
-                                    </span>
+                                    <template v-if="Array.isArray(item[field]) && item[field].length > 0">
+                                        <span v-for="(service, index) in item[field]" :key="service.id">
+                                            {{ service.title }}{{ index < item[field].length - 1 ? ', ' : '' }}
+                                        </span>
+                                    </template>
+                                    <template v-else>
+                                        {{ '' }}
+                                    </template>
                                 </span>
                                 <span v-else>{{ item[field] || '' }}</span>
                                 </template>

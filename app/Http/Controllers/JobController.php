@@ -76,12 +76,18 @@ class JobController extends Controller
             'customer_id' => 'sometimes|required|exists:customers,id',
             'status' => 'sometimes|required|string',
             'scheduled_at' => 'nullable|date',
+            'services' => 'nullable|array',
+            'services.*.id' => 'required|exists:services,id',
         ]);
 
         $job->update($validatedData);
-        $job->services()->sync($request->input('service_id'));
 
-        return response()->json($job);
+        if ($request->has('services')) {
+            $serviceIds = collect($request->input('services'))->pluck('id')->toArray();
+            $job->services()->sync($serviceIds);
+        }
+
+        return response()->json($job->load('services'));
     }
 
     public function destroy(Job $job)
