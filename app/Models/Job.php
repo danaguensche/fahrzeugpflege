@@ -14,8 +14,11 @@ class Job extends Model
     protected $fillable = [
         'title',
         'description',
-        'scheduled_at',
+        'car_id',
+        'customer_id',
+        'service_id',
         'status',
+        'scheduled_at',
     ];
 
     protected $casts = [

@@ -47,7 +47,7 @@
                     <v-select
                         v-model="job.service_id"
                         :items="services"
-                        item-title="name"
+                        item-title="title"
                         item-value="id"
                         label="Service auswählen"
                         :rules="[v => !!v || 'Service ist erforderlich']"
@@ -186,7 +186,10 @@ export default {
         async fetchServices() {
             try {
                 const response = await axios.get('/api/services');
-                this.services = response.data.data;
+                this.services = response.data.map(services => ({
+                    id: services.id,
+                    title: services.title,
+                }));
             } catch (error) {
                 console.error('Error fetching services:', error);
             }

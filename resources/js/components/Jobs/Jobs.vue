@@ -18,6 +18,7 @@
             </v-btn>
         </div>
         <DataTable
+            ref="jobDataTable"
             :searchString="searchText"
             :isSearchActive="isSearchActive"
             endpoint="jobs"
@@ -92,8 +93,7 @@ export default {
 
         handleJobAdded() {
             this.showAddJobDialog = false;
-            // Refresh the DataTable to show the new job
-            this.$children[1].loadItems(); // Assuming DataTable is the second child
+            this.$refs.jobDataTable.loadItems();
         },
 
         handleJobsDeleted() {
