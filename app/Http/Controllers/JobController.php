@@ -14,12 +14,12 @@ class JobController extends Controller
             'description' => 'nullable|string',
             'car_id' => 'required|exists:cars,id',
             'customer_id' => 'required|exists:customers,id',
-            'service_id' => 'required|exists:services,id',
             'status' => 'required|string',
             'scheduled_at' => 'nullable|date',
         ]);
 
         $job = Job::create($validatedData);
+        $job->services()->sync($request->input('service_id'));
 
         return response()->json($job, 201);
     }
@@ -64,7 +64,7 @@ class JobController extends Controller
 
     public function show(Job $job)
     {
-        return response()->json($job);
+        return response()->json($job->load('services'));
     }
 
     public function update(Request $request, Job $job)
@@ -74,12 +74,12 @@ class JobController extends Controller
             'description' => 'nullable|string',
             'car_id' => 'sometimes|required|exists:cars,id',
             'customer_id' => 'sometimes|required|exists:customers,id',
-            'service_id' => 'sometimes|required|exists:services,id',
             'status' => 'sometimes|required|string',
             'scheduled_at' => 'nullable|date',
         ]);
 
         $job->update($validatedData);
+        $job->services()->sync($request->input('service_id'));
 
         return response()->json($job);
     }

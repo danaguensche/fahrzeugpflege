@@ -16,10 +16,14 @@ class Job extends Model
         'description',
         'car_id',
         'customer_id',
-        'service_id',
         'status',
         'scheduled_at',
     ];
+
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'job_service', 'job_id', 'service_id');
+    }
 
     protected $casts = [
         'scheduled_at' => 'datetime',

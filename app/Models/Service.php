@@ -19,4 +19,9 @@ class Service extends Model
     {
         return $this->hasMany(ServicePricing::class);
     }
+
+    public function jobs()
+    {
+        return $this->belongsToMany(Job::class, 'job_service', 'service_id', 'job_id');
+    }
 }

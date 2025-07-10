@@ -52,6 +52,8 @@
                         label="Service auswählen"
                         :rules="[v => !!v || 'Service ist erforderlich']"
                         required
+                        multiple
+                        chips
                     ></v-select>
                     <v-select
                         v-model="job.status"
@@ -92,7 +94,7 @@ export default {
                 description: '',
                 car_id: null,
                 customer_id: null,
-                service_id: null,
+                service_id: [],
                 status: 'ausstehend',
                 scheduled_at: null,
             },
