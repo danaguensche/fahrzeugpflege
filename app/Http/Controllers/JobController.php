@@ -26,7 +26,7 @@ class JobController extends Controller
 
     public function index(Request $request)
     {
-        $query = Job::query();
+        $query = Job::with('services');
 
         $itemsPerPage = $request->input('itemsPerPage', 10);
         $sortBy = $request->input('sortBy', 'id');

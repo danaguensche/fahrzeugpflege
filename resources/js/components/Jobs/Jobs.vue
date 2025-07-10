@@ -71,8 +71,9 @@ export default {
                     { title: 'In Bearbeitung', value: 'in_bearbeitung' },
                     { title: 'Abgeschlossen', value: 'abgeschlossen' },
                 ]},
+                { title: 'Services', key: 'services', sortable: false },
             ],
-            jobFields: ["id", "title", "description", "scheduled_at", "status"],
+            jobFields: ["id", "title", "description", "scheduled_at", "status", "services"],
             showAddJobDialog: false,
         }
     },

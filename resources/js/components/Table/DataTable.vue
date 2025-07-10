@@ -94,7 +94,12 @@
                                         {{ item[field] || '' }}
                                     </a>
                                     <!-- The rest of the fields as plain text -->
-                                    <span v-else>{{ item[field] || '' }}</span>
+                                <span v-else-if="field === 'services'">
+                                    <span v-for="(service, index) in item[field]" :key="service.id">
+                                        {{ service.title }}{{ index < item[field].length - 1 ? ', ' : '' }}
+                                    </span>
+                                </span>
+                                <span v-else>{{ item[field] || '' }}</span>
                                 </template>
                             </td>
                             
