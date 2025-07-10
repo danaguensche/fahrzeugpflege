@@ -2,11 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Job;
+use Illuminate\Http\Request;
 
 class JobController extends Controller
 {
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'car_id' => 'required|exists:cars,id',
+            'customer_id' => 'required|exists:customers,id',
+            'service_id' => 'required|exists:services,id',
+            'status' => 'required|string',
+            'scheduled_at' => 'nullable|date',
+        ]);
+
+        $job = Job::create($validatedData);
+
+        return response()->json($job, 201);
+    }
+
     public function index(Request $request)
     {
         $query = Job::query();

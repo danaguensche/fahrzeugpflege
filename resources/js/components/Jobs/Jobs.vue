@@ -12,6 +12,10 @@
                     </CloseButton>
                 </div>
             </div>
+            <v-btn class="add-job-button" color="primary" @click="openAddJobDialog">
+                <v-icon left>mdi-plus</v-icon>
+                Neue Aufgabe
+            </v-btn>
         </div>
         <DataTable
             :searchString="searchText"
@@ -27,6 +31,8 @@
             @show-error="handleError"
         />
 
+        <AddJobForm v-model="showAddJobDialog" @job-added="handleJobAdded" />
+
     </div>
 </template>
 
@@ -35,13 +41,15 @@ import DataTable from '../Table/DataTable.vue';
 import { mapState } from 'vuex';
 import Search from '../CommonSlots/Searchbar.vue';
 import CloseButton from '../CommonSlots/CloseButton.vue';
+import AddJobForm from './AddJobForm.vue';
 
 export default {
     name: 'Jobs',
     components: {
         DataTable,
         Search,
-        CloseButton
+        CloseButton,
+        AddJobForm,
     },
 
     data() {
@@ -59,7 +67,8 @@ export default {
                 { title: 'Abholtermin', key: 'scheduled_at', sortable: true },
                 { title: 'Status', key: 'status', sortable: true },
             ],
-            jobFields: ["id", "title", "description", "scheduled_at", "status"]
+            jobFields: ["id", "title", "description", "scheduled_at", "status"],
+            showAddJobDialog: false,
         }
     },
 
@@ -77,6 +86,15 @@ export default {
     },
 
     methods: {
+        openAddJobDialog() {
+            this.showAddJobDialog = true;
+        },
+
+        handleJobAdded() {
+            this.showAddJobDialog = false;
+            // Refresh the DataTable to show the new job
+            this.$children[1].loadItems(); // Assuming DataTable is the second child
+        },
 
         handleJobsDeleted() {
             // Wird von JobsTable emittiert nach erfolgreichem Löschen
@@ -85,7 +103,7 @@ export default {
 
         handleError(message) {
             console.error('Error from JobTable:', message);
-            // Hier können Sie eine Toast-Nachricht oder ähnliches anzeigen
+            // Hier können Sie eine Toast-nachricht oder ähnliches anzeigen
         },
 
         //Search Handling
@@ -153,12 +171,17 @@ export default {
     z-index: 10;
     width: 100%;
     margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .search-input-container {
     position: relative;
     display: flex;
     align-items: center;
+    flex-grow: 1;
+    margin-right: 20px;
 }
 
 .search-buttons {
@@ -223,6 +246,10 @@ export default {
 .jobs-page-sidebar-opened {
     margin-left: 330px;
     transition: margin-left 0.3s ease;
+}
+
+.add-job-button {
+    margin-left: auto; /* Pushes the button to the right */
 }
 
 @media only screen and (max-width: 650px) {
