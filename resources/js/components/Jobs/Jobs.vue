@@ -23,7 +23,7 @@
             detailsPage="jobdetails"
             detailsUrlBasePath="jobs"
             deleteKey="id"
-            @itemsDeleted="handleItemsDeleted"
+            @itemsDeleted="handleJobsDeleted"
             @show-error="handleError"
         />
 

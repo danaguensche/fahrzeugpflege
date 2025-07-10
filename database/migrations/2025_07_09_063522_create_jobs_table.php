@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('description')->nullable();
             $table->string('status')->default('pending');
+            $table->timestamp('scheduled_at')->nullable();
 
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');

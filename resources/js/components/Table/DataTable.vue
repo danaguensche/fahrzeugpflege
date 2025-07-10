@@ -278,6 +278,7 @@ export default {
             }
 
             this.loading = true;
+            console.log(`[DataTable] Search started for ${this.endpoint} with query: ${query}.`);
             try {
                 const params = {
                     query: query.trim(),
@@ -305,14 +306,16 @@ export default {
                 this.items = items;
                 this.totalItems = total;
                 this.options.page = page;
+                console.log(`[DataTable] Search completed for ${this.endpoint}. Found ${this.totalItems} items.`);
 
             } catch (error) {
-                console.error(`Error when searching for ${this.endpoint}:`, error);
+                console.error(`[DataTable] Error during search for ${this.endpoint}:`, error);
                 this.items = [];
                 this.totalItems = 0;
                 this.$emit('show-error', `Error when searching for ${this.endpoint}`);
             } finally {
                 this.loading = false;
+                console.log(`[DataTable] Search finished for ${this.endpoint}.`);
             }
         },
 
@@ -520,6 +523,7 @@ export default {
 
         async loadItems() {
             this.loading = true;
+            console.log(`[DataTable] Loading started for ${this.endpoint}.`);
 
             try {
                 const params = {
@@ -538,12 +542,15 @@ export default {
                 const response = await axios.get(`/api/${this.endpoint}`, { params });
                 this.items = response.data.items || response.data || [];
                 this.totalItems = response.data.total || response.data.totalItems || this.items.length;
+                console.log(`[DataTable] Data loaded successfully for ${this.endpoint}. Total items: ${this.totalItems}`);
             } catch (error) {
-                console.error(`Error during data loading for ${this.endpoint}:`, error);
+                console.error(`[DataTable] Error during data loading for ${this.endpoint}:`, error);
                 this.items = [];
                 this.totalItems = 0;
+                this.$emit('show-error', `Error during data loading for ${this.endpoint}`);
             } finally {
                 this.loading = false;
+                console.log(`[DataTable] Loading finished for ${this.endpoint}.`);
             }
         }
     },

@@ -39,5 +39,9 @@ Route::delete('customer/{customerId}/car/{carId}', [CustomerController::class, '
 
 
 
+// Jobs Routes
+Route::get('/jobs/search', [App\Http\Controllers\JobController::class, 'search']);
+Route::apiResource('jobs', App\Http\Controllers\JobController::class);
+
 // Logout Routes
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
