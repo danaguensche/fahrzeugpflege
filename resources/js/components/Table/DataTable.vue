@@ -87,7 +87,8 @@
                                                 v-model="editItem[field]" 
                                                 :rules="getFieldRules(field)"
                                                 :error-messages="fieldErrors[field]" 
-                                                density="compact">
+                                                density="compact"
+                                                :type="field === 'scheduled_at' ? 'datetime-local' : 'text'">
                                             </v-text-field>
                                         </template>
                                     </template>
@@ -109,6 +110,12 @@
                                     <template v-else>
                                         {{ '' }}
                                     </template>
+                                </span>
+                                <span v-else-if="field === 'status'">
+                                    {{ getStatusTitle(item[field]) }}
+                                </span>
+                                <span v-else-if="field === 'scheduled_at'">
+                                    {{ formatDateTime(item[field]) }}
                                 </span>
                                 <span v-else>{{ item[field] || '' }}</span>
                                 </template>
@@ -585,6 +592,29 @@ export default {
                 this.loading = false;
                 console.log(`[DataTable] Loading finished for ${this.endpoint}.`);
             }
+        },
+
+        getStatusTitle(statusCode) {
+            const statusHeader = this.headers.find(header => header.key === 'status');
+            if (statusHeader && statusHeader.options) {
+                const option = statusHeader.options.find(opt => opt.value === statusCode);
+                return option ? option.title : statusCode;
+            }
+            return statusCode;
+        },
+
+        formatDateTime(dateTimeString) {
+            if (!dateTimeString) return '';
+            const date = new Date(dateTimeString);
+            const options = {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            };
+            return date.toLocaleString('de-DE', options);
         }
     },
 
