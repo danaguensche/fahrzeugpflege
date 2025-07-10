@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Job;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class JobController extends Controller
 {
@@ -96,4 +97,37 @@ class JobController extends Controller
 
         return response()->json(null, 204);
     }
+
+
+
+    public function destroyMultiple(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'integer|exists:customers,id'
+            ]);
+
+            Job::destroy($validated['ids']);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Jobs wurden erfolgreich gelöscht.'
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validierungsfehler',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Löschen mehrerer Jobs: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler beim Löschen der Jobs'
+            ], 500);
+        }
+    }
+
 }

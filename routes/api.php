@@ -45,6 +45,7 @@ Route::apiResource('services', App\Http\Controllers\ServiceController::class);
 
 // Jobs Routes
 Route::get('/jobs/search', [App\Http\Controllers\JobController::class, 'search']);
+Route::delete('jobs', [App\Http\Controllers\JobController::class, 'destroyMultiple']);
 Route::apiResource('jobs', App\Http\Controllers\JobController::class);
 
 // Logout Routes
