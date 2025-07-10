@@ -66,7 +66,11 @@ export default {
                 { title: 'Titel', key: 'title', sortable: true },
                 { title: 'Beschreibung', key: 'description', sortable: true },
                 { title: 'Abholtermin', key: 'scheduled_at', sortable: true },
-                { title: 'Status', key: 'status', sortable: true },
+                { title: 'Status', key: 'status', sortable: true, editable: true, type: 'select', options: [
+                    { title: 'Ausstehend', value: 'ausstehend' },
+                    { title: 'In Bearbeitung', value: 'in_bearbeitung' },
+                    { title: 'Abgeschlossen', value: 'abgeschlossen' },
+                ]},
             ],
             jobFields: ["id", "title", "description", "scheduled_at", "status"],
             showAddJobDialog: false,

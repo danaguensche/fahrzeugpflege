@@ -19,7 +19,7 @@
                     <v-autocomplete
                         v-model="job.car_id"
                         :items="cars"
-                        item-title="Kennzeichen"
+                        item-title="data"
                         item-value="id"
                         label="Fahrzeug auswählen"
                         :rules="[v => !!v || 'Fahrzeug ist erforderlich']"
@@ -53,7 +53,6 @@
                         :rules="[v => !!v || 'Service ist erforderlich']"
                         required
                     ></v-select>
-
                     <v-select
                         v-model="job.status"
                         :items="jobStatuses"
@@ -61,7 +60,6 @@
                         :rules="[v => !!v || 'Status ist erforderlich']"
                         required
                     ></v-select>
-
                     <v-text-field
                         v-model="job.scheduled_at"
                         label="Abholtermin"
@@ -150,7 +148,7 @@ export default {
                 const response = await axios.get(`/api/cars/search?query=${query}`);
                 this.cars = response.data.data.map(car => ({
                     id: car.id,
-                    Kennzeichen: car.Kennzeichen,
+                    data: `${car.Automarke || ''} ${car.Typ || ''} ${car.Kennzeichen || ''}`.trim(),
                 }));
             } catch (error) {
                 console.error('Error fetching cars:', error);
@@ -169,7 +167,7 @@ export default {
                 const response = await axios.get(`/api/customers/search?query=${query}`);
                 this.customers = response.data.data.map(customer => ({
                     id: customer.id,
-                    full_name: `${customer.firstname || ''} ${customer.lastname || ''}`.trim(),
+                    full_name: `${customer.firstname || ''} ${customer.lastname || ''} ${customer.email || ''}`.trim(),
                 }));
             } catch (error) {
                 console.error('Error fetching customers:', error);

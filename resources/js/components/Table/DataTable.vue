@@ -65,12 +65,25 @@
                                     </template>
                                     <!-- The rest of the fields are editable -->
                                     <template v-else>
-                                        <v-text-field 
-                                            v-model="editItem[field]" 
-                                            :rules="getFieldRules(field)"
-                                            :error-messages="fieldErrors[field]" 
-                                            density="compact">
-                                        </v-text-field>
+                                        <template v-if="getHeader(field).type === 'select'">
+                                            <v-select
+                                                v-model="editItem[field]"
+                                                :items="getHeader(field).options"
+                                                item-title="title"
+                                                item-value="value"
+                                                :rules="getFieldRules(field)"
+                                                :error-messages="fieldErrors[field]"
+                                                density="compact"
+                                            ></v-select>
+                                        </template>
+                                        <template v-else>
+                                            <v-text-field 
+                                                v-model="editItem[field]" 
+                                                :rules="getFieldRules(field)"
+                                                :error-messages="fieldErrors[field]" 
+                                                density="compact">
+                                            </v-text-field>
+                                        </template>
                                     </template>
                                 </template>
                                 
@@ -370,6 +383,10 @@ export default {
 
         getFieldRules(field) {
             return [value => !!value || `${field} is required`];
+        },
+
+        getHeader(field) {
+            return this.headers.find(header => header.key === field);
         },
 
         showAlert(heading, paragraph, okayButton, action) {

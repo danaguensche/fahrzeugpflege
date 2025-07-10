@@ -61,4 +61,33 @@ class JobController extends Controller
             'total' => $jobs->total(),
         ]);
     }
+
+    public function show(Job $job)
+    {
+        return response()->json($job);
+    }
+
+    public function update(Request $request, Job $job)
+    {
+        $validatedData = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'nullable|string',
+            'car_id' => 'sometimes|required|exists:cars,id',
+            'customer_id' => 'sometimes|required|exists:customers,id',
+            'service_id' => 'sometimes|required|exists:services,id',
+            'status' => 'sometimes|required|string',
+            'scheduled_at' => 'nullable|date',
+        ]);
+
+        $job->update($validatedData);
+
+        return response()->json($job);
+    }
+
+    public function destroy(Job $job)
+    {
+        $job->delete();
+
+        return response()->json(null, 204);
+    }
 }
