@@ -103,14 +103,20 @@
                     <!-- Services information -->
                     <v-sheet>
                         <DefaultHeader :title="'Dienstleistungen'"></DefaultHeader>
-                        <v-list v-if="!editMode" dense>
-                            <v-list-item v-for="service in jobDetails.data.services" :key="service.id">
-                                <v-list-item-title>{{ service.name }}</v-list-item-title>
-                            </v-list-item>
-                            <v-list-item v-if="jobDetails.data.services.length === 0">
-                                <v-list-item-title>Keine Dienstleistungen zugewiesen</v-list-item-title>
-                            </v-list-item>
-                        </v-list>
+                        <div v-if="!editMode" class="d-flex flex-wrap align-center">
+                            <v-chip
+                                v-for="service in jobDetails.data.services"
+                                :key="service.id"
+                                class="ma-1"
+                                color="primary"
+                                label
+                            >
+                                {{ service.name }}
+                            </v-chip>
+                            <span v-if="jobDetails.data.services.length === 0" class="text-grey ma-1">
+                                Keine Dienstleistungen zugewiesen
+                            </span>
+                        </div>
 
                         <v-autocomplete
                             v-else
