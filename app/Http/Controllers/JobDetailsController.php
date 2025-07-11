@@ -35,7 +35,7 @@ class JobDetailsController extends Controller
                 'Title' => 'required|string|max:255',
                 'Beschreibung' => 'nullable|string',
                 'Abholtermin' => 'nullable|date',
-                'Status' => 'required|string|max:255',
+                'status' => 'required|string|max:255',
                 'customer_id' => 'nullable|exists:customers,id',
                 'car_id' => 'nullable|exists:cars,id',
                 'services' => 'nullable|array',

@@ -16,13 +16,26 @@
                         </InformationHeader>
 
                         <!-- Ansichtsmodus -->
-                        <InfoList v-if="!editMode" :details="jobDetails" :labels="labels" :infoKeys="jobInfoKeys">
+                        <InfoList v-if="!editMode" :details="displayedJobDetails" :labels="labels" :infoKeys="jobInfoKeys">
                         </InfoList>
 
                         <!-- Bearbeitungsmodus -->
-                        <InfoListEditMode v-else :personalInfoKeys="jobInfoKeys" :labels="labels"
-                            :editedData="editedJobData">
-                        </InfoListEditMode>
+                        <div v-else>
+                            <InfoListEditMode :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status')" :labels="labels"
+                                :editedData="editedJobData">
+                            </InfoListEditMode>
+                            <v-select
+                                v-model="editedJobData.Status"
+                                :items="statuses"
+                                item-title="title"
+                                item-value="value"
+                                label="Status"
+                                variant="outlined"
+                                density="comfortable"
+                                hide-details="auto"
+                                class="mt-4"
+                            ></v-select>
+                        </div>
                     </v-sheet>
 
                     <!-- Customer information -->
@@ -263,6 +276,11 @@ export default {
             carSearchTimeout: null,
             services: [],
             servicesLoading: false,
+            statuses: [
+                { title: 'Ausstehend', value: 'ausstehend' },
+                { title: 'In Bearbeitung', value: 'in_bearbeitung' },
+                { title: 'Abgeschlossen', value: 'abgeschlossen' },
+            ],
             snackbar: {
                 show: false,
                 text: '',
@@ -282,6 +300,15 @@ export default {
         },
         formattedUpdatedAt() {
             return this.formatDate(this.jobDetails.data?.updated_at);
+        },
+        displayedJobDetails() {
+            if (!this.jobDetails.data) return {};
+            const displayedData = { ...this.jobDetails.data };
+            if (displayedData.Status) {
+                const foundStatus = this.statuses.find(s => s.value === displayedData.Status);
+                displayedData.Status = foundStatus ? foundStatus.title : displayedData.Status;
+            }
+            return displayedData;
         },
     },
     async mounted() {
@@ -331,6 +358,12 @@ export default {
                 this.jobDetails = data;
                 this.editedJobData = { ...this.jobDetails.data };
 
+                // Map status to its value for the dropdown
+                if (this.jobDetails.data.Status) {
+                    const foundStatus = this.statuses.find(s => s.title === this.jobDetails.data.Status);
+                    this.editedJobData.Status = foundStatus ? foundStatus.value : this.jobDetails.data.Status;
+                }
+
                 console.log('JobDetails component received jobDetails:', this.jobDetails);
                 console.log('JobDetails component received car data:', this.jobDetails.data.car);
 
@@ -379,6 +412,12 @@ export default {
 
             if (this.editMode) {
                 this.editedJobData = { ...this.jobDetails.data };
+                console.log('Entering edit mode. editedJobData:', this.editedJobData);
+                // Map status to its value for the dropdown
+                if (this.jobDetails.data.Status) {
+                    const foundStatus = this.statuses.find(s => s.title === this.jobDetails.data.Status);
+                    this.editedJobData.Status = foundStatus ? foundStatus.value : this.jobDetails.data.Status;
+                }
                 // Ensure services are mapped correctly for the autocomplete
                 if (this.jobDetails.data.services) {
                     this.editedJobData.services = this.jobDetails.data.services.map(service => ({
@@ -403,6 +442,11 @@ export default {
             } else {
                 this.editedJobData.services = [];
             }
+            // Reset status to original value for display
+            if (this.jobDetails.data.Status) {
+                const foundStatus = this.statuses.find(s => s.title === this.jobDetails.data.Status);
+                this.editedJobData.Status = foundStatus ? foundStatus.value : this.jobDetails.data.Status;
+            }
         },
 
         async saveJobData() {
@@ -422,6 +466,12 @@ export default {
 
                 // Handle services (send only IDs)
                 dataToSubmit.services = dataToSubmit.services ? dataToSubmit.services.map(s => s.id) : [];
+
+                // Handle status casing for backend
+                if (Object.prototype.hasOwnProperty.call(dataToSubmit, 'Status')) {
+                    dataToSubmit.status = dataToSubmit.Status;
+                    delete dataToSubmit.Status;
+                }
 
                 console.log('Submitting job data:', dataToSubmit);
 
