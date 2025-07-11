@@ -12,13 +12,13 @@
                 <!-- Job information -->
                 <v-card-text class="px-4 pt-4 pb-0">
                     <v-sheet>
-                        <InformationHeader :title="'Jobinformationen'" :editMode="editMode">
+                        <InformationHeader :title="'Jobinformationen'" :editMode="editMode" :getIconForField="getIconForField">
                         </InformationHeader>
 
                         <!-- Ansichtsmodus -->
-                        <InfoList v-if="!editMode" :details="displayedJobDetails" :labels="labels" :infoKeys="jobInfoKeys">
+                        <InfoList v-if="!editMode" :details="displayedJobDetails" :labels="labels"
+                        :infoKeys="jobInfoKeys" :getIconForField="getIconForField">
                         </InfoList>
-
                         <!-- Bearbeitungsmodus -->
                         <div v-else>
                             <InfoListEditMode :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status')" :labels="labels"
