@@ -70,6 +70,8 @@ Route::middleware(['auth'])->group(function () {
             return view('pages.customerdetails', ['id' => $id]);
         })->name('customerdetails');
         Route::get('/auftraege', 'jobs')->name('jobs');
+        Route::get('/auftraege/jobdetails/{id}', 'jobdetails')->name('jobdetails');
+        
         Route::get('/berichte', 'reports')->name('reports');
         Route::get('/profil', 'profile')->name('profile');
         Route::get('/einstellungen', 'settings')->name('settings');

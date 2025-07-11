@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerDetailsController;
 use App\Http\Controllers\CustomerSearchController;
 use App\Http\Controllers\CarSearchController;
+use App\Http\Controllers\JobDetailsController;
+use App\Http\Controllers\ServiceController;
 
 
 // Auth Routes
@@ -41,12 +43,15 @@ Route::delete('customer/{customerId}/car/{carId}', [CustomerController::class, '
 
 
 // Services Routes
-Route::apiResource('services', App\Http\Controllers\ServiceController::class);
+Route::apiResource('services', ServiceController::class);
+Route::get('/services/search', [ServiceController::class, 'search']);
 
 // Jobs Routes
 Route::get('/jobs/search', [App\Http\Controllers\JobController::class, 'search']);
 Route::delete('jobs', [App\Http\Controllers\JobController::class, 'destroyMultiple']);
 Route::apiResource('jobs', App\Http\Controllers\JobController::class);
+Route::get('/jobs/jobdetails/{id}', [JobDetailsController::class, 'details']);
+Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
 
 // Logout Routes
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

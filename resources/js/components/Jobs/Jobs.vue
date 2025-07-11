@@ -26,7 +26,7 @@
             :fields="jobFields"
             itemKey="id"
             detailsPage="jobdetails"
-            detailsUrlBasePath="jobs"
+            detailsUrlBasePath="auftraege"
             deleteKey="ids"
             @itemsDeleted="handleJobsDeleted"
             @show-error="handleError"

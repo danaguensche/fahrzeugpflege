@@ -25,6 +25,16 @@ class Job extends Model
         return $this->belongsToMany(Service::class, 'job_service', 'job_id', 'service_id');
     }
 
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function car()
+    {
+        return $this->belongsTo(Car::class);
+    }
+
     protected $casts = [
         'scheduled_at' => 'datetime',
     ];
