@@ -13,10 +13,10 @@ class CarSearchController extends Controller
         $query = $request->input('query');
 
         if (!$query) {
-            return response()->json(['data' => []]);
+            $results = Car::all();
+        } else {
+            $results = Car::search($query)->get();
         }
-
-        $results = Car::search($query)->get();
 
         return CarResource::collection($results);
     }

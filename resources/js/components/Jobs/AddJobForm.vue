@@ -9,63 +9,123 @@
                         label="Titel"
                         :rules="[v => !!v || 'Titel ist erforderlich']"
                         required
+                        variant="outlined"
+                        density="comfortable"
                     ></v-text-field>
 
                     <v-textarea
                         v-model="job.description"
                         label="Beschreibung"
+                        variant="outlined"
+                        density="comfortable"
                     ></v-textarea>
 
                     <v-autocomplete
-                        v-model="job.car_id"
+                        v-model="job.car"
                         :items="cars"
-                        item-title="data"
+                        item-title="Kennzeichen"
                         item-value="id"
-                        label="Fahrzeug auswählen"
+                        label="Fahrzeug"
+                        placeholder="Fahrzeug auswählen oder suchen"
+                        prepend-inner-icon="mdi-car"
+                        variant="outlined"
+                        density="comfortable"
+                        clearable
+                        :loading="carsLoading"
+                        @update:search="searchCars"
+                        return-object
                         :rules="[v => !!v || 'Fahrzeug ist erforderlich']"
                         required
-                        clearable
-                        chips
-                        small-chips
-                        @update:search="searchCars"
-                    ></v-autocomplete>
+                    >
+                        <template v-slot:item="{ props, item }">
+                            <v-list-item
+                                v-bind="props"
+                                :title="item.raw.Kennzeichen"
+                                :subtitle="item.raw.Automarke"
+                            ></v-list-item>
+                        </template>
+                        <template v-slot:selection="{ item }">
+                            {{ item.raw.Kennzeichen }}
+                        </template>
+                    </v-autocomplete>
 
                     <v-autocomplete
-                        v-model="job.customer_id"
+                        v-model="job.customer"
                         :items="customers"
                         item-title="full_name"
                         item-value="id"
-                        label="Kunde auswählen"
+                        label="Kunde"
+                        placeholder="Kunde auswählen oder suchen"
+                        prepend-inner-icon="mdi-account"
+                        variant="outlined"
+                        density="comfortable"
+                        clearable
+                        :loading="customersLoading"
+                        @update:search="searchCustomers"
+                        return-object
                         :rules="[v => !!v || 'Kunde ist erforderlich']"
                         required
-                        clearable
-                        chips
-                        small-chips
-                        @update:search="searchCustomers"
-                    ></v-autocomplete>
+                    >
+                        <template v-slot:item="{ props, item }">
+                            <v-list-item
+                                v-bind="props"
+                                :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                :subtitle="item.raw.email"
+                            ></v-list-item>
+                        </template>
+                        <template v-slot:selection="{ item }">
+                            {{ item.raw.email }}
+                        </template>
+                    </v-autocomplete>
 
-                    <v-select
-                        v-model="job.service_id"
+                    <v-autocomplete
+                        v-model="job.services"
                         :items="services"
-                        item-title="title"
+                        item-title="name"
                         item-value="id"
-                        label="Service auswählen"
-                        :rules="[v => !!v || 'Service ist erforderlich']"
-                        required
+                        label="Dienstleistungen"
+                        placeholder="Dienstleistungen auswählen"
+                        prepend-inner-icon="mdi-briefcase"
+                        variant="outlined"
+                        density="comfortable"
                         multiple
                         chips
-                    ></v-select>
+                        clearable
+                        :loading="servicesLoading"
+                        return-object
+                        :rules="[v => v && v.length > 0 || 'Mindestens eine Dienstleistung ist erforderlich']"
+                        required
+                    >
+                        <template v-slot:chip="{ props, item }">
+                            <v-chip
+                                v-bind="props"
+                                :text="item.raw.name"
+                            ></v-chip>
+                        </template>
+                        <template v-slot:item="{ props, item }">
+                            <v-list-item
+                                v-bind="props"
+                                :title="item.raw.name"
+                            ></v-list-item>
+                        </template>
+                    </v-autocomplete>
+
                     <v-select
                         v-model="job.status"
                         :items="jobStatuses"
                         label="Status"
                         :rules="[v => !!v || 'Status ist erforderlich']"
                         required
+                        variant="outlined"
+                        density="comfortable"
                     ></v-select>
+
                     <v-text-field
                         v-model="job.scheduled_at"
                         label="Abholtermin"
                         type="datetime-local"
+                        variant="outlined"
+                        density="comfortable"
                     ></v-text-field>
 
                 </v-form>
@@ -76,13 +136,19 @@
                 <v-btn color="blue darken-1" text @click="saveJob">Speichern</v-btn>
             </v-card-actions>
         </v-card>
+        <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false">
+        </SnackBar>
     </v-dialog>
 </template>
 
 <script>
 import axios from 'axios';
+import SnackBar from '../Details/SnackBar.vue';
 
 export default {
+    components: {
+        SnackBar,
+    },
     props: {
         modelValue: Boolean,
     },
@@ -92,9 +158,9 @@ export default {
             job: {
                 title: '',
                 description: '',
-                car_id: null,
-                customer_id: null,
-                service_id: [],
+                car: null,
+                customer: null,
+                services: [],
                 status: 'ausstehend',
                 scheduled_at: null,
             },
@@ -106,8 +172,16 @@ export default {
                 { title: 'In Bearbeitung', value: 'in_bearbeitung' },
                 { title: 'Abgeschlossen', value: 'abgeschlossen' },
             ],
+            carsLoading: false,
             carSearchTimeout: null,
+            customersLoading: false,
             customerSearchTimeout: null,
+            servicesLoading: false,
+            snackbar: {
+                show: false,
+                text: '',
+                color: 'success',
+            },
         };
     },
     computed: {
@@ -123,8 +197,7 @@ export default {
     watch: {
         modelValue(val) {
             if (val) {
-                this.fetchServices();
-                // Optionally fetch initial cars/users if dropdowns are not empty
+                this.fetchInitialData();
             }
         },
     },
@@ -134,77 +207,119 @@ export default {
             this.resetForm();
         },
         async saveJob() {
-            if (this.$refs.form.validate()) {
+            const { valid } = await this.$refs.form.validate();
+            if (valid) {
                 try {
-                    await axios.post('/api/jobs', this.job);
+                    const jobData = {
+                        ...this.job,
+                        car_id: this.job.car ? this.job.car.id : null,
+                        customer_id: this.job.customer ? this.job.customer.id : null,
+                        service_ids: this.job.services ? this.job.services.map(s => s.id) : [],
+                    };
+                    delete jobData.car;
+                    delete jobData.customer;
+                    delete jobData.services;
+
+                    await axios.post('/api/jobs', jobData);
                     this.$emit('job-added');
+                    this.showSnackbar('Job erfolgreich hinzugefügt', 'success');
                     this.closeDialog();
                 } catch (error) {
                     console.error('Error saving job:', error);
-                    // Handle error (e.g., show a toast notification)
+                    this.showSnackbar(error.response?.data?.message || 'Fehler beim Speichern des Jobs', 'error');
                 }
             }
         },
         async fetchCars(query = '') {
+            this.carsLoading = true;
             try {
                 const response = await axios.get(`/api/cars/search?query=${query}`);
                 this.cars = response.data.data.map(car => ({
                     id: car.id,
-                    data: `${car.Automarke || ''} ${car.Typ || ''} ${car.Kennzeichen || ''}`.trim(),
+                    Kennzeichen: car.Kennzeichen,
+                    Automarke: car.Automarke,
                 }));
             } catch (error) {
                 console.error('Error fetching cars:', error);
+                this.showSnackbar('Fehler beim Laden der Fahrzeuge', 'error');
+            } finally {
+                this.carsLoading = false;
             }
         },
-        searchCars(newVal) {
-            if (this.carSearchDebounce) {
-                clearTimeout(this.carSearchDebounce);
+        searchCars(query) {
+            if (this.carSearchTimeout) {
+                clearTimeout(this.carSearchTimeout);
             }
-            this.carSearchDebounce = setTimeout(() => {
-                this.fetchCars(newVal);
+            this.carSearchTimeout = setTimeout(() => {
+                this.fetchCars(query);
             }, 300);
         },
         async fetchCustomers(query = '') {
+            this.customersLoading = true;
             try {
                 const response = await axios.get(`/api/customers/search?query=${query}`);
                 this.customers = response.data.data.map(customer => ({
                     id: customer.id,
-                    full_name: `${customer.firstname || ''} ${customer.lastname || ''} ${customer.email || ''}`.trim(),
+                    firstname: customer.firstname,
+                    lastname: customer.lastname,
+                    full_name: `${customer.firstname} ${customer.lastname}`,
+                    email: customer.email,
                 }));
             } catch (error) {
                 console.error('Error fetching customers:', error);
+                this.showSnackbar('Fehler beim Laden der Kunden', 'error');
+            } finally {
+                this.customersLoading = false;
             }
         },
-        async searchCustomers(newVal) {
-            if (this.customerSearchDebounce) {
-                clearTimeout(this.customerSearchDebounce);
+        searchCustomers(query) {
+            if (this.customerSearchTimeout) {
+                clearTimeout(this.customerSearchTimeout);
             }
-            this.customerSearchDebounce = setTimeout(() => {
-                this.fetchCustomers(newVal);
+            this.customerSearchTimeout = setTimeout(() => {
+                this.fetchCustomers(query);
             }, 300);
         },
         async fetchServices() {
+            this.servicesLoading = true;
             try {
                 const response = await axios.get('/api/services');
-                this.services = response.data.map(services => ({
-                    id: services.id,
-                    title: services.title,
+                this.services = response.data.data.map(service => ({
+                    id: service.id,
+                    name: service.name,
                 }));
             } catch (error) {
                 console.error('Error fetching services:', error);
+                this.showSnackbar('Fehler beim Laden der Dienstleistungen', 'error');
+            } finally {
+                this.servicesLoading = false;
             }
         },
+        fetchInitialData() {
+            this.fetchCars();
+            this.fetchCustomers();
+            this.fetchServices();
+        },
         resetForm() {
-            this.$refs.form.reset();
-            this.$refs.form.resetValidation();
+            if (this.$refs.form) {
+                this.$refs.form.reset();
+                this.$refs.form.resetValidation();
+            }
             this.job = {
                 title: '',
                 description: '',
-                car_id: null,
-                customer_id: null,
-                service_id: null,
+                car: null,
+                customer: null,
+                services: [],
                 status: 'ausstehend',
                 scheduled_at: null,
+            };
+        },
+        showSnackbar(text, color = 'success') {
+            this.snackbar = {
+                show: true,
+                text,
+                color,
             };
         },
     },
@@ -212,5 +327,7 @@ export default {
 </script>
 
 <style scoped>
-/* Add any specific styles for your form here */
+.v-autocomplete, .v-select, .v-text-field, .v-textarea {
+    margin-bottom: 16px;
+}
 </style>

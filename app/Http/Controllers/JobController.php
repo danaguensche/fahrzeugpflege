@@ -17,10 +17,12 @@ class JobController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'status' => 'required|string',
             'scheduled_at' => 'nullable|date',
+            'service_ids' => 'required|array',
+            'service_ids.*' => 'exists:services,id',
         ]);
 
         $job = Job::create($validatedData);
-        $job->services()->sync($request->input('service_id'));
+        $job->services()->sync($request->input('service_ids'));
 
         return response()->json($job, 201);
     }
