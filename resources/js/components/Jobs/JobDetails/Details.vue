@@ -79,8 +79,50 @@
                     <!-- Car information -->
                     <v-sheet>
                         <DefaultHeader :title="'Fahrzeuginformationen'"></DefaultHeader>
-                        <InfoList v-if="!editMode" :details="jobDetails.data.car" :labels="labels" :infoKeys="carInfoKeys" :getIconForField="getIconForField">
-                        </InfoList>
+                        <template v-if="!editMode">
+                            <template v-if="!editMode">
+                            <template v-if="jobDetails.data.car && jobDetails.data.car.Kennzeichen">
+                                <v-list class="bg-transparent">
+                                    <template v-for="key in carInfoKeys" :key="key">
+                                        <v-list-item v-if="jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
+                                            <template v-slot:prepend>
+                                                <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
+                                                </v-icon>
+                                            </template>
+
+                                            <v-list-item-title class="font-weight-medium">
+                                                {{ labels[key] || key }}
+                                            </v-list-item-title>
+
+                                            <v-list-item-subtitle class="mt-1 text-body-1">
+                                                <template v-if="key === 'Kennzeichen'">
+                                                    <router-link :to="`/fahrzeuge/fahrzeugdetails/${jobDetails.data.car.Kennzeichen}`" class="text-decoration-none text-primary">
+                                                        {{ jobDetails.data.car.Kennzeichen }}
+                                                    </router-link>
+                                                </template>
+                                                <template v-else>
+                                                    {{ jobDetails.data.car[key] }}
+                                                </template>
+                                            </v-list-item-subtitle>
+                                        </v-list-item>
+                                        <v-divider v-if="key !== carInfoKeys[carInfoKeys.length - 1] && jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
+                                        </v-divider>
+                                    </template>
+                                </v-list>
+                            </template>
+                            <template v-else>
+                                <v-list-item>
+                                    <v-list-item-subtitle class="text-grey">
+                                        <div class="d-flex align-center justify-center pa-4">
+                                            <v-icon icon="mdi-car-off" color="grey-lighten-1" size="32" class="mr-2">
+                                            </v-icon>
+                                            <span>Kein Fahrzeug zugeordnet</span>
+                                        </div>
+                                    </v-list-item-subtitle>
+                                </v-list-item>
+                            </template>
+                        </template>
+                        </template>
 
                         <v-autocomplete
                             v-else
@@ -211,7 +253,6 @@ import InfoList from "../../Details/InfoList.vue";
 import InfoListEditMode from "../../Details/InfoListEditMode.vue";
 import DefaultHeader from "../../Details/DefaultHeader.vue";
 import CustomerInfoList from "../../Details/CustomerInfoList.vue";
-import CarInfoList from "../../Details/CarInfoList.vue";
 
 export default {
     name: "JobDetails",
@@ -511,6 +552,17 @@ export default {
             };
         },
 
+        getIconForField(key) {
+            const iconMap = {
+                Kennzeichen: "mdi-car-info",
+                Automarke: "mdi-car-traction-control",
+                Typ: "mdi-car-cog",
+                Farbe: "mdi-palette",
+                Sonstiges: "mdi-information-outline",
+            };
+            return iconMap[key] || "mdi-information-outline";
+        },
+
         async fetchCustomers(query = '') {
             this.customersLoading = true;
             try {
@@ -642,6 +694,11 @@ export default {
   }
 }
 
+.v-card-text {
+  flex: 1;
+  overflow-y: auto;
+}
+
 @media (max-width: 767.98px) {
   .v-card-actions {
     flex-direction: column;
@@ -657,4 +714,5 @@ export default {
     display: none;
   }
 }
+
 </style>
