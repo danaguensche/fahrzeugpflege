@@ -32,9 +32,9 @@ class JobDetailsController extends Controller
             $job = Job::findOrFail($id);
 
             $validationRules = [
-                'Title' => 'required|string|max:255',
-                'Beschreibung' => 'nullable|string',
-                'Abholtermin' => 'nullable|date',
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'scheduled_at' => 'nullable|date',
                 'status' => 'required|string|max:255',
                 'customer_id' => 'nullable|exists:customers,id',
                 'car_id' => 'nullable|exists:cars,id',

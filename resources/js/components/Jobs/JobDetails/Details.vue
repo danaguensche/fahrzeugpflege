@@ -23,20 +23,33 @@
                         </InfoList>
                         <!-- Bearbeitungsmodus -->
                         <div v-else>
-                            <InfoListEditMode
-                                :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin')"
-                                :labels="labels" :editedData="editedJobData" :getIconForField="getIconForField"
-                                class="job-information-fields">
+                            <InfoListEditMode :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin')" :labels="labels"
+                                :editedData="editedJobData" @update:editedData="editedJobData = $event"
+                                :getIconForField="getIconForField">
                             </InfoListEditMode>
-
-                            <v-text-field v-model="editedJobData.Abholtermin" label="Abholtermin"
-                                prepend-inner-icon="mdi-calendar-clock" variant="outlined" density="comfortable"
-                                hide-details="auto" type="datetime-local" class="mt-4 w-50 ms-4"></v-text-field>
-
-                            <v-select v-model="editedJobData.Status" :items="statuses" item-title="title"
-                                item-value="value" label="Status" variant="outlined" density="comfortable"
-                                hide-details="auto" class="mt-4 w-50 ms-4"></v-select>
-
+                            <v-text-field
+                                v-model="formattedAbholterminForEdit"
+                                type="datetime-local"
+                                :label="labels.Abholtermin"
+                                variant="outlined"
+                                density="comfortable"
+                                hide-details="auto"
+                                class="mt-4"
+                                :prepend-inner-icon="getIconForField('Abholtermin')"
+                                @keydown.prevent
+                            ></v-text-field>
+                            <v-select
+                                v-model="editedJobData.Status"
+                                :items="statuses"
+                                item-title="title"
+                                item-value="value"
+                                label="Status"
+                                variant="outlined"
+                                density="comfortable"
+                                hide-details="auto"
+                                class="mt-4"
+                                :prepend-inner-icon="getIconForField('Status')"
+                            ></v-select>
                         </div>
                     </v-sheet>
 
@@ -304,11 +317,32 @@ export default {
             }
             if (displayedData.Abholtermin) {
                 displayedData.Abholtermin = this.formatDate(displayedData.Abholtermin);
-            } else {
-                displayedData.Abholtermin = 'Unbekannt';
             }
             return displayedData;
         },
+        formattedAbholterminForEdit: {
+            get() {
+                if (!this.editedJobData.Abholtermin) return '';
+                try {
+                    const date = new Date(this.editedJobData.Abholtermin);
+                    return date.toISOString().slice(0, 16);
+                } catch {
+                    return '';
+                }
+            },
+            set(newValue) {
+                if (newValue) {
+                    try {
+                        const date = new Date(newValue);
+                        this.editedJobData.Abholtermin = date.toISOString();
+                    } catch {
+                        this.editedJobData.Abholtermin = null;
+                    }
+                } else {
+                    this.editedJobData.Abholtermin = null;
+                }
+            }
+        }
     },
     async mounted() {
         try {
@@ -475,6 +509,16 @@ export default {
                     delete dataToSubmit.Status;
                 }
 
+                // Rename keys to match backend expectations and ensure they are always present
+                dataToSubmit.title = dataToSubmit.Title || null;
+                delete dataToSubmit.Title;
+
+                dataToSubmit.description = dataToSubmit.Beschreibung || null;
+                delete dataToSubmit.Beschreibung;
+
+                dataToSubmit.scheduled_at = dataToSubmit.Abholtermin || null;
+                delete dataToSubmit.Abholtermin;
+
                 console.log('Submitting job data:', dataToSubmit);
 
                 await axios.put(
@@ -515,23 +559,14 @@ export default {
 
         getIconForField(key) {
             const iconMap = {
-                // Job Information Icons
                 id: "mdi-identifier",
                 Title: "mdi-format-title",
                 Beschreibung: "mdi-text-box-outline",
-                Abholtermin: "mdi-calendar-clock",
-                Status: "mdi-progress-check",
-
-                // Customer Information Icons
-                customer_id: "mdi-account-box",
-                customer: "mdi-account",
-
-                // Car Information Icons
-                car_id: "mdi-car-key",
-                car: "mdi-car",
-                Kennzeichen: "mdi-license",
-                Automarke: "mdi-car-estate",
-                Typ: "mdi-car-hatchback",
+                Abholtermin: "mdi-calendar",
+                Status: "mdi-check-circle-outline",
+                Kennzeichen: "mdi-car-info",
+                Automarke: "mdi-car-traction-control",
+                Typ: "mdi-car-cog",
                 Farbe: "mdi-palette",
                 Sonstiges: "mdi-information-outline",
 
