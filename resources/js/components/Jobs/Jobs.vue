@@ -72,6 +72,8 @@ export default {
                     { title: 'Abgeschlossen', value: 'abgeschlossen' },
                 ]},
                 { title: 'Services', key: 'services', sortable: false },
+                { title: 'Löschen', key: 'delete', sortable: false },
+                {title: 'Bearbeiten', key: 'edit', sortable: false }
             ],
             jobFields: ["id", "title", "description", "scheduled_at", "status", "services"],
             showAddJobDialog: false,

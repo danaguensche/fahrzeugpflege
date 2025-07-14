@@ -12,63 +12,50 @@
                 <!-- Job information -->
                 <v-card-text class="px-4 pt-4 pb-0">
                     <v-sheet>
-                        <InformationHeader :title="'Jobinformationen'" :editMode="editMode" :getIconForField="getIconForField">
+                        <InformationHeader :title="'Jobinformationen'" :editMode="editMode"
+                            :getIconForField="getIconForField">
                         </InformationHeader>
 
                         <!-- Ansichtsmodus -->
                         <InfoList v-if="!editMode" :details="displayedJobDetails" :labels="labels"
-                        :infoKeys="jobInfoKeys" :getIconForField="getIconForField">
+                            :infoKeys="jobInfoKeys" :getIconForField="getIconForField">
+
                         </InfoList>
                         <!-- Bearbeitungsmodus -->
                         <div v-else>
-                            <InfoListEditMode :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status')" :labels="labels"
-                                :editedData="editedJobData">
+                            <InfoListEditMode
+                                :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin')"
+                                :labels="labels" :editedData="editedJobData" :getIconForField="getIconForField"
+                                class="job-information-fields">
                             </InfoListEditMode>
-                            <v-select
-                                v-model="editedJobData.Status"
-                                :items="statuses"
-                                item-title="title"
-                                item-value="value"
-                                label="Status"
-                                variant="outlined"
-                                density="comfortable"
-                                hide-details="auto"
-                                class="mt-4"
-                            ></v-select>
+
+                            <v-text-field v-model="editedJobData.Abholtermin" label="Abholtermin"
+                                prepend-inner-icon="mdi-calendar-clock" variant="outlined" density="comfortable"
+                                hide-details="auto" type="datetime-local" class="mt-4 w-50 ms-4"></v-text-field>
+
+                            <v-select v-model="editedJobData.Status" :items="statuses" item-title="title"
+                                item-value="value" label="Status" variant="outlined" density="comfortable"
+                                hide-details="auto" class="mt-4 w-50 ms-4"></v-select>
+
                         </div>
                     </v-sheet>
 
                     <!-- Customer information -->
                     <v-sheet>
                         <DefaultHeader :title="'Kundeninformation'"></DefaultHeader>
-                        <CustomerInfoList v-if="!editMode" :customer="jobDetails.data.customer" :customerId="jobDetails.data.customer_id"
-                            :labels="labels">
+                        <CustomerInfoList v-if="!editMode" :customer="jobDetails.data.customer"
+                            :customerId="jobDetails.data.customer_id" :labels="labels">
                         </CustomerInfoList>
 
-                        <v-autocomplete
-                            v-else
-                            v-model="editedJobData.customer"
-                            :items="customers"
-                            item-title="full_name"
-                            item-value="id"
-                            label="Kunde"
-                            placeholder="Kunde auswählen oder suchen"
-                            prepend-inner-icon="mdi-account"
-                            variant="outlined"
-                            density="comfortable"
-                            hide-details="auto"
-                            clearable
-                            :loading="customersLoading"
-                            :search-input.sync="customerSearch"
-                            @update:search-input="searchCustomers"
-                            return-object
-                        >
+                        <v-autocomplete v-else v-model="editedJobData.customer" class="w-50 ms-4" :items="customers"
+                            item-title="full_name" item-value="id" label="Kunde"
+                            placeholder="Kunde auswählen oder suchen" prepend-inner-icon="mdi-account"
+                            variant="outlined" density="comfortable" hide-details="auto" clearable
+                            :loading="customersLoading" :search-input.sync="customerSearch"
+                            @update:search-input="searchCustomers" return-object>
                             <template v-slot:item="{ props, item }">
-                                <v-list-item
-                                    v-bind="props"
-                                    :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                    :subtitle="item.raw.email"
-                                ></v-list-item>
+                                <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                    :subtitle="item.raw.email"></v-list-item>
                             </template>
                             <template v-slot:selection="{ item }">
                                 {{ item.raw.email }}
@@ -81,73 +68,62 @@
                         <DefaultHeader :title="'Fahrzeuginformationen'"></DefaultHeader>
                         <template v-if="!editMode">
                             <template v-if="!editMode">
-                            <template v-if="jobDetails.data.car && jobDetails.data.car.Kennzeichen">
-                                <v-list class="bg-transparent">
-                                    <template v-for="key in carInfoKeys" :key="key">
-                                        <v-list-item v-if="jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
-                                            <template v-slot:prepend>
-                                                <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
+                                <template v-if="jobDetails.data.car && jobDetails.data.car.Kennzeichen">
+                                    <v-list class="bg-transparent">
+                                        <template v-for="key in carInfoKeys" :key="key">
+                                            <v-list-item
+                                                v-if="jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
+                                                <template v-slot:prepend>
+                                                    <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
+                                                    </v-icon>
+                                                </template>
+
+                                                <v-list-item-title class="font-weight-medium">
+                                                    {{ labels[key] || key }}
+                                                </v-list-item-title>
+
+                                                <v-list-item-subtitle class="mt-1 text-body-1">
+                                                    <template v-if="key === 'Kennzeichen'">
+                                                        <router-link
+                                                            :to="`/fahrzeuge/fahrzeugdetails/${jobDetails.data.car.Kennzeichen}`"
+                                                            class="text-decoration-none text-primary">
+                                                            {{ jobDetails.data.car.Kennzeichen }}
+                                                        </router-link>
+                                                    </template>
+                                                    <template v-else>
+                                                        {{ jobDetails.data.car[key] }}
+                                                    </template>
+                                                </v-list-item-subtitle>
+                                            </v-list-item>
+                                            <v-divider
+                                                v-if="key !== carInfoKeys[carInfoKeys.length - 1] && jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
+                                            </v-divider>
+                                        </template>
+                                    </v-list>
+                                </template>
+                                <template v-else>
+                                    <v-list-item>
+                                        <v-list-item-subtitle class="text-grey">
+                                            <div class="d-flex align-center justify-center pa-4">
+                                                <v-icon icon="mdi-car-off" color="grey-lighten-1" size="32"
+                                                    class="mr-2">
                                                 </v-icon>
-                                            </template>
-
-                                            <v-list-item-title class="font-weight-medium">
-                                                {{ labels[key] || key }}
-                                            </v-list-item-title>
-
-                                            <v-list-item-subtitle class="mt-1 text-body-1">
-                                                <template v-if="key === 'Kennzeichen'">
-                                                    <router-link :to="`/fahrzeuge/fahrzeugdetails/${jobDetails.data.car.Kennzeichen}`" class="text-decoration-none text-primary">
-                                                        {{ jobDetails.data.car.Kennzeichen }}
-                                                    </router-link>
-                                                </template>
-                                                <template v-else>
-                                                    {{ jobDetails.data.car[key] }}
-                                                </template>
-                                            </v-list-item-subtitle>
-                                        </v-list-item>
-                                        <v-divider v-if="key !== carInfoKeys[carInfoKeys.length - 1] && jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
-                                        </v-divider>
-                                    </template>
-                                </v-list>
-                            </template>
-                            <template v-else>
-                                <v-list-item>
-                                    <v-list-item-subtitle class="text-grey">
-                                        <div class="d-flex align-center justify-center pa-4">
-                                            <v-icon icon="mdi-car-off" color="grey-lighten-1" size="32" class="mr-2">
-                                            </v-icon>
-                                            <span>Kein Fahrzeug zugeordnet</span>
-                                        </div>
-                                    </v-list-item-subtitle>
-                                </v-list-item>
+                                                <span>Kein Fahrzeug zugeordnet</span>
+                                            </div>
+                                        </v-list-item-subtitle>
+                                    </v-list-item>
+                                </template>
                             </template>
                         </template>
-                        </template>
 
-                        <v-autocomplete
-                            v-else
-                            v-model="editedJobData.car"
-                            :items="cars"
-                            item-title="Kennzeichen"
-                            item-value="id"
-                            label="Fahrzeug"
-                            placeholder="Fahrzeug auswählen oder suchen"
-                            prepend-inner-icon="mdi-car"
-                            variant="outlined"
-                            density="comfortable"
-                            hide-details="auto"
-                            clearable
-                            :loading="carsLoading"
-                            :search-input.sync="carSearch"
-                            @update:search-input="searchCars"
-                            return-object
-                        >
+                        <v-autocomplete v-else class="w-50 ms-4" v-model="editedJobData.car" :items="cars"
+                            item-title="Kennzeichen" item-value="id" label="Fahrzeug"
+                            placeholder="Fahrzeug auswählen oder suchen" prepend-inner-icon="mdi-car" variant="outlined"
+                            density="comfortable" hide-details="auto" clearable :loading="carsLoading"
+                            :search-input.sync="carSearch" @update:search-input="searchCars" return-object>
                             <template v-slot:item="{ props, item }">
-                                <v-list-item
-                                    v-bind="props"
-                                    :title="item.raw.Kennzeichen"
-                                    :subtitle="item.raw.Automarke"
-                                ></v-list-item>
+                                <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
+                                    :subtitle="item.raw.Automarke"></v-list-item>
                             </template>
                             <template v-slot:selection="{ item }">
                                 {{ item.raw.Kennzeichen }}
@@ -159,13 +135,8 @@
                     <v-sheet>
                         <DefaultHeader :title="'Dienstleistungen'"></DefaultHeader>
                         <div v-if="!editMode" class="d-flex flex-wrap align-center">
-                            <v-chip
-                                v-for="service in jobDetails.data.services"
-                                :key="service.id"
-                                class="ma-1"
-                                color="primary"
-                                label
-                            >
+                            <v-chip v-for="service in jobDetails.data.services" :key="service.id" class="ma-1"
+                                color="primary" label>
                                 {{ service.name }}
                             </v-chip>
                             <span v-if="jobDetails.data.services.length === 0" class="text-grey ma-1">
@@ -173,35 +144,16 @@
                             </span>
                         </div>
 
-                        <v-autocomplete
-                            v-else
-                            v-model="editedJobData.services"
-                            :items="services"
-                            item-title="name"
-                            item-value="id"
-                            label="Dienstleistungen"
-                            placeholder="Dienstleistungen auswählen"
-                            prepend-inner-icon="mdi-briefcase"
-                            variant="outlined"
-                            density="comfortable"
-                            hide-details="auto"
-                            multiple
-                            chips
-                            clearable
-                            :loading="servicesLoading"
-                            return-object
-                        >
+                        <v-autocomplete v-else class="w-50 ms-4" v-model="editedJobData.services" :items="services"
+                            item-title="name" item-value="id" label="Dienstleistungen"
+                            placeholder="Dienstleistungen auswählen" prepend-inner-icon="mdi-briefcase"
+                            variant="outlined" density="comfortable" hide-details="auto" multiple chips clearable
+                            :loading="servicesLoading" return-object>
                             <template v-slot:chip="{ props, item }">
-                                <v-chip
-                                    v-bind="props"
-                                    :text="item.raw.name"
-                                ></v-chip>
+                                <v-chip v-bind="props" :text="item.raw.name"></v-chip>
                             </template>
                             <template v-slot:item="{ props, item }">
-                                <v-list-item
-                                    v-bind="props"
-                                    :title="item.raw.name"
-                                ></v-list-item>
+                                <v-list-item v-bind="props" :title="item.raw.name"></v-list-item>
                             </template>
                         </v-autocomplete>
                     </v-sheet>
@@ -342,12 +294,18 @@ export default {
         formattedUpdatedAt() {
             return this.formatDate(this.jobDetails.data?.updated_at);
         },
+
         displayedJobDetails() {
             if (!this.jobDetails.data) return {};
             const displayedData = { ...this.jobDetails.data };
             if (displayedData.Status) {
                 const foundStatus = this.statuses.find(s => s.value === displayedData.Status);
                 displayedData.Status = foundStatus ? foundStatus.title : displayedData.Status;
+            }
+            if (displayedData.Abholtermin) {
+                displayedData.Abholtermin = this.formatDate(displayedData.Abholtermin);
+            } else {
+                displayedData.Abholtermin = 'Unbekannt';
             }
             return displayedData;
         },
@@ -395,7 +353,6 @@ export default {
                 if (!data) {
                     throw new Error("Keine Daten vom Server erhalten");
                 }
-
                 this.jobDetails = data;
                 this.editedJobData = { ...this.jobDetails.data };
 
@@ -459,6 +416,10 @@ export default {
                     const foundStatus = this.statuses.find(s => s.title === this.jobDetails.data.Status);
                     this.editedJobData.Status = foundStatus ? foundStatus.value : this.jobDetails.data.Status;
                 }
+
+                if (this.editedJobData.Abholtermin) {
+                    this.editedJobData.Abholtermin = this.formatDateTimeForInput(this.editedJobData.Abholtermin);
+                }
                 // Ensure services are mapped correctly for the autocomplete
                 if (this.jobDetails.data.services) {
                     this.editedJobData.services = this.jobDetails.data.services.map(service => ({
@@ -496,7 +457,7 @@ export default {
 
             try {
                 const dataToSubmit = { ...this.editedJobData };
-                
+
                 // Handle customer_id
                 dataToSubmit.customer_id = dataToSubmit.customer ? dataToSubmit.customer.id : null;
                 delete dataToSubmit.customer;
@@ -528,16 +489,16 @@ export default {
             } catch (error) {
                 console.error('Error saving job data:', error);
                 console.error('Error response:', error.response?.data);
-                
+
                 let errorMessage = "Fehler beim Speichern der Jobdaten";
-                
+
                 if (error.response?.data?.message) {
                     errorMessage = error.response.data.message;
                 } else if (error.response?.data?.errors) {
                     const validationErrors = Object.values(error.response.data.errors).flat();
                     errorMessage = validationErrors.join(', ');
                 }
-                
+
                 this.showSnackbar(errorMessage, 'error');
             } finally {
                 this.saveLoading = false;
@@ -554,13 +515,54 @@ export default {
 
         getIconForField(key) {
             const iconMap = {
-                Kennzeichen: "mdi-car-info",
-                Automarke: "mdi-car-traction-control",
-                Typ: "mdi-car-cog",
+                // Job Information Icons
+                id: "mdi-identifier",
+                Title: "mdi-format-title",
+                Beschreibung: "mdi-text-box-outline",
+                Abholtermin: "mdi-calendar-clock",
+                Status: "mdi-progress-check",
+
+                // Customer Information Icons
+                customer_id: "mdi-account-box",
+                customer: "mdi-account",
+
+                // Car Information Icons
+                car_id: "mdi-car-key",
+                car: "mdi-car",
+                Kennzeichen: "mdi-license",
+                Automarke: "mdi-car-estate",
+                Typ: "mdi-car-hatchback",
                 Farbe: "mdi-palette",
                 Sonstiges: "mdi-information-outline",
+
+                // Services Icons
+                services: "mdi-tools",
+
+                // Meta Data Icons
+                created_at: "mdi-calendar-plus",
+                updated_at: "mdi-calendar-edit",
+
+                // Default fallback
+                default: "mdi-information-outline"
             };
-            return iconMap[key] || "mdi-information-outline";
+
+            return iconMap[key] || iconMap.default;
+        },
+        formatDateTimeForInput(dateString) {
+            if (!dateString) return '';
+
+            try {
+                const date = new Date(dateString);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            } catch {
+                return '';
+            }
         },
 
         async fetchCustomers(query = '') {
@@ -637,82 +639,85 @@ export default {
 </script>
 
 <style scoped>
+.job-information-fields {
+    width: 102%;
+}
+
 .card-container {
-  width: 100%;
-  height: calc(100vh - 40px);
-  padding: 20px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
+    width: 100%;
+    height: calc(100vh - 40px);
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 .card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
 @media (max-width: 575.98px) {
-  .card-container {
-    padding: 10px;
-    height: calc(100vh - 20px);
-  }
+    .card-container {
+        padding: 10px;
+        height: calc(100vh - 20px);
+    }
 
-  .card {
-    font-size: 14px;
-  }
+    .card {
+        font-size: 14px;
+    }
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
-  .card-container {
-    padding: 15px;
-    height: calc(100vh - 30px);
-  }
+    .card-container {
+        padding: 15px;
+        height: calc(100vh - 30px);
+    }
 }
 
 @media (min-width: 768px) and (max-width: 991.98px) {
-  .card-container {
-    max-width: calc(100% - 80px);
-  }
+    .card-container {
+        max-width: calc(100% - 80px);
+    }
 }
 
 @media (min-width: 992px) and (max-width: 1199.98px) {
-  .card-container {
-    max-width: calc(100% - 250px);
-  }
+    .card-container {
+        max-width: calc(100% - 250px);
+    }
 }
 
 @media (min-width: 1200px) {
-  .card-container {
-    max-width: calc(100% - 280px);
-  }
+    .card-container {
+        max-width: calc(100% - 280px);
+    }
 }
 
 .v-card-text {
-  flex: 1;
-  overflow-y: auto;
+    flex: 1;
+    overflow-y: auto;
 }
 
 @media (max-width: 767.98px) {
-  .v-card-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    .v-card-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-  .v-card-actions button {
-    margin-bottom: 8px;
-    width: 100%;
-  }
+    .v-card-actions button {
+        margin-bottom: 8px;
+        width: 100%;
+    }
 
-  .v-spacer {
-    display: none;
-  }
+    .v-spacer {
+        display: none;
+    }
 }
-
 </style>
