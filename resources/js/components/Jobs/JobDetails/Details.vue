@@ -21,9 +21,21 @@
                         </InfoList>
                         <!-- Bearbeitungsmodus -->
                         <div v-else>
-                            <InfoListEditMode :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status')" :labels="labels"
-                                :editedData="editedJobData" :getIconForField="getIconForField">
+                            <InfoListEditMode :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin')" :labels="labels"
+                                :editedData="editedJobData" @update:editedData="editedJobData = $event"
+                                :getIconForField="getIconForField">
                             </InfoListEditMode>
+                            <v-text-field
+                                v-model="formattedAbholterminForEdit"
+                                type="datetime-local"
+                                :label="labels.Abholtermin"
+                                variant="outlined"
+                                density="comfortable"
+                                hide-details="auto"
+                                class="mt-4"
+                                :prepend-inner-icon="getIconForField('Abholtermin')"
+                                @keydown.prevent
+                            ></v-text-field>
                             <v-select
                                 v-model="editedJobData.Status"
                                 :items="statuses"
@@ -350,8 +362,34 @@ export default {
                 const foundStatus = this.statuses.find(s => s.value === displayedData.Status);
                 displayedData.Status = foundStatus ? foundStatus.title : displayedData.Status;
             }
+            if (displayedData.Abholtermin) {
+                displayedData.Abholtermin = this.formatDate(displayedData.Abholtermin);
+            }
             return displayedData;
         },
+        formattedAbholterminForEdit: {
+            get() {
+                if (!this.editedJobData.Abholtermin) return '';
+                try {
+                    const date = new Date(this.editedJobData.Abholtermin);
+                    return date.toISOString().slice(0, 16);
+                } catch {
+                    return '';
+                }
+            },
+            set(newValue) {
+                if (newValue) {
+                    try {
+                        const date = new Date(newValue);
+                        this.editedJobData.Abholtermin = date.toISOString();
+                    } catch {
+                        this.editedJobData.Abholtermin = null;
+                    }
+                } else {
+                    this.editedJobData.Abholtermin = null;
+                }
+            }
+        }
     },
     async mounted() {
         try {
@@ -514,6 +552,16 @@ export default {
                     dataToSubmit.status = dataToSubmit.Status;
                     delete dataToSubmit.Status;
                 }
+
+                // Rename keys to match backend expectations and ensure they are always present
+                dataToSubmit.title = dataToSubmit.Title || null;
+                delete dataToSubmit.Title;
+
+                dataToSubmit.description = dataToSubmit.Beschreibung || null;
+                delete dataToSubmit.Beschreibung;
+
+                dataToSubmit.scheduled_at = dataToSubmit.Abholtermin || null;
+                delete dataToSubmit.Abholtermin;
 
                 console.log('Submitting job data:', dataToSubmit);
 
