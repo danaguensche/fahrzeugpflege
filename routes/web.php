@@ -67,7 +67,8 @@ Route::middleware(['auth'])->group(function () {
         },)->name('cardetails');
         Route::get('/kunden', 'customers')->name('kunden');
         Route::get('/kunden/kundendetails/{id}', function ($id) {
-            return view('pages.customerdetails', ['id' => $id]);
+            $customer = \App\Models\Customer::with('auftraege')->find($id);
+            return view('pages.customerdetails', ['id' => $id, 'auftraege' => $customer->auftraege]);
         })->name('customerdetails');
         Route::get('/auftraege', 'jobs')->name('jobs');
         Route::get('/auftraege/jobdetails/{id}', 'jobdetails')->name('jobdetails');

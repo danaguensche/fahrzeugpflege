@@ -111,6 +111,60 @@
             @car-assigned="handleCarAssigned" @car-selected="handleCarSelected" @error="handleCarAddError">
           </CarAddDialog>
 
+          <!-- Auftragsinformationen -->
+          <v-sheet>
+            <DefaultHeader :title="'Auftragsinformationen'"></DefaultHeader>
+            <template v-if="customerDetails.data.auftraege && customerDetails.data.auftraege.length > 0">
+              <div v-for="auftrag in customerDetails.data.auftraege" :key="auftrag.id" class="mb-4 pa-4">
+                <v-list class="bg-transparent">
+                  <v-list-item>
+                    <template v-slot:prepend>
+                      <v-icon icon="mdi-identifier" color="primary" class="mr-2"></v-icon>
+                    </template>
+                    <v-list-item-title class="font-weight-medium">
+                      <router-link :to="`/auftraege/jobdetails/${auftrag.id}`" class="text-decoration-none text-primary">
+                        Auftrag ID: {{ auftrag.id }}
+                      </router-link>
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-divider></v-divider>
+                  <template v-for="key in auftragInfoKeys" :key="key">
+                    <v-list-item v-if="auftrag[key] !== undefined">
+                      <template v-slot:prepend>
+                        <v-icon :icon="getIconForField(key)" color="primary" class="mr-2"></v-icon>
+                      </template>
+                      <v-list-item-title class="font-weight-medium">
+                        {{ labels[key] || key }}
+                      </v-list-item-title>
+                      <v-list-item-subtitle class="mt-1 text-body-1">
+                        <template v-if="auftrag[key] === null || auftrag[key] === ''">
+                          <span class="text-grey">Keine Daten vorhanden</span>
+                        </template>
+                        <template v-else-if="key === 'Abholtermin'">
+                          {{ formatDate(auftrag[key]) }}
+                        </template>
+                        <template v-else-if="key === 'Status'">
+                          {{ getJobStatusTitle(auftrag[key]) }}
+                        </template>
+                      </v-list-item-subtitle>
+                    </v-list-item>
+                    <v-divider v-if="key !== auftragInfoKeys[auftragInfoKeys.length - 1]"></v-divider>
+                  </template>
+                </v-list>
+              </div>
+            </template>
+            <template v-else>
+              <v-list-item>
+                <v-list-item-subtitle class="text-grey">
+                  <div class="d-flex align-center justify-center pa-4">
+                    <v-icon icon="mdi-information-off" color="grey-lighten-1" size="32" class="mr-2"></v-icon>
+                    <span>Keine Informationen gefunden</span>
+                  </div>
+                </v-list-item-subtitle>
+              </v-list-item>
+            </template>
+          </v-sheet>
+
           <!-- Metadaten -->
           <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt" :formattedUpdatedAt="formattedUpdatedAt">
           </MetaData>
@@ -205,6 +259,10 @@ export default {
         cars: "Fahrzeuge",
         created_at: "Erstellt am",
         updated_at: "Zuletzt aktualisiert am",
+        Title: "Titel",
+        Beschreibung: "Beschreibung",
+        Abholtermin: "Abholtermin",
+        Status: "Status",
       },
       loading: true,
       error: null,
@@ -223,6 +281,10 @@ export default {
 
     addressInfoKeys() {
       return ['addressline', 'postalcode', 'city'];
+    },
+
+    auftragInfoKeys() {
+      return ['Title', 'Beschreibung', 'Abholtermin', 'Status'];
     },
 
     formattedCreatedAt() {
@@ -277,6 +339,7 @@ export default {
         }
 
         this.customerDetails = data;
+        this.customerDetails.data.jobs = data.jobs; 
         this.editedCustomerData = { ...this.customerDetails.data };
       } catch (error) {
         this.error = error.response?.data?.message || error.message;
@@ -305,7 +368,11 @@ export default {
         addressline: "mdi-map-marker",
         postalcode: "mdi-mail",
         city: "mdi-city",
-        cars: "mdi-car-multiple"
+        cars: "mdi-car-multiple",
+        Title: "mdi-format-title",
+        Beschreibung: "mdi-text-box-outline",
+        Abholtermin: "mdi-calendar",
+        Status: "mdi-check-circle-outline"
       };
 
       return iconMap[key] || "mdi-information-outline";
@@ -439,6 +506,19 @@ export default {
       } catch (error) {
         const errorMessage = error.response?.data?.message || "Fehler beim Aktualisieren der Kundenfahrzeuge";
         this.showSnackbar(errorMessage, 'error');
+      }
+    },
+
+    getJobStatusTitle(status) {
+      switch (status) {
+        case 'in_bearbeitung':
+          return 'Ausstehend';
+        case 'in_progress':
+          return 'In Bearbeitung';
+        case 'Abgeschlossen':
+          return 'Abgeschlossen';
+        default:
+          return status; // Fallback, falls der Status unbekannt ist
       }
     },
 
