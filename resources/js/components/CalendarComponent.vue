@@ -1,5 +1,5 @@
 <template>
-  <div class="calendar-container">
+  <div class="calendar-container" :style="{ marginLeft: calendarMarginLeft }">
     <vue-cal
       :events="events"
       :time-from="8 * 60"
@@ -15,6 +15,7 @@
       :min-cell-width="100"
       :min-cell-height="100"
       :snap-to-time="15"
+      :locale="de"
       :sticky-split-labels="true"
       :hide-weekends="false"
       :start-week-on-sunday="false"
@@ -24,6 +25,7 @@
       :event-draggable="false"
       :editable-events="{ title: false, drag: false, resize: false, create: false }"
       :views="['month', 'week', 'day']"
+      :disable-views="['years', 'year']"
       @view-change="updateView"
       @ready="onCalendarReady"
       @cell-click="onDayClick"
@@ -70,6 +72,7 @@
 import VueCal from 'vue-cal';
 import 'vue-cal/dist/vuecal.css';
 import axios from 'axios';
+import { mapState } from 'vuex';
 
 export default {
   components: { VueCal },
@@ -83,6 +86,12 @@ export default {
   },
   mounted() {
     // this.fetchEvents(); // Will be called by @ready event
+  },
+  computed: {
+    ...mapState(['isSidebarOpen']),
+    calendarMarginLeft() {
+      return this.isSidebarOpen ? '260px' : '110px';
+    },
   },
   methods: {
     fetchEvents(startDate, endDate) {
@@ -161,12 +170,12 @@ export default {
 
 <style>
 .calendar-container {
-  padding: 20px;
+  padding: 20px 40px 20px 20px; /* Increased right padding */
   background-color: #f8f8f8; /* Light background for the calendar area */
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin: 20px;
   position: relative; /* Added to ensure proper stacking context */
+  transition: margin-left 0.6s ease; /* Smooth transition for margin */
 }
 
 .vuecal {
