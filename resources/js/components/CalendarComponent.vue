@@ -48,7 +48,7 @@
       </div>
     </div>
 
-    <div v-if="selectedEvent" class="event-details">
+    <div v-if="selectedEvent" class="event-details" id="event-details-section">
       <h3><router-link :to="'/auftraege/jobdetails/' + selectedEvent.job_id">{{ selectedEvent.title }}</router-link></h3>
       <p v-if="selectedEvent.content"><strong>Beschreibung:</strong> {{ selectedEvent.content }}</p>
       <p><strong>Status:</strong> {{ selectedEvent.status }}</p>
@@ -122,6 +122,12 @@ export default {
     onEventClick(event, e) {
       this.selectedEvent = event;
       e.stopPropagation();
+      this.$nextTick(() => {
+        const element = document.getElementById('event-details-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
     },
     renderEventContent(event, view) {
       return `
