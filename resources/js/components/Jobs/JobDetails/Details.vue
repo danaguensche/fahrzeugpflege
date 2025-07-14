@@ -11,7 +11,7 @@
 
                 <!-- Job information -->
                 <v-card-text class="px-4 pt-4 pb-0">
-                    <v-sheet>
+                    <v-sheet >
                         <InformationHeader :title="'Jobinformationen'" :editMode="editMode"
                             :getIconForField="getIconForField">
                         </InformationHeader>
@@ -25,7 +25,7 @@
                         <div v-else>
                             <InfoListEditMode :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin')" :labels="labels"
                                 :editedData="editedJobData" @update:editedData="editedJobData = $event"
-                                :getIconForField="getIconForField">
+                                :getIconForField="getIconForField" class="job-information-fields">
                             </InfoListEditMode>
                             <v-text-field
                                 v-model="formattedAbholterminForEdit"
@@ -34,7 +34,7 @@
                                 variant="outlined"
                                 density="comfortable"
                                 hide-details="auto"
-                                class="mt-4"
+                                class="mt-4 w-50 ms-4"
                                 :prepend-inner-icon="getIconForField('Abholtermin')"
                                 @keydown.prevent
                             ></v-text-field>
@@ -47,14 +47,14 @@
                                 variant="outlined"
                                 density="comfortable"
                                 hide-details="auto"
-                                class="mt-4"
+                                class="mt-4 w-50 ms-4"
                                 :prepend-inner-icon="getIconForField('Status')"
                             ></v-select>
                         </div>
                     </v-sheet>
 
                     <!-- Customer information -->
-                    <v-sheet>
+                    <v-sheet class="section-block">
                         <DefaultHeader :title="'Kundeninformation'"></DefaultHeader>
                         <CustomerInfoList v-if="!editMode" :customer="jobDetails.data.customer"
                             :customerId="jobDetails.data.customer_id" :labels="labels">
@@ -77,7 +77,7 @@
                     </v-sheet>
 
                     <!-- Car information -->
-                    <v-sheet>
+                    <v-sheet class="section-block">
                         <DefaultHeader :title="'Fahrzeuginformationen'"></DefaultHeader>
                         <template v-if="!editMode">
                             <template v-if="!editMode">
@@ -145,7 +145,7 @@
                     </v-sheet>
 
                     <!-- Services information -->
-                    <v-sheet>
+                    <v-sheet class="section-block">
                         <DefaultHeader :title="'Dienstleistungen'"></DefaultHeader>
                         <div v-if="!editMode" class="d-flex flex-wrap align-center">
                             <v-chip v-for="service in jobDetails.data.services" :key="service.id" class="ma-1"
@@ -678,6 +678,7 @@ export default {
     width: 102%;
 }
 
+
 .card-container {
     width: 100%;
     height: calc(100vh - 40px);
@@ -698,6 +699,13 @@ export default {
     flex-direction: column;
     overflow-y: auto;
 }
+
+.section-block {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
 
 @media (max-width: 575.98px) {
     .card-container {
