@@ -17,10 +17,10 @@ class CustomerController extends Controller
                 'firstname' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
                 'email' => 'required|email|unique:customers,email',
-                'phonenumber' => 'required|string',
-                'addressline' => 'required|string',
-                'postalcode' => 'required|string',
-                'city' => 'required|string',
+                'phonenumber' => 'nullable|string|max:255',
+                'addressline' => 'nullable|string|max:255',
+                'postalcode' => 'nullable|string|max:255',
+                'city' => 'nullable|string|max:255',
             ]);
 
             $customer = Customer::create($validated);
@@ -206,10 +206,10 @@ class CustomerController extends Controller
                 'firstname' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
                 'email' => 'required|email|unique:customers,email,' . $id,
-                'phonenumber' => 'required|string',
-                'addressline' => 'required|string',
-                'postalcode' => 'required|string',
-                'city' => 'required|string',
+                'phonenumber' => 'nullable|string|max:255',
+                'addressline' => 'nullable|string|max:255',
+                'postalcode' => 'nullable|string|max:255',
+                'city' => 'nullable|string|max:255',
             ]);
 
             // CORRECTED: send all validated data

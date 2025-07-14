@@ -99,7 +99,6 @@ export default {
 
         handleCustomerAdded() {
             this.showAddCustomerDialog = false;
-            this.$refs.customerDataTable.loadItems();
         },
 
         handleItemsDeleted() {

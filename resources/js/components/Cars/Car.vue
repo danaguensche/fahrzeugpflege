@@ -94,7 +94,6 @@ export default {
         // UI Actions
         handleCarAdded() {
             this.showAddCarDialog = false;
-            this.$refs.carDataTable.loadItems();
         },
 
         openAddCarDialog() {
