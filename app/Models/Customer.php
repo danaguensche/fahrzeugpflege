@@ -34,6 +34,11 @@ class Customer extends Model
         return $this->hasMany(Order::class); 
     }
 
+    public function auftraege()
+    {
+        return $this->hasMany(Job::class);
+    }
+
     public function toSearchableArray()
     {
         return [
