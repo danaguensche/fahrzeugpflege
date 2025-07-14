@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Job;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class JobController extends Controller
 {
@@ -29,20 +30,17 @@ class JobController extends Controller
 
     public function index(Request $request)
     {
-        $query = Job::with('services');
+        $query = Job::with(['customer', 'car', 'services']);
 
-        $itemsPerPage = $request->input('itemsPerPage', 10);
-        $sortBy = $request->input('sortBy', 'id');
-        $sortDesc = $request->input('sortDesc', 'true') === 'true';
+        if ($request->has('start') && $request->has('end')) {
+            $start = Carbon::parse($request->input('start'));
+            $end = Carbon::parse($request->input('end'));
+            $query->whereBetween('scheduled_at', [$start, $end]);
+        }
 
-        $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
+        $jobs = $query->get();
 
-        $jobs = $query->paginate($itemsPerPage);
-
-        return response()->json([
-            'items' => $jobs->items(),
-            'total' => $jobs->total(),
-        ]);
+        return response()->json($jobs);
     }
 
     public function search(Request $request)

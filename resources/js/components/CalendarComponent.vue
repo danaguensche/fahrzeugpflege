@@ -24,6 +24,7 @@
       :editable-events="{ title: false, drag: false, resize: false, create: false }"
       :views="['month', 'week', 'day']"
       @view-change="updateView"
+      @ready="onCalendarReady"
     >
       <template #event="{ event, view }">
         <div class="vuecal__event-title">{{ event.title }}</div>
@@ -48,12 +49,17 @@
     </div>
 
     <div v-if="selectedEvent" class="event-details">
-      <h3>{{ selectedEvent.title }}</h3>
+      <h3><router-link :to="'/auftraege/jobdetails/' + selectedEvent.job_id">{{ selectedEvent.title }}</router-link></h3>
+      <p v-if="selectedEvent.content"><strong>Beschreibung:</strong> {{ selectedEvent.content }}</p>
       <p><strong>Status:</strong> {{ selectedEvent.status }}</p>
-      <p><strong>Email:</strong> {{ selectedEvent.email }}</p>
+      <p><strong>Kunde:</strong> <router-link :to="'/kunden/kundendetails/' + selectedEvent.customer_id">{{ selectedEvent.customer_firstname }} {{ selectedEvent.customer_lastname }}</router-link></p>
+      <p><strong>Email:</strong> <a :href="'mailto:' + selectedEvent.email">{{ selectedEvent.email }}</a></p>
+      <p><strong>Car Kennzeichen:</strong> <router-link :to="'/fahrzeuge/fahrzeugdetails/' + selectedEvent.car_kennzeichen">{{ selectedEvent.car_kennzeichen }}</router-link></p>
+      <p><strong>Services:</strong>
+        <span v-for="(service, index) in selectedEvent.services_list" :key="index" class="service-tag">{{ service }}</span>
+      </p>
       <p><strong>Start:</strong> {{ selectedEvent.start.format('DD.MM.YYYY HH:mm') }}</p>
       <p><strong>End:</strong> {{ selectedEvent.end.format('DD.MM.YYYY HH:mm') }}</p>
-      <p v-if="selectedEvent.content"><strong>Description:</strong> {{ selectedEvent.content }}</p>
     </div>
   </div>
 </template>
@@ -61,6 +67,7 @@
 <script>
 import VueCal from 'vue-cal';
 import 'vue-cal/dist/vuecal.css';
+import axios from 'axios';
 
 export default {
   components: { VueCal },
@@ -73,50 +80,44 @@ export default {
     };
   },
   mounted() {
-    this.fetchEvents();
+    // this.fetchEvents(); // Will be called by @ready event
   },
   methods: {
-    fetchEvents() {
-      // Mock data for demonstration. In a real application, you would fetch this from an API.
-      // Example API call: axios.get('/api/calendar-events').then(response => { this.events = response.data; });
-      this.events = [
-        {
-          start: '2025-07-14 10:00',
-          end: '2025-07-14 11:00',
-          title: 'Aufgabe 1',
-          content: 'Beschreibung der Aufgabe 1',
-          status: 'Ausstehend',
-          email: 'user1@example.com',
-          class: 'ausstehend',
+    fetchEvents(startDate, endDate) {
+      axios.get('/api/jobs', {
+        params: {
+          start: startDate.toISOString().slice(0, 10) + ' 00:00:00',
+          end: endDate.toISOString().slice(0, 10) + ' 23:59:59',
         },
-        {
-          start: '2025-07-14 14:00',
-          end: '2025-07-14 15:30',
-          title: 'Aufgabe 2',
-          content: 'Beschreibung der Aufgabe 2',
-          status: 'In Bearbeitung',
-          email: 'user2@example.com',
-          class: 'in-bearbeitung',
-        },
-        {
-          start: '2025-07-15 09:00',
-          end: '2025-07-15 10:00',
-          title: 'Aufgabe 3',
-          content: 'Beschreibung der Aufgabe 3',
-          status: 'Abgeschlossen',
-          email: 'user3@example.com',
-          class: 'abgeschlossen',
-        },
-        {
-          start: '2025-07-15 11:00',
-          end: '2025-07-15 12:00',
-          title: 'Aufgabe 4',
-          content: 'Beschreibung der Aufgabe 4',
-          status: 'Ausstehend',
-          email: 'user4@example.com',
-          class: 'ausstehend',
-        },
-      ];
+      })
+        .then(response => {
+          this.events = response.data.map(job => {
+            const start = new Date(job.scheduled_at);
+            const end = new Date(start.getTime() + 60 * 60 * 1000); // Assuming 1 hour duration
+            const eventClass = job.status.replace(/_/g, '-');
+            console.log(`Job Status: ${job.status}, Assigned Class: ${eventClass}`);
+            return {
+              start: start.toISOString().slice(0, 16).replace('T', ' '),
+              end: end.toISOString().slice(0, 16).replace('T', ' '),
+              title: job.title,
+              content: job.description,
+              status: job.status,
+              email: job.customer ? job.customer.email : 'N/A',
+              customer_firstname: job.customer ? job.customer.firstname : 'N/A',
+              customer_lastname: job.customer ? job.customer.lastname : 'N/A',
+              customer_id: job.customer ? job.customer.id : null,
+              car_kennzeichen: job.car ? job.car.Kennzeichen : 'N/A',
+              car_make: job.car ? job.car.make : 'N/A',
+              car_model: job.car ? job.car.model : 'N/A',
+              services_list: job.services ? job.services.map(service => service.title) : [],
+              job_id: job.id,
+              class: job.status.replace(/_/g, '-'),
+            };
+          });
+        })
+        .catch(error => {
+          console.error("Error fetching events:", error);
+        });
     },
     onEventClick(event, e) {
       this.selectedEvent = event;
@@ -130,6 +131,10 @@ export default {
     },
     updateView(newView) {
       this.activeView = newView.view;
+      this.fetchEvents(newView.startDate, newView.endDate);
+    },
+    onCalendarReady(view) {
+      this.fetchEvents(view.startDate, view.endDate);
     },
   },
 };
@@ -210,11 +215,55 @@ export default {
 }
 
 .event-details {
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
+  margin-top: 25px;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  background-color: #ffffff; /* Clean white background */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* More prominent shadow */
+  font-family: 'Rubik', sans-serif; /* Use consistent font */
+}
+
+.event-details h3 {
+  font-size: 1.6em;
+  color: #333; /* Darker heading color */
+  margin-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.event-details p {
+  font-size: 1em;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  color: #555; /* Slightly lighter text color */
+}
+
+.event-details p strong {
+  color: #333;
+}
+
+.event-details a {
+  color: #007bff; /* A clear blue for links */
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.event-details a:hover {
+  color: #0056b3; /* Darker blue on hover */
+  text-decoration: underline;
+}
+
+.service-tag {
+  display: inline-block;
+  background-color: #e0e0e0; /* Light grey background */
+  color: #333; /* Dark text */
+  padding: 5px 10px;
+  border-radius: 15px; /* Rounded corners for tag look */
+  margin-right: 8px; /* Space between tags */
+  margin-bottom: 5px; /* Space below tags */
+  font-size: 0.9em;
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
 .legend-container {
