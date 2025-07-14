@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import CalendarPage from './components/pages/CalendarPage.vue';
+import MainLayout from './components/layouts/MainLayout.vue';
+import CalendarComponent from './components/CalendarComponent.vue';
 import DashboardPage from './components/pages/DashboardPage.vue';
 import CarsPage from './components/pages/CarsPage.vue';
 import JobsPage from './components/pages/JobsPage.vue';
@@ -19,53 +20,58 @@ import ResetPassword from './components/Auth/ResetPassword.vue';
 
 const routes = [
     {
-        path: '/dashboard',
-        component: DashboardPage,
-    },
-    {
-        path: '/kalender',
-        component: CalendarPage
-    },
-    {
-        path: '/fahrzeuge',
-        component: CarsPage
-    },
-    {
-        path: '/fahrzeuge/fahrzeugdetails/:kennzeichen',
-        component: CarDetailsPage
-    },
-    {
-        path: '/kunden',
-        component: CustomerPage
-    },
-    {
-        path: '/kunden/kundendetails/:id',
-        component: CustomerDetailsPage
-    },
-
-    {
-        path: '/auftraege',
-        component: JobsPage
-    },
-    {
-        path: '/auftraege/jobdetails/:id',
-        component: JobsDetailsPage
-    },
-    {
-        path: '/berichte/form/:formtype',
-        component: ReportForm
-    },
-    {
-        path: '/berichte',
-        component: ReportsPage
-    },
-    {
-        path: '/profil',
-        component: ProfilePage
-    },
-    {
-        path: '/einstellungen',
-        component: SettingsPage
+        path: '/',
+        component: MainLayout,
+        children: [
+            {
+                path: 'dashboard',
+                component: DashboardPage,
+            },
+            {
+                path: 'kalender',
+                component: CalendarComponent
+            },
+            {
+                path: 'fahrzeuge',
+                component: CarsPage
+            },
+            {
+                path: 'fahrzeuge/fahrzeugdetails/:kennzeichen',
+                component: CarDetailsPage
+            },
+            {
+                path: 'kunden',
+                component: CustomerPage
+            },
+            {
+                path: 'kunden/kundendetails/:id',
+                component: CustomerDetailsPage
+            },
+            {
+                path: 'auftraege',
+                component: JobsPage
+            },
+            {
+                path: 'auftraege/jobdetails/:id',
+                component: JobsDetailsPage
+            },
+            {
+                path: 'berichte/form/:formtype',
+                component: ReportForm
+            },
+            {
+                path: 'berichte',
+                component: ReportsPage
+            },
+            {
+                path: 'profil',
+                component: ProfilePage
+            },
+            {
+                path: 'einstellungen',
+                component: SettingsPage
+            },
+        ]
     },
     {
         path: '/login',
