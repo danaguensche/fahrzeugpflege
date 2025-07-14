@@ -12,25 +12,16 @@
                     </CloseButton>
                 </div>
             </div>
-            <v-btn class="add-job-button" color="primary" @click="openAddJobDialog">
-                <v-icon left>mdi-plus</v-icon>
-                Neue Aufgabe
-            </v-btn>
         </div>
-        <DataTable
-            ref="jobDataTable"
-            :searchString="searchText"
-            :isSearchActive="isSearchActive"
-            endpoint="jobs"
-            :headers="jobHeaders"
-            :fields="jobFields"
-            itemKey="id"
-            detailsPage="jobdetails"
-            detailsUrlBasePath="auftraege"
-            deleteKey="ids"
-            @itemsDeleted="handleJobsDeleted"
-            @show-error="handleError"
-        />
+        <div class="content-container">
+            <DefaultButton @click="openAddJobDialog">
+                Auftrag hinzufügen
+            </DefaultButton>
+        </div>
+        <DataTable ref="jobDataTable" :searchString="searchText" :isSearchActive="isSearchActive" endpoint="jobs"
+            :headers="jobHeaders" :fields="jobFields" itemKey="id" detailsPage="jobdetails"
+            detailsUrlBasePath="auftraege" deleteKey="ids" @itemsDeleted="handleJobsDeleted"
+            @show-error="handleError" />
 
         <AddJobForm v-model="showAddJobDialog" @job-added="handleJobAdded" />
 
@@ -43,6 +34,7 @@ import { mapState } from 'vuex';
 import Search from '../CommonSlots/Searchbar.vue';
 import CloseButton from '../CommonSlots/CloseButton.vue';
 import AddJobForm from './AddJobForm.vue';
+import DefaultButton from '../CommonSlots/DefaultButton.vue';
 
 export default {
     name: 'Jobs',
@@ -51,6 +43,7 @@ export default {
         Search,
         CloseButton,
         AddJobForm,
+        DefaultButton
     },
 
     data() {
@@ -66,14 +59,16 @@ export default {
                 { title: 'Titel', key: 'title', sortable: true },
                 { title: 'Beschreibung', key: 'description', sortable: true },
                 { title: 'Abholtermin', key: 'scheduled_at', sortable: true },
-                { title: 'Status', key: 'status', sortable: true, editable: true, type: 'select', options: [
-                    { title: 'Ausstehend', value: 'ausstehend' },
-                    { title: 'In Bearbeitung', value: 'in_bearbeitung' },
-                    { title: 'Abgeschlossen', value: 'abgeschlossen' },
-                ]},
+                {
+                    title: 'Status', key: 'status', sortable: true, editable: true, type: 'select', options: [
+                        { title: 'Ausstehend', value: 'ausstehend' },
+                        { title: 'In Bearbeitung', value: 'in_bearbeitung' },
+                        { title: 'Abgeschlossen', value: 'abgeschlossen' },
+                    ]
+                },
                 { title: 'Services', key: 'services', sortable: false },
                 { title: 'Löschen', key: 'delete', sortable: false },
-                {title: 'Bearbeiten', key: 'edit', sortable: false }
+                { title: 'Bearbeiten', key: 'edit', sortable: false }
             ],
             jobFields: ["id", "title", "description", "scheduled_at", "status", "services"],
             showAddJobDialog: false,
@@ -256,7 +251,8 @@ export default {
 }
 
 .add-job-button {
-    margin-left: auto; /* Pushes the button to the right */
+    margin-left: auto;
+    /* Pushes the button to the right */
 }
 
 @media only screen and (max-width: 650px) {

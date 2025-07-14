@@ -15,11 +15,7 @@
         </div>
 
         <div class="content-container">
-            <DefaultButton @click="toggleCustomerForm">Kunde hinzufügen</DefaultButton>
-        </div>
-
-        <div class="form-container">
-            <CustomerForm :isOpen="showCustomerForm" @close="showCustomerForm = false" />
+            <DefaultButton @click="openAddCustomerDialog">Kunde hinzufügen</DefaultButton>
         </div>
 
         <DataTable
@@ -34,6 +30,8 @@
             @itemsDeleted="handleItemsDeleted"
             @show-error="handleError"
         />
+        <AddCustomerForm v-model="showAddCustomerDialog" @customer-added="handleCustomerAdded" />
+
     </div>
 </template>
 
@@ -41,8 +39,8 @@
 import CloseButton from '../CommonSlots/CloseButton.vue';
 import Search from '../CommonSlots/Searchbar.vue';
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
-import CustomerForm from './addCustomer/CustomerForm.vue';
 import DataTable from '../Table/DataTable.vue';
+import AddCustomerForm from './addCustomer/AddCustomerForm.vue';
 import { mapState } from 'vuex';
 
 export default {
@@ -52,17 +50,17 @@ export default {
         Search,
         CloseButton,
         DefaultButton,
-        CustomerForm,
+        AddCustomerForm,
         DataTable,
     },
 
     data() {
         return {
+            showAddCustomerDialog: false,
             searchContext: "Suchen Sie nach einem Kunden...",
             searchText: '',
             isSearchActive: false,
             searchDebounceTimer: null,
-            showCustomerForm: false,
             customerHeaders: [
                 { title: 'Auswählen', key: 'checkbox', sortable: false, width: '80px' },
                 { title: 'ID', key: 'id', sortable: true, align: 'start' },
@@ -95,9 +93,13 @@ export default {
 
     methods: {
 
-        // UI Actions
-        toggleCustomerForm() {
-            this.showCustomerForm = !this.showCustomerForm;
+        openAddCustomerDialog() {
+            this.showAddCustomerDialog = true;
+        },
+
+        handleCustomerAdded() {
+            this.showAddCustomerDialog = false;
+            this.$refs.customerDataTable.loadItems();
         },
 
         handleItemsDeleted() {

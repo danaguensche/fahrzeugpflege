@@ -15,12 +15,9 @@
         </div>
 
         <div class="content-container">
-            <DefaultButton @click="toggleCarForm">Fahrzeug hinzufügen</DefaultButton>
+            <DefaultButton @click="openAddCarDialog">Fahrzeug hinzufügen</DefaultButton>
         </div>
 
-        <div class="form-container">
-            <CarForm :isOpen="showCarForm" @close="showCarForm = false" />
-        </div>
 
         <DataTable
             :searchString="searchText"
@@ -35,6 +32,7 @@
             @itemsDeleted="handleItemsDeleted"
             @show-error="handleError"
         />
+        <AddCarForm v-model="showAddCarDialog" @car-added="handleCarAdded" />
     </div>
 </template>
 
@@ -42,9 +40,9 @@
 import { mapState } from 'vuex';
 import Search from '../CommonSlots/Searchbar.vue';
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
-import CarForm from './addCar/CarForm.vue';
 import DataTable from '../Table/DataTable.vue';
 import CloseButton from '../CommonSlots/CloseButton.vue';
+import AddCarForm from './addCar/AddCarForm.vue';
 
 export default {
     name: 'Car',
@@ -52,19 +50,19 @@ export default {
     components: {
         Search,
         DefaultButton,
-        CarForm,
         DataTable,
-        CloseButton
+        CloseButton,
+        AddCarForm
     },
 
     data() {
         return {
             //Search
+            showAddCarDialog: false,
             searchContext: "Suchen Sie nach einem Fahrzeug...",
             searchText: '',
             isSearchActive: false,
             searchDebounceTimer: null,
-            showCarForm: false,
             carHeaders: [
                 { title: 'Auswählen', key: 'checkbox', sortable: false, width: '80px' },
                 { title: 'Kennzeichen', key: 'Kennzeichen', sortable: true, align: 'start' },
@@ -94,8 +92,13 @@ export default {
 
     methods: {
         // UI Actions
-        toggleCarForm() {
-            this.showCarForm = !this.showCarForm;
+        handleCarAdded() {
+            this.showAddCarDialog = false;
+            this.$refs.carDataTable.loadItems();
+        },
+
+        openAddCarDialog() {
+            this.showAddCarDialog = true;
         },
 
         handleItemsDeleted() {
