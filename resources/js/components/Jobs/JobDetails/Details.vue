@@ -22,7 +22,7 @@
                         <!-- Bearbeitungsmodus -->
                         <div v-else>
                             <InfoListEditMode :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status')" :labels="labels"
-                                :editedData="editedJobData">
+                                :editedData="editedJobData" :getIconForField="getIconForField">
                             </InfoListEditMode>
                             <v-select
                                 v-model="editedJobData.Status"
@@ -34,6 +34,7 @@
                                 density="comfortable"
                                 hide-details="auto"
                                 class="mt-4"
+                                :prepend-inner-icon="getIconForField('Status')"
                             ></v-select>
                         </div>
                     </v-sheet>
@@ -554,6 +555,11 @@ export default {
 
         getIconForField(key) {
             const iconMap = {
+                id: "mdi-identifier",
+                Title: "mdi-format-title",
+                Beschreibung: "mdi-text-box-outline",
+                Abholtermin: "mdi-calendar",
+                Status: "mdi-check-circle-outline",
                 Kennzeichen: "mdi-car-info",
                 Automarke: "mdi-car-traction-control",
                 Typ: "mdi-car-cog",

@@ -144,7 +144,7 @@
                           {{ formatDate(auftrag[key]) }}
                         </template>
                         <template v-else-if="key === 'Status'">
-                          {{ getJobStatusTitle(auftrag[key]) }}
+                          {{ statusOptions.find(option => option.value === auftrag[key])?.title || auftrag[key] }}
                         </template>
                       </v-list-item-subtitle>
                     </v-list-item>
@@ -271,6 +271,11 @@ export default {
         text: '',
         color: 'success',
       },
+      statusOptions: [
+        { title: 'Ausstehend', value: 'ausstehend' },
+        { title: 'In Bearbeitung', value: 'in_bearbeitung' },
+        { title: 'Abgeschlossen', value: 'abgeschlossen' },
+      ],
     };
   },
 
@@ -506,19 +511,6 @@ export default {
       } catch (error) {
         const errorMessage = error.response?.data?.message || "Fehler beim Aktualisieren der Kundenfahrzeuge";
         this.showSnackbar(errorMessage, 'error');
-      }
-    },
-
-    getJobStatusTitle(status) {
-      switch (status) {
-        case 'in_bearbeitung':
-          return 'Ausstehend';
-        case 'in_progress':
-          return 'In Bearbeitung';
-        case 'Abgeschlossen':
-          return 'Abgeschlossen';
-        default:
-          return status; // Fallback, falls der Status unbekannt ist
       }
     },
 
