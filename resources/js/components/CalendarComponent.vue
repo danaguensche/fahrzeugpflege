@@ -10,6 +10,7 @@
       :selected-date="selectedDate"
       :on-event-click="onEventClick"
       :event-content-renderer="renderEventContent"
+      :cell-content-renderer="renderCellContent"
       :min-event-width="100"
       :min-cell-width="100"
       :min-cell-height="100"
@@ -25,6 +26,7 @@
       :views="['month', 'week', 'day']"
       @view-change="updateView"
       @ready="onCalendarReady"
+      @cell-click="onDayClick"
     >
       <template #event="{ event, view }">
         <div class="vuecal__event-title">{{ event.title }}</div>
@@ -141,6 +143,17 @@ export default {
     },
     onCalendarReady(view) {
       this.fetchEvents(view.startDate, view.endDate);
+    },
+    onDayClick(date) {
+      if (this.activeView === 'month') {
+        this.activeView = 'week';
+        this.selectedDate = date;
+      }
+    },
+    renderCellContent(cell, view) {
+      if (view.id === 'month' && cell.events.length) {
+        return `<div class="event-count">${cell.events.length} Aufgaben</div>`;
+      }
     },
   },
 };
@@ -270,6 +283,25 @@ export default {
   margin-bottom: 5px; /* Space below tags */
   font-size: 0.9em;
   white-space: nowrap; /* Prevent text wrapping */
+}
+
+.event-count {
+  background-color: #007bff; /* Blue background */
+  color: white; /* White text */
+  border-radius: 50%; /* Make it a circle */
+  width: 30px; /* Slightly larger circle */
+  height: 30px; /* Slightly larger circle */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1em; /* Increased font size */
+  font-weight: bold;
+  margin-top: 5px; /* Adjust position */
+}
+
+.vuecal__cell-date {
+  font-size: 1.2em; /* Increased font size for month number */
+  font-weight: bold;
 }
 
 .legend-container {
