@@ -116,8 +116,18 @@
             <DefaultHeader :title="'Auftragsinformationen'"></DefaultHeader>
             <template v-if="customerDetails.data.auftraege && customerDetails.data.auftraege.length > 0">
               <div v-for="auftrag in customerDetails.data.auftraege" :key="auftrag.id" class="mb-4 pa-4">
-                <h3 class="font-weight-bold">Auftrag ID: {{ auftrag.id }}</h3>
                 <v-list class="bg-transparent">
+                  <v-list-item>
+                    <template v-slot:prepend>
+                      <v-icon icon="mdi-identifier" color="primary" class="mr-2"></v-icon>
+                    </template>
+                    <v-list-item-title class="font-weight-medium">
+                      <router-link :to="`/auftraege/jobdetails/${auftrag.id}`" class="text-decoration-none text-primary">
+                        Auftrag ID: {{ auftrag.id }}
+                      </router-link>
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-divider></v-divider>
                   <template v-for="key in auftragInfoKeys" :key="key">
                     <v-list-item v-if="auftrag[key] !== undefined">
                       <template v-slot:prepend>
@@ -133,8 +143,8 @@
                         <template v-else-if="key === 'Abholtermin'">
                           {{ formatDate(auftrag[key]) }}
                         </template>
-                        <template v-else>
-                          {{ auftrag[key] }}
+                        <template v-else-if="key === 'Status'">
+                          {{ getJobStatusTitle(auftrag[key]) }}
                         </template>
                       </v-list-item-subtitle>
                     </v-list-item>
@@ -496,6 +506,19 @@ export default {
       } catch (error) {
         const errorMessage = error.response?.data?.message || "Fehler beim Aktualisieren der Kundenfahrzeuge";
         this.showSnackbar(errorMessage, 'error');
+      }
+    },
+
+    getJobStatusTitle(status) {
+      switch (status) {
+        case 'in_bearbeitung':
+          return 'Ausstehend';
+        case 'in_progress':
+          return 'In Bearbeitung';
+        case 'Abgeschlossen':
+          return 'Abgeschlossen';
+        default:
+          return status; // Fallback, falls der Status unbekannt ist
       }
     },
 
