@@ -115,8 +115,8 @@
           <v-sheet>
             <DefaultHeader :title="'Auftragsinformationen'"></DefaultHeader>
             <template v-if="customerDetails.data.auftraege && customerDetails.data.auftraege.length > 0">
-              <v-card v-for="auftrag in customerDetails.data.auftraege" :key="auftrag.id" class="mb-4 pa-4">
-                <v-card-title class="font-weight-bold">Auftrag ID: {{ auftrag.id }}</v-card-title>
+              <div v-for="auftrag in customerDetails.data.auftraege" :key="auftrag.id" class="mb-4 pa-4">
+                <h3 class="font-weight-bold">Auftrag ID: {{ auftrag.id }}</h3>
                 <v-list class="bg-transparent">
                   <template v-for="key in auftragInfoKeys" :key="key">
                     <v-list-item v-if="auftrag[key] !== undefined">
@@ -141,7 +141,7 @@
                     <v-divider v-if="key !== auftragInfoKeys[auftragInfoKeys.length - 1]"></v-divider>
                   </template>
                 </v-list>
-              </v-card>
+              </div>
             </template>
             <template v-else>
               <v-list-item>
