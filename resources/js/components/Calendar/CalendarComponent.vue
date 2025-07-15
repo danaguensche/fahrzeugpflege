@@ -57,19 +57,8 @@
         </div>
       </div>
 
-      <div v-if="selectedEvent" class="event-details" id="event-details-section">
-        <h3><router-link :to="'/auftraege/jobdetails/' + selectedEvent.job_id">{{ selectedEvent.title }}</router-link></h3>
-        <p v-if="selectedEvent.content"><strong>Beschreibung:</strong> {{ selectedEvent.content }}</p>
-        <p><strong>Status:</strong> {{ selectedEvent.status }}</p>
-        <p><strong>Kunde:</strong> <router-link :to="'/kunden/kundendetails/' + selectedEvent.customer_id">{{ selectedEvent.customer_firstname }} {{ selectedEvent.customer_lastname }}</router-link></p>
-        <p><strong>Email:</strong> <a :href="'mailto:' + selectedEvent.email">{{ selectedEvent.email }}</a></p>
-        <p><strong>Car Kennzeichen:</strong> <router-link :to="'/fahrzeuge/fahrzeugdetails/' + selectedEvent.car_kennzeichen">{{ selectedEvent.car_kennzeichen }}</router-link></p>
-        <p><strong>Services:</strong>
-          <span v-for="(service, index) in selectedEvent.services_list" :key="index" class="service-tag">{{ service }}</span>
-        </p>
-        <p><strong>Start:</strong> {{ selectedEvent.start.format('DD.MM.YYYY HH:mm') }}</p>
-        <p><strong>End:</strong> {{ selectedEvent.end.format('DD.MM.YYYY HH:mm') }}</p>
-      </div>
+      <!-- Event Dialog Komponente -->
+      <EventDialog :event="selectedEvent" :visible="eventDialog" @close="closeEventDialog" />
     </div>
   </div>
 </template>
@@ -79,15 +68,21 @@ import VueCal from 'vue-cal';
 import 'vue-cal/dist/vuecal.css';
 import axios from 'axios';
 import { mapState } from 'vuex';
+import EventDialog from './EventDialog.vue'; // Pfad zur EventDialog-Komponente anpassen
 
 export default {
-  components: { VueCal },
+  components: {
+    VueCal,
+    EventDialog
+  },
   data() {
     return {
       events: [],
       selectedDate: new Date(),
       selectedEvent: null,
       activeView: 'week',
+      eventDialog: false,
+      job: null,
     };
   },
   mounted() {
@@ -136,35 +131,41 @@ export default {
           console.error("Error fetching events:", error);
         });
     },
+
     onEventClick(event, e) {
       this.selectedEvent = event;
+      this.eventDialog = true;
       e.stopPropagation();
-      this.$nextTick(() => {
-        const element = document.getElementById('event-details-section');
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
     },
+
+    closeEventDialog() {
+      this.eventDialog = false;
+      this.selectedEvent = null;
+    },
+
     renderEventContent(event, view) {
       return `
         <div class="vuecal__event-title">${event.title}</div>
         <div class="vuecal__event-content">${event.email}</div>
       `;
     },
+
     updateView(newView) {
       this.activeView = newView.view;
       this.fetchEvents(newView.startDate, newView.endDate);
     },
+
     onCalendarReady(view) {
       this.fetchEvents(view.startDate, view.endDate);
     },
+
     onDayClick(date) {
       if (this.activeView === 'month') {
         this.activeView = 'week';
         this.selectedDate = date;
       }
     },
+
     renderCellContent(cell, view) {
       if (view.id === 'month' && cell.events.length) {
         return `<div class="event-count">${cell.events.length} Aufgaben</div>`;
@@ -217,12 +218,12 @@ export default {
     width: calc(100% - 40px);
     padding: 20px;
   }
-  
+
   .calendar-page-sidebar-opened {
     margin-left: 280px;
     width: calc(100% - 300px);
   }
-  
+
   .vuecal {
     height: calc(100vh - 200px);
     min-height: 500px;
@@ -233,18 +234,18 @@ export default {
   .calendar-container {
     padding: 10px;
   }
-  
+
   .calendar-page {
     margin-left: 10px;
     width: calc(100% - 20px);
     padding: 15px;
   }
-  
+
   .calendar-page-sidebar-opened {
     margin-left: 10px;
     width: calc(100% - 20px);
   }
-  
+
   .vuecal {
     height: calc(100vh - 120px);
     min-height: 400px;
