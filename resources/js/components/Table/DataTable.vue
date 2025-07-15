@@ -21,10 +21,7 @@
 
         <!-- Table Container -->
         <div class="table-container">
-            <!-- Loading indicator -->
-            <div v-if="loading" class="loader-container">
-                <v-progress-circular indeterminate></v-progress-circular>
-            </div>
+
             
             <!-- Scrolling Table -->
             <div class="scrollable-table">
