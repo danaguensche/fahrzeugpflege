@@ -53,6 +53,8 @@ export default {
                 if (response.data.success) {
                     console.log('Login erfolgreich', response.data);
                     localStorage.setItem('token', response.data.token);
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+                    this.$store.dispatch('auth/login', { token: response.data.token, role: response.data.user.role });
                     console.log('Token gespeichert:', localStorage.getItem('token'));
                     window.location.href = response.data.redirect;
                 }

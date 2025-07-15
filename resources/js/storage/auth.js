@@ -1,10 +1,10 @@
-import { createStore } from "vuex";
-
-export default createStore({
+export default {
+  namespaced: true, // Add namespaced to avoid action/mutation name collisions
   state: {
     activeForm: 'login',
     isLoggedIn: !!localStorage.getItem('token'),
-    token: localStorage.getItem('token')
+    token: localStorage.getItem('token'),
+    userRole: localStorage.getItem('userRole') || null,
   },
   mutations: {
     setActiveForm(state, formName) {
@@ -17,17 +17,24 @@ export default createStore({
       state.token = token;
       localStorage.setItem('token', token);
     },
+    setUserRole(state, role) {
+      state.userRole = role;
+      localStorage.setItem('userRole', role);
+    },
     clearToken(state) {
       state.token = null;
       localStorage.removeItem('token');
+      state.userRole = null;
+      localStorage.removeItem('userRole');
     }
   },
   actions: {
     switchForm({ commit }, formName) {
       commit('setActiveForm', formName);
     },
-    login({ commit }, token) {
+    login({ commit }, { token, role }) {
       commit('setToken', token);
+      commit('setUserRole', role);
       commit('setLoggedIn', true);
     },
     logout({ commit }) {
@@ -36,8 +43,10 @@ export default createStore({
     },
     checkAuthStatus({ commit }) {
       const token = localStorage.getItem('token');
-      if (token) {
+      const userRole = localStorage.getItem('userRole');
+      if (token && userRole) {
         commit('setToken', token);
+        commit('setUserRole', userRole);
         commit('setLoggedIn', true);
       } else {
         commit('setLoggedIn', false);
@@ -48,4 +57,4 @@ export default createStore({
   //   isLoggedIn: state => state.isLoggedIn,
   //   getToken: state => state.token
   // }
-});
+};

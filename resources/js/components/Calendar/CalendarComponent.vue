@@ -350,6 +350,51 @@ export default {
   background: linear-gradient(135deg, #a5d6a7 0%, #81c784 100%);
 }
 
+/* Event Details Styles */
+.event-details {
+  z-index: 9999;
+  position: relative;
+  margin-top: 30px;
+  padding: 25px;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  font-family: 'Rubik', sans-serif;
+}
+
+.event-details h3 {
+  font-size: 1.5em;
+  color: #212529;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f8f9fa;
+  padding-bottom: 12px;
+  font-weight: 600;
+}
+
+.event-details p {
+  font-size: 1em;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  color: #495057;
+}
+
+.event-details p strong {
+  color: #212529;
+  font-weight: 600;
+}
+
+.event-details a {
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  font-weight: 500;
+}
+
+.event-details a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
 
 .service-tag {
   display: inline-block;
