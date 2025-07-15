@@ -26,7 +26,10 @@ class CarResource extends JsonResource
             'Typ' => $this->Typ,
             'Farbe' => $this->Farbe,
             'Sonstiges' => $this->Sonstiges,
-            'images' => $this->images->map(fn($img) => asset('storage/' . $img->path)),
+            'images' => $this->images->map(fn($img) => [
+                'id' => $img->id,
+                'url' => asset('storage/' . $img->path)
+            ]),
             'customer' => $this->whenLoaded('customer', function () {
                 return [
                     'id' => $this->customer->id,

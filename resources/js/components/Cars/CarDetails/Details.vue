@@ -38,9 +38,39 @@
                     <!-- Customer information -->
                     <v-sheet>
                         <DefaultHeader :title="'Kundeninformation'"></DefaultHeader>
-                        <CustomerInfoList :customer="carDetails.data.customer" :customerId="carDetails.data.customer_id"
+                        <CustomerInfoList v-if="!editMode" :customer="carDetails.data.customer" :customerId="carDetails.data.customer_id"
                             :labels="labels">
                         </CustomerInfoList>
+
+                        <v-autocomplete
+                            v-else
+                            v-model="editedCarData.customer"
+                            :items="customers"
+                            item-title="full_name"
+                            item-value="id"
+                            label="Kunde"
+                            placeholder="Kunde auswählen oder suchen"
+                            prepend-inner-icon="mdi-account"
+                            variant="outlined"
+                            density="comfortable"
+                            hide-details="auto"
+                            clearable
+                            :loading="customersLoading"
+                            :search-input.sync="customerSearch"
+                            @update:search-input="searchCustomers"
+                            return-object
+                        >
+                            <template v-slot:item="{ props, item }">
+                                <v-list-item
+                                    v-bind="props"
+                                    :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                    :subtitle="item.raw.email"
+                                ></v-list-item>
+                            </template>
+                            <template v-slot:selection="{ item }">
+                                {{ item.raw.email }}
+                            </template>
+                        </v-autocomplete>
 
                         <!-- Button wird nur angezeigt wenn noch kein Kunde eingetragen wurde -->
                         <v-btn class="mt-4" color="primary"
@@ -104,6 +134,7 @@
                                     <input
                                         ref="fileInput"
                                         type="file"
+                                        multiple
                                         accept="image/*"
                                         style="display: none;"
                                         @change="handleFileSelect"
@@ -133,41 +164,45 @@
                             <!-- File Input Alternative -->
                             <v-col cols="12">
                                 <v-file-input
-                                    v-model="imageUploadDialog.selectedFile"
+                                    v-model="imageUploadDialog.selectedFiles"
+                                    multiple
                                     accept="image/*"
-                                    label="Bild auswählen"
+                                    label="Bilder auswählen"
                                     prepend-icon="mdi-camera"
                                     show-size
                                     @change="handleFileChange"
-                                    :rules="fileRules"
                                     outlined
                                     class="mt-4"
                                 ></v-file-input>
                             </v-col>
 
                             <!-- Image Preview -->
-                            <v-col cols="12" v-if="imageUploadDialog.imagePreview">
+                            <v-col cols="12" v-if="imageUploadDialog.imagePreviews.length > 0">
                                 <v-card outlined>
                                     <v-card-subtitle class="d-flex align-center">
                                         <v-icon left small>mdi-eye</v-icon>
                                         Vorschau:
                                     </v-card-subtitle>
-                                    <v-img
-                                        :src="imageUploadDialog.imagePreview"
-                                        max-height="300"
-                                        contain
-                                        class="ma-2"
-                                    ></v-img>
-                                    
-                                    <!-- Image Info -->
-                                    <v-card-text v-if="imageUploadDialog.selectedFile" class="pt-0">
-                                        <v-chip small color="primary" outlined class="mr-2">
-                                            {{ formatFileSize(imageUploadDialog.selectedFile.size) }}
-                                        </v-chip>
-                                        <v-chip small color="grey" outlined>
-                                            {{ imageUploadDialog.selectedFile.name }}
-                                        </v-chip>
-                                    </v-card-text>
+                                    <v-row dense class="pa-2">
+                                        <v-col v-for="(preview, index) in imageUploadDialog.imagePreviews" :key="index" cols="12" sm="6" md="4">
+                                            <v-card outlined>
+                                                <v-img
+                                                    :src="preview.src"
+                                                    height="150"
+                                                    contain
+                                                    class="ma-2"
+                                                ></v-img>
+                                                <v-card-text class="pt-0">
+                                                    <v-chip small color="primary" outlined class="mr-2">
+                                                        {{ formatFileSize(preview.size) }}
+                                                    </v-chip>
+                                                    <v-chip small color="grey" outlined>
+                                                        {{ preview.name }}
+                                                    </v-chip>
+                                                </v-card-text>
+                                            </v-card>
+                                        </v-col>
+                                    </v-row>
                                 </v-card>
                             </v-col>
 
@@ -214,8 +249,8 @@
                     </v-btn>
                     <v-btn
                         color="primary"
-                        @click="uploadImage"
-                        :disabled="!imageUploadDialog.selectedFile || imageUploadDialog.uploading"
+                        @click="uploadImages"
+                        :disabled="imageUploadDialog.selectedFiles.length === 0 || imageUploadDialog.uploading"
                         :loading="imageUploadDialog.uploading"
                     >
                         <v-icon left>mdi-upload</v-icon>
@@ -303,6 +338,10 @@ export default {
             editMode: false,
             saveLoading: false,
             imageUploadLoading: false,
+            customers: [],
+            customersLoading: false,
+            customerSearch: null,
+            customerSearchTimeout: null,
             snackbar: {
                 show: false,
                 text: '',
@@ -311,14 +350,14 @@ export default {
             // Image upload dialog data
             imageUploadDialog: {
                 show: false,
-                selectedFile: null,
-                imagePreview: null,
+                selectedFiles: [],
+                imagePreviews: [],
                 uploading: false,
                 uploadProgress: 0,
                 errorMessage: '',
                 isDragOver: false,
                 dragCounter: 0,
-                maxFileSize: 10000000, // 10MB
+                maxFileSize: 5242880, // 5MB
                 acceptedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg']
             }
         };
@@ -347,43 +386,28 @@ export default {
         images() {
             const img = this.carDetails.data?.images;
             console.log("Raw images data:", img);
-            
+
             if (!img) {
                 return [];
             }
 
-            if (Array.isArray(img)) {
-                return img.filter(Boolean).map(image => {
-                    // Ensure correct image data structure
-                    if (typeof image === 'string') {
-                        return {
-                            id: null,
-                            path: image,
-                            url: image
-                        };
-                    }
+            const mapImage = (image) => {
+                if (image && image.id) {
                     return {
                         id: image.id,
-                        path: image.path,
-                        url: image.url || `/storage/${image.path}`
+                        path: image.path, // Keep path for consistency if needed
+                        url: image.url
                     };
-                });
+                }
+                return null;
+            };
+
+            if (Array.isArray(img)) {
+                return img.filter(Boolean).map(mapImage).filter(Boolean);
             }
 
-            // If img is not an array, but has data
-            if (typeof img === 'string') {
-                return [{
-                    id: null,
-                    path: img,
-                    url: img
-                }];
-            }
-
-            return img ? [{
-                id: img.id,
-                path: img.path,
-                url: img.url || `/storage/${img.path}`
-            }] : [];
+            const singleImage = mapImage(img);
+            return singleImage ? [singleImage] : [];
         },
         formattedCreatedAt() {
             return this.formatDate(this.carDetails.data?.created_at);
@@ -391,16 +415,11 @@ export default {
         formattedUpdatedAt() {
             return this.formatDate(this.carDetails.data?.updated_at);
         },
-        fileRules() {
-            return [
-                value => !value || value.size < this.imageUploadDialog.maxFileSize || `Bild darf nicht größer als ${this.formatFileSize(this.imageUploadDialog.maxFileSize)} sein`,
-                value => !value || this.imageUploadDialog.acceptedTypes.includes(value.type.toLowerCase()) || `Nur Bilder im Format ${this.imageUploadDialog.acceptedTypes.map(t => t.split('/')[1].toUpperCase()).join(', ')} sind erlaubt`
-            ];
-        },
     },
     async mounted() {
         try {
             await this.getCar();
+            await this.fetchCustomers(); 
         } catch (error) {
             this.error = error.message;
             this.showSnackbar(error.message, 'error');
@@ -441,6 +460,15 @@ export default {
 
                 this.carDetails = data;
                 this.editedCarData = { ...this.carDetails.data };
+                if (this.carDetails.data.customer) {
+                    this.editedCarData.customer = {
+                        id: this.carDetails.data.customer.id,
+                        full_name: `${this.carDetails.data.customer.firstname} ${this.carDetails.data.customer.lastname}`,
+                        email: this.carDetails.data.customer.email
+                    };
+                } else {
+                    this.editedCarData.customer = null;
+                }
             } catch (error) {
                 this.error = error.response?.data?.message || error.message;
                 this.showSnackbar("Fehler beim Laden der Fahrzeugdetails: " + this.error, 'error');
@@ -485,7 +513,9 @@ export default {
                 const dataToSubmit = { ...this.editedCarData };
                 
                 // Handle customer_id - convert empty/null values to null
-                if (dataToSubmit.customer_id === '' || dataToSubmit.customer_id === 0 || dataToSubmit.customer_id === '0') {
+                if (dataToSubmit.customer) {
+                    dataToSubmit.customer_id = dataToSubmit.customer.id;
+                } else {
                     dataToSubmit.customer_id = null;
                 }
 
@@ -595,8 +625,8 @@ export default {
         },
 
         resetImageUploadForm() {
-            this.imageUploadDialog.selectedFile = null;
-            this.imageUploadDialog.imagePreview = null;
+            this.imageUploadDialog.selectedFiles = [];
+            this.imageUploadDialog.imagePreviews = [];
             this.imageUploadDialog.uploading = false;
             this.imageUploadDialog.uploadProgress = 0;
             this.imageUploadDialog.errorMessage = '';
@@ -629,7 +659,7 @@ export default {
 
             const files = Array.from(e.dataTransfer.files);
             if (files.length > 0) {
-                this.handleFileChange(files[0]);
+                this.handleFileChange(files);
             }
         },
 
@@ -641,39 +671,40 @@ export default {
         handleFileSelect(e) {
             const files = Array.from(e.target.files);
             if (files.length > 0) {
-                this.handleFileChange(files[0]);
+                this.handleFileChange(files);
             }
             // Reset input
             e.target.value = '';
         },
 
         // File validation and processing
-        handleFileChange(file) {
-            if (!file) {
-                this.imageUploadDialog.selectedFile = null;
-                this.imageUploadDialog.imagePreview = null;
+        handleFileChange(files) {
+            if (!files || files.length === 0) {
+                this.imageUploadDialog.selectedFiles = [];
+                this.imageUploadDialog.imagePreviews = [];
                 return;
             }
 
-            // Validate file
-            const validation = this.validateFile(file);
-            if (!validation.valid) {
-                this.handleImageUploadError(validation.message);
-                this.imageUploadDialog.selectedFile = null;
-                this.imageUploadDialog.imagePreview = null;
-                return;
+            const validFiles = [];
+            for (const file of files) {
+                const validation = this.validateFile(file);
+                if (validation.valid) {
+                    validFiles.push(file);
+                } else {
+                    this.handleImageUploadError(validation.message);
+                }
             }
 
-            this.imageUploadDialog.selectedFile = file;
+            this.imageUploadDialog.selectedFiles = validFiles;
             this.imageUploadDialog.errorMessage = '';
-            this.createImagePreview(file);
+            this.createImagePreviews(validFiles);
         },
 
         validateFile(file) {
             if (file.size > this.imageUploadDialog.maxFileSize) {
                 return {
                     valid: false,
-                    message: `Bild darf nicht größer als ${this.formatFileSize(this.imageUploadDialog.maxFileSize)} sein`
+                    message: `Jede Datei darf maximal ${this.formatFileSize(this.imageUploadDialog.maxFileSize)} groß sein.`
                 };
             }
 
@@ -687,18 +718,21 @@ export default {
             return { valid: true };
         },
 
-        createImagePreview(file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                this.imageUploadDialog.imagePreview = e.target.result;
-            };
-            reader.readAsDataURL(file);
+        createImagePreviews(files) {
+            this.imageUploadDialog.imagePreviews = [];
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.imageUploadDialog.imagePreviews.push({ src: e.target.result, name: file.name, size: file.size });
+                };
+                reader.readAsDataURL(file);
+            }
         },
 
         // Upload functionality
-        async uploadImage() {
-            if (!this.imageUploadDialog.selectedFile) {
-                this.handleImageUploadError('Bitte wählen Sie ein Bild aus');
+        async uploadImages() {
+            if (this.imageUploadDialog.selectedFiles.length === 0) {
+                this.handleImageUploadError('Bitte wählen Sie ein oder mehrere Bilder aus');
                 return;
             }
 
@@ -707,7 +741,9 @@ export default {
             this.imageUploadDialog.errorMessage = '';
 
             const formData = new FormData();
-            formData.append('images[]', this.imageUploadDialog.selectedFile);
+            for (const file of this.imageUploadDialog.selectedFiles) {
+                formData.append('images[]', file);
+            }
 
             try {
                 const response = await axios.post(
@@ -726,11 +762,11 @@ export default {
                 // Refresh car details to get updated images
                 await this.getCar();
                 this.imageUploadDialog.uploadProgress = 100;
-                this.showSnackbar('Bild erfolgreich hochgeladen', 'success');
+                this.showSnackbar('Bilder erfolgreich hochgeladen', 'success');
                 setTimeout(() => this.closeImageUploadDialog(), 500);
 
             } catch (error) {
-                const errorMessage = error.response?.data?.message || 'Fehler beim Hochladen des Bildes';
+                const errorMessage = error.response?.data?.message || 'Fehler beim Hochladen der Bilder';
                 this.handleImageUploadError(errorMessage);
             } finally {
                 this.imageUploadDialog.uploading = false;
@@ -742,63 +778,41 @@ export default {
             this.showSnackbar(message, 'error');
         },
 
-        handleImageDelete(index) {
+        handleImageDelete(imageId) {
             try {
-                console.log('Attempting to delete image at index:', index);
-                console.log('Image data:', this.images[index]);
-                
-                const image = this.images[index];
-                
-                if (image && image.id) {
-                    this.deleteImageFromServer(image.id, index);
+                console.log('Attempting to delete image with ID:', imageId);
+                if (imageId) {
+                    this.deleteImageFromServer(imageId);
                 } else {
-                    this.images.splice(index, 1);
-                    console.log('Image removed from local array (no ID)');
-                    
-                    if (this.$toast) {
-                        this.$toast.success('Bild erfolgreich entfernt');
-                    }
+                    console.error('Image ID is missing, cannot delete from server.');
+                    this.showSnackbar('Fehler: Bild-ID fehlt.', 'error');
                 }
-                
             } catch (error) {
-                console.error('Error deleting image:', error);
-                if (this.$toast) {
-                    this.$toast.error('Fehler beim Löschen des Bildes');
-                }
+                console.error('Error in handleImageDelete:', error);
+                this.showSnackbar('Fehler beim Löschen des Bildes', 'error');
             }
         },
 
-        async deleteImageFromServer(imageId, index) {
+        async deleteImageFromServer(imageId) {
             try {
                 this.loading = true;
-                
-                // send DELETE query
                 const response = await fetch(`/api/images/${imageId}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
-                        // add CSRF token
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
                     }
                 });
-                
+
                 if (response.ok) {
-                    // delete image from local array 
-                    this.images.splice(index, 1);
-                    console.log('Image deleted successfully from server');
-                    
-                    if (this.$toast) {
-                        this.$toast.success('Bild erfolgreich gelöscht');
-                    }
+                    await this.getCar(); // Refresh car details to update images
+                    this.showSnackbar('Bild erfolgreich gelöscht', 'success');
                 } else {
                     throw new Error(`Server responded with status: ${response.status}`);
                 }
-                
             } catch (error) {
                 console.error('Error deleting image from server:', error);
-                if (this.$toast) {
-                    this.$toast.error('Fehler beim Löschen des Bildes vom Server');
-                }
+                this.showSnackbar('Fehler beim Löschen des Bildes vom Server', 'error');
             } finally {
                 this.loading = false;
             }
@@ -853,6 +867,38 @@ export default {
             const sizes = ['Bytes', 'KB', 'MB', 'GB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        },
+
+        async fetchCustomers(query = '') {
+            this.customersLoading = true;
+            console.log('Fetching customers with query:', query);
+            try {
+                const response = await axios.get(`/api/customers/search?query=${query}`);
+                console.log('Customer API response:', response.data);
+                this.customers = response.data.data.map(customer => ({
+                    id: customer.id,
+                    firstname: customer.firstname,
+                    lastname: customer.lastname,
+                    full_name: `${customer.firstname} ${customer.lastname}`,
+                    email: customer.email
+                }));
+                console.log('Mapped customers:', this.customers);
+            } catch (error) {
+                console.error('Error fetching customers:', error.response || error);
+                this.showSnackbar('Fehler beim Laden der Kunden', 'error');
+            } finally {
+                this.customersLoading = false;
+            }
+        },
+
+        searchCustomers(query) {
+            // Debounce the search to avoid too many API calls
+            if (this.customerSearchTimeout) {
+                clearTimeout(this.customerSearchTimeout);
+            }
+            this.customerSearchTimeout = setTimeout(() => {
+                this.fetchCustomers(query);
+            }, 300);
         }
     },
 };

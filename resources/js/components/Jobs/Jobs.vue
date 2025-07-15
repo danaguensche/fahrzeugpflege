@@ -1,81 +1,77 @@
 <template>
-    <div class="car-page" :class="{ 'car-page-sidebar-opened': isSidebarOpen }">
+    <div class="jobs-page" :class="{ 'jobs-page-sidebar-opened': isSidebarOpen }">
         <div class="search-wrapper">
             <div class="search-input-container">
                 <Search :context="searchContext" v-model="searchText" @clearSearch="clearSearch" />
                 <div class="search-buttons">
                     <v-btn :icon="true" :prepend-icon="'mdi-magnify'" class="search-button" variant="text"
-                        @click="searchCars">
+                        @click="searchJobs">
                         <v-icon>mdi-magnify</v-icon>
                     </v-btn>
-                    <CloseButton :isVisible="searchText.length > 0" class="close-button" @close="clearSearch">
+                    <CloseButton :isVisible="searchText.length > 0" class="close-button" @click="clearSearch">
                     </CloseButton>
                 </div>
             </div>
         </div>
 
         <div class="content-container">
-            <DefaultButton @click="openAddCarDialog">Fahrzeug hinzufügen</DefaultButton>
+            <DefaultButton @click="openAddJobDialog">Auftrag hinzufügen</DefaultButton>
         </div>
 
-        <div class="table-container">
-            <DataTable
-                :searchString="searchText"
-                :isSearchActive="isSearchActive"
-                endpoint="cars"
-                :headers="carHeaders"
-                :fields="carFields"
-                itemKey="Kennzeichen"
-                detailsPage="fahrzeugdetails"
-                detailsUrlBasePath="fahrzeuge"
-                deleteKey="kennzeichen"
-                @itemsDeleted="handleItemsDeleted"
-                @show-error="handleError"
-            />
-        </div>
-        
-        <AddCarForm v-model="showAddCarDialog" @car-added="handleCarAdded" />
+        <DataTable ref="jobDataTable" :searchString="searchText" :isSearchActive="isSearchActive" endpoint="jobs"
+            :headers="jobHeaders" :fields="jobFields" itemKey="id" detailsPage="jobdetails"
+            detailsUrlBasePath="auftraege" deleteKey="ids" @itemsDeleted="handleJobsDeleted"
+            @show-error="handleError" />
+
+        <AddJobForm v-model="showAddJobDialog" @job-added="handleJobAdded" />
+
     </div>
 </template>
 
 <script>
+import DataTable from '../Table/DataTable.vue';
 import { mapState } from 'vuex';
 import Search from '../CommonSlots/Searchbar.vue';
-import DefaultButton from '../CommonSlots/DefaultButton.vue';
-import DataTable from '../Table/DataTable.vue';
 import CloseButton from '../CommonSlots/CloseButton.vue';
-import AddCarForm from './addCar/AddCarForm.vue';
+import AddJobForm from './AddJobForm.vue';
+import DefaultButton from '../CommonSlots/DefaultButton.vue';
 
 export default {
-    name: 'Car',
-
+    name: 'Jobs',
     components: {
-        Search,
-        DefaultButton,
         DataTable,
+        Search,
         CloseButton,
-        AddCarForm
+        AddJobForm,
+        DefaultButton
     },
 
     data() {
         return {
             //Search
-            showAddCarDialog: false,
-            searchContext: "Suchen Sie nach einem Fahrzeug...",
+            searchContext: "Suchen Sie nach einem Auftrag...",
             searchText: '',
             isSearchActive: false,
             searchDebounceTimer: null,
-            carHeaders: [
+            jobHeaders: [
                 { title: 'Auswählen', key: 'checkbox', sortable: false, width: '80px' },
-                { title: 'Kennzeichen', key: 'Kennzeichen', sortable: true, align: 'start' },
-                { title: 'Fahrzeugklasse', key: 'Fahrzeugklasse', sortable: true },
-                { title: 'Automarke', key: 'Automarke', sortable: true },
-                { title: 'Typ', key: 'Typ', sortable: true },
-                { title: 'Farbe', key: 'Farbe', sortable: true },
-                { title: 'Löschen', key: 'delete', sortable: false, width: '60px' },
-                { title: 'Bearbeiten', key: 'edit', sortable: false, width: '60px' }
+                { title: 'id', key: 'id', sortable: true, align: 'start' },
+                { title: 'Titel', key: 'title', sortable: true },
+                { title: 'Beschreibung', key: 'description', sortable: true },
+                { title: 'Abholtermin', key: 'scheduled_at', sortable: true },
+                {
+                    title: 'Status', key: 'status', sortable: true, editable: true, type: 'select', options: [
+                        { title: 'Ausstehend', value: 'ausstehend' },
+                        { title: 'In Bearbeitung', value: 'in_bearbeitung' },
+                        { title: 'Abgeschlossen', value: 'abgeschlossen' },
+                    ]
+                },
+                { title: 'Services', key: 'services', sortable: false },
+                { title: 'Löschen', key: 'delete', sortable: false },
+                { title: 'Bearbeiten', key: 'edit', sortable: false }
             ],
-            carFields: ["Kennzeichen", "Fahrzeugklasse", "Automarke", "Typ", "Farbe"]
+            jobFields: ["id", "title", "description", "scheduled_at", "status", "services"],
+            showAddJobDialog: false,
         }
     },
 
@@ -93,23 +89,23 @@ export default {
     },
 
     methods: {
-        // UI Actions
-        handleCarAdded() {
-            this.showAddCarDialog = false;
+        openAddJobDialog() {
+            this.showAddJobDialog = true;
         },
 
-        openAddCarDialog() {
-            this.showAddCarDialog = true;
+        handleJobAdded() {
+            this.showAddJobDialog = false;
+            this.$refs.jobDataTable.loadItems();
         },
 
-        handleItemsDeleted() {
-            // Wird von DataTable emittiert nach erfolgreichem Löschen
-            console.log('Cars deleted, table will refresh automatically');
+        handleJobsDeleted() {
+            // Wird von JobsTable emittiert nach erfolgreichem Löschen
+            console.log('Jobs deleted, table will refresh automatically');
         },
 
         handleError(message) {
-            console.error('Error from DataTable:', message);
-            // Hier können Sie eine Toast-Nachricht oder ähnliches anzeigen
+            console.error('Error from JobTable:', message);
+            // Hier können Sie eine Toast-nachricht oder ähnliches anzeigen
         },
 
         //Search Handling
@@ -142,7 +138,7 @@ export default {
             }
         },
 
-        searchCars() {
+        searchJobs() {
             if (this.searchText?.trim()) {
                 this.isSearchActive = true;
             }
@@ -152,7 +148,7 @@ export default {
 </script>
 
 <style scoped>
-.car-page {
+.jobs-page {
     margin-left: 150px;
     margin-right: 50px;
     transition: margin-left 0.3s ease;
@@ -172,7 +168,7 @@ export default {
     justify-content: space-between;
     width: 100%;
     margin-top: -80px;
-    z-index: 5;
+    z-index: 10;
     position: relative;
 }
 
@@ -247,14 +243,14 @@ export default {
     width: 100%;
 }
 
-.car-page-sidebar-opened {
+.jobs-page-sidebar-opened {
     margin-left: 330px;
     transition: margin-left 0.3s ease;
 }
 
 /* Tablet Styles */
 @media only screen and (max-width: 1024px) {
-    .car-page {
+    .jobs-page {
         margin-left: 120px;
         margin-right: 30px;
     }
@@ -262,13 +258,13 @@ export default {
 
 /* Mobile Styles */
 @media only screen and (max-width: 768px) {
-    .car-page {
+    .jobs-page {
         margin-left: 160px;
         margin-right: 20px;
         font-size: 12px;
     }
 
-    .car-page-sidebar-opened {
+    .jobs-page-sidebar-opened {
         margin-left: 260px;
     }
 

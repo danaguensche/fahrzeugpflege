@@ -282,7 +282,7 @@ export default {
     },
     methods: {
         getImageUrl(image) {
-            console.log('Getting image URL for:', image);
+            //console.log('Getting image URL for:', image);
             
             // Handle different image formats
             if (typeof image === 'string') {
@@ -333,15 +333,16 @@ export default {
             this.replaceIndex = null;
         },
 
-        onReplaceFileChange(file) {
-            console.log('File change event triggered:', file);
+        onReplaceFileChange(event) {
+            console.log('File change event triggered:', event);
             
             this.replacePreview = null;
             
+            const file = event ? event.target.files[0] : null;
+
             if (file && file instanceof File) {
                 console.log('Valid file selected:', file.name, file.size, file.type);
                 
-
                 const isValidSize = file.size < 10000000; // 10MB
                 const isValidType = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type);
 
@@ -363,9 +364,11 @@ export default {
                     return;
                 }
 
+                this.replaceFile = file; // Assign the file here
                 this.createReplacePreview(file);
             } else {
                 console.log('No file selected or invalid file');
+                this.replaceFile = null; // Ensure replaceFile is null if no valid file
                 this.replacePreview = null;
             }
         },
@@ -402,19 +405,23 @@ export default {
         },
 
         deleteImage() {
-            console.log('Delete image called with:', {
+            if (this.deleteIndex === null) return;
+
+            const imageToDelete = this.images[this.deleteIndex];
+            console.log('Attempting to delete image:', {
                 index: this.deleteIndex,
-                image: this.images[this.deleteIndex]
+                image: imageToDelete,
             });
-            
-            if (this.deleteIndex !== null) {
-                this.$emit('delete-image', this.deleteIndex);
-                
-                this.deleteDialog = false;
-                this.deleteIndex = null;
-                
-                this.selectedAction = null;
+
+            if (imageToDelete && imageToDelete.id) {
+                this.$emit('delete-image', imageToDelete.id);
+            } else {
+                console.error(`Image at index ${this.deleteIndex} is missing an ID.`, imageToDelete);
             }
+
+            this.deleteDialog = false;
+            this.deleteIndex = null;
+            this.selectedAction = null;
         }
     }
 };

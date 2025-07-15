@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Image;
 
 class CarDetailsController extends CarController
 {
@@ -198,21 +199,19 @@ class CarDetailsController extends CarController
     /**
      * Delete specific image
      */
-    public function deleteImage($kennzeichen, $imageId)
+    public function deleteImage($imageId)
     {
         try {
-            $kennzeichen = str_replace('+', ' ', $kennzeichen);
-            
             Log::info("Attempting to delete image", [
-                'kennzeichen' => $kennzeichen,
                 'imageId' => $imageId,
-                'imageId_type' => gettype($imageId)
+                'imageId_type' => gettype($imageId),
+                'request_uri' => request()->fullUrl(),
+                'request_method' => request()->method()
             ]);
 
             // Check if imageId is null or empty
             if (is_null($imageId) || $imageId === '' || $imageId === 'null') {
                 Log::error("Invalid image ID provided for deletion", [
-                    'kennzeichen' => $kennzeichen,
                     'imageId' => $imageId
                 ]);
                 return response()->json([
@@ -221,27 +220,7 @@ class CarDetailsController extends CarController
                 ], 400);
             }
 
-            $car = Car::where('Kennzeichen', $kennzeichen)->firstOrFail();
-            
-            // Log all images for debugging
-            Log::info("Car images for deletion", [
-                'car_id' => $car->id,
-                'images' => $car->images()->select('id', 'path')->get()->toArray()
-            ]);
-
-            $image = $car->images()->where('id', $imageId)->first();
-
-            if (!$image) {
-                Log::error("Image not found for deletion", [
-                    'kennzeichen' => $kennzeichen,
-                    'imageId' => $imageId,
-                    'available_images' => $car->images()->pluck('id')->toArray()
-                ]);
-                return response()->json([
-                    'error' => 'Bild nicht gefunden',
-                    'message' => 'Das angegebene Bild existiert nicht'
-                ], 404);
-            }
+            $image = \App\Models\Image::findOrFail($imageId);
 
             Log::info("Found image to delete", [
                 'image_id' => $image->id,
@@ -268,15 +247,13 @@ class CarDetailsController extends CarController
             ]);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            Log::error("Car not found for deletion", [
-                'kennzeichen' => $kennzeichen,
+            Log::error("Image not found for deletion", [
                 'imageId' => $imageId,
                 'error' => $e->getMessage()
             ]);
-            return response()->json(['error' => 'Fahrzeug nicht gefunden'], 404);
+            return response()->json(['error' => 'Bild nicht gefunden'], 404);
         } catch (\Exception $e) {
             Log::error('Fehler beim Löschen des Bildes: ' . $e->getMessage(), [
-                'kennzeichen' => $kennzeichen,
                 'imageId' => $imageId,
                 'trace' => $e->getTraceAsString()
             ]);

@@ -62,6 +62,7 @@ class Car extends Model
             'Typ' => $this->Typ,
             'Farbe' => $this->Farbe,
             'Sonstiges' => $this->Sonstiges,
+            'customer_id' => $this->customer_id,
         ];
     }
 }

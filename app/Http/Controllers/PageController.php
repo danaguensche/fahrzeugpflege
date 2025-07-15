@@ -40,6 +40,11 @@ class PageController extends Controller
     {
         return view('pages.jobs');
     }
+
+    public function jobdetails()
+    {
+        return view('welcome');
+    }
  
     public function reports()
     {

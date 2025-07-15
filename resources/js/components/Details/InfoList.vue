@@ -2,7 +2,7 @@
     <v-list class="bg-transparent" v-if="!editMode">
         <template v-for="key in infoKeys" :key="key">
 
-            <v-list-item v-if="details.data[key] !== undefined">
+            <v-list-item v-if="resolvedDetails[key] !== undefined">
 
                 <template v-slot:prepend>
                     <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
@@ -15,14 +15,14 @@
 
                 <v-list-item-subtitle class="mt-1 text-body-1">
 
-                    <template v-if="details.data[key] === null || details.data[key] === ''">
+                    <template v-if="resolvedDetails[key] === null || resolvedDetails[key] === ''">
                         <span class="text-grey">
                             Keine Daten vorhanden
                         </span>
                     </template>
 
                     <template v-else>
-                        {{ details.data[key] }}
+                        {{ resolvedDetails[key] }}
                     </template>
 
                 </v-list-item-subtitle>
@@ -62,5 +62,11 @@ export default {
         },
 
     },
+    computed: {
+        resolvedDetails() {
+            // Check if details has a 'data' property, if so, use it. Otherwise, use details directly.
+            return this.details && this.details.data ? this.details.data : this.details;
+        }
+    }
 }
 </script>

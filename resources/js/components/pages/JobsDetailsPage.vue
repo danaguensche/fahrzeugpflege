@@ -1,20 +1,18 @@
 <template>
     <MainSidebar></MainSidebar>
-    <Jobs></Jobs>
+    <JobDetails></JobDetails>
 </template>
 
 <script>
 
 import MainSidebar from '../sidebar/MainSidebar.vue';
-import Jobs from '../Jobs/Jobs.vue';
-import Footer from '../CommonSlots/Footer.vue';
+import JobDetails from '../Jobs/JobDetails/Details.vue';
 
 export default {
-    name: "JobsPage",
+    name: "JobsDetailsPage",
     components: {
-        Jobs,
         MainSidebar,
-        Footer,
+        JobDetails,
     }
 }
 

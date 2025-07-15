@@ -24,24 +24,23 @@
                         <v-card-title>
                             <v-icon left class="mr-4" color="primary">mdi-format-list-bulleted</v-icon>
                             <span class="ga-10"></span>
-                            Gefundene Fahrzeuge ({{ filteredSearchResults.length }})
+                            Gefundene Fahrzeuge ({{ searchResults.length }})
                         </v-card-title>
-                        <v-list two-line>
-                            <v-list-item v-for="car in filteredSearchResults" :key="car.Kennzeichen" @click="selectExistingCar(car)" class="list-item-hover">
-                            <v-avatar>
-                                <v-icon color="primary">mdi-car</v-icon>
-                            </v-avatar>
-                            <v-list-item-title class="font-weight-bold">
-                                {{ car.Kennzeichen }}
-                            </v-list-item-title>
-                            <v-list-item-subtitle>
-                                {{ car.Automarke }} {{ car.Typ }} | {{ car.Farbe || 'Keine Farbangabe' }}
-                            </v-list-item-subtitle>
-                            <v-list-item-action style="position: absolute; top: 10px; right: 0;">
-                                <v-btn icon variant="plain" @click="selectExistingCar(car)">
-                                <v-icon color="primary">mdi-plus-circle</v-icon>
-                                </v-btn>
-                            </v-list-item-action>
+                        <v-list lines="two">
+                            <v-list-item v-for="car in searchResults" :key="car.Kennzeichen" @click="selectExistingCar(car)" class="list-item-hover"
+                                :title="car.Kennzeichen"
+                                :subtitle="`${car.Automarke} ${car.Typ} | ${car.Farbe || 'Keine Farbangabe'}`"
+                            >
+                                <template v-slot:prepend>
+                                    <v-avatar>
+                                        <v-icon color="primary">mdi-car</v-icon>
+                                    </v-avatar>
+                                </template>
+                                <template v-slot:append>
+                                    <v-btn icon variant="plain" @click="selectExistingCar(car)">
+                                        <v-icon color="primary">mdi-plus-circle</v-icon>
+                                    </v-btn>
+                                </template>
                             </v-list-item>
                         </v-list>
                     </v-card>
@@ -174,12 +173,6 @@ export default {
                 Sonstiges: '',
             },
         };
-    },
-
-    computed: {
-        filteredSearchResults() {
-            return this.searchResults.filter(car => !car.customer_id);
-        }
     },
 
     methods: {

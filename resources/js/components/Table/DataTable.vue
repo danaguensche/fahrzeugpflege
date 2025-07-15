@@ -8,12 +8,12 @@
 
             <!-- Button group for vehicle operations -->
             <div class="button-group">
-                <ConfirmButton class="confirm-button" @click="confirmEditCar" :disabled="!editCarId">
+                <ConfirmButton class="confirm-button" @click="confirmEditItem" :disabled="!editItemId">
                     Bestätigen
                 </ConfirmButton>
                 <CancelButton class="cancel-button" @click="cancelEdit">Abbrechen</CancelButton>
-                <DeleteButton class="delete-button" :disabled="selectedCars.length === 0"
-                    @click="confirmDeleteSelectedCars">
+                <DeleteButton class="delete-button" :disabled="selectedItems.length === 0"
+                    @click="confirmDeleteSelectedItems">
                     Löschen
                 </DeleteButton>
             </div>
@@ -21,17 +21,14 @@
 
         <!-- Table Container -->
         <div class="table-container">
-            <!-- Loading indicator -->
-            <div v-if="loading" class="loader-container">
-                <v-progress-circular indeterminate></v-progress-circular>
-            </div>
+
             
             <!-- Scrolling Table -->
             <div class="scrollable-table">
                 <!-- Vuetify server table with pagination and sorting -->
                 <v-data-table-server 
                     :headers="headers" 
-                    :items="cars" 
+                    :items="items" 
                     :itemsLength="totalItems"
                     height="calc(100vh - 400px)" 
                     fixed-header 
@@ -47,47 +44,83 @@
 
                     <!-- Template for each row of the table -->
                     <template v-slot:item="{ item }">
-                        <tr :class="{ 'edited-row': editCarId === item.Kennzeichen }">
+                        <tr :class="{ 'edited-row': editItemId === item[itemKey] }">
                             <!-- Checkbox for vehicle selection -->
                             <td class="checkbox fixed-width">
-                                <v-checkbox v-model="selectedCars" :value="item.Kennzeichen"></v-checkbox>
+                                <v-checkbox v-model="selectedItems" :value="item[itemKey]"></v-checkbox>
                             </td>
                             
                             <!-- Vehicle Data Fields -->
                             <td v-for="field in fields" :key="field" class="fixed-width">
                                 <!-- Edit Mode -->
-                                <template v-if="editCarId === item.Kennzeichen">
+                                <template v-if="editItemId === item[itemKey]">
                                     <!-- Kennzeichen - link only, not editable -->
-                                    <template v-if="field === 'Kennzeichen'">
-                                        <a :href="`/fahrzeuge/fahrzeugdetails/${editCar[field] ? editCar[field].replace(/\s/g, '+') : ''}`">
-                                            {{ editCar[field] || '' }}
+                                    <template v-if="field === itemKey">
+                                        <a :href="`/${detailsUrlBasePath}/${detailsPage}/${item[field] ? item[field].toString().replace(/\s/g, '+') : ''}`">
+                                            {{ editItem[field] || '' }}
                                         </a>
+                                    </template>
+                                    <!-- Services field - not editable -->
+                                    <template v-else-if="field === 'services'">
+                                        <span v-for="(service, index) in item[field]" :key="service.id">
+                                            {{ service.title }}{{ index < item[field].length - 1 ? ', ' : '' }}
+                                        </span>
                                     </template>
                                     <!-- The rest of the fields are editable -->
                                     <template v-else>
-                                        <v-text-field 
-                                            v-model="editCar[field]" 
-                                            :rules="getFieldRules(field)"
-                                            :error-messages="fieldErrors[field]" 
-                                            density="compact">
-                                        </v-text-field>
+                                        <template v-if="getHeader(field).type === 'select'">
+                                            <v-select
+                                                v-model="editItem[field]"
+                                                :items="getHeader(field).options"
+                                                item-title="title"
+                                                item-value="value"
+                                                :rules="getFieldRules(field)"
+                                                :error-messages="fieldErrors[field]"
+                                                density="compact"
+                                            ></v-select>
+                                        </template>
+                                        <template v-else>
+                                            <v-text-field 
+                                                v-model="editItem[field]" 
+                                                :rules="getFieldRules(field)"
+                                                :error-messages="fieldErrors[field]" 
+                                                density="compact"
+                                                :type="field === 'scheduled_at' ? 'datetime-local' : 'text'">
+                                            </v-text-field>
+                                        </template>
                                     </template>
                                 </template>
                                 
                                 <!-- View Mode -->
                                 <template v-else>
                                     <!-- Kennzeichen as link -->
-                                    <a v-if="field === 'Kennzeichen'" :href="`/fahrzeuge/fahrzeugdetails/${item[field] ? item[field].replace(/\s/g, '+') : ''}`">
+                                    <a v-if="field === itemKey" :href="`/${detailsUrlBasePath}/${detailsPage}/${item[field] ? item[field].toString().replace(/\s/g, '+') : ''}`">
                                         {{ item[field] || '' }}
                                     </a>
                                     <!-- The rest of the fields as plain text -->
-                                    <span v-else>{{ item[field] || '' }}</span>
+                                <span v-else-if="field === 'services'">
+                                    <template v-if="Array.isArray(item[field]) && item[field].length > 0">
+                                        <span v-for="(service, index) in item[field]" :key="service.id">
+                                            {{ service.title }}{{ index < item[field].length - 1 ? ', ' : '' }}
+                                        </span>
+                                    </template>
+                                    <template v-else>
+                                        {{ '' }}
+                                    </template>
+                                </span>
+                                <span v-else-if="field === 'status'">
+                                    {{ getStatusTitle(item[field]) }}
+                                </span>
+                                <span v-else-if="field === 'scheduled_at'">
+                                    {{ formatDateTime(item[field]) }}
+                                </span>
+                                <span v-else>{{ item[field] || '' }}</span>
                                 </template>
                             </td>
                             
                             <!-- Delete Button -->
                             <td class="table-icon fixed-width">
-                                <v-btn icon class="delete-button" variant="plain" @click="confirmDeleteCar(item.Kennzeichen)">
+                                <v-btn icon class="delete-button" variant="plain" @click="confirmDeleteItem(item[itemKey])">
                                     <v-icon>mdi-delete</v-icon>
                                 </v-btn>
                             </td>
@@ -95,8 +128,8 @@
                             <!-- Edit/Save button -->
                             <td class="table-icon fixed-width">
                                 <v-btn variant="plain" icon
-                                    @click="editCarId === item.Kennzeichen ? saveCar() : editCarDetails(item)">
-                                    <v-icon>{{ editCarId === item.Kennzeichen ? 'mdi-content-save' : 'mdi-pencil' }}</v-icon>
+                                    @click="editItemId === item[itemKey] ? saveItem() : editItemDetails(item)">
+                                    <v-icon>{{ editItemId === item[itemKey] ? 'mdi-content-save' : 'mdi-pencil' }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
@@ -140,10 +173,37 @@ import DeleteButton from '../CommonSlots/DeleteButton.vue';
 import Pagination from '../CommonSlots/Pagination.vue';
 
 export default {
-    name: "CarTable",
+    name: "DataTable",
     
-    // Props for searching and filtering
     props: {
+        endpoint: {
+            type: String,
+            required: true
+        },
+        headers: {
+            type: Array,
+            required: true
+        },
+        fields: {
+            type: Array,
+            required: true
+        },
+        itemKey: {
+            type: String,
+            required: true
+        },
+        detailsPage: {
+            type: String,
+            required: true
+        },
+        detailsUrlBasePath: {
+            type: String,
+            required: true
+        },
+        deleteKey: {
+            type: String,
+            default: 'ids'
+        },
         searchString: {
             type: String,
             default: ''
@@ -165,95 +225,56 @@ export default {
     
     data() {
         return {
-            // Basic data
             isRefreshing: false,
-            cars: [],                        // List of vehicles
-            selectedCars: [],               // Selected vehicles for mass operations
-            carToDelete: null,              // Vehicle ID for deletion
-            
-            // Interface state
-            isAlertVisible: false,          // Modal window visibility
-            loading: false,                 // Loading indicator
-            totalItems: 0,                  // Total number of items
-            
-            // Table headers
-            headers: [
-                { title: 'Auswählen', key: 'checkbox', sortable: false, width: '80px' },
-                { title: 'Kennzeichen', key: 'Kennzeichen', sortable: true, align: 'start' },
-                { title: 'Fahrzeugklasse', key: 'Fahrzeugklasse', sortable: true },
-                { title: 'Automarke', key: 'Automarke', sortable: true },
-                { title: 'Typ', key: 'Typ', sortable: true },
-                { title: 'Farbe', key: 'Farbe', sortable: true },
-                { title: 'Löschen', key: 'delete', sortable: false, width: '60px' },
-                { title: 'Bearbeiten', key: 'edit', sortable: false, width: '60px' }
-            ],
-            
-            // Vehicle data fields
-            fields: ["Kennzeichen", "Fahrzeugklasse", "Automarke", "Typ", "Farbe"],
-            
-            // Editing
-            editCarId: null,                // ID of the edited vehicle
-            editCar: {},                    // Editable vehicle data
-            fieldErrors: {},                // Field validation errors
-            
-            // Pagination and sorting settings
+            items: [],
+            selectedItems: [],
+            itemToDelete: null,
+            isAlertVisible: false,
+            loading: false,
+            totalItems: 0,
+            editItemId: null,
+            editItem: {},
+            fieldErrors: {},
             options: {
-                page: 1,                    // Current page
-                itemsPerPage: 20,          // Elements on the page
-                sortBy: [{ key: 'Kennzeichen', order: 'desc' }]  // Default sorting
+                page: 1,
+                itemsPerPage: 20,
+                sortBy: [{ key: this.itemKey, order: 'desc' }]
             },
-            
-            // Modal window
-            alertHeading: '',              // Alert header
-            alertParagraph: '',            // Alert text
-            alertOkayButton: '',           // Confirmation button text
-            confirmAction: null,           // Confirmation function
-            
-            // Search
-            searchDebounceTimer: null      // Timer for debounce search
+            alertHeading: '',
+            alertParagraph: '',
+            alertOkayButton: '',
+            confirmAction: null,
+            searchDebounceTimer: null
         };
     },
 
     computed: {
-        // Current page
         currentPage() {
             return this.options.page;
         },
-        
-        // Total number of pages
         totalPages() {
             return Math.ceil(this.totalItems / this.options.itemsPerPage);
         },
-        
-        // Editing mode flag
         isEditing() {
-            return this.editCarId !== null;
+            return this.editItemId !== null;
         },
-        
-        // Array of page numbers for pagination
         pageItems() {
             return Array.from({ length: this.totalPages }, (_, i) => i + 1);
         }
     },
 
-    // Tracking changes in props
     watch: {
-        // Track changes to the search string
         searchString: {
             handler(newValue, oldValue) {
-                // React only to real changes
                 if (newValue !== oldValue) {
                     this.handleSearchChange(newValue);
                 }
             },
             immediate: false
         },
-        
-        // Tracking the search status
         isSearchActive: {
             handler(newValue) {
                 if (!newValue && !this.searchString) {
-                    // Search deactivated, return to normal browsing
                     this.options.page = 1;
                     this.loadItems();
                 }
@@ -261,65 +282,46 @@ export default {
         }
     },
 
-    // Loading data when mounting a component
     mounted() {
         this.loadItems();
     },
 
     methods: {
-        // === SEARCH METHODS ===
-        
-        /**
-         * Search string modification handling with debounce
-         * @param {string} searchValue - New search value
-         */
         handleSearchChange(searchValue) {
-            // Clear the previous timer
             if (this.searchDebounceTimer) {
                 clearTimeout(this.searchDebounceTimer);
             }
 
-            // If the string is empty, load normal data
             if (!searchValue || !searchValue.trim()) {
                 this.options.page = 1;
                 this.loadItems();
                 return;
             }
 
-            // Set debounce to 300ms
             this.searchDebounceTimer = setTimeout(() => {
-                this.options.page = 1; // Reset to the first page on a new search
-                this.searchCars(searchValue);
+                this.options.page = 1;
+                this.searchItems(searchValue);
             }, 300);
         },
 
-        /**
-         * Search vehicles by query
-         * @param {string} query - Search query
-         * @param {number} page - Page number
-         */
-        async searchCars(query = this.searchString, page = this.options.page) {
+        async searchItems(query = this.searchString, page = this.options.page) {
             if (!query || !query.trim()) {
                 this.loadItems();
                 return;
             }
 
             this.loading = true;
+            console.log(`[DataTable] Search started for ${this.endpoint} with query: ${query}.`);
             try {
-                console.log('Vehicle Search:', query, 'Page:', page);
-
                 const params = {
                     query: query.trim(),
                     page: page,
                     itemsPerPage: this.options.itemsPerPage,
-                    sortBy: this.options.sortBy.length > 0 ? this.options.sortBy[0].key : 'Kennzeichen',
-                    sortDesc: this.options.sortBy.length > 0 ? this.options.sortBy[0].order === 'desc' : false
+                    sortBy: this.options.sortBy.length > 0 ? this.options.sortBy[0].key : this.itemKey,
+                    sortDesc: this.options.sortBy.length > 0 ? this.options.sortBy[0].order === 'desc' : true
                 };
 
-                const response = await axios.get('/api/cars/search', { params });
-                console.log('API Search Response:', response.data);
-
-                // Handling different response formats
+                const response = await axios.get(`/api/${this.endpoint}/search`, { params });
                 let items = [];
                 let total = 0;
 
@@ -334,137 +336,79 @@ export default {
                     total = response.data.length;
                 }
 
-                this.cars = items;
+                this.items = items;
                 this.totalItems = total;
                 this.options.page = page;
-
-                console.log('Search results:', {
-                    query,
-                    itemsFound: items.length,
-                    totalItems: total,
-                    currentPage: page
-                });
+                console.log(`[DataTable] Search completed for ${this.endpoint}. Found ${this.totalItems} items.`);
 
             } catch (error) {
-                console.error('Error when searching for vehicles:', error);
-                if (error.response) {
-                    console.error('Response Data:', error.response.data);
-                    console.error('Response Status:', error.response.status);
-                }
-
-                // On error show empty results
-                this.cars = [];
+                console.error(`[DataTable] Error during search for ${this.endpoint}:`, error);
+                this.items = [];
                 this.totalItems = 0;
-                this.$emit('show-error', 'Error when searching for vehicles');
+                this.$emit('show-error', `Error when searching for ${this.endpoint}`);
             } finally {
                 this.loading = false;
+                console.log(`[DataTable] Search finished for ${this.endpoint}.`);
             }
         },
 
-        // === PAGINATION AND SORTING METHODS ===
-        
-        /**
-         * Handling changes to table options (v-data-table-server callback)
-         * @param {Object} newOptions - New table options
-         */
         onOptionsUpdate(newOptions) {
-            console.log('Updating the table options:', newOptions);
-            
             let needsReload = false;
 
-            // Handling page changes
             if (newOptions.page !== this.options.page) {
                 this.options.page = newOptions.page;
                 needsReload = true;
             }
 
-            // Handling changes in the number of elements on the page
             if (newOptions.itemsPerPage !== this.options.itemsPerPage) {
                 this.options.itemsPerPage = newOptions.itemsPerPage;
-                this.options.page = 1; // Reset to first page
+                this.options.page = 1;
                 needsReload = true;
             }
 
-            // Processing a change in sorting
             if (newOptions.sortBy && JSON.stringify(newOptions.sortBy) !== JSON.stringify(this.options.sortBy)) {
                 this.options.sortBy = newOptions.sortBy;
-                this.options.page = 1; // Reset to the first page when sorting is changed
+                this.options.page = 1;
                 needsReload = true;
             }
 
-            // Reload data if changes have been made
             if (needsReload) {
                 if (this.isSearchActive && this.searchString && this.searchString.trim()) {
-                    this.searchCars(this.searchString, this.options.page);
+                    this.searchItems(this.searchString, this.options.page);
                 } else {
                     this.loadItems();
                 }
             }
         },
 
-        /**
-         * Handling page changes
-         * @param {number} page - New page number
-         */
         handlePageChange(page) {
             this.options.page = page;
-
-            // Determine whether to load search results or normal data
             if (this.isSearchActive && this.searchString && this.searchString.trim()) {
-                this.searchCars(this.searchString, page);
+                this.searchItems(this.searchString, page);
             } else {
                 this.loadItems();
             }
         },
 
-        /**
-         * Handling changes in the number of items on the page
-         * @param {number} itemsPerPage - New number of items
-         */
         handleItemsPerPageChange(itemsPerPage) {
             this.options.itemsPerPage = itemsPerPage;
-            this.options.page = 1; // Reset to the first page
-
+            this.options.page = 1;
             if (this.isSearchActive && this.searchString && this.searchString.trim()) {
-                this.searchCars(this.searchString, 1);
-            } else {
+                this.searchItems(this.searchString, 1);
+            }
+            else {
                 this.loadItems();
             }
         },
 
-        // === VALIDATION METHODS ===
-        
-        /**
-         * Getting validation rules for a field
-         * @param {string} field - Field name
-         * @returns {Array} Array of validation rules
-         */
         getFieldRules(field) {
-            switch (field) {
-                case 'Kennzeichen':
-                    return [value => !!value || 'Kennzeichen ist erforderlich'];
-                case 'Fahrzeugklasse':
-                    return [value => !!value || 'Fahrzeugklasse ist erforderlich'];
-                case 'Automarke':
-                    return [value => !!value || 'Automarke ist erforderlich'];
-                case 'Typ':
-                    return [value => !!value || 'Typ ist erforderlich'];
-                case 'Farbe':
-                    return [value => !!value || 'Farbe ist erforderlich'];
-                default:
-                    return [];
-            }
+            return [value => !!value || `${field} is required`];
         },
 
-        // === MODAL WINDOW METHODS ===
-        
-        /**
-         * Display confirmation modal
-         * @param {string} heading - Header
-         * @param {string} paragraph - Message text
-         * @param {string} okayButton - Text of the confirmation button
-         * @param {Function} action - Confirmation function
-         */
+        getHeader(field) {
+            return this.headers.find(header => header.key === field);
+        },
+
         showAlert(heading, paragraph, okayButton, action) {
             this.alertHeading = heading;
             this.alertParagraph = paragraph;
@@ -473,9 +417,6 @@ export default {
             this.isAlertVisible = true;
         },
 
-        /**
-         * Handling confirmation in a modal window
-         */
         handleConfirmation() {
             if (this.confirmAction) {
                 this.confirmAction();
@@ -483,199 +424,143 @@ export default {
             this.isAlertVisible = false;
         },
 
-        // === DELETION METHODS ===
-        
-        /**
-         * Confirm deletion of one vehicle
-         * @param {string} kennzeichen - Vehicle license plate
-         */
-        confirmDeleteCar(kennzeichen) {
-            this.carToDelete = kennzeichen;
+        confirmDeleteItem(id) {
+            this.itemToDelete = id;
             this.showAlert(
-                'Fahrzeug löschen',
-                'Möchten Sie das ausgewählte Fahrzeug wirklich löschen?',
+                'Item löschen',
+                'Möchten Sie das ausgewählte Item wirklich löschen?',
                 'Löschen',
-                this.deleteCar
+                this.deleteItem
             );
         },
 
-        /**
-         * Confirm deletion of selected vehicles
-         */
-        confirmDeleteSelectedCars() {
-            if (this.selectedCars.length > 0) {
-                const message = this.selectedCars.length === 1
-                    ? 'Möchten Sie das ausgewählte Fahrzeug wirklich löschen?'
-                    : 'Möchten Sie die ausgewählten Fahrzeuge wirklich löschen?';
+        confirmDeleteSelectedItems() {
+            if (this.selectedItems.length > 0) {
+                const message = this.selectedItems.length === 1
+                    ? 'Möchten Sie das ausgewählte Item wirklich löschen?'
+                    : 'Möchten Sie die ausgewählten Items wirklich löschen?';
 
-                const heading = this.selectedCars.length === 1
-                    ? 'Fahrzeug löschen'
-                    : 'Fahrzeuge löschen';
+                const heading = this.selectedItems.length === 1
+                    ? 'Item löschen'
+                    : 'Items löschen';
 
                 this.showAlert(
                     heading,
                     message,
                     'Löschen',
-                    this.deleteCars
+                    this.deleteItems
                 );
             }
         },
 
-        /**
-         * Deleting one vehicle
-         */
-        async deleteCar() {
-            if (this.carToDelete) {
+        async deleteItem() {
+            if (this.itemToDelete) {
                 try {
-                    await axios.delete(`/api/cars/${this.carToDelete}`);
-                    console.log('Vehicle deleted successfully:', this.carToDelete);
-
-                    // Check if the elements remained on the current page after deletion
-                    const isLastItemOnPage = this.cars.length === 1;
+                    await axios.delete(`/api/${this.endpoint}/${this.itemToDelete}`);
+                    const isLastItemOnPage = this.items.length === 1;
                     const isNotFirstPage = this.options.page > 1;
 
-                    // If we delete the last element not on the first page, go to the previous page
                     if (isLastItemOnPage && isNotFirstPage) {
                         this.options.page -= 1;
                     }
 
-                    // Reload the data after deletion
                     if (this.isSearchActive && this.searchString && this.searchString.trim()) {
-                        await this.searchCars(this.searchString, this.options.page);
+                        await this.searchItems(this.searchString, this.options.page);
                     } else {
                         await this.loadItems();
                     }
 
-                    // Remove the deleted vehicle from the selected ones
-                    this.selectedCars = this.selectedCars.filter(kennzeichen => kennzeichen !== this.carToDelete);
-                    this.carToDelete = null;
+                    this.selectedItems = this.selectedItems.filter(id => id !== this.itemToDelete);
+                    this.itemToDelete = null;
                 } catch (error) {
-                    console.error('Error when deleting a vehicle:', error.response?.data || error.message);
-                    this.$emit('show-error', 'Error when deleting a vehicle');
+                    this.$emit('show-error', `Error when deleting item`);
                 }
             }
         },
 
-        /**
-         * Deleting multiple vehicles
-         */
-        async deleteCars() {
-            if (this.selectedCars.length > 0) {
+        async deleteItems() {
+            if (this.selectedItems.length > 0) {
                 try {
-                    await axios.delete(`/api/cars`, {
-                        data: { kennzeichen: this.selectedCars }
+                    await axios.delete(`/api/${this.endpoint}`, {
+                        data: { [this.deleteKey]: this.selectedItems }
                     });
 
-                    // Logic of going to the previous page if we delete all elements
-                    const itemsBeingDeleted = this.selectedCars.length;
-                    const remainingItemsOnPage = this.cars.length - itemsBeingDeleted;
+                    const itemsBeingDeleted = this.selectedItems.length;
+                    const remainingItemsOnPage = this.items.length - itemsBeingDeleted;
                     const isNotFirstPage = this.options.page > 1;
 
                     if (remainingItemsOnPage <= 0 && isNotFirstPage) {
                         this.options.page -= 1;
                     }
 
-                    // Reload the data after deletion
                     if (this.isSearchActive && this.searchString && this.searchString.trim()) {
-                        await this.searchCars(this.searchString, this.options.page);
+                        await this.searchItems(this.searchString, this.options.page);
                     } else {
                         await this.loadItems();
                     }
 
-                    this.selectedCars = [];
-                    this.$emit('carsDeleted');
+                    this.selectedItems = [];
+                    this.$emit('itemsDeleted');
                 } catch (error) {
-                    console.error('Error when deleting vehicles:', error);
-                    this.$emit('show-error', 'Error when deleting vehicles');
+                    this.$emit('show-error', `Error when deleting items`);
                 }
             }
         },
 
-        // === EDITING METHODS ===
-        
-        /**
-         * Vehicle edit confirmation
-         */
-        async confirmEditCar() {
+        async confirmEditItem() {
             try {
-                // Prepare data to be sent
-                const formattedData = {
-                    Kennzeichen: this.editCar.Kennzeichen,
-                    Fahrzeugklasse: this.editCar.Fahrzeugklasse,
-                    Automarke: this.editCar.Automarke,
-                    Typ: this.editCar.Typ,
-                    Farbe: this.editCar.Farbe
-                };
+                const payload = {};
+                this.fields.forEach(field => {
+                    payload[field] = this.editItem[field];
+                });
 
-                await axios.put(`/api/cars/${this.editCarId}`, formattedData);
+                await axios.put(`/api/${this.endpoint}/${this.editItemId}`, payload);
                 this.cancelEdit();
 
-                // Reload data after saving
                 if (this.isSearchActive && this.searchString && this.searchString.trim()) {
-                    await this.searchCars(this.searchString, this.options.page);
+                    await this.searchItems(this.searchString, this.options.page);
                 } else {
                     await this.loadItems();
                 }
             } catch (error) {
-                console.error('Error when saving a vehicle:', error.response?.data || error.message);
-                this.$emit('show-error', 'Error when saving a vehicle');
+                this.$emit('show-error', `Error when saving item`);
             }
         },
 
-        /**
-         * Start editing vehicle
-         * @param {Object} car - Vehicle object
-         */
-        editCarDetails(car) {
-            this.editCarId = car.Kennzeichen;
-            this.editCar = { ...car };
+        editItemDetails(item) {
+            this.editItemId = item[this.itemKey];
+            this.editItem = { ...item };
         },
 
-        /**
-         * Saving the vehicle (confirmation call)
-         */
-        async saveCar() {
+        async saveItem() {
             try {
-                // Prepare data to be sent
-                const formattedData = {
-                    Kennzeichen: this.editCar.Kennzeichen,
-                    Fahrzeugklasse: this.editCar.Fahrzeugklasse,
-                    Automarke: this.editCar.Automarke,
-                    Typ: this.editCar.Typ,
-                    Farbe: this.editCar.Farbe
-                };
+                const payload = {};
+                this.fields.forEach(field => {
+                    payload[field] = this.editItem[field];
+                });
 
-                await axios.put(`/api/cars/${this.editCarId}`, formattedData);
+                await axios.put(`/api/${this.endpoint}/${this.editItemId}`, payload);
                 this.cancelEdit();
 
-                // Reload data after saving
                 if (this.isSearchActive && this.searchString && this.searchString.trim()) {
-                    await this.searchCars(this.searchString, this.options.page);
+                    await this.searchItems(this.searchString, this.options.page);
                 } else {
                     await this.loadItems();
                 }
             } catch (error) {
-                console.error('Error when saving a vehicle:', error.response?.data || error.message);
-                this.$emit('show-error', 'Error when saving a vehicle');
+                this.$emit('show-error', `Error when saving item`);
             }
         },
 
-        /**
-         * Cancel edit
-         */
         cancelEdit() {
-            this.editCarId = null;
-            this.editCar = {};
+            this.editItemId = null;
+            this.editItem = {};
             this.fieldErrors = {};
         },
 
-        // === DATA LOADING METHODS ===
-        
-        /**
-         * Loading items from the server
-         */
         async loadItems() {
             this.loading = true;
+            console.log(`[DataTable] Loading started for ${this.endpoint}.`);
 
             try {
                 const params = {
@@ -683,37 +568,53 @@ export default {
                     itemsPerPage: this.options.itemsPerPage
                 };
 
-                // Add sorting parameters
                 if (this.options.sortBy && this.options.sortBy.length > 0) {
                     params.sortBy = this.options.sortBy[0].key;
-                    params.sortDesc = this.options.sortBy?.[0]?.order === 'asc';
+                    params.sortDesc = this.options.sortBy[0].order === 'asc';
                 } else {
-                    // Default sorting: newest first
-                    params.sortBy = 'Kennzeichen';
+                    params.sortBy = this.itemKey;
                     params.sortDesc = true;
                 }
 
-                console.log('Request parameters:', params);
-
-                const response = await axios.get('/api/cars', { params });
-                console.log('API Response:', response.data);
-
-                this.cars = response.data.items || response.data || [];
-                this.totalItems = response.data.total || response.data.totalItems || this.cars.length;
+                const response = await axios.get(`/api/${this.endpoint}`, { params });
+                this.items = response.data.items || response.data || [];
+                this.totalItems = response.data.total || response.data.totalItems || this.items.length;
+                console.log(`[DataTable] Data loaded successfully for ${this.endpoint}. Total items: ${this.totalItems}`);
             } catch (error) {
-                console.error('Error during data loading:', error);
-                if (error.response) {
-                    console.error('Response Data:', error.response.data);
-                }
-                this.cars = [];
+                console.error(`[DataTable] Error during data loading for ${this.endpoint}:`, error);
+                this.items = [];
                 this.totalItems = 0;
+                this.$emit('show-error', `Error during data loading for ${this.endpoint}`);
             } finally {
                 this.loading = false;
+                console.log(`[DataTable] Loading finished for ${this.endpoint}.`);
             }
+        },
+
+        getStatusTitle(statusCode) {
+            const statusHeader = this.headers.find(header => header.key === 'status');
+            if (statusHeader && statusHeader.options) {
+                const option = statusHeader.options.find(opt => opt.value === statusCode);
+                return option ? option.title : statusCode;
+            }
+            return statusCode;
+        },
+
+        formatDateTime(dateTimeString) {
+            if (!dateTimeString) return '';
+            const date = new Date(dateTimeString);
+            const options = {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            };
+            return date.toLocaleString('de-DE', options);
         }
     },
 
-    // Cleanup when unmounting a component
     beforeUnmount() {
         if (this.searchDebounceTimer) {
             clearTimeout(this.searchDebounceTimer);

@@ -52,20 +52,26 @@ class CarController extends Controller
 
     public function index()
     {
-        $perPage = request()->input('itemsPerPage', 20);
-        $page = request()->input('page', 1);
+        $maxPerPage = 100;
+        $perPage = min((int) request()->input('itemsPerPage', 20), $maxPerPage);
+        $page = max((int) request()->input('page', 1), 1);
         $sortBy = request()->input('sortBy', 'id');
-        $sortDesc = request()->input('sortDesc', 'false') === 'true';
+        $sortDesc = filter_var(request()->input('sortDesc', 'false'), FILTER_VALIDATE_BOOLEAN);
+
         $query = Car::with('images');
-        if ($sortBy) {
+        if (!empty($sortBy)) {
             $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
         }
 
         $total = $query->count();
-        $cars = $query->skip(($page - 1) * $perPage)->take($perPage)->get();
+
+        $cars = $query->skip(($page - 1) * $perPage)
+                    ->take($perPage)
+                    ->get();
+
         return response()->json([
             'items' => CarResource::collection($cars),
-            'total' => $total
+            'total' => $total,
         ]);
     }
 
@@ -73,10 +79,10 @@ class CarController extends Controller
      * Car Search
      */
     public function search(Request $request)
-    {
+    {   $maxPerPage = 100;
         try {
             $query = $request->input('query', '');
-            $perPage = $request->input('itemsPerPage', 20);
+            $perPage = min((int) request()->input('itemsPerPage', 20), $maxPerPage);
             $page = $request->input('page', 1);
             $sortBy = $request->input('sortBy', 'id');
             $sortDesc = $request->input('sortDesc', 'false') === 'true';

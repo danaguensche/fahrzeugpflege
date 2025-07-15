@@ -11,12 +11,16 @@ class Service extends Model
     use HasFactory;
     public $timestamps = false;
     protected $fillable = [
-        'id',
         'title',
     ];
 
     public function servicePricings()
     {
         return $this->hasMany(ServicePricing::class);
+    }
+
+    public function jobs()
+    {
+        return $this->belongsToMany(Job::class, 'job_service', 'service_id', 'job_id');
     }
 }

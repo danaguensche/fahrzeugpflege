@@ -11,7 +11,7 @@ class CustomerDetailsController extends CustomerController
 {
     public function details($id)
     {
-        $customer = Customer::with(['cars'])->where('id', $id)->first();
+        $customer = Customer::with(['cars', 'auftraege'])->where('id', $id)->first();
 
         if ($customer !== null) {
             return new CustomerResource($customer);

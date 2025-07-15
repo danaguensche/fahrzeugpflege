@@ -18,7 +18,7 @@
         <div class="actions">
             <v-checkbox label="Anmeldedaten speichern"></v-checkbox>
             <div class="forms-buttons-forgot">
-                <a href="#" class="forms-buttons-forgot">Passwort vergessen?</a>
+                <router-link to="/forgot-password" class="forms-buttons-forgot">Passwort vergessen?</router-link>
             </div>
         </div>
         <SubmitButton>Anmelden</SubmitButton>

@@ -69,6 +69,7 @@ export default {
           });
           if (response.data.success) {
             this.alertVisible = true;
+            this.$store.dispatch('switchForm', 'login');
           } else {
             console.error('Unerwarteter Erfolgsfall:', response.data);
           }

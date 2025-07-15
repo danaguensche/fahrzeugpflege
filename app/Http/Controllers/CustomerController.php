@@ -17,10 +17,10 @@ class CustomerController extends Controller
                 'firstname' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
                 'email' => 'required|email|unique:customers,email',
-                'phonenumber' => 'required|string',
-                'addressline' => 'required|string',
-                'postalcode' => 'required|string',
-                'city' => 'required|string',
+                'phonenumber' => 'nullable|string|max:255',
+                'addressline' => 'nullable|string|max:255',
+                'postalcode' => 'nullable|string|max:255',
+                'city' => 'nullable|string|max:255',
             ]);
 
             $customer = Customer::create($validated);
@@ -47,10 +47,11 @@ class CustomerController extends Controller
 
     public function index(Request $request)
     {
-        $perPage = $request->input('itemsPerPage', 20);
-        $page = $request->input('page', 1);
-        $sortBy = $request->input('sortBy', 'id');
-        $sortDesc = filter_var(request()->input('sortDesc', false), FILTER_VALIDATE_BOOLEAN);
+        $maxPerPage = 100;
+        $perPage = min((int) request()->input('itemsPerPage', 20), $maxPerPage);
+        $page = max((int) request()->input('page', 1), 1);
+        $sortBy = request()->input('sortBy', 'id');
+        $sortDesc = filter_var(request()->input('sortDesc', 'false'), FILTER_VALIDATE_BOOLEAN);
 
         $allowedSortFields = ['id', 'firstname', 'lastname', 'email', 'phonenumber', 'company', 'addressline', 'postalcode', 'city'];
 
@@ -75,8 +76,9 @@ class CustomerController extends Controller
     public function search(Request $request)
     {
         try {
+            $maxPerPage = 100;
             $query = $request->input('query', '');
-            $perPage = $request->input('itemsPerPage', 20);
+            $perPage = min((int) request()->input('itemsPerPage', 20), $maxPerPage);
             $page = $request->input('page', 1);
             $sortBy = $request->input('sortBy', 'id');
             $sortDesc = filter_var(request()->input('sortDesc', false), FILTER_VALIDATE_BOOLEAN);
@@ -204,10 +206,10 @@ class CustomerController extends Controller
                 'firstname' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
                 'email' => 'required|email|unique:customers,email,' . $id,
-                'phonenumber' => 'required|string',
-                'addressline' => 'required|string',
-                'postalcode' => 'required|string',
-                'city' => 'required|string',
+                'phonenumber' => 'nullable|string|max:255',
+                'addressline' => 'nullable|string|max:255',
+                'postalcode' => 'nullable|string|max:255',
+                'city' => 'nullable|string|max:255',
             ]);
 
             // CORRECTED: send all validated data
@@ -236,6 +238,22 @@ class CustomerController extends Controller
                 'success' => false,
                 'message' => 'Fehler beim Aktualisieren des Kunden'
             ], 500);
+        }
+    }
+
+    public function removeCarFromCustomer($customerId, $carId)
+    {
+        try {
+            $customer = Customer::findOrFail($customerId);
+            $car = $customer->cars()->findOrFail($carId);
+
+            // Assuming a one-to-many relationship where Car has a customer_id
+            $car->customer_id = null;
+            $car->save();
+
+            return response()->json(['success' => true, 'message' => 'Fahrzeug erfolgreich vom Kunden entfernt.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Fehler beim Entfernen des Fahrzeugs.'], 500);
         }
     }
 }

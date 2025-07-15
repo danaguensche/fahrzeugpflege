@@ -21,6 +21,9 @@ Route::controller(PageController::class)->group(function () {
     Route::get('/', 'login')->name('login');
     Route::get('/login', 'login')->name('login');
     Route::get('/signup', 'signup')->name('signup');
+    Route::get('/reset-password/{token}', function () {
+        return view('welcome'); // Or your main app view
+    })->name('password.reset');
 });
 
 // Auth Routes
@@ -64,11 +67,14 @@ Route::middleware(['auth'])->group(function () {
         },)->name('cardetails');
         Route::get('/kunden', 'customers')->name('kunden');
         Route::get('/kunden/kundendetails/{id}', function ($id) {
-            return view('pages.customerdetails', ['id' => $id]);
+            $customer = \App\Models\Customer::with('auftraege')->find($id);
+            return view('pages.customerdetails', ['id' => $id, 'auftraege' => $customer->auftraege]);
         })->name('customerdetails');
         Route::get('/auftraege', 'jobs')->name('jobs');
+        Route::get('/auftraege/jobdetails/{id}', 'jobdetails')->name('jobdetails');
+        
         Route::get('/berichte', 'reports')->name('reports');
         Route::get('/profil', 'profile')->name('profile');
         Route::get('/einstellungen', 'settings')->name('settings');
-    });
+});
 });

@@ -30,6 +30,7 @@ class CustomerResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'cars' => CarResource::collection($this->whenLoaded('cars')),
+            'auftraege' => JobResource::collection($this->whenLoaded('auftraege')),
         ];
     }
 }
