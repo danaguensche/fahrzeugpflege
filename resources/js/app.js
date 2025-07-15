@@ -13,7 +13,7 @@ axios.defaults.withCredentials = true;
 axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 axios.defaults.headers.common['Accept'] = 'application/json';
 
-const token = localStorage.getItem('token'); 
+const token = localStorage.getItem('apiToken'); 
 if (token) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 }
@@ -26,7 +26,7 @@ app.use(Router);
 app.use(store);
 app.use(vuetify);
 
-// Ensure auth status is checked before mounting the app
-store.dispatch('auth/checkAuthStatus').then(() => {
-    app.mount('#app');
-});
+
+
+
+app.mount('#app');

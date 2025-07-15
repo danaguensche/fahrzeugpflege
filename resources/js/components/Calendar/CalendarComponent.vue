@@ -372,8 +372,6 @@ export default {
 
 /* Event Details Styles */
 .event-details {
-  z-index: 9999;
-  position: relative;
   margin-top: 30px;
   padding: 25px;
   border: 1px solid #e9ecef;

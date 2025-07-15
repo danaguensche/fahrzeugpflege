@@ -16,9 +16,7 @@ use App\Http\Controllers\ServiceController;
 // Auth Routes
 Route::post('/forgot-password', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::post('/reset-password', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/users/me', [UserController::class, 'me']);
-});
+Route::middleware('auth:sanctum')->get('/users/me', [UserController::class, 'me']);
 Route::middleware('auth:sanctum')->get('/users/search', [UserController::class, 'search']);
 Route::put('/users/me', [UserController::class, 'update']);
 

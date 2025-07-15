@@ -21,8 +21,7 @@ class UserResource extends JsonResource
             'email'       => $this->email ?? 'Nicht verfügbar',
             'addressLine' => $this->addressline ?? 'Nicht verfügbar',
             'postalCode'  => $this->postalcode ?? 'Nicht verfügbar',
-            'city'        => $this->city ?? 'Nicht verfügbar',
-            'role'        => $this->role ?? 'Nicht verfügbar'
+            'city'        => $this->city ?? 'Nicht verfügbar'
         ];
     }
     
