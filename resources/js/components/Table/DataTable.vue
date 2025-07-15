@@ -286,6 +286,7 @@ export default {
     },
 
     mounted() {
+        console.log('DataTable.vue mounted');
         this.loadItems();
     },
 
@@ -346,6 +347,15 @@ export default {
 
             } catch (error) {
                 console.error(`[DataTable] Error during search for ${this.endpoint}:`, error);
+                if (error.response) {
+                    console.error('Response data:', error.response.data);
+                    console.error('Response status:', error.response.status);
+                    console.error('Response headers:', error.response.headers);
+                } else if (error.request) {
+                    console.error('Request data:', error.request);
+                } else {
+                    console.error('Error message:', error.message);
+                }
                 this.items = [];
                 this.totalItems = 0;
                 this.$emit('show-error', `Error when searching for ${this.endpoint}`);
@@ -585,6 +595,15 @@ export default {
                 console.log(`[DataTable] Data loaded successfully for ${this.endpoint}. Total items: ${this.totalItems}`);
             } catch (error) {
                 console.error(`[DataTable] Error during data loading for ${this.endpoint}:`, error);
+                if (error.response) {
+                    console.error('Response data:', error.response.data);
+                    console.error('Response status:', error.response.status);
+                    console.error('Response headers:', error.response.headers);
+                } else if (error.request) {
+                    console.error('Request data:', error.request);
+                } else {
+                    console.error('Error message:', error.message);
+                }
                 this.items = [];
                 this.totalItems = 0;
                 this.$emit('show-error', `Error during data loading for ${this.endpoint}`);

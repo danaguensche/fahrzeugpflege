@@ -28,7 +28,8 @@ class User extends Authenticatable implements CanResetPassword
         'addressline',
         'postalcode',
         'city',
-        'api_token'
+        'api_token',
+        'role'
 
     ];
 

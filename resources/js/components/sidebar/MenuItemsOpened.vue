@@ -1,6 +1,6 @@
 <template>
     <div class="sidebar-container">
-        <div v-for="(menuitem, index) in menuitems" :key="menuitem.id"
+        <div v-for="(menuitem, index) in filteredMenuItems" :key="menuitem.id"
             :class="['sidebar-button', { 'profile-spacing': menuitem.name === 'Profil' }]">
             <div class="sidebar-buttons-wrapper">
                 <MenuButton @click="redirectToView(menuitem)" class="menu-button-content">
@@ -23,6 +23,7 @@
 import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
 import MenuButton from './Slots/MenuButton.vue';
 import axios from 'axios';
+import { mapState } from 'vuex';
 
 export default {
     name: 'MenuItemsOpened',
@@ -41,15 +42,16 @@ export default {
             },
             //Text-Inhalte der Sidebar
             menuitems: [
-                { id: 1, name: 'Dashboard' },
-                { id: 2, name: 'Kalender' },
-                { id: 3, name: 'Fahrzeuge' },
-                { id: 4, name: 'Kunden' },
-                { id: 5, name: 'Aufträge' },
-                { id: 6, name: 'Berichte' },
-                { id: 7, name: 'Profil' },
-                { id: 8, name: 'Einstellungen' },
-                { id: 9, name: 'Abmelden' },
+                { id: 1, name: 'Dashboard', roles: ['trainee', 'trainer', 'admin'] },
+                { id: 2, name: 'Kalender', roles: ['trainee', 'trainer', 'admin'] },
+                { id: 3, name: 'Fahrzeuge', roles: ['trainee', 'trainer', 'admin'] },
+                { id: 4, name: 'Kunden', roles: ['trainer', 'admin'] },
+                { id: 5, name: 'Aufträge', roles: ['trainee', 'trainer', 'admin'] },
+                { id: 6, name: 'Berichte', roles: ['trainer', 'admin'] },
+                { id: 7, name: 'Benutzer', roles: ['admin'] },
+                { id: 8, name: 'Profil', roles: ['trainee', 'trainer', 'admin'] },
+                { id: 9, name: 'Einstellungen', roles: ['trainer', 'admin'] },
+                { id: 10, name: 'Abmelden', roles: ['trainee', 'trainer', 'admin'] },
             ],
 
             //Bildnamen
@@ -60,10 +62,17 @@ export default {
                 { id: 4, name: new URL('@/img/sidebar-img/customer-icon.png', import.meta.url).href },
                 { id: 5, name: new URL('@/img/sidebar-img/jobs-icon.png', import.meta.url).href },
                 { id: 6, name: new URL('@/img/sidebar-img/reports-icon.png', import.meta.url).href },
-                { id: 7, name: new URL('@/img/sidebar-img/profile-icon.png', import.meta.url).href },
-                { id: 8, name: new URL('@/img/sidebar-img/settings-icon.png', import.meta.url).href },
-                { id: 9, name: new URL('@/img/sidebar-img/logout-icon.png', import.meta.url).href },
+                { id: 7, name: new URL('@/img/sidebar-img/user-icon.png', import.meta.url).href }, /* New icon for Users */
+                { id: 8, name: new URL('@/img/sidebar-img/profile-icon.png', import.meta.url).href },
+                { id: 9, name: new URL('@/img/sidebar-img/settings-icon.png', import.meta.url).href },
+                { id: 10, name: new URL('@/img/sidebar-img/logout-icon.png', import.meta.url).href },
             ]
+        }
+    },
+    computed: {
+        ...mapState(['userRole']),
+        filteredMenuItems() {
+            return this.menuitems.filter(item => item.roles.includes(this.userRole));
         }
     },
     methods: {
