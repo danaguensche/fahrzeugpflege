@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\JobResource;
 use App\Models\Job;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -30,6 +31,14 @@ class JobController extends Controller
 
     public function index(Request $request)
     {
+        $maxPerPage = 100;
+        $perPage = min((int) $request->input('itemsPerPage', 20), $maxPerPage);
+        $page = max((int) $request->input('page', 1), 1);
+        $sortBy = $request->input('sortBy', 'id');
+        $sortDesc = filter_var($request->input('sortDesc', 'false'), FILTER_VALIDATE_BOOLEAN);
+
+        $allowedSortFields = ['id', 'title', 'description', 'scheduled_at', 'status'];
+
         $query = Job::with(['customer', 'car', 'services']);
 
         if ($request->has('start') && $request->has('end')) {
@@ -38,10 +47,22 @@ class JobController extends Controller
             $query->whereBetween('scheduled_at', [$start, $end]);
         }
 
-        $jobs = $query->get();
+        if (in_array($sortBy, $allowedSortFields)) {
+            $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
+        }
 
-        return response()->json($jobs);
+        $total = $query->count();
+
+        $jobs = $query->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+
+        return response()->json([
+            'items' => $jobs,
+            'total' => $total,
+        ]);
     }
+
 
     public function search(Request $request)
     {
@@ -51,7 +72,7 @@ class JobController extends Controller
         $sortDesc = $request->input('sortDesc', 'true') === 'true';
 
         $query = Job::where('title', 'like', '%' . $searchQuery . '%')
-                    ->orWhere('description', 'like', '%' . $searchQuery . '%');
+            ->orWhere('description', 'like', '%' . $searchQuery . '%');
 
         $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
 
@@ -109,12 +130,11 @@ class JobController extends Controller
             ]);
 
             Job::destroy($validated['ids']);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Jobs wurden erfolgreich gelöscht.'
             ], 200);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
@@ -129,5 +149,4 @@ class JobController extends Controller
             ], 500);
         }
     }
-
 }

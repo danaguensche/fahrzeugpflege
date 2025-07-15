@@ -168,7 +168,8 @@ export default {
     justify-content: space-between;
     width: 100%;
     margin-top: -80px;
-    z-index: 5;
+    z-index: 10;
+    position: relative;
 }
 
 .table-container {

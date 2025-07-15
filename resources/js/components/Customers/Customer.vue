@@ -163,6 +163,7 @@ export default {
     width: 100%;
     margin-top: -80px;
     z-index: 5;
+    position: relative;
 }
 
 .table-container {
