@@ -13,11 +13,11 @@
                 </div>
             </div>
         </div>
+
         <div class="content-container">
-            <DefaultButton @click="openAddJobDialog">
-                Auftrag hinzufügen
-            </DefaultButton>
+            <DefaultButton @click="openAddJobDialog">Auftrag hinzufügen</DefaultButton>
         </div>
+
         <DataTable ref="jobDataTable" :searchString="searchText" :isSearchActive="isSearchActive" endpoint="jobs"
             :headers="jobHeaders" :fields="jobFields" itemKey="id" detailsPage="jobdetails"
             detailsUrlBasePath="auftraege" deleteKey="ids" @itemsDeleted="handleJobsDeleted"
@@ -149,14 +149,17 @@ export default {
 
 <style scoped>
 .jobs-page {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    flex-direction: column;
     margin-left: 150px;
     margin-right: 50px;
     transition: margin-left 0.3s ease;
     font-family: var(--font-family);
+}
+
+.search-wrapper {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    margin-bottom: 10px;
 }
 
 .content-container {
@@ -168,22 +171,15 @@ export default {
     z-index: 5;
 }
 
-.search-wrapper {
-    position: relative;
-    z-index: 10;
+.table-container {
     width: 100%;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
 .search-input-container {
     position: relative;
     display: flex;
     align-items: center;
-    flex-grow: 1;
-    margin-right: 20px;
+    width: 100%;
 }
 
 .search-buttons {
@@ -240,9 +236,10 @@ export default {
     background-color: rgba(0, 0, 0, 0.04);
 }
 
-.form-container {
-    margin-top: 1vh;
-    margin-bottom: 1vh;
+
+
+.table-container {
+    width: 100%;
 }
 
 .jobs-page-sidebar-opened {
@@ -250,14 +247,19 @@ export default {
     transition: margin-left 0.3s ease;
 }
 
-.add-job-button {
-    margin-left: auto;
-    /* Pushes the button to the right */
+/* Tablet Styles */
+@media only screen and (max-width: 1024px) {
+    .jobs-page {
+        margin-left: 120px;
+        margin-right: 30px;
+    }
 }
 
-@media only screen and (max-width: 650px) {
+/* Mobile Styles */
+@media only screen and (max-width: 768px) {
     .jobs-page {
         margin-left: 160px;
+        margin-right: 20px;
         font-size: 12px;
     }
 
@@ -267,10 +269,6 @@ export default {
 
     .content-container {
         flex-direction: column;
-    }
-
-    .form-container {
-        width: 100%;
     }
 
     .search-input-container {

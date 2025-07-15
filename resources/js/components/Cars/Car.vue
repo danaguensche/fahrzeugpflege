@@ -18,20 +18,22 @@
             <DefaultButton @click="openAddCarDialog">Fahrzeug hinzufügen</DefaultButton>
         </div>
 
-
-        <DataTable
-            :searchString="searchText"
-            :isSearchActive="isSearchActive"
-            endpoint="cars"
-            :headers="carHeaders"
-            :fields="carFields"
-            itemKey="Kennzeichen"
-            detailsPage="fahrzeugdetails"
-            detailsUrlBasePath="fahrzeuge"
-            deleteKey="kennzeichen"
-            @itemsDeleted="handleItemsDeleted"
-            @show-error="handleError"
-        />
+        <div class="table-container">
+            <DataTable
+                :searchString="searchText"
+                :isSearchActive="isSearchActive"
+                endpoint="cars"
+                :headers="carHeaders"
+                :fields="carFields"
+                itemKey="Kennzeichen"
+                detailsPage="fahrzeugdetails"
+                detailsUrlBasePath="fahrzeuge"
+                deleteKey="kennzeichen"
+                @itemsDeleted="handleItemsDeleted"
+                @show-error="handleError"
+            />
+        </div>
+        
         <AddCarForm v-model="showAddCarDialog" @car-added="handleCarAdded" />
     </div>
 </template>
@@ -151,14 +153,17 @@ export default {
 
 <style scoped>
 .car-page {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    flex-direction: column;
     margin-left: 150px;
     margin-right: 50px;
     transition: margin-left 0.3s ease;
     font-family: var(--font-family);
+}
+
+.search-wrapper {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    margin-bottom: 10px;
 }
 
 .content-container {
@@ -170,17 +175,15 @@ export default {
     z-index: 5;
 }
 
-.search-wrapper {
-    position: relative;
-    z-index: 10;
+.table-container {
     width: 100%;
-    margin-bottom: 20px;
 }
 
 .search-input-container {
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
 .search-buttons {
@@ -237,9 +240,10 @@ export default {
     background-color: rgba(0, 0, 0, 0.04);
 }
 
-.form-container {
-    margin-top: 1vh;
-    margin-bottom: 1vh;
+
+
+.table-container {
+    width: 100%;
 }
 
 .car-page-sidebar-opened {
@@ -247,9 +251,19 @@ export default {
     transition: margin-left 0.3s ease;
 }
 
-@media only screen and (max-width: 650px) {
+/* Tablet Styles */
+@media only screen and (max-width: 1024px) {
+    .car-page {
+        margin-left: 120px;
+        margin-right: 30px;
+    }
+}
+
+/* Mobile Styles */
+@media only screen and (max-width: 768px) {
     .car-page {
         margin-left: 160px;
+        margin-right: 20px;
         font-size: 12px;
     }
 
@@ -259,10 +273,6 @@ export default {
 
     .content-container {
         flex-direction: column;
-    }
-
-    .form-container {
-        width: 100%;
     }
 
     .search-input-container {

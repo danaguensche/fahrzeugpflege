@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import MainLayout from './components/layouts/MainLayout.vue';
-import CalendarComponent from './components/CalendarComponent.vue';
+import CalendarComponent from './components/Calendar/CalendarComponent.vue';
 import DashboardPage from './components/pages/DashboardPage.vue';
 import CarsPage from './components/pages/CarsPage.vue';
 import JobsPage from './components/pages/JobsPage.vue';
@@ -18,12 +18,10 @@ import JobsDetailsPage from './components/pages/JobsDetailsPage.vue';
 import ForgotPassword from './components/Auth/ForgotPassword.vue';
 import ResetPassword from './components/Auth/ResetPassword.vue';
 
-const routes = [
-    {
+const routes = [{
         path: '/',
         component: MainLayout,
-        children: [
-            {
+        children: [{
                 path: 'dashboard',
                 component: DashboardPage,
             },
