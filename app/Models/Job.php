@@ -35,6 +35,11 @@ class Job extends Model
         return $this->belongsTo(Car::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     protected $casts = [
         'scheduled_at' => 'datetime',
     ];

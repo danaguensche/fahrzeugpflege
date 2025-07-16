@@ -97,7 +97,7 @@ export default {
 
         logout() {
             this.isAlertVisible = false;
-                axios.post('/logout', {}, {
+                axios.post('/api/logout', {}, {
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }

@@ -51,9 +51,9 @@ Route::get('/services/search', [ServiceController::class, 'search']);
 // Jobs Routes
 Route::get('/jobs/search', [App\Http\Controllers\JobController::class, 'search']);
 Route::delete('jobs', [App\Http\Controllers\JobController::class, 'destroyMultiple']);
-Route::apiResource('jobs', App\Http\Controllers\JobController::class);
+Route::apiResource('jobs', App\Http\Controllers\JobController::class)->middleware('auth:sanctum');
 Route::get('/jobs/jobdetails/{id}', [JobDetailsController::class, 'details']);
 Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
 
 // Logout Routes
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:sanctum');

@@ -63,6 +63,7 @@ export default {
                     title: 'Status', key: 'status', sortable: true, editable: true, type: 'select', options: [
                         { title: 'Ausstehend', value: 'ausstehend' },
                         { title: 'In Bearbeitung', value: 'in_bearbeitung' },
+                        { title: 'im Rückblick', value: 'im_rueckblick' },
                         { title: 'Abgeschlossen', value: 'abgeschlossen' },
                     ]
                 },
@@ -72,11 +73,48 @@ export default {
             ],
             jobFields: ["id", "title", "description", "scheduled_at", "status", "services"],
             showAddJobDialog: false,
+            selectedStatus: null,
+            selectedCustomer: null,
+            selectedCar: null,
+            selectedUser: null,
+            startDate: null,
+            endDate: null,
+            customers: [],
+            cars: [],
+            users: [],
+            customersLoading: false,
+            carsLoading: false,
+            usersLoading: false,
+            customerSearchTimeout: null,
+            carSearchTimeout: null,
+            userSearchTimeout: null,
         }
     },
 
     computed: {
-        ...mapState(['isSidebarOpen'])
+        ...mapState(['isSidebarOpen', 'userRole']),
+        activeFilters() {
+            const filters = {};
+            if (this.selectedStatus) {
+                filters.status = this.selectedStatus;
+            }
+            if (this.selectedCustomer) {
+                filters.customer_id = this.selectedCustomer.id;
+            }
+            if (this.selectedCar) {
+                filters.car_id = this.selectedCar.id;
+            }
+            if (this.selectedUser) {
+                filters.user_id = this.selectedUser.id;
+            }
+            if (this.startDate) {
+                filters.start = this.startDate;
+            }
+            if (this.endDate) {
+                filters.end = this.endDate;
+            }
+            return filters;
+        }
     },
 
     watch: {
@@ -89,6 +127,89 @@ export default {
     },
 
     methods: {
+        applyFilters() {
+            this.$refs.jobDataTable.loadItems();
+        },
+
+        async fetchCustomers(query = '') {
+            this.customersLoading = true;
+            try {
+                const response = await axios.get(`/api/customers/search?query=${query}`);
+                this.customers = response.data.data.map(customer => ({
+                    id: customer.id,
+                    firstname: customer.firstname,
+                    lastname: customer.lastname,
+                    full_name: `${customer.firstname} ${customer.lastname}`,
+                    email: customer.email,
+                }));
+            } catch (error) {
+                console.error('Error fetching customers:', error);
+            } finally {
+                this.customersLoading = false;
+            }
+        },
+
+        searchCustomers(query) {
+            if (this.customerSearchTimeout) {
+                clearTimeout(this.customerSearchTimeout);
+            }
+            this.customerSearchTimeout = setTimeout(() => {
+                this.fetchCustomers(query);
+            }, 300);
+        },
+
+        async fetchCars(query = '') {
+            this.carsLoading = true;
+            try {
+                const response = await axios.get(`/api/cars/search?query=${query}`);
+                this.cars = response.data.data.map(car => ({
+                    id: car.id,
+                    Kennzeichen: car.Kennzeichen,
+                    Automarke: car.Automarke,
+                }));
+            } catch (error) {
+                console.error('Error fetching cars:', error);
+            } finally {
+                this.carsLoading = false;
+            }
+        },
+
+        searchCars(query) {
+            if (this.carSearchTimeout) {
+                clearTimeout(this.carSearchTimeout);
+            }
+            this.carSearchTimeout = setTimeout(() => {
+                this.fetchCars(query);
+            }, 300);
+        },
+
+        async fetchUsers(query = '') {
+            this.usersLoading = true;
+            try {
+                const response = await axios.get(`/api/users/search?query=${query}`);
+                this.users = response.data.data.map(user => ({
+                    id: user.id,
+                    firstname: user.firstname,
+                    lastname: user.lastname,
+                    full_name: `${user.firstname} ${user.lastname}`,
+                    email: user.email,
+                }));
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            } finally {
+                this.usersLoading = false;
+            }
+        },
+
+        searchUsers(query) {
+            if (this.userSearchTimeout) {
+                clearTimeout(this.userSearchTimeout);
+            }
+            this.userSearchTimeout = setTimeout(() => {
+                this.fetchUsers(query);
+            }, 300);
+        },
+
         openAddJobDialog() {
             this.showAddJobDialog = true;
         },
@@ -142,6 +263,13 @@ export default {
             if (this.searchText?.trim()) {
                 this.isSearchActive = true;
             }
+        }
+    },
+    mounted() {
+        this.fetchCustomers();
+        this.fetchCars();
+        if (this.userRole !== 'trainee') {
+            this.fetchUsers();
         }
     }
 }

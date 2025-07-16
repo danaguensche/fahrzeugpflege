@@ -5,6 +5,7 @@ export default {
     isLoggedIn: !!localStorage.getItem('token'),
     token: localStorage.getItem('token'),
     userRole: localStorage.getItem('userRole') || null,
+    userId: localStorage.getItem('userId') || null,
   },
   mutations: {
     setActiveForm(state, formName) {
@@ -21,20 +22,27 @@ export default {
       state.userRole = role;
       localStorage.setItem('userRole', role);
     },
+    setUserId(state, id) {
+      state.userId = id;
+      localStorage.setItem('userId', id);
+    },
     clearToken(state) {
       state.token = null;
       localStorage.removeItem('token');
       state.userRole = null;
       localStorage.removeItem('userRole');
+      state.userId = null;
+      localStorage.removeItem('userId');
     }
   },
   actions: {
     switchForm({ commit }, formName) {
       commit('setActiveForm', formName);
     },
-    login({ commit }, { token, role }) {
+    login({ commit }, { token, role, userId }) {
       commit('setToken', token);
       commit('setUserRole', role);
+      commit('setUserId', userId);
       commit('setLoggedIn', true);
     },
     logout({ commit }) {
@@ -44,9 +52,11 @@ export default {
     checkAuthStatus({ commit }) {
       const token = localStorage.getItem('token');
       const userRole = localStorage.getItem('userRole');
-      if (token && userRole) {
+      const userId = localStorage.getItem('userId');
+      if (token && userRole && userId) {
         commit('setToken', token);
         commit('setUserRole', userRole);
+        commit('setUserId', userId);
         commit('setLoggedIn', true);
       } else {
         commit('setLoggedIn', false);

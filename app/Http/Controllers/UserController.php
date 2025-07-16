@@ -131,4 +131,19 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    public function search(Request $request)
+    {
+        $searchQuery = $request->input('query');
+
+        $users = User::where(function ($queryBuilder) use ($searchQuery) {
+            $queryBuilder->where('firstname', 'like', '%' . $searchQuery . '%')
+                         ->orWhere('lastname', 'like', '%' . $searchQuery . '%')
+                         ->orWhere('email', 'like', '%' . $searchQuery . '%');
+        })->get();
+
+        return response()->json([
+            'data' => $users,
+        ]);
+    }
 }

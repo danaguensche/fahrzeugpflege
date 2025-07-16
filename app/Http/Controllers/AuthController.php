@@ -14,9 +14,7 @@ class AuthController extends Controller
 {
     public function logout(Request $request): JsonResponse
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Sie wurden erfolgreich abgemeldet.']);
     }
 
@@ -39,6 +37,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'userId' => $user->id,
             ],
             'token' => $token,
             'redirect' => '/dashboard'

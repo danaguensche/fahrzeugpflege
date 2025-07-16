@@ -574,7 +574,8 @@ export default {
             try {
                 const params = {
                     page: this.options.page,
-                    itemsPerPage: this.options.itemsPerPage
+                    itemsPerPage: this.options.itemsPerPage,
+                    ...this.filters
                 };
 
                 if (this.options.sortBy && this.options.sortBy.length > 0) {

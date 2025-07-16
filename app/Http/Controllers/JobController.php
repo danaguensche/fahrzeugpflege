@@ -10,8 +10,14 @@ use Carbon\Carbon;
 
 class JobController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('role:trainer,admin');
+    }
+
     public function store(Request $request)
     {
+
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -23,7 +29,7 @@ class JobController extends Controller
             'service_ids.*' => 'exists:services,id',
         ]);
 
-        $job = Job::create($validatedData);
+        $job = Job::create(array_merge($validatedData, ['user_id' => auth()->id()]));
         $job->services()->sync($request->input('service_ids'));
 
         return response()->json($job, 201);
@@ -39,7 +45,32 @@ class JobController extends Controller
 
         $allowedSortFields = ['id', 'title', 'description', 'scheduled_at', 'status'];
 
-        $query = Job::with(['customer', 'car', 'services']);
+        $query = Job::with(['customer', 'car', 'services', 'user']);
+
+        // Filter by user role
+        if (auth()->user()->role === 'trainee') {
+            $query->where('user_id', auth()->id());
+        }
+
+        // Filtering by status
+        if ($request->has('status') && $request->input('status') !== '') {
+            $query->where('status', $request->input('status'));
+        }
+
+        // Filtering by car_id
+        if ($request->has('car_id') && $request->input('car_id') !== '') {
+            $query->where('car_id', $request->input('car_id'));
+        }
+
+        // Filtering by customer_id
+        if ($request->has('customer_id') && $request->input('customer_id') !== '') {
+            $query->where('customer_id', $request->input('customer_id'));
+        }
+
+        // Filtering by user_id (for trainer/admin to filter by specific trainee)
+        if (auth()->user()->role !== 'trainee' && $request->has('user_id') && $request->input('user_id') !== '') {
+            $query->where('user_id', $request->input('user_id'));
+        }
 
         if ($request->has('start') && $request->has('end')) {
             $start = Carbon::parse($request->input('start'));
@@ -56,6 +87,8 @@ class JobController extends Controller
         $jobs = $query->skip(($page - 1) * $perPage)
             ->take($perPage)
             ->get();
+
+        Log::info('Jobs fetched:', ['count' => $jobs->count(), 'jobs' => $jobs->toArray()]);
 
         return response()->json([
             'items' => $jobs,

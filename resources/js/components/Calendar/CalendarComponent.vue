@@ -17,7 +17,6 @@
         :min-cell-width="100"
         :min-cell-height="100"
         :snap-to-time="15"
-        :locale="de"
         :sticky-split-labels="true"
         :hide-weekends="false"
         :start-week-on-sunday="false"
@@ -51,6 +50,10 @@
         <div class="legend-item">
           <span class="legend-color abgeschlossen"></span>
           <span>Abgeschlossen</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color im-rueckblick"></span>
+          <span>Im Rückblick</span>
         </div>
       </div>
 
@@ -364,6 +367,10 @@ export default {
 
 .legend-color.in-bearbeitung {
   background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
+}
+
+.legend-color.im-rueckblick {
+  background: linear-gradient(135deg, #ffecb3 0%, #ffe082 100%);
 }
 
 .legend-color.abgeschlossen {
