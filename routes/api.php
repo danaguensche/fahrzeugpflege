@@ -56,7 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/jobs/jobdetails/{id}', [JobDetailsController::class, 'details']);
     Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
 
-    Route::middleware('check_role:trainer,admin')->group(function () {
+    Route::middleware(\App\Http\Middleware\CheckRole::class . ':trainer,admin')->group(function () {
         Route::post('/jobs', [App\Http\Controllers\JobController::class, 'store']);
         Route::put('/jobs/{job}', [App\Http\Controllers\JobController::class, 'update']);
         Route::delete('/jobs/{job}', [App\Http\Controllers\JobController::class, 'destroy']);

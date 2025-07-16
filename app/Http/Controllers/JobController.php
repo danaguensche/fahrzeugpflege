@@ -24,7 +24,12 @@ class JobController extends Controller
             'service_ids.*' => 'exists:services,id',
         ]);
 
-        $job = Job::create(array_merge($validatedData, ['user_id' => auth()->id()]));
+        $user = auth()->user();
+        if (!$user) {
+            // Handle unauthenticated user, e.g., throw an exception or return an error response
+            abort(401, 'Unauthenticated.');
+        }
+        $job = Job::create(array_merge($validatedData, ['user_id' => $user->id]));
         $job->services()->sync($request->input('service_ids'));
 
         return response()->json($job, 201);
@@ -43,6 +48,7 @@ class JobController extends Controller
         $query = Job::with(['customer', 'car', 'services', 'user']);
 
         // Filter by user role
+        /** @var \App\Models\User|null $user */
         $user = auth()->user();
         if ($user && $user->role === 'trainee') {
             $query->where('user_id', $user->id);
@@ -64,7 +70,7 @@ class JobController extends Controller
         }
 
         // Filtering by user_id (for trainer/admin to filter by specific trainee)
-        if (auth()->user()->role !== 'trainee' && $request->has('user_id') && $request->input('user_id') !== '') {
+        if ($user && $user->role !== 'trainee' && $request->has('user_id') && $request->input('user_id') !== '') {
             $query->where('user_id', $request->input('user_id'));
         }
 
@@ -120,6 +126,11 @@ class JobController extends Controller
 
     public function update(Request $request, Job $job)
     {
+        // Convert empty string for scheduled_at to null
+        if ($request->has('scheduled_at') && $request->input('scheduled_at') === '') {
+            $request->merge(['scheduled_at' => null]);
+        }
+
         $validatedData = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
@@ -127,6 +138,7 @@ class JobController extends Controller
             'customer_id' => 'sometimes|required|exists:customers,id',
             'status' => 'sometimes|required|string',
             'scheduled_at' => 'nullable|date',
+            'user_id' => 'sometimes|nullable|exists:users,id',
             'services' => 'nullable|array',
             'services.*.id' => 'required|exists:services,id',
         ]);

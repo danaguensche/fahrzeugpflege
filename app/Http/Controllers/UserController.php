@@ -69,6 +69,7 @@ class UserController extends Controller
     public function update(Request $request)
     {
         try {
+            /** @var \App\Models\User|null $user */
             $user = Auth::user();
 
             // Überprüfen, ob der Benutzer authentifiziert ist
