@@ -56,6 +56,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/jobs/jobdetails/{id}', [JobDetailsController::class, 'details']);
     Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
 
+    // Comment Routes
+    Route::post('/comments', [App\Http\Controllers\CommentController::class, 'store']);
+    Route::delete('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'destroy']);
+
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':trainer,admin')->group(function () {
         Route::post('/jobs', [App\Http\Controllers\JobController::class, 'store']);
         Route::put('/jobs/{job}', [App\Http\Controllers\JobController::class, 'update']);

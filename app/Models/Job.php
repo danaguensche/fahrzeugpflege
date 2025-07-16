@@ -43,4 +43,9 @@ class Job extends Model
     protected $casts = [
         'scheduled_at' => 'datetime',
     ];
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }

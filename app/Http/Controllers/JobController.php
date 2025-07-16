@@ -121,7 +121,7 @@ class JobController extends Controller
 
     public function show(Job $job)
     {
-        return response()->json($job->load('services'));
+        return response()->json($job->load(['services', 'comments.user']));
     }
 
     public function update(Request $request, Job $job)
