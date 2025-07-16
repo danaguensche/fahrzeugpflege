@@ -105,7 +105,7 @@ export default {
         },
       })
         .then(response => {
-          this.events = response.data.map(job => {
+          this.events = response.data.items.map(job => {
             const start = new Date(job.scheduled_at);
             const end = new Date(start.getTime() + 60 * 60 * 1000); // Assuming 1 hour duration
             const eventClass = job.status.replace(/_/g, '-');
