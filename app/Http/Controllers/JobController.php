@@ -10,11 +10,6 @@ use Carbon\Carbon;
 
 class JobController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('role:trainer,admin');
-    }
-
     public function store(Request $request)
     {
 
@@ -48,8 +43,9 @@ class JobController extends Controller
         $query = Job::with(['customer', 'car', 'services', 'user']);
 
         // Filter by user role
-        if (auth()->user()->role === 'trainee') {
-            $query->where('user_id', auth()->id());
+        $user = auth()->user();
+        if ($user && $user->role === 'trainee') {
+            $query->where('user_id', $user->id);
         }
 
         // Filtering by status

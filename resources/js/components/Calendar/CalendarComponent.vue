@@ -312,7 +312,11 @@ export default {
   color: #333;
   border-left: 4px solid #4caf50;
 }
-
+.vuecal__event.im-rueckblick {
+  background: linear-gradient(135deg, #ffecb3 0%, #ffe082 100%);
+  color: #333;
+  border-left: 4px solid #e9c455;
+}
 .vuecal__event-title {
   font-weight: 600;
   margin-bottom: 4px;
