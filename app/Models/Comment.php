@@ -8,7 +8,10 @@ class Comment extends Model
 {
     protected $fillable = ['user_id', 'job_id', 'comment_text'];
 
-    public function user()
+    /**
+     * Get the user that owns the comment.
+     */
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class);
     }
