@@ -11,6 +11,7 @@ use App\Http\Controllers\CustomerSearchController;
 use App\Http\Controllers\CarSearchController;
 use App\Http\Controllers\JobDetailsController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ImageReportController;
 
 
 // Auth Routes
@@ -59,6 +60,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Comment Routes
     Route::post('/comments', [App\Http\Controllers\CommentController::class, 'store']);
     Route::delete('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'destroy']);
+
+    // Image Report Routes
+    Route::get('/tasks/{taskId}/images', [ImageReportController::class, 'index']);
+    Route::post('/tasks/{taskId}/images', [ImageReportController::class, 'upload']);
+    Route::delete('/images/{imageId}', [ImageReportController::class, 'destroy']);
 
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':trainer,admin')->group(function () {
         Route::post('/jobs', [App\Http\Controllers\JobController::class, 'store']);

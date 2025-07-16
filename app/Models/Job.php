@@ -48,4 +48,9 @@ class Job extends Model
     {
         return $this->hasMany(Comment::class);
     }
+
+    public function images()
+    {
+        return $this->hasMany(ImageReport::class, 'task_id');
+    }
 }
