@@ -8,7 +8,7 @@
         <v-icon size="24" class="mr-2">{{ icon }}</v-icon>
         <span class="text-h5 font-weight-medium">{{ title }}</span>
         <v-spacer></v-spacer>
-        <v-btn icon @click="switchEditMode" variant="text" color="white">
+        <v-btn icon @click="switchEditMode" variant="text" color="white" v-if="isAdminOrTrainer">
             <v-tooltip activator="parent" location="bottom">
                 Bearbeiten
             </v-tooltip>
@@ -18,6 +18,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 export default {
     name: 'Header',
     props: {
@@ -35,5 +36,8 @@ export default {
             default: 'mdi-account'
         }
     },
+    computed: {
+        ...mapGetters('auth', ['isAdminOrTrainer']),
+    }
 }
 </script>

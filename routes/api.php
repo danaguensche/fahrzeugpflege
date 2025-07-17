@@ -19,20 +19,28 @@ Route::post('/forgot-password', [App\Http\Controllers\Auth\ForgotPasswordControl
 Route::post('/reset-password', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/me', [UserController::class, 'me']);
+    Route::get('/users', [UserController::class, 'index']);
+
+    // Cars Routes (View only for trainee, full access for trainer/admin)
+    Route::get('/cars/search', [CarSearchController::class, 'search']);
+    Route::get('cars', [CarController::class, 'index']);
+    Route::get('cars/{kennzeichen}', [CarController::class, 'show']);
+    Route::get('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'details']);
+
+    Route::middleware(\App\Http\Middleware\CheckRole::class . ':trainer,admin')->group(function () {
+        Route::post('cars', [CarController::class, 'store']);
+        Route::put('cars/{kennzeichen}', [CarController::class, 'update']);
+        Route::delete('cars/{kennzeichen}', [CarController::class, 'destroy']);
+        Route::delete('cars', [CarController::class, 'destroyMultiple']);
+        Route::put('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'update']);
+        Route::post('cars/cardetails/{kennzeichen}/images', [CarDetailsController::class, 'uploadImages']);
+        Route::delete('images/{imageId}', [CarDetailsController::class, 'deleteImage']);
+        Route::post('cars/{kennzeichen}/images/{imageId}', [CarDetailsController::class, 'replaceImage']);
+    });
 });
+
 Route::middleware('auth:sanctum')->get('/users/search', [UserController::class, 'search']);
 Route::put('/users/me', [UserController::class, 'update']);
-
-// Cars Routesob
-Route::get('/cars/search', [CarSearchController::class, 'search']);
-Route::apiResource('cars', CarController::class)->parameters(['cars' => 'kennzeichen']);
-Route::get('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'details']);
-Route::delete('cars', [CarController::class, 'destroyMultiple']);
-Route::put('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'update']);
-// Image management routes
-Route::post('cars/cardetails/{kennzeichen}/images', [CarDetailsController::class, 'uploadImages']);
-Route::delete('images/{imageId}', [CarDetailsController::class, 'deleteImage']);
-Route::post('cars/{kennzeichen}/images/{imageId}', [CarDetailsController::class, 'replaceImage']);
 
 
 // Customers Routes

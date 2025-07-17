@@ -53,8 +53,9 @@ export default {
       }
     }
   },
-  // getters: {
-  //   isLoggedIn: state => state.isLoggedIn,
-  //   getToken: state => state.token
-  // }
+  getters: {
+    isAdminOrTrainer: (state) => {
+      return state.userRole === 'admin' || state.userRole === 'trainer';
+    },
+  },
 };
