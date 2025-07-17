@@ -12,15 +12,25 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    
     public function logout(Request $request): JsonResponse
+
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        // Auth::logout();
+        // $request->session()->invalidate();
+        // $request->session()->regenerateToken();
+        // return response()->json(['message' => 'Sie wurden erfolgreich abgemeldet.']);
+
+        //Vorher Session basiert, jetzt Token basiert (Sanctum)
+        $user = $request->user();
+
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+        }
+
         return response()->json(['message' => 'Sie wurden erfolgreich abgemeldet.']);
     }
-
-
+        
     public function loginPost(LoginUserRequest $request): JsonResponse
     {
         $request->validated($request->all());

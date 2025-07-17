@@ -11,11 +11,10 @@
             </div>
         </div>
     </div>
-    <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
-            alertHeading="Abmelden"
-            alertParagraph="Wollen Sie sich abmelden?"
-            alertOkayButton="Abmelden" alertCloseButton="Abbrechen" @confirmation="logout">
-        </VuetifyAlert>
+    <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation" alertHeading="Abmelden"
+        alertParagraph="Wollen Sie sich abmelden?" alertOkayButton="Abmelden" alertCloseButton="Abbrechen"
+        @confirmation="logout">
+    </VuetifyAlert>
 </template>
 
 <script>
@@ -97,17 +96,17 @@ export default {
 
         logout() {
             this.isAlertVisible = false;
-                axios.post('/api/logout', {}, {
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                }).then(() => {
-                    localStorage.removeItem('apiToken');
-                    this.$router.push('/login');
-                }).catch(error => {
-                    console.error('Logout fehlgeschlagen', error);
-                    alert('Logout fehlgeschlagen. Bitte versuchen Sie es erneut.');
-                });
+            axios.post('/api/logout', {}, {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            }).then(() => {
+                this.$store.dispatch('auth/logout'); //Logout Funktion aus auth.js (Vuex Store)
+                this.$router.push('/login');
+            }).catch(error => {
+                console.error('Logout fehlgeschlagen', error);
+                alert('Logout fehlgeschlagen. Bitte versuchen Sie es erneut.');
+            });
         },
         updateAlertVisibility() {
             this.isAlertVisible = !this.isAlertVisible;
@@ -116,7 +115,6 @@ export default {
 }
 </script>
 <style scoped>
-
 .sidebar-container-closed {
     width: 110px;
     height: 100vh;
@@ -148,7 +146,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     width: 100%;
     background-color: var(--clr-light);
     border-radius: 10px;

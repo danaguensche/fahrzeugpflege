@@ -112,18 +112,19 @@ export default {
 
         logout() {
             this.isAlertVisible = false;
-                axios.post('/logout', {}, {
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                }).then(() => {
-                    localStorage.removeItem('apiToken');
-                    this.$router.push('/login');
-                }).catch(error => {
-                    console.error('Logout fehlgeschlagen', error);
-                    alert('Logout fehlgeschlagen. Bitte versuchen Sie es erneut.');
-                });
+            axios.post('/api/logout', {}, {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            }).then(() => {
+                this.$store.dispatch('auth/logout'); //Logout Funktion aus auth.js (Vuex Store)
+                this.$router.push('/login');
+            }).catch(error => {
+                console.error('Logout fehlgeschlagen', error);
+                alert('Logout fehlgeschlagen. Bitte versuchen Sie es erneut.');
+            });
         },
+
         updateAlertVisibility() {
             this.isAlertVisible = !this.isAlertVisible;
         }
