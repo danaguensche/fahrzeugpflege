@@ -54,7 +54,6 @@ export default {
                 { id: 10, name: 'Abmelden', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/logout-icon.png', import.meta.url).href },
             ],
 
-            //Bildnamen
         }
     },
     computed: {
