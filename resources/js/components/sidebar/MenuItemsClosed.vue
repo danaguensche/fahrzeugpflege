@@ -2,11 +2,11 @@
 
 <template>
     <div class="sidebar-container-closed">
-        <div v-for="(menuitem, index) in filteredMenuItems" :key="menuitem.id"
+        <div v-for="(menuitem, index) in menuitems" :key="menuitem.id"
             :class="['sidebar-button closed', { 'profile-spacing closed': menuitem.name === 'Profil' }]">
             <div class="sidebar-buttons-wrapper" @click="redirectToView(menuitem)">
                 <MenuButton class="menu-button-content">
-                    <img :src="menuitem.icon" class="icon closed" alt="Icon for {{ menuitem.name }}">
+                    <img :src="iconPaths[index].name" class="icon closed" alt="Icon for {{ menuitem.name }}">
                 </MenuButton>
             </div>
         </div>
@@ -22,7 +22,6 @@
 import MenuButton from './Slots/MenuButton.vue';
 import axios from 'axios';
 import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
-import { mapState } from 'vuex';
 
 export default {
     name: 'MenuItemsClosed',
@@ -30,13 +29,6 @@ export default {
     components: {
         MenuButton,
         VuetifyAlert
-    },
-
-    computed: {
-        ...mapState('auth', ['userRole']),
-        filteredMenuItems() {
-            return this.menuitems.filter(item => item.roles.includes(this.userRole));
-        }
     },
 
     data() {
@@ -48,16 +40,28 @@ export default {
             },
             //Text-Inhalte der Sidebar
             menuitems: [
-                { id: 1, name: 'Dashboard', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/dashboard-icon.png', import.meta.url).href },
-                { id: 2, name: 'Kalender', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/calendar-icon.png', import.meta.url).href },
-                { id: 3, name: 'Fahrzeuge', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/cars-icon.png', import.meta.url).href },
-                { id: 4, name: 'Kunden', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/customer-icon.png', import.meta.url).href },
-                { id: 5, name: 'Aufträge', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/jobs-icon.png', import.meta.url).href },
-                { id: 6, name: 'Berichte', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/reports-icon.png', import.meta.url).href },
-                { id: 7, name: 'Benutzer', roles: ['admin'], icon: new URL('@/img/sidebar-img/user-icon.png', import.meta.url).href },
-                { id: 8, name: 'Profil', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/profile-icon.png', import.meta.url).href },
-                { id: 9, name: 'Einstellungen', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/settings-icon.png', import.meta.url).href },
-                { id: 10, name: 'Abmelden', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/logout-icon.png', import.meta.url).href },
+                { id: 1, name: 'Dashboard' },
+                { id: 2, name: 'Kalender' },
+                { id: 3, name: 'Fahrzeuge' },
+                { id: 4, name: 'Kunden' },
+                { id: 5, name: 'Aufträge' },
+                { id: 6, name: 'Berichte' },
+                
+                { id: 7, name: 'Profil' },
+                { id: 8, name: 'Einstellungen' },
+                { id: 9, name: 'Abmelden' },
+            ],
+            // Bildnamen
+            iconPaths: [
+                { id: 1, name: new URL('@/img/sidebar-img/dashboard-icon.png', import.meta.url).href },
+                { id: 2, name: new URL('@/img/sidebar-img/calendar-icon.png', import.meta.url).href },
+                { id: 3, name: new URL('@/img/sidebar-img/cars-icon.png', import.meta.url).href },
+                { id: 4, name: new URL('@/img/sidebar-img/customer-icon.png', import.meta.url).href },
+                { id: 5, name: new URL('@/img/sidebar-img/jobs-icon.png', import.meta.url).href },
+                { id: 6, name: new URL('@/img/sidebar-img/reports-icon.png', import.meta.url).href },
+                { id: 7, name: new URL('@/img/sidebar-img/profile-icon.png', import.meta.url).href },
+                { id: 8, name: new URL('@/img/sidebar-img/settings-icon.png', import.meta.url).href },
+                { id: 9, name: new URL('@/img/sidebar-img/logout-icon.png', import.meta.url).href },
             ]
         }
     },
@@ -97,7 +101,7 @@ export default {
 
         logout() {
             this.isAlertVisible = false;
-                axios.post('/api/logout', {}, {
+                axios.post('/logout', {}, {
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }

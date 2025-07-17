@@ -62,9 +62,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', 'dashboard')->name('dashboard');
         Route::get('/kalender', 'calendar')->name('calendar');
         Route::get('/fahrzeuge', 'cars')->name('fahrzeuge');
-        Route::get('/fahrzeuge/fahrzeugdetails/{kennzeichen}', 'carDetails')->name('cardetails');
+        Route::get('/fahrzeuge/fahrzeugdetails/{kennzeichen}', function ($kennzeichen) {
+            return view('pages.cardetails', ['kennzeichen' => $kennzeichen]);
+        },)->name('cardetails');
         Route::get('/kunden', 'customers')->name('kunden');
-        Route::get('/kunden/kundendetails/{id}', 'customerDetails')->name('customerdetails');
+        Route::get('/kunden/kundendetails/{id}', function ($id) {
+            $customer = \App\Models\Customer::with('auftraege')->find($id);
+            return view('pages.customerdetails', ['id' => $id, 'auftraege' => $customer->auftraege]);
+        })->name('customerdetails');
         Route::get('/auftraege', 'jobs')->name('jobs');
         Route::get('/auftraege/jobdetails/{id}', 'jobdetails')->name('jobdetails');
         

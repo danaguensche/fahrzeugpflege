@@ -285,7 +285,6 @@ export default {
             statuses: [
                 { title: 'Ausstehend', value: 'ausstehend' },
                 { title: 'In Bearbeitung', value: 'in_bearbeitung' },
-                { title: 'im Rückblick', value: 'im_rueckblick' },
                 { title: 'Abgeschlossen', value: 'abgeschlossen' },
             ],
             snackbar: {

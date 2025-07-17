@@ -230,7 +230,6 @@ export default {
             jobStatuses: [
                 { title: 'Ausstehend', value: 'ausstehend' },
                 { title: 'In Bearbeitung', value: 'in_bearbeitung' },
-                { title: 'im Rückblick', value: 'im_rueckblick' },
                 { title: 'Abgeschlossen', value: 'abgeschlossen' },
             ],
             carsLoading: false,
@@ -278,7 +277,6 @@ export default {
                         car_id: this.job.car ? this.job.car.id : null,
                         customer_id: this.job.customer ? this.job.customer.id : null,
                         service_ids: this.job.services ? this.job.services.map(s => s.id) : [],
-                        user_id: this.$store.state.auth.userId, // Add user_id
                     };
                     delete jobData.car;
                     delete jobData.customer;

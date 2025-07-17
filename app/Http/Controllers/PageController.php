@@ -21,9 +21,9 @@ class PageController extends Controller
         return view('pages.cars');
     }
 
-    public function carDetails($kennzeichen)
+    public function carDetails()
     {
-        return view('pages.cardetails', ['kennzeichen' => $kennzeichen]);
+        return view('pages.cardetails');
     }
 
     public function customers()
@@ -31,10 +31,9 @@ class PageController extends Controller
         return view('pages.customers');
     }
 
-    public function customerDetails($id)
+    public function customerDetails()
     {
-        $customer = \App\Models\Customer::with('auftraege')->find($id);
-        return view('pages.customerdetails', ['id' => $id, 'auftraege' => $customer->auftraege]);
+        return view('pages.customerdetails');
     }
     
     public function jobs()
@@ -42,9 +41,9 @@ class PageController extends Controller
         return view('pages.jobs');
     }
 
-    public function jobdetails($id)
+    public function jobdetails()
     {
-        return view('pages.jobdetails', ['id' => $id]);
+        return view('welcome');
     }
  
     public function reports()

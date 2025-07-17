@@ -35,22 +35,7 @@ class Job extends Model
         return $this->belongsTo(Car::class);
     }
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
     protected $casts = [
         'scheduled_at' => 'datetime',
     ];
-
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
-    }
-
-    public function images()
-    {
-        return $this->hasMany(ImageReport::class, 'task_id');
-    }
 }

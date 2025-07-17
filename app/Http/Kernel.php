@@ -19,8 +19,4 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
-
-    protected $routeMiddleware = [
-        'check_role' => \App\Http\Middleware\CheckRole::class,
-    ];
 }

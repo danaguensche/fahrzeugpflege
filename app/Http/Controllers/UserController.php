@@ -69,7 +69,6 @@ class UserController extends Controller
     public function update(Request $request)
     {
         try {
-            /** @var \App\Models\User|null $user */
             $user = Auth::user();
 
             // Überprüfen, ob der Benutzer authentifiziert ist
@@ -131,20 +130,5 @@ class UserController extends Controller
                 'trace' => env('APP_DEBUG') ? $e->getTraceAsString() : null,
             ], 500);
         }
-    }
-
-    public function search(Request $request)
-    {
-        $searchQuery = $request->input('query');
-
-        $users = User::where(function ($queryBuilder) use ($searchQuery) {
-            $queryBuilder->where('firstname', 'like', '%' . $searchQuery . '%')
-                         ->orWhere('lastname', 'like', '%' . $searchQuery . '%')
-                         ->orWhere('email', 'like', '%' . $searchQuery . '%');
-        })->get();
-
-        return response()->json([
-            'data' => $users,
-        ]);
     }
 }
