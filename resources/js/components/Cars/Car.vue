@@ -15,7 +15,7 @@
         </div>
 
         <div class="content-container">
-            <DefaultButton @click="openAddCarDialog">Fahrzeug hinzufügen</DefaultButton>
+            <DefaultButton @click="openAddCarDialog" v-if="isAdminOrTrainer">Fahrzeug hinzufügen</DefaultButton>
         </div>
 
         <div class="table-container">
@@ -23,7 +23,7 @@
                 :searchString="searchText"
                 :isSearchActive="isSearchActive"
                 endpoint="cars"
-                :headers="carHeaders"
+                :headers="filteredCarHeaders"
                 :fields="carFields"
                 itemKey="Kennzeichen"
                 detailsPage="fahrzeugdetails"
@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import Search from '../CommonSlots/Searchbar.vue';
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
 import DataTable from '../Table/DataTable.vue';
@@ -80,7 +80,15 @@ export default {
     },
 
     computed: {
-        ...mapState(['isSidebarOpen'])
+        ...mapState(['isSidebarOpen']),
+        ...mapGetters('auth', ['isAdminOrTrainer']),
+        filteredCarHeaders() {
+            if (this.isAdminOrTrainer) {
+                return this.carHeaders;
+            } else {
+                return this.carHeaders.filter(header => header.key !== 'delete' && header.key !== 'edit' && header.key !== 'checkbox');
+            }
+        }
     },
 
     watch: {

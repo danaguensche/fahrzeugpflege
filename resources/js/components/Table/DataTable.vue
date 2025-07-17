@@ -7,7 +7,7 @@
             <div class="spacer"></div>
 
             <!-- Button group for vehicle operations -->
-            <div class="button-group">
+            <div class="button-group" v-if="isAdminOrTrainer">
                 <ConfirmButton class="confirm-button" @click="confirmEditItem" :disabled="!editItemId">
                     Bestätigen
                 </ConfirmButton>
@@ -45,7 +45,7 @@
                     <template v-slot:item="{ item }">
                         <tr :class="{ 'edited-row': editItemId === item[itemKey] }">
                             <!-- Checkbox for vehicle selection -->
-                            <td class="checkbox fixed-width">
+                            <td class="checkbox fixed-width" v-if="isAdminOrTrainer">
                                 <v-checkbox v-model="selectedItems" :value="item[itemKey]"></v-checkbox>
                             </td>
                             
@@ -118,14 +118,14 @@
                             </td>
                             
                             <!-- Delete Button -->
-                            <td class="table-icon fixed-width">
+                            <td class="table-icon fixed-width" v-if="isAdminOrTrainer">
                                 <v-btn icon class="delete-button" variant="plain" @click="confirmDeleteItem(item[itemKey])">
                                     <v-icon>mdi-delete</v-icon>
                                 </v-btn>
                             </td>
                             
                             <!-- Edit/Save button -->
-                            <td class="table-icon fixed-width">
+                            <td class="table-icon fixed-width" v-if="isAdminOrTrainer">
                                 <v-btn variant="plain" icon
                                     @click="editItemId === item[itemKey] ? saveItem() : editItemDetails(item)">
                                     <v-icon>{{ editItemId === item[itemKey] ? 'mdi-content-save' : 'mdi-pencil' }}</v-icon>
@@ -163,6 +163,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import RefreshButton from '../CommonSlots/RefreshButton.vue';
 import axios from 'axios';
 import VuetifyAlert from '../Alerts/VuetifyAlert.vue';
@@ -248,6 +249,7 @@ export default {
     },
 
     computed: {
+        ...mapGetters('auth', ['isAdminOrTrainer']),
         currentPage() {
             return this.options.page;
         },

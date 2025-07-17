@@ -50,7 +50,7 @@ export default {
             menuitems: [
                 { id: 1, name: 'Dashboard', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/dashboard-icon.png', import.meta.url).href },
                 { id: 2, name: 'Kalender', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/calendar-icon.png', import.meta.url).href },
-                { id: 3, name: 'Fahrzeuge', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/cars-icon.png', import.meta.url).href },
+                { id: 3, name: 'Fahrzeuge', roles: ['trainee','trainer', 'admin'], icon: new URL('@/img/sidebar-img/cars-icon.png', import.meta.url).href },
                 { id: 4, name: 'Kunden', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/customer-icon.png', import.meta.url).href },
                 { id: 5, name: 'Aufträge', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/jobs-icon.png', import.meta.url).href },
                 { id: 6, name: 'Berichte', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/reports-icon.png', import.meta.url).href },

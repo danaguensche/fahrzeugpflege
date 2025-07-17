@@ -15,13 +15,14 @@
                     :editMode="editMode"
                     @upload-image="openImageUploadDialog"
                     @delete-image="handleImageDelete"
-                    @replace-image="handleImageReplace">
+                    @replace-image="handleImageReplace"
+                    :canEdit="isAdminOrTrainer">
                 </ImageCarousel>
 
                 <!-- Fahrzeug information -->
                 <v-card-text class="px-4 pt-4 pb-0">
                     <v-sheet>
-                        <InformationHeader :title="'Fahrzeuginformationen'" :editMode="editMode">
+                        <InformationHeader :title="'Fahrzeuginformationen'" :editMode="editMode" v-if="isAdminOrTrainer">
                         </InformationHeader>
 
                         <!-- Ansichtsmodus -->
@@ -43,7 +44,7 @@
                         </CustomerInfoList>
 
                         <v-autocomplete
-                            v-else
+                            v-else-if="isAdminOrTrainer"
                             v-model="editedCarData.customer"
                             :items="customers"
                             item-title="full_name"
@@ -74,7 +75,7 @@
 
                         <!-- Button wird nur angezeigt wenn noch kein Kunde eingetragen wurde -->
                         <v-btn class="mt-4" color="primary"
-                            v-if="!carDetails.data.customer || carDetails.data.customer === 0"
+                            v-if="(!carDetails.data.customer || carDetails.data.customer === 0) && isAdminOrTrainer"
                             @click="openCustomerAddDialog">
                             Kunde hinzufügen
                         </v-btn>
@@ -91,14 +92,14 @@
                     <v-spacer></v-spacer>
 
                     <!-- Bearbeitungsmodus Aktionen -->
-                    <template v-if="editMode">
+                    <template v-if="editMode && isAdminOrTrainer">
                         <CancelButton :cancelEdit="cancelEdit"></CancelButton>
                         <SaveButton :saveData="saveCarData"></SaveButton>
                     </template>
 
                     <!-- Ansichtsmodus Aktionen -->
                     <template v-else>
-                        <EditButton :switchEditMode="switchEditMode"></EditButton>
+                        <EditButton :switchEditMode="switchEditMode" v-if="isAdminOrTrainer"></EditButton>
                         <PrintButton></PrintButton>
                     </template>
                 </v-card-actions>
@@ -111,7 +112,7 @@
         </CustomerAddDialog>
 
         <!-- Image Upload Dialog -->
-        <v-dialog v-model="imageUploadDialog.show" max-width="700px" persistent>
+        <v-dialog v-model="imageUploadDialog.show" max-width="700px" persistent v-if="isAdminOrTrainer">
             <v-card>
                 <v-card-title class="d-flex align-center">
                     <v-icon left>mdi-upload</v-icon>
@@ -268,6 +269,7 @@
 
 <script>
 import axios from "axios";
+import { mapGetters } from 'vuex';
 import Loader from "../../Details/Loader.vue";
 import ImageCarousel from "../../Details/ImageCarousel.vue";
 import InformationHeader from "../../Details/InformationHeader.vue";
@@ -363,6 +365,7 @@ export default {
         };
     },
     computed: {
+        ...mapGetters('auth', ['isAdminOrTrainer']),
         vehicleInfoKeys() {
             return ['id', 'Kennzeichen', 'Fahrzeugklasse', 'Automarke', 'Typ', 'Farbe', 'Sonstiges'];
         },
