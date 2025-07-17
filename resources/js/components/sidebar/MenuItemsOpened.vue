@@ -70,7 +70,7 @@ export default {
         }
     },
     computed: {
-        ...mapState(['userRole']),
+        ...mapState('auth', ['userRole']),
         filteredMenuItems() {
             return this.menuitems.filter(item => item.roles.includes(this.userRole));
         }
