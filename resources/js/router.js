@@ -52,12 +52,12 @@ const routes = [
             {
                 path: 'fahrzeuge',
                 component: CarsPage,
-                meta: { roles: ['trainer', 'admin'] }
+                meta: { roles: ['trainee', 'trainer', 'admin'] }
             },
             {
                 path: 'fahrzeuge/fahrzeugdetails/:kennzeichen',
                 component: CarDetailsPage,
-                meta: { roles: ['trainer', 'admin'] }
+                meta: { roles: ['trainee', 'trainer', 'admin'] }
             },
             {
                 path: 'kunden',

@@ -4,8 +4,8 @@
             :class="['sidebar-button', { 'profile-spacing': menuitem.name === 'Profil' }]">
             <div class="sidebar-buttons-wrapper">
                 <MenuButton @click="redirectToView(menuitem)" class="menu-button-content">
-                    <img v-if="menuitem.icon" :src="menuitem.icon" class="icon"
-                alt="Icon for {{ menuitem.name }}">
+                    <img v-if="iconPaths[index]" :src="iconPaths[index].name" class="icon"
+                        alt="Icon for {{ menuitem.name }}">
                     <span class="sidebar-textContent">{{ menuitem.name }}</span>
                 </MenuButton>
             </div>
@@ -42,28 +42,37 @@ export default {
             },
             //Text-Inhalte der Sidebar
             menuitems: [
-                { id: 1, name: 'Dashboard', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/dashboard-icon.png', import.meta.url).href },
-                { id: 2, name: 'Kalender', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/calendar-icon.png', import.meta.url).href },
-                { id: 3, name: 'Fahrzeuge', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/cars-icon.png', import.meta.url).href },
-                { id: 4, name: 'Kunden', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/customer-icon.png', import.meta.url).href },
-                { id: 5, name: 'Aufträge', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/jobs-icon.png', import.meta.url).href },
-                { id: 6, name: 'Berichte', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/reports-icon.png', import.meta.url).href },
-                { id: 7, name: 'Benutzer', roles: ['admin'], icon: new URL('@/img/sidebar-img/user-icon.png', import.meta.url).href },
-                { id: 8, name: 'Profil', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/profile-icon.png', import.meta.url).href },
-                { id: 9, name: 'Einstellungen', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/settings-icon.png', import.meta.url).href },
-                { id: 10, name: 'Abmelden', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/logout-icon.png', import.meta.url).href },
+                { id: 1, name: 'Dashboard', roles: ['trainee', 'trainer', 'admin'] },
+                { id: 2, name: 'Kalender', roles: ['trainee', 'trainer', 'admin'] },
+                { id: 3, name: 'Fahrzeuge', roles: ['trainee', 'trainer', 'admin'] },
+                { id: 4, name: 'Kunden', roles: ['trainer', 'admin'] },
+                { id: 5, name: 'Aufträge', roles: ['trainee', 'trainer', 'admin'] },
+                { id: 6, name: 'Berichte', roles: ['trainer', 'admin'] },
+                { id: 7, name: 'Benutzer', roles: ['admin'] },
+                { id: 8, name: 'Profil', roles: ['trainee', 'trainer', 'admin'] },
+                { id: 9, name: 'Einstellungen', roles: ['trainer', 'admin'] },
+                { id: 10, name: 'Abmelden', roles: ['trainee', 'trainer', 'admin'] },
             ],
 
             //Bildnamen
+            iconPaths: [
+                { id: 1, name: new URL('@/img/sidebar-img/dashboard-icon.png', import.meta.url).href },
+                { id: 2, name: new URL('@/img/sidebar-img/calendar-icon.png', import.meta.url).href },
+                { id: 3, name: new URL('@/img/sidebar-img/cars-icon.png', import.meta.url).href },
+                { id: 4, name: new URL('@/img/sidebar-img/customer-icon.png', import.meta.url).href },
+                { id: 5, name: new URL('@/img/sidebar-img/jobs-icon.png', import.meta.url).href },
+                { id: 6, name: new URL('@/img/sidebar-img/reports-icon.png', import.meta.url).href },
+                { id: 7, name: new URL('@/img/sidebar-img/user-icon.png', import.meta.url).href }, /* New icon for Users */
+                { id: 8, name: new URL('@/img/sidebar-img/profile-icon.png', import.meta.url).href },
+                { id: 9, name: new URL('@/img/sidebar-img/settings-icon.png', import.meta.url).href },
+                { id: 10, name: new URL('@/img/sidebar-img/logout-icon.png', import.meta.url).href },
+            ]
         }
     },
     computed: {
-        ...mapState('auth', ['userRole']),
+        ...mapState(['userRole']),
         filteredMenuItems() {
-            const filtered = this.menuitems.filter(item => item.roles.includes(this.userRole));
-            console.log('Filtered Menu Items:', filtered);
-            console.log('Current User Role:', this.userRole);
-            return filtered;
+            return this.menuitems.filter(item => item.roles.includes(this.userRole));
         }
     },
     methods: {
@@ -103,7 +112,7 @@ export default {
 
         logout() {
             this.isAlertVisible = false;
-                axios.post('/api/logout', {}, {
+                axios.post('/logout', {}, {
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
@@ -220,7 +229,6 @@ export default {
 }
 
 @media (max-width: 768px) {
-    @media (max-width: 768px) {
     .sidebar-container {
         width: 220px;
         transition: width 0.3s ease;
@@ -238,6 +246,5 @@ export default {
     .sidebar-button.profile-spacing {
         margin-top: 5vh;
     }
-}
 }
 </style>
