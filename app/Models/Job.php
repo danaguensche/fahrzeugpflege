@@ -16,6 +16,7 @@ class Job extends Model
         'description',
         'car_id',
         'customer_id',
+        'user_id',
         'status',
         'scheduled_at',
     ];

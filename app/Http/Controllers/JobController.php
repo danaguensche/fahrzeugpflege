@@ -18,6 +18,7 @@ class JobController extends Controller
             'description' => 'nullable|string',
             'car_id' => 'required|exists:cars,id',
             'customer_id' => 'required|exists:customers,id',
+            'user_id' => 'nullable|exists:users,id',
             'status' => 'required|string',
             'scheduled_at' => 'nullable|date',
             'service_ids' => 'required|array',
