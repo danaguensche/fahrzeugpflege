@@ -1,14 +1,36 @@
 <template>
   <div class="calendar-container">
     <div class="calendar-page" :class="{ 'calendar-page-sidebar-opened': isSidebarOpen }">
-      <vue-cal class="vuecal" :events="events" :time-from="8 * 60" :time-to="20 * 60" :time-step="30"
-        :active-view="activeView" :key="activeView" :selected-date="selectedDate" :on-event-click="onEventClick"
-        :event-content-renderer="renderEventContent" :cell-content-renderer="renderCellContent" :min-event-width="100"
-        :min-cell-width="100" :min-cell-height="100" :snap-to-time="15" :locale="de" :sticky-split-labels="true"
-        :hide-weekends="false" :start-week-on-sunday="false" :cell-click-hold="false" :drag-to-create-event="false"
-        :event-duration-resizable="false" :event-draggable="false"
-        :editable-events="{ title: false, drag: false, resize: false, create: false }" :views="['month', 'week', 'day']"
-        :disable-views="['years', 'year']" @view-change="updateView" @ready="onCalendarReady" @cell-click="onDayClick">
+      <vue-cal
+        class="vuecal"
+        :events="events"
+        :time-from="8 * 60"
+        :time-to="20 * 60"
+        :time-step="30"
+        :active-view="activeView"
+        :key="activeView"
+        :selected-date="selectedDate"
+        :on-event-click="onEventClick"
+        :event-content-renderer="renderEventContent"
+        :cell-content-renderer="renderCellContent"
+        :min-event-width="100"
+        :min-cell-width="100"
+        :min-cell-height="100"
+        :snap-to-time="15"
+        :sticky-split-labels="true"
+        :hide-weekends="false"
+        :start-week-on-sunday="false"
+        :cell-click-hold="false"
+        :drag-to-create-event="false"
+        :event-duration-resizable="false"
+        :event-draggable="false"
+        :editable-events="{ title: false, drag: false, resize: false, create: false }"
+        :views="['month', 'week', 'day']"
+        :disable-views="['years', 'year']"
+        @view-change="updateView"
+        @ready="onCalendarReady"
+        @cell-click="onDayClick"
+      >
         <template #event="{ event, view }">
           <div class="vuecal__event-title">{{ event.title }}</div>
           <div class="vuecal__event-content">{{ event.content }}</div>
@@ -29,10 +51,25 @@
           <span class="legend-color abgeschlossen"></span>
           <span>Abgeschlossen</span>
         </div>
+        <div class="legend-item">
+          <span class="legend-color im-rueckblick"></span>
+          <span>Im Rückblick</span>
+        </div>
       </div>
 
-      <!-- Event Dialog Komponente -->
-      <EventDialog :event="selectedEvent" :visible="eventDialog" @close="closeEventDialog" />
+      <div v-if="selectedEvent" class="event-details" id="event-details-section">
+        <h3><router-link :to="'/auftraege/jobdetails/' + selectedEvent.job_id">{{ selectedEvent.title }}</router-link></h3>
+        <p v-if="selectedEvent.content"><strong>Beschreibung:</strong> {{ selectedEvent.content }}</p>
+        <p><strong>Status:</strong> {{ selectedEvent.status }}</p>
+        <p><strong>Kunde:</strong> <router-link :to="'/kunden/kundendetails/' + selectedEvent.customer_id">{{ selectedEvent.customer_firstname }} {{ selectedEvent.customer_lastname }}</router-link></p>
+        <p><strong>Email:</strong> <a :href="'mailto:' + selectedEvent.email">{{ selectedEvent.email }}</a></p>
+        <p><strong>Car Kennzeichen:</strong> <router-link :to="'/fahrzeuge/fahrzeugdetails/' + selectedEvent.car_kennzeichen">{{ selectedEvent.car_kennzeichen }}</router-link></p>
+        <p><strong>Services:</strong>
+          <span v-for="(service, index) in selectedEvent.services_list" :key="index" class="service-tag">{{ service }}</span>
+        </p>
+        <p><strong>Start:</strong> {{ selectedEvent.start.format('DD.MM.YYYY HH:mm') }}</p>
+        <p><strong>End:</strong> {{ selectedEvent.end.format('DD.MM.YYYY HH:mm') }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -42,21 +79,15 @@ import VueCal from 'vue-cal';
 import 'vue-cal/dist/vuecal.css';
 import axios from 'axios';
 import { mapState } from 'vuex';
-import EventDialog from './EventDialog.vue'; // Pfad zur EventDialog-Komponente anpassen
 
 export default {
-  components: {
-    VueCal,
-    EventDialog
-  },
+  components: { VueCal },
   data() {
     return {
       events: [],
       selectedDate: new Date(),
       selectedEvent: null,
       activeView: 'week',
-      eventDialog: false,
-      job: null,
     };
   },
   mounted() {
@@ -77,9 +108,7 @@ export default {
         },
       })
         .then(response => {
-          console.log('API response:', response.data);
-          const jobs = Array.isArray(response.data.items) ? response.data.items : [];
-          this.events = jobs.map(job => {
+          this.events = response.data.items.map(job => {
             const start = new Date(job.scheduled_at);
             const end = new Date(start.getTime() + 60 * 60 * 1000); // Assuming 1 hour duration
             const eventClass = job.status.replace(/_/g, '-');
@@ -107,41 +136,35 @@ export default {
           console.error("Error fetching events:", error);
         });
     },
-
     onEventClick(event, e) {
       this.selectedEvent = event;
-      this.eventDialog = true;
       e.stopPropagation();
+      this.$nextTick(() => {
+        const element = document.getElementById('event-details-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
     },
-
-    closeEventDialog() {
-      this.eventDialog = false;
-      this.selectedEvent = null;
-    },
-
     renderEventContent(event, view) {
       return `
         <div class="vuecal__event-title">${event.title}</div>
         <div class="vuecal__event-content">${event.email}</div>
       `;
     },
-
     updateView(newView) {
       this.activeView = newView.view;
       this.fetchEvents(newView.startDate, newView.endDate);
     },
-
     onCalendarReady(view) {
       this.fetchEvents(view.startDate, view.endDate);
     },
-
     onDayClick(date) {
       if (this.activeView === 'month') {
         this.activeView = 'week';
         this.selectedDate = date;
       }
     },
-
     renderCellContent(cell, view) {
       if (view.id === 'month' && cell.events.length) {
         return `<div class="event-count">${cell.events.length} Aufgaben</div>`;
@@ -194,12 +217,12 @@ export default {
     width: calc(100% - 40px);
     padding: 20px;
   }
-
+  
   .calendar-page-sidebar-opened {
     margin-left: 280px;
     width: calc(100% - 300px);
   }
-
+  
   .vuecal {
     height: calc(100vh - 200px);
     min-height: 500px;
@@ -210,18 +233,18 @@ export default {
   .calendar-container {
     padding: 10px;
   }
-
+  
   .calendar-page {
     margin-left: 10px;
     width: calc(100% - 20px);
     padding: 15px;
   }
-
+  
   .calendar-page-sidebar-opened {
     margin-left: 10px;
     width: calc(100% - 20px);
   }
-
+  
   .vuecal {
     height: calc(100vh - 120px);
     min-height: 400px;
@@ -289,7 +312,11 @@ export default {
   color: #333;
   border-left: 4px solid #4caf50;
 }
-
+.vuecal__event.im-rueckblick {
+  background: linear-gradient(135deg, #ffecb3 0%, #ffe082 100%);
+  color: #333;
+  border-left: 4px solid #e9c455;
+}
 .vuecal__event-title {
   font-weight: 600;
   margin-bottom: 4px;
@@ -346,12 +373,18 @@ export default {
   background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
 }
 
+.legend-color.im-rueckblick {
+  background: linear-gradient(135deg, #ffecb3 0%, #ffe082 100%);
+}
+
 .legend-color.abgeschlossen {
   background: linear-gradient(135deg, #a5d6a7 0%, #81c784 100%);
 }
 
 /* Event Details Styles */
 .event-details {
+  z-index: 9999;
+  position: relative;
   margin-top: 30px;
   padding: 25px;
   border: 1px solid #e9ecef;

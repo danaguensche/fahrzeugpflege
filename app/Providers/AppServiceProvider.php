@@ -6,7 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Sanctum\Sanctum;
 use Laravel\Sanctum\PersonalAccessToken;
-
+use Illuminate\Routing\Router;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot()
+    public function boot(Router $router)
     {
         Validator::resolver(function($translator, $data, $rules, $messages) {
             return new class($translator, $data, $rules, $messages) extends \Illuminate\Validation\Validator {
@@ -38,3 +38,4 @@ class AppServiceProvider extends ServiceProvider
     }
     
 }
+

@@ -11,6 +11,7 @@ use App\Http\Controllers\CustomerSearchController;
 use App\Http\Controllers\CarSearchController;
 use App\Http\Controllers\JobDetailsController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ImageReportController;
 
 
 // Auth Routes
@@ -47,11 +48,29 @@ Route::apiResource('services', ServiceController::class);
 Route::get('/services/search', [ServiceController::class, 'search']);
 
 // Jobs Routes
-Route::get('/jobs/search', [App\Http\Controllers\JobController::class, 'search']);
-Route::delete('jobs', [App\Http\Controllers\JobController::class, 'destroyMultiple']);
-Route::apiResource('jobs', App\Http\Controllers\JobController::class);
-Route::get('/jobs/jobdetails/{id}', [JobDetailsController::class, 'details']);
-Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/jobs/search', [App\Http\Controllers\JobController::class, 'search']);
+    Route::get('/jobs', [App\Http\Controllers\JobController::class, 'index']);
+    Route::get('/jobs/{job}', [App\Http\Controllers\JobController::class, 'show']);
+    Route::get('/jobs/jobdetails/{id}', [JobDetailsController::class, 'details']);
+    Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
+
+    // Comment Routes
+    Route::post('/comments', [App\Http\Controllers\CommentController::class, 'store']);
+    Route::delete('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'destroy']);
+
+    // Image Report Routes
+    Route::get('/tasks/{taskId}/images', [ImageReportController::class, 'index']);
+    Route::post('/tasks/{taskId}/images', [ImageReportController::class, 'upload']);
+    Route::delete('/images/{imageId}', [ImageReportController::class, 'destroy']);
+
+    Route::middleware(\App\Http\Middleware\CheckRole::class . ':trainer,admin')->group(function () {
+        Route::post('/jobs', [App\Http\Controllers\JobController::class, 'store']);
+        Route::put('/jobs/{job}', [App\Http\Controllers\JobController::class, 'update']);
+        Route::delete('/jobs/{job}', [App\Http\Controllers\JobController::class, 'destroy']);
+        Route::delete('jobs', [App\Http\Controllers\JobController::class, 'destroyMultiple']);
+    });
+});
 
 // Logout Routes
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:sanctum');
