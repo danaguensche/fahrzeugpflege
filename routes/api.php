@@ -23,7 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->get('/users/search', [UserController::class, 'search']);
 Route::put('/users/me', [UserController::class, 'update']);
 
-// Cars Routes
+// Cars Routesob
 Route::get('/cars/search', [CarSearchController::class, 'search']);
 Route::apiResource('cars', CarController::class)->parameters(['cars' => 'kennzeichen']);
 Route::get('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'details']);

@@ -21,7 +21,8 @@ class Customer extends Model
         'phonenumber',
         'addressline',
         'postalcode',
-        'city'
+        'city',
+        'notes'
     ];
 
 
@@ -50,7 +51,8 @@ class Customer extends Model
             'phonenumber' => $this->phonenumber,
             'addressline' => $this->addressline,
             'postalcode' => $this->postalcode,
-            'city' => $this->city
+            'city' => $this->city,
+            'notes' => $this->notes
         ];
     }
 }

@@ -253,6 +253,7 @@ export default {
         lastname: "Nachname",
         email: "E-Mail",
         phonenumber: "Telefonnummer",
+        notes: "Anmerkungen",
         addressline: "Straße und Hausnummer",
         postalcode: "Postleitzahl",
         city: "Stadt",
@@ -282,7 +283,7 @@ export default {
 
   computed: {
     personalInfoKeys() {
-      return ['id', 'company', 'firstname', 'lastname', 'email', 'phonenumber'];
+      return ['id', 'company', 'firstname', 'lastname', 'email', 'phonenumber', 'notes'];
     },
 
     addressInfoKeys() {
@@ -371,9 +372,12 @@ export default {
         lastname: "mdi-account-details",
         email: "mdi-email",
         phonenumber: "mdi-phone",
+        notes: "mdi-note-text",
+
         addressline: "mdi-map-marker",
         postalcode: "mdi-mail",
         city: "mdi-city",
+        
         cars: "mdi-car-multiple",
         Title: "mdi-format-title",
         Beschreibung: "mdi-text-box-outline",

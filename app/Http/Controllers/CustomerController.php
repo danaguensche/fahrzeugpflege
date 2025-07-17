@@ -21,6 +21,7 @@ class CustomerController extends Controller
                 'addressline' => 'nullable|string|max:255',
                 'postalcode' => 'nullable|string|max:255',
                 'city' => 'nullable|string|max:255',
+                'notes' => 'nullable|text',
             ]);
 
             $customer = Customer::create($validated);
@@ -210,6 +211,7 @@ class CustomerController extends Controller
                 'addressline' => 'nullable|string|max:255',
                 'postalcode' => 'nullable|string|max:255',
                 'city' => 'nullable|string|max:255',
+                'notes' => 'nullable|text',
             ]);
 
             // CORRECTED: send all validated data
