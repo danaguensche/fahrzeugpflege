@@ -45,9 +45,9 @@
                     <template v-slot:item="{ item }">
                         <tr :class="{ 'edited-row': editItemId === item[itemKey] }">
                             <!-- Checkbox for vehicle selection -->
-                            <td class="checkbox fixed-width" v-if="isAdminOrTrainer">
-                                <v-checkbox v-model="selectedItems" :value="item[itemKey]"></v-checkbox>
-                            </td>
+            <td class="checkbox fixed-width" v-if="headers.some(h => h.key === 'select')">
+                <v-checkbox v-model="selectedItems" :value="item[itemKey]"></v-checkbox>
+            </td>
                             
                             <!-- Vehicle Data Fields -->
                             <td v-for="field in fields" :key="field" class="fixed-width">

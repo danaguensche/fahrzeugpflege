@@ -17,6 +17,7 @@ import CustomerDetailsPage from './components/pages/CustomerDetailsPage.vue';
 import JobsDetailsPage from './components/pages/JobsDetailsPage.vue';
 import ForgotPassword from './components/Auth/ForgotPassword.vue';
 import ResetPassword from './components/Auth/ResetPassword.vue';
+import UsersPage from './components/UsersPage.vue';
 import store from './storage/index.js'; // Import your Vuex store
 
 const routes = [
@@ -102,7 +103,7 @@ const routes = [
             // Add a route for 'Benutzer' (Users) page, visible only to admin
             {
                 path: 'benutzer',
-                component: () => import('./components/pages/UsersPage.vue'), // Assuming you will create this component
+                component: UsersPage,
                 meta: { roles: ['admin'] }
             },
         ],

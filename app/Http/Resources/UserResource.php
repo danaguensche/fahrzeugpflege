@@ -15,12 +15,13 @@ class UserResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'firstName'   => $this->firstname ?? 'Nicht verfügbar',
-            'lastName'    => $this->lastname ?? 'Nicht verfügbar',
-            'phoneNumber' => $this->phonenumber ?? 'Nicht verfügbar',
+            'id'          => $this->id,
+            'firstname'   => $this->firstname ?? 'Nicht verfügbar',
+            'lastname'    => $this->lastname ?? 'Nicht verfügbar',
+            'phonenumber' => $this->phonenumber ?? 'Nicht verfügbar',
             'email'       => $this->email ?? 'Nicht verfügbar',
-            'addressLine' => $this->addressline ?? 'Nicht verfügbar',
-            'postalCode'  => $this->postalcode ?? 'Nicht verfügbar',
+            'addressline' => $this->addressline ?? 'Nicht verfügbar',
+            'postalcode'  => $this->postalcode ?? 'Nicht verfügbar',
             'city'        => $this->city ?? 'Nicht verfügbar',
             'role'        => $this->role ?? 'Nicht verfügbar'
         ];

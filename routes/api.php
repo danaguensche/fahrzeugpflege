@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':trainer,admin')->group(function () {
         Route::get('/users', [UserController::class, 'index']);
         Route::get('/users/search', [UserController::class, 'search']);
+        Route::put('/users/{id}', [UserController::class, 'update']);
     });
 
     // Cars Routes (View only for trainee, full access for trainer/admin)
