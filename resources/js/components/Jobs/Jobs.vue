@@ -19,9 +19,9 @@
         </div>
 
         <DataTable ref="jobDataTable" :searchString="searchText" :isSearchActive="isSearchActive" endpoint="jobs"
-            :headers="jobHeaders" :fields="jobFields" itemKey="id" detailsPage="jobdetails"
+            :headers="filteredJobHeaders" :fields="jobFields" itemKey="id" detailsPage="jobdetails"
             detailsUrlBasePath="auftraege" deleteKey="ids" @itemsDeleted="handleJobsDeleted"
-            @show-error="handleError" />
+            @show-error="handleError" :canEditStatusOnly="userRole === 'trainee'" />
 
         <AddJobForm v-model="showAddJobDialog" @job-added="handleJobAdded" />
 
@@ -92,7 +92,17 @@ export default {
     },
 
     computed: {
-        ...mapState(['isSidebarOpen', 'userRole']),
+        ...mapState(['isSidebarOpen']),
+        ...mapState('auth', ['userRole']),
+        filteredJobHeaders() {
+            if (this.userRole === 'trainee') {
+                return this.jobHeaders.filter(header =>
+                    header.key !== 'select' &&
+                    header.key !== 'delete'
+                );
+            }
+            return this.jobHeaders;
+        },
         activeFilters() {
             const filters = {};
             if (this.selectedStatus) {
@@ -267,6 +277,7 @@ export default {
         }
     },
     mounted() {
+        console.log('Jobs.vue mounted. userRole:', this.userRole);
         this.fetchCustomers();
         this.fetchCars();
         if (this.userRole !== 'trainee') {
@@ -279,7 +290,7 @@ export default {
 <style scoped>
 .jobs-page {
     margin-left: 150px;
-    margin-right: 50px;
+    padding-right: 20px;
     transition: margin-left 0.3s ease;
     font-family: var(--font-family);
 }
@@ -381,7 +392,6 @@ export default {
 @media only screen and (max-width: 1024px) {
     .jobs-page {
         margin-left: 120px;
-        margin-right: 30px;
     }
 }
 
@@ -389,7 +399,6 @@ export default {
 @media only screen and (max-width: 768px) {
     .jobs-page {
         margin-left: 160px;
-        margin-right: 20px;
         font-size: 12px;
     }
 

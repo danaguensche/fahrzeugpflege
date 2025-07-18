@@ -64,6 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/jobs/search', [App\Http\Controllers\JobController::class, 'search']);
     Route::get('/jobs', [App\Http\Controllers\JobController::class, 'index']);
     Route::get('/jobs/{job}', [App\Http\Controllers\JobController::class, 'show']);
+    Route::put('/jobs/{job}', [App\Http\Controllers\JobController::class, 'update']); // Moved outside of role middleware
     Route::get('/jobs/jobdetails/{id}', [JobDetailsController::class, 'details']);
     Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
 
@@ -78,7 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':trainer,admin')->group(function () {
         Route::post('/jobs', [App\Http\Controllers\JobController::class, 'store']);
-        Route::put('/jobs/{job}', [App\Http\Controllers\JobController::class, 'update']);
+        // Route::put('/jobs/{job}', [App\Http\Controllers\JobController::class, 'update']); // Moved outside
         Route::delete('/jobs/{job}', [App\Http\Controllers\JobController::class, 'destroy']);
         Route::delete('jobs', [App\Http\Controllers\JobController::class, 'destroyMultiple']);
     });
