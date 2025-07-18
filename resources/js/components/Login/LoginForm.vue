@@ -52,10 +52,18 @@ export default {
                 const response = await axios.post('/login', this.formData);
                 if (response.data.success) {
                     console.log('Login erfolgreich', response.data);
+                    console.log('Received token:', response.data.token);
+                    console.log('Received user role:', response.data.user.role);
+
                     localStorage.setItem('token', response.data.token);
+                    localStorage.setItem('userRole', response.data.user.role); // Ensure userRole is explicitly set in localStorage
+
                     axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
                     this.$store.dispatch('auth/login', { token: response.data.token, role: response.data.user.role });
-                    console.log('Token gespeichert:', localStorage.getItem('token'));
+
+                    console.log('Token stored in localStorage:', localStorage.getItem('token'));
+                    console.log('User role stored in localStorage:', localStorage.getItem('userRole'));
+
                     window.location.href = response.data.redirect;
                 }
             } catch (error) {

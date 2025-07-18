@@ -54,7 +54,7 @@ export default {
             isSearchActive: false,
             searchDebounceTimer: null,
             jobHeaders: [
-                { title: 'Auswählen', key: 'checkbox', sortable: false, width: '80px' },
+                { title: 'Auswählen', key: 'select', sortable: false, width: '60px' },
                 { title: 'id', key: 'id', sortable: true, align: 'start' },
                 { title: 'Titel', key: 'title', sortable: true },
                 { title: 'Beschreibung', key: 'description', sortable: true },
@@ -185,6 +185,7 @@ export default {
 
         async fetchUsers(query = '') {
             this.usersLoading = true;
+            console.log('Fetching users with role:', this.userRole);
             try {
                 const response = await axios.get(`/api/users/search?query=${query}`);
                 this.users = response.data.data.map(user => ({

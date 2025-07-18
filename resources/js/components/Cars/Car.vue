@@ -66,7 +66,7 @@ export default {
             isSearchActive: false,
             searchDebounceTimer: null,
             carHeaders: [
-                { title: 'Auswählen', key: 'checkbox', sortable: false, width: '80px' },
+                { title: 'Auswählen', key: 'select', sortable: false, width: '60px' },
                 { title: 'Kennzeichen', key: 'Kennzeichen', sortable: true, align: 'start' },
                 { title: 'Fahrzeugklasse', key: 'Fahrzeugklasse', sortable: true },
                 { title: 'Automarke', key: 'Automarke', sortable: true },
@@ -86,7 +86,7 @@ export default {
             if (this.isAdminOrTrainer) {
                 return this.carHeaders;
             } else {
-                return this.carHeaders.filter(header => header.key !== 'delete' && header.key !== 'edit' && header.key !== 'checkbox');
+                return this.carHeaders.filter(header => header.key !== 'delete' && header.key !== 'edit' && header.key !== 'select');
             }
         }
     },
