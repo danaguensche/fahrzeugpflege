@@ -672,7 +672,6 @@ export default {
             this.servicesLoading = true;
             try {
                 const response = await axios.get(`/api/services`);
-                console.log('API Services Response:', response.data);
                 this.services = response.data.data.map(service => ({
                     id: service.id,
                     name: service.name
