@@ -30,31 +30,61 @@ class JobDetailsController extends Controller
     {
         try {
             $job = Job::findOrFail($id);
+            $user = auth()->user();
 
-            $validationRules = [
-                'title' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'scheduled_at' => 'nullable|date',
-                'status' => 'required|string|max:255',
-                'customer_id' => 'nullable|exists:customers,id',
-                'car_id' => 'nullable|exists:cars,id',
-                'services' => 'nullable|array',
-                'services.*' => 'exists:services,id',
-            ];
+            if ($user && $user->role === 'trainee') {
+                // Trainee can only update status for their own jobs
+                if ($job->user_id !== $user->id) {
+                    abort(403, 'Unauthorized action. You can only update your own jobs.');
+                }
 
-            $validatedData = $request->validate($validationRules);
+                // Validate that only 'status' is being updated
+                $allowedFields = ['status'];
+                $requestFields = array_keys($request->all());
+                $diff = array_diff($requestFields, $allowedFields);
 
-            $job->update($validatedData);
+                if (!empty($diff)) {
+                    abort(403, 'Unauthorized action. Trainees can only update job status.');
+                }
 
-            if (isset($validatedData['services'])) {
-                $job->services()->sync($validatedData['services']);
+                $validatedData = $request->validate([
+                    'status' => 'required|string',
+                ]);
+
+                $job->update($validatedData);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Jobdaten erfolgreich aktualisiert',
+                    'data' => new JobResource($job->fresh(['customer', 'car', 'services']))
+                ]);
+
+            } else { // Admin or Trainer
+                $validationRules = [
+                    'title' => 'required|string|max:255',
+                    'description' => 'nullable|string',
+                    'scheduled_at' => 'nullable|date',
+                    'status' => 'required|string|max:255',
+                    'customer_id' => 'nullable|exists:customers,id',
+                    'car_id' => 'nullable|exists:cars,id',
+                    'services' => 'nullable|array',
+                    'services.*' => 'exists:services,id',
+                ];
+
+                $validatedData = $request->validate($validationRules);
+
+                $job->update($validatedData);
+
+                if (isset($validatedData['services'])) {
+                    $job->services()->sync($validatedData['services']);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Jobdaten erfolgreich aktualisiert',
+                    'data' => new JobResource($job->fresh(['customer', 'car', 'services']))
+                ]);
             }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Jobdaten erfolgreich aktualisiert',
-                'data' => new JobResource($job->fresh(['customer', 'car', 'services']))
-            ]);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             Log::error('Job not found for update', [

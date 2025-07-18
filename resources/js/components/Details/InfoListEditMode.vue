@@ -13,13 +13,13 @@
                         </div>
                         <v-text-field v-if="key !== 'Sonstiges'" class="w-50 " v-model="editedData[key]"
                             variant="outlined" density="comfortable" hide-details="auto" :readonly="key === 'id'"
-                            :disabled="key === 'id'"
+                            :disabled="key === 'id' || disabled"
                             :hint="key === 'id' ? `${labels[key]} kann nicht bearbeitet werden` : ''"
                             :persistent-hint="key === 'id'">
                         </v-text-field>
                         <v-textarea v-if="key === 'Sonstiges'" class="w-50 tw-resize-y rounded-md" 
                             v-model="editedData[key]" variant="outlined" density="comfortable" 
-                            :no-resize="false"></v-textarea>
+                            :no-resize="false" :disabled="disabled"></v-textarea>
                     </v-col>
 
                 </v-row>
@@ -43,6 +43,10 @@ export default {
         editedData: {
             type: Object,
             required: true,
+        },
+        disabled: {
+            type: Boolean,
+            default: false,
         },
 
         var: {

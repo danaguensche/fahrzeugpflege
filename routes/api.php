@@ -77,6 +77,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tasks/{taskId}/images', [ImageReportController::class, 'upload']);
     Route::delete('/images/{imageId}', [ImageReportController::class, 'destroy']);
 
+    Route::get('/services', [App\Http\Controllers\ServiceController::class, 'index']); // Added route for services
+
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':trainer,admin')->group(function () {
         Route::post('/jobs', [App\Http\Controllers\JobController::class, 'store']);
         // Route::put('/jobs/{job}', [App\Http\Controllers\JobController::class, 'update']); // Moved outside

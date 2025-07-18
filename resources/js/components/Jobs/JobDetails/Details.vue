@@ -25,7 +25,8 @@
                         <div v-else>
                             <InfoListEditMode :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin')" :labels="labels"
                                 :editedData="editedJobData" @update:editedData="editedJobData = $event"
-                                :getIconForField="getIconForField" class="job-information-fields">
+                                :getIconForField="getIconForField" class="job-information-fields"
+                                :disabled="userRole === 'trainee'">
                             </InfoListEditMode>
                             <v-text-field
                                 v-model="formattedAbholterminForEdit"
@@ -37,6 +38,7 @@
                                 class="mt-4 w-50 ms-4"
                                 :prepend-inner-icon="getIconForField('Abholtermin')"
                                 @keydown.prevent
+                                :disabled="userRole === 'trainee'"
                             ></v-text-field>
                             <v-select
                                 v-model="editedJobData.Status"
@@ -65,7 +67,7 @@
                             placeholder="Kunde auswählen oder suchen" prepend-inner-icon="mdi-account"
                             variant="outlined" density="comfortable" hide-details="auto" clearable
                             :loading="customersLoading" :search-input.sync="customerSearch"
-                            @update:search-input="searchCustomers" return-object>
+                            @update:search-input="searchCustomers" return-object :disabled="userRole === 'trainee'">
                             <template v-slot:item="{ props, item }">
                                 <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
                                     :subtitle="item.raw.email"></v-list-item>
@@ -133,7 +135,7 @@
                             item-title="Kennzeichen" item-value="id" label="Fahrzeug"
                             placeholder="Fahrzeug auswählen oder suchen" prepend-inner-icon="mdi-car" variant="outlined"
                             density="comfortable" hide-details="auto" clearable :loading="carsLoading"
-                            :search-input.sync="carSearch" @update:search-input="searchCars" return-object>
+                            :search-input.sync="carSearch" @update:search-input="searchCars" return-object :disabled="userRole === 'trainee'">
                             <template v-slot:item="{ props, item }">
                                 <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
                                     :subtitle="item.raw.Automarke"></v-list-item>
@@ -161,7 +163,7 @@
                             item-title="name" item-value="id" label="Dienstleistungen"
                             placeholder="Dienstleistungen auswählen" prepend-inner-icon="mdi-briefcase"
                             variant="outlined" density="comfortable" hide-details="auto" multiple chips clearable
-                            :loading="servicesLoading" return-object>
+                            :loading="servicesLoading" return-object :disabled="userRole === 'trainee'">
                             <template v-slot:chip="{ props, item }">
                                 <v-chip v-bind="props" :text="item.raw.name"></v-chip>
                             </template>
@@ -218,6 +220,8 @@ import InfoList from "../../Details/InfoList.vue";
 import InfoListEditMode from "../../Details/InfoListEditMode.vue";
 import DefaultHeader from "../../Details/DefaultHeader.vue";
 import CustomerInfoList from "../../Details/CustomerInfoList.vue";
+
+import { mapState } from 'vuex';
 
 export default {
     name: "JobDetails",
@@ -296,6 +300,7 @@ export default {
         };
     },
     computed: {
+        ...mapState('auth', ['userRole']),
         jobInfoKeys() {
             return ['id', 'Title', 'Beschreibung', 'Abholtermin', 'Status'];
         },
@@ -491,34 +496,42 @@ export default {
             this.error = null;
 
             try {
-                const dataToSubmit = { ...this.editedJobData };
+                let dataToSubmit = {};
 
-                // Handle customer_id
-                dataToSubmit.customer_id = dataToSubmit.customer ? dataToSubmit.customer.id : null;
-                delete dataToSubmit.customer;
+                if (this.userRole === 'trainee') {
+                    dataToSubmit = {
+                        status: this.editedJobData.Status,
+                    };
+                } else {
+                    dataToSubmit = { ...this.editedJobData };
 
-                // Handle car_id
-                dataToSubmit.car_id = dataToSubmit.car ? dataToSubmit.car.id : null;
-                delete dataToSubmit.car;
+                    // Handle customer_id
+                    dataToSubmit.customer_id = dataToSubmit.customer ? dataToSubmit.customer.id : null;
+                    delete dataToSubmit.customer;
 
-                // Handle services (send only IDs)
-                dataToSubmit.services = dataToSubmit.services ? dataToSubmit.services.map(s => s.id) : [];
+                    // Handle car_id
+                    dataToSubmit.car_id = dataToSubmit.car ? dataToSubmit.car.id : null;
+                    delete dataToSubmit.car;
 
-                // Handle status casing for backend
-                if (Object.prototype.hasOwnProperty.call(dataToSubmit, 'Status')) {
-                    dataToSubmit.status = dataToSubmit.Status;
-                    delete dataToSubmit.Status;
+                    // Handle services (send only IDs)
+                    dataToSubmit.services = dataToSubmit.services ? dataToSubmit.services.map(s => s.id) : [];
+
+                    // Handle status casing for backend
+                    if (Object.prototype.hasOwnProperty.call(dataToSubmit, 'Status')) {
+                        dataToSubmit.status = dataToSubmit.Status;
+                        delete dataToSubmit.Status;
+                    }
+
+                    // Rename keys to match backend expectations and ensure they are always present
+                    dataToSubmit.title = dataToSubmit.Title || null;
+                    delete dataToSubmit.Title;
+
+                    dataToSubmit.description = dataToSubmit.Beschreibung || null;
+                    delete dataToSubmit.Beschreibung;
+
+                    dataToSubmit.scheduled_at = dataToSubmit.Abholtermin || null;
+                    delete dataToSubmit.Abholtermin;
                 }
-
-                // Rename keys to match backend expectations and ensure they are always present
-                dataToSubmit.title = dataToSubmit.Title || null;
-                delete dataToSubmit.Title;
-
-                dataToSubmit.description = dataToSubmit.Beschreibung || null;
-                delete dataToSubmit.Beschreibung;
-
-                dataToSubmit.scheduled_at = dataToSubmit.Abholtermin || null;
-                delete dataToSubmit.Abholtermin;
 
                 console.log('Submitting job data:', dataToSubmit);
 
@@ -659,6 +672,7 @@ export default {
             this.servicesLoading = true;
             try {
                 const response = await axios.get(`/api/services`);
+                console.log('API Services Response:', response.data);
                 this.services = response.data.data.map(service => ({
                     id: service.id,
                     name: service.name
