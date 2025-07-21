@@ -22,6 +22,7 @@ class JobController extends Controller
             'scheduled_at' => 'nullable|date',
             'service_ids' => 'required|array',
             'service_ids.*' => 'exists:services,id',
+            'trainee_id' => 'nullable|exists:users,id',
         ]);
 
         $user = auth()->user();
@@ -29,7 +30,7 @@ class JobController extends Controller
             // Handle unauthenticated user, e.g., throw an exception or return an error response
             abort(401, 'Unauthenticated.');
         }
-        $job = Job::create(array_merge($validatedData, ['user_id' => $user->id]));
+        $job = Job::create(array_merge($validatedData, ['trainer_id' => $user->id]));
         $job->services()->sync($request->input('service_ids'));
 
         return response()->json($job, 201);
@@ -45,13 +46,13 @@ class JobController extends Controller
 
         $allowedSortFields = ['id', 'title', 'description', 'scheduled_at', 'status'];
 
-        $query = Job::with(['customer', 'car', 'services', 'user']);
+        $query = Job::with(['customer', 'car', 'services', 'trainer', 'trainee']);
 
         // Filter by user role
         /** @var \App\Models\User|null $user */
         $user = auth()->user();
         if ($user && $user->role === 'trainee') {
-            $query->where('user_id', $user->id);
+            $query->where('trainee_id', $user->id);
         }
 
         // Filtering by status
@@ -169,7 +170,6 @@ class JobController extends Controller
                 'customer_id' => 'sometimes|required|exists:customers,id',
                 'status' => 'sometimes|required|string',
                 'scheduled_at' => 'nullable|date',
-                'user_id' => 'sometimes|nullable|exists:users,id',
                 'services' => 'nullable|array',
                 'services.*.id' => 'required|exists:services,id',
             ]);

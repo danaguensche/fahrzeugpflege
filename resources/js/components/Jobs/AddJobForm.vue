@@ -162,6 +162,36 @@
                                 class="mb-3"
                             ></v-text-field>
                         </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <v-autocomplete
+                                v-model="job.trainee"
+                                :items="trainees"
+                                item-title="full_name"
+                                item-value="id"
+                                label="Auszubildender"
+                                placeholder="Auszubildenden auswählen"
+                                prepend-inner-icon="mdi-account-school"
+                                variant="outlined"
+                                density="comfortable"
+                                clearable
+                                :loading="traineesLoading"
+                                return-object
+                                class="mb-3"
+                            >
+                                <template v-slot:item="{ props, item }">
+                                    <v-list-item
+                                        v-bind="props"
+                                        :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                        :subtitle="item.raw.email"
+                                        class="pa-3"
+                                    ></v-list-item>
+                                </template>
+                                <template v-slot:selection="{ item }">
+                                    {{ item.raw.email }}
+                                </template>
+                            </v-autocomplete>
+                        </v-col>
                     </v-row>
                 </v-form>
             </v-card-text>
@@ -223,7 +253,9 @@ export default {
                 services: [],
                 status: 'ausstehend',
                 scheduled_at: null,
+                trainee: null,
             },
+            trainees: [],
             cars: [],
             customers: [],
             services: [],
@@ -238,6 +270,7 @@ export default {
             customersLoading: false,
             customerSearchTimeout: null,
             servicesLoading: false,
+            traineesLoading: false,
             jobsLoading: false,
             snackbar: {
                 show: false,
@@ -278,11 +311,12 @@ export default {
                         car_id: this.job.car ? this.job.car.id : null,
                         customer_id: this.job.customer ? this.job.customer.id : null,
                         service_ids: this.job.services ? this.job.services.map(s => s.id) : [],
-                        user_id: this.$store.state.auth.userId, // Add user_id
+                        trainee_id: this.job.trainee ? this.job.trainee.id : null,
                     };
                     delete jobData.car;
                     delete jobData.customer;
                     delete jobData.services;
+                    delete jobData.trainee;
 
                     await axios.post('/api/jobs', jobData);
                     this.$emit('job-added');
@@ -346,6 +380,24 @@ export default {
                 this.fetchCustomers(query);
             }, 300);
         },
+        async fetchTrainees() {
+            this.traineesLoading = true;
+            try {
+                const response = await axios.get('/api/users/trainees');
+                this.trainees = response.data.data.map(trainee => ({
+                    id: trainee.id,
+                    firstname: trainee.firstname,
+                    lastname: trainee.lastname,
+                    full_name: `${trainee.firstname} ${trainee.lastname}`,
+                    email: trainee.email,
+                }));
+            } catch (error) {
+                console.error('Error fetching trainees:', error);
+                this.showSnackbar('Fehler beim Laden der Auszubildenden', 'error');
+            } finally {
+                this.traineesLoading = false;
+            }
+        },
         async fetchServices() {
             this.servicesLoading = true;
             try {
@@ -365,6 +417,7 @@ export default {
             this.fetchCars();
             this.fetchCustomers();
             this.fetchServices();
+            this.fetchTrainees();
         },
         resetForm() {
             if (this.$refs.form) {

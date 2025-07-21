@@ -138,4 +138,15 @@ class UserController extends Controller
             'data' => $users,
         ]);
     }
+
+    /**
+     * Get all users with the 'trainee' role.
+     *
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function getTrainees()
+    {
+        $trainees = User::where('role', 'trainee')->get();
+        return UserResource::collection($trainees);
+    }
 }

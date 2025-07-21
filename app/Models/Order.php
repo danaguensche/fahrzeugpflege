@@ -9,13 +9,20 @@ class Order extends Model
 {
     /** @use HasFactory<\Database\Factories\OrderFactory> */
     use HasFactory;
+    protected $table = 'auftraege';
     public $timestamps = false;
     protected $fillable = [
         'id',
         'id_customer',
         'id_car',
         'id_service_pricing',
-        'created_at'
+        'created_at',
+        'trainer_id',
+        'trainee_id',
+        'title',
+        'description',
+        'scheduled_at',
+        'status'
     ];
 
     public function servicePricing()
