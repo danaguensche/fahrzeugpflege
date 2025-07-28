@@ -14,7 +14,7 @@ class JobDetailsController extends Controller
     public function details($id)
     {
         Log::info('JobDetailsController@details called', ['id' => $id, 'user_id' => auth()->check() ? auth()->id() : null, 'authenticated' => auth()->check()]);
-        $job = Job::with(['customer', 'car', 'services'])->find($id);
+        $job = Job::with(['customer', 'car', 'services', 'trainee'])->find($id);
 
         if ($job !== null) {
             return new JobResource($job);
@@ -53,10 +53,12 @@ class JobDetailsController extends Controller
 
                 $job->update($validatedData);
 
+                Log::info('Job trainee_id after update', ['trainee_id' => $job->trainee_id]);
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Jobdaten erfolgreich aktualisiert',
-                    'data' => new JobResource($job->fresh(['customer', 'car', 'services']))
+                    'data' => new JobResource($job->fresh(['customer', 'car', 'services', 'trainee']))
                 ]);
 
             } else { // Admin or Trainer
@@ -65,6 +67,7 @@ class JobDetailsController extends Controller
                     'description' => 'nullable|string',
                     'scheduled_at' => 'nullable|date',
                     'status' => 'required|string|max:255',
+                    'trainee_id' => 'nullable|exists:users,id',
                     'customer_id' => 'nullable|exists:customers,id',
                     'car_id' => 'nullable|exists:cars,id',
                     'services' => 'nullable|array',
@@ -75,14 +78,18 @@ class JobDetailsController extends Controller
 
                 $job->update($validatedData);
 
+                Log::info('Job trainee_id after update', ['trainee_id' => $job->trainee_id]);
+
                 if (isset($validatedData['services'])) {
                     $job->services()->sync($validatedData['services']);
                 }
+                Log::info('JobController@update payload', $request->all());
+
 
                 return response()->json([
                     'success' => true,
                     'message' => 'Jobdaten erfolgreich aktualisiert',
-                    'data' => new JobResource($job->fresh(['customer', 'car', 'services']))
+                    'data' => new JobResource($job->fresh(['customer', 'car', 'services', 'trainee']))
                 ]);
             }
 

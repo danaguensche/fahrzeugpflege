@@ -89,7 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/services', [App\Http\Controllers\ServiceController::class, 'index']); // Added route for services
 
-    Route::middleware(\App\Http\Middleware\CheckRole::class . ':trainer,admin')->group(function () {
+    Route::middleware(\App\Http\Middleware\CheckRole::class . ':trainer,admin,trainee')->group(function () {
         Route::post('/jobs', [App\Http\Controllers\JobController::class, 'store']);
         // Route::put('/jobs/{job}', [App\Http\Controllers\JobController::class, 'update']); // Moved outside
         Route::delete('/jobs/{job}', [App\Http\Controllers\JobController::class, 'destroy']);

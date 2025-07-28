@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Models\User;
 
 class JobResource extends JsonResource
 {
@@ -20,6 +21,7 @@ class JobResource extends JsonResource
             'Beschreibung' => $this->description,
             'Abholtermin' => $this->scheduled_at,
             'Status' => $this->status,
+            'trainee' => new UserResource($this->whenLoaded('trainee')),
             'customer_id' => $this->customer_id,
             'car_id' => $this->car_id,
             'customer' => new CustomerResource($this->whenLoaded('customer')),
@@ -28,5 +30,10 @@ class JobResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
+
+    public function trainee()
+    {
+        return $this->belongsTo(User::class, 'trainee_id');
     }
 }

@@ -156,6 +156,8 @@ class JobController extends Controller
 
             $job->update($validatedData);
 
+            Log::info('Job trainee_id after update', ['trainee_id' => $job->trainee_id]);
+
             return response()->json($job->load('services'));
 
         } else { // Admin or Trainer
@@ -167,6 +169,7 @@ class JobController extends Controller
             $validatedData = $request->validate([
                 'title' => 'sometimes|required|string|max:255',
                 'description' => 'nullable|string',
+                'trainee_id' => 'nullable|exists:users,id',
                 'car_id' => 'sometimes|required|exists:cars,id',
                 'customer_id' => 'sometimes|required|exists:customers,id',
                 'status' => 'sometimes|required|string',
@@ -177,11 +180,14 @@ class JobController extends Controller
 
             $job->update($validatedData);
 
+            Log::info('Job trainee_id after update', ['trainee_id' => $job->trainee_id]);
+
             if ($request->has('services')) {
                 $serviceIds = collect($request->input('services'))->pluck('id')->toArray();
                 $job->services()->sync($serviceIds);
             }
 
+            Log::info('JobController@update payload', $request->all());
             return response()->json($job->load('services'));
         }
     }
