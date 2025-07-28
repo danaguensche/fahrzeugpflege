@@ -47,7 +47,7 @@ export default {
                 { id: 3, name: 'Fahrzeuge', roles: ['trainee', 'trainer', 'admin'] },
                 { id: 4, name: 'Kunden', roles: ['trainer', 'admin'] },
                 { id: 5, name: 'Aufträge', roles: ['trainee', 'trainer', 'admin'] },
-                { id: 6, name: 'Berichte', roles: ['trainer', 'admin'] },
+                { id: 6, name: 'Berichte', roles: ['trainee', 'trainer', 'admin'] },
                 { id: 7, name: 'Benutzer', roles: ['admin'] },
                 { id: 8, name: 'Profil', roles: ['trainee', 'trainer', 'admin'] },
                 { id: 9, name: 'Einstellungen', roles: ['trainer', 'admin'] },

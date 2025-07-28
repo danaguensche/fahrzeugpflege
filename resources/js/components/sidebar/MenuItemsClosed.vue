@@ -53,7 +53,7 @@ export default {
                 { id: 3, name: 'Fahrzeuge', roles: ['trainee','trainer', 'admin'], icon: new URL('@/img/sidebar-img/cars-icon.png', import.meta.url).href },
                 { id: 4, name: 'Kunden', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/customer-icon.png', import.meta.url).href },
                 { id: 5, name: 'Aufträge', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/jobs-icon.png', import.meta.url).href },
-                { id: 6, name: 'Berichte', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/reports-icon.png', import.meta.url).href },
+                { id: 6, name: 'Berichte', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/reports-icon.png', import.meta.url).href },
                 { id: 7, name: 'Benutzer', roles: ['admin'], icon: new URL('@/img/sidebar-img/user-icon.png', import.meta.url).href },
                 { id: 8, name: 'Profil', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/profile-icon.png', import.meta.url).href },
                 { id: 9, name: 'Einstellungen', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/settings-icon.png', import.meta.url).href },

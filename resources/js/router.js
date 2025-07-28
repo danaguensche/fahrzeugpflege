@@ -87,7 +87,7 @@ const routes = [
             {
                 path: 'berichte',
                 component: ReportsPage,
-                meta: { roles: ['trainer', 'admin'] }
+                meta: { roles: ['trainee', 'trainer', 'admin'] }
             },
             {
                 path: 'profil',
