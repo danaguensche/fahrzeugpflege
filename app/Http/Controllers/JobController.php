@@ -23,6 +23,7 @@ class JobController extends Controller
             'scheduled_at' => 'nullable|date',
             'service_ids' => 'required|array',
             'service_ids.*' => 'exists:services,id',
+            'trainee_id' => 'nullable|exists:users,id',
         ]);
 
         $user = auth()->user();
@@ -30,7 +31,7 @@ class JobController extends Controller
             // Handle unauthenticated user, e.g., throw an exception or return an error response
             abort(401, 'Unauthenticated.');
         }
-        $job = Job::create(array_merge($validatedData, ['user_id' => $user->id]));
+        $job = Job::create(array_merge($validatedData, ['trainer_id' => $user->id]));
         $job->services()->sync($request->input('service_ids'));
 
         return response()->json($job, 201);
@@ -46,13 +47,13 @@ class JobController extends Controller
 
         $allowedSortFields = ['id', 'title', 'description', 'scheduled_at', 'status'];
 
-        $query = Job::with(['customer', 'car', 'services', 'user']);
+        $query = Job::with(['customer', 'car', 'services', 'trainer', 'trainee']);
 
         // Filter by user role
         /** @var \App\Models\User|null $user */
         $user = auth()->user();
         if ($user && $user->role === 'trainee') {
-            $query->where('user_id', $user->id);
+            $query->where('trainee_id', $user->id);
         }
 
         // Filtering by status
@@ -127,31 +128,62 @@ class JobController extends Controller
 
     public function update(Request $request, Job $job)
     {
-        // Convert empty string for scheduled_at to null
-        if ($request->has('scheduled_at') && $request->input('scheduled_at') === '') {
-            $request->merge(['scheduled_at' => null]);
+        $user = auth()->user();
+
+        if ($user && $user->role === 'trainee') {
+            Log::info('JobController@update: Trainee user detected.', ['user_id' => $user->id, 'job_user_id' => $job->user_id, 'job_id' => $job->id]);
+            // Trainee can only update status for their own jobs
+            if ($job->user_id !== $user->id) {
+                Log::error('JobController@update: Trainee attempting to update job not assigned to them.', ['user_id' => $user->id, 'job_user_id' => $job->user_id, 'job_id' => $job->id]);
+                abort(403, 'Unauthorized action. You can only update your own jobs.');
+            }
+
+            // Validate that only 'status' is being updated
+            $allowedFields = ['status'];
+            Log::info('JobController@update: Request all for trainee.', ['request_all' => $request->all()]);
+            $requestFields = array_keys($request->all());
+            Log::info('JobController@update: Trainee update request fields.', ['request_fields' => $requestFields]);
+            $diff = array_diff($requestFields, $allowedFields);
+
+            if (!empty($diff)) {
+                Log::error('JobController@update: Trainee attempting to update fields other than status.', ['user_id' => $user->id, 'job_id' => $job->id, 'attempted_fields' => $requestFields]);
+                abort(403, 'Unauthorized action. Trainees can only update job status.');
+            }
+
+            $validatedData = $request->validate([
+                'status' => 'required|string',
+            ]);
+
+            $job->update($validatedData);
+
+            return response()->json($job->load('services'));
+
+        } else { // Admin or Trainer
+            // Convert empty string for scheduled_at to null
+            if ($request->has('scheduled_at') && $request->input('scheduled_at') === '') {
+                $request->merge(['scheduled_at' => null]);
+            }
+
+            $validatedData = $request->validate([
+                'title' => 'sometimes|required|string|max:255',
+                'description' => 'nullable|string',
+                'car_id' => 'sometimes|required|exists:cars,id',
+                'customer_id' => 'sometimes|required|exists:customers,id',
+                'status' => 'sometimes|required|string',
+                'scheduled_at' => 'nullable|date',
+                'services' => 'nullable|array',
+                'services.*.id' => 'required|exists:services,id',
+            ]);
+
+            $job->update($validatedData);
+
+            if ($request->has('services')) {
+                $serviceIds = collect($request->input('services'))->pluck('id')->toArray();
+                $job->services()->sync($serviceIds);
+            }
+
+            return response()->json($job->load('services'));
         }
-
-        $validatedData = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string',
-            'car_id' => 'sometimes|required|exists:cars,id',
-            'customer_id' => 'sometimes|required|exists:customers,id',
-            'status' => 'sometimes|required|string',
-            'scheduled_at' => 'nullable|date',
-            'user_id' => 'sometimes|nullable|exists:users,id',
-            'services' => 'nullable|array',
-            'services.*.id' => 'required|exists:services,id',
-        ]);
-
-        $job->update($validatedData);
-
-        if ($request->has('services')) {
-            $serviceIds = collect($request->input('services'))->pluck('id')->toArray();
-            $job->services()->sync($serviceIds);
-        }
-
-        return response()->json($job->load('services'));
     }
 
     public function destroy(Job $job)

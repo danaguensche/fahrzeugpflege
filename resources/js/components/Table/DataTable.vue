@@ -7,13 +7,13 @@
             <div class="spacer"></div>
 
             <!-- Button group for vehicle operations -->
-            <div class="button-group" v-if="isAdminOrTrainer">
+            <div class="button-group" v-if="isAdminOrTrainer || canEditStatusOnly">
                 <ConfirmButton class="confirm-button" @click="confirmEditItem" :disabled="!editItemId">
                     Bestätigen
                 </ConfirmButton>
                 <CancelButton class="cancel-button" @click="cancelEdit">Abbrechen</CancelButton>
                 <DeleteButton class="delete-button" :disabled="selectedItems.length === 0"
-                    @click="confirmDeleteSelectedItems">
+                    @click="confirmDeleteSelectedItems" v-if="isAdminOrTrainer">
                     Löschen
                 </DeleteButton>
             </div>
@@ -45,9 +45,9 @@
                     <template v-slot:item="{ item }">
                         <tr :class="{ 'edited-row': editItemId === item[itemKey] }">
                             <!-- Checkbox for vehicle selection -->
-                            <td class="checkbox fixed-width" v-if="isAdminOrTrainer">
-                                <v-checkbox v-model="selectedItems" :value="item[itemKey]"></v-checkbox>
-                            </td>
+            <td class="checkbox fixed-width" v-if="headers.some(h => h.key === 'select')">
+                <v-checkbox v-model="selectedItems" :value="item[itemKey]"></v-checkbox>
+            </td>
                             
                             <!-- Vehicle Data Fields -->
                             <td v-for="field in fields" :key="field" class="fixed-width">
@@ -76,6 +76,7 @@
                                                 :rules="getFieldRules(field)"
                                                 :error-messages="fieldErrors[field]"
                                                 density="compact"
+                                                :disabled="canEditStatusOnly && field !== 'status'"
                                             ></v-select>
                                         </template>
                                         <template v-else>
@@ -84,7 +85,8 @@
                                                 :rules="getFieldRules(field)"
                                                 :error-messages="fieldErrors[field]" 
                                                 density="compact"
-                                                :type="field === 'scheduled_at' ? 'datetime-local' : 'text'">
+                                                :type="field === 'scheduled_at' ? 'datetime-local' : 'text'"
+                                                :disabled="canEditStatusOnly && field !== 'status'">
                                             </v-text-field>
                                         </template>
                                     </template>
@@ -125,7 +127,7 @@
                             </td>
                             
                             <!-- Edit/Save button -->
-                            <td class="table-icon fixed-width" v-if="isAdminOrTrainer">
+                            <td class="table-icon fixed-width" v-if="isAdminOrTrainer || (canEditStatusOnly && item.status)">
                                 <v-btn variant="plain" icon
                                     @click="editItemId === item[itemKey] ? saveItem() : editItemDetails(item)">
                                     <v-icon>{{ editItemId === item[itemKey] ? 'mdi-content-save' : 'mdi-pencil' }}</v-icon>
@@ -209,6 +211,10 @@ export default {
             default: ''
         },
         isSearchActive: {
+            type: Boolean,
+            default: false
+        },
+        canEditStatusOnly: {
             type: Boolean,
             default: false
         }
@@ -520,10 +526,14 @@ export default {
 
         async confirmEditItem() {
             try {
-                const payload = {};
-                this.fields.forEach(field => {
-                    payload[field] = this.editItem[field];
-                });
+                let payload = {};
+                if (this.canEditStatusOnly) {
+                    payload = { status: this.editItem.status };
+                } else {
+                    this.fields.forEach(field => {
+                        payload[field] = this.editItem[field];
+                    });
+                }
 
                 await axios.put(`/api/${this.endpoint}/${this.editItemId}`, payload);
                 this.cancelEdit();
@@ -545,10 +555,14 @@ export default {
 
         async saveItem() {
             try {
-                const payload = {};
-                this.fields.forEach(field => {
-                    payload[field] = this.editItem[field];
-                });
+                let payload = {};
+                if (this.canEditStatusOnly) {
+                    payload = { status: this.editItem.status };
+                } else {
+                    this.fields.forEach(field => {
+                        payload[field] = this.editItem[field];
+                    });
+                }
 
                 await axios.put(`/api/${this.endpoint}/${this.editItemId}`, payload);
                 this.cancelEdit();
@@ -670,7 +684,6 @@ export default {
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     max-width: 100%;
-    margin-right: 20px;
 }
 
 .scrollable-table {

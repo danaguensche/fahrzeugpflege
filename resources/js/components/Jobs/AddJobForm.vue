@@ -98,6 +98,131 @@
                                 variant="outlined" density="comfortable" prepend-inner-icon="mdi-calendar-clock"
                                 class="mb-3"></v-text-field>
                         </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <v-autocomplete
+                                v-model="job.customer"
+                                :items="customers"
+                                item-title="full_name"
+                                item-value="id"
+                                label="Kunde"
+                                placeholder="Kunde auswählen oder suchen"
+                                prepend-inner-icon="mdi-account"
+                                variant="outlined"
+                                density="comfortable"
+                                clearable
+                                :loading="customersLoading"
+                                @update:search="searchCustomers"
+                                return-object
+                                :rules="[v => !!v || 'Kunde ist erforderlich']"
+                                required
+                                class="mb-3"
+                            >
+                                <template v-slot:item="{ props, item }">
+                                    <v-list-item
+                                        v-bind="props"
+                                        :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                        :subtitle="item.raw.email"
+                                        class="pa-3"
+                                    ></v-list-item>
+                                </template>
+                                <template v-slot:selection="{ item }">
+                                    {{ item.raw.email }}
+                                </template>
+                            </v-autocomplete>
+                        </v-col>
+
+                        <v-col cols="12">
+                            <v-autocomplete
+                                v-model="job.services"
+                                :items="services"
+                                item-title="name"
+                                item-value="id"
+                                label="Dienstleistungen"
+                                placeholder="Dienstleistungen auswählen"
+                                prepend-inner-icon="mdi-briefcase"
+                                variant="outlined"
+                                density="comfortable"
+                                multiple
+                                chips
+                                clearable
+                                :loading="servicesLoading"
+                                return-object
+                                :rules="[v => v && v.length > 0 || 'Mindestens eine Dienstleistung ist erforderlich']"
+                                required
+                                class="mb-3"
+                            >
+                                <template v-slot:chip="{ props, item }">
+                                    <v-chip
+                                        v-bind="props"
+                                        :text="item.raw.name"
+                                    ></v-chip>
+                                </template>
+                                <template v-slot:item="{ props, item }">
+                                    <v-list-item
+                                        v-bind="props"
+                                        :title="item.raw.name"
+                                        class="pa-3"
+                                    ></v-list-item>
+                                </template>
+                            </v-autocomplete>
+                        </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <v-select
+                                v-model="job.status"
+                                :items="jobStatuses"
+                                label="Status"
+                                :rules="[v => !!v || 'Status ist erforderlich']"
+                                required
+                                variant="outlined"
+                                density="comfortable"
+                                prepend-inner-icon="mdi-information"
+                                class="mb-3"
+                            ></v-select>
+                        </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <v-text-field
+                                v-model="job.scheduled_at"
+                                label="Abholtermin"
+                                type="datetime-local"
+                                variant="outlined"
+                                density="comfortable"
+                                prepend-inner-icon="mdi-calendar-clock"
+                                class="mb-3"
+                            ></v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <v-autocomplete
+                                v-model="job.trainee"
+                                :items="trainees"
+                                item-title="full_name"
+                                item-value="id"
+                                label="Auszubildender"
+                                placeholder="Auszubildenden auswählen"
+                                prepend-inner-icon="mdi-account-school"
+                                variant="outlined"
+                                density="comfortable"
+                                clearable
+                                :loading="traineesLoading"
+                                return-object
+                                class="mb-3"
+                            >
+                                <template v-slot:item="{ props, item }">
+                                    <v-list-item
+                                        v-bind="props"
+                                        :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                        :subtitle="item.raw.email"
+                                        class="pa-3"
+                                    ></v-list-item>
+                                </template>
+                                <template v-slot:selection="{ item }">
+                                    {{ item.raw.email }}
+                                </template>
+                            </v-autocomplete>
+                        </v-col>
                     </v-row>
                 </v-form>
             </v-card-text>
@@ -144,7 +269,9 @@ export default {
                 services: [],
                 status: 'ausstehend',
                 scheduled_at: null,
+                trainee: null,
             },
+            trainees: [],
             cars: [],
             customers: [],
             users: [],
@@ -162,6 +289,7 @@ export default {
             userSearchTimeout: null,
             customerSearchTimeout: null,
             servicesLoading: false,
+            traineesLoading: false,
             jobsLoading: false,
             snackbar: {
                 show: false,
@@ -202,13 +330,12 @@ export default {
                         car_id: this.job.car ? this.job.car.id : null,
                         customer_id: this.job.customer ? this.job.customer.id : null,
                         service_ids: this.job.services ? this.job.services.map(s => s.id) : [],
-                        // Wenn Mitarbeiter ausgewählt: dessen ID, sonst eingeloggter User
-                        user_id: this.job.user ? this.job.user.id : this.$store.state.auth.userId,
+                        trainee_id: this.job.trainee ? this.job.trainee.id : null,
                     };
                     delete jobData.car;
                     delete jobData.customer;
                     delete jobData.services;
-                    delete jobData.user;
+                    delete jobData.trainee;
 
                     await axios.post('/api/jobs', jobData);
                     this.$emit('job-added');
@@ -291,16 +418,24 @@ export default {
                 this.fetchCustomers(query);
             }, 300);
         },
-
-        searchUsers(query) {
-            if (this.userSearchTimeout) {
-                clearTimeout(this.userSearchTimeout);
+        async fetchTrainees() {
+            this.traineesLoading = true;
+            try {
+                const response = await axios.get('/api/users/trainees');
+                this.trainees = response.data.data.map(trainee => ({
+                    id: trainee.id,
+                    firstname: trainee.firstname,
+                    lastname: trainee.lastname,
+                    full_name: `${trainee.firstname} ${trainee.lastname}`,
+                    email: trainee.email,
+                }));
+            } catch (error) {
+                console.error('Error fetching trainees:', error);
+                this.showSnackbar('Fehler beim Laden der Auszubildenden', 'error');
+            } finally {
+                this.traineesLoading = false;
             }
-            this.userSearchTimeout = setTimeout(() => {
-                this.fetchUsers(query);
-            }, 300);
         },
-
         async fetchServices() {
             this.servicesLoading = true;
             try {
@@ -320,7 +455,7 @@ export default {
             this.fetchCars();
             this.fetchCustomers();
             this.fetchServices();
-            this.fetchUsers();
+            this.fetchTrainees();
         },
         resetForm() {
             if (this.$refs.form) {

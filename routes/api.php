@@ -19,7 +19,15 @@ Route::post('/forgot-password', [App\Http\Controllers\Auth\ForgotPasswordControl
 Route::post('/reset-password', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/me', [UserController::class, 'me']);
-    Route::get('/users', [UserController::class, 'index']);
+    Route::put('/users/me', [UserController::class, 'update']);
+
+    // Users Routes (restricted for trainee)
+    Route::middleware(\App\Http\Middleware\CheckRole::class . ':trainer,admin')->group(function () {
+        Route::get('/users', [UserController::class, 'index']);
+        Route::get('/users/search', [UserController::class, 'search']);
+        Route::put('/users/{id}', [UserController::class, 'update']);
+        Route::get('/users/trainees', [UserController::class, 'getTrainees']);
+    });
 
     // Cars Routes (View only for trainee, full access for trainer/admin)
     Route::get('/cars/search', [CarSearchController::class, 'search']);
@@ -37,31 +45,27 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('images/{imageId}', [CarDetailsController::class, 'deleteImage']);
         Route::post('cars/{kennzeichen}/images/{imageId}', [CarDetailsController::class, 'replaceImage']);
     });
-});
 
-Route::middleware('auth:sanctum')->get('/users/search', [UserController::class, 'search']);
-Route::put('/users/me', [UserController::class, 'update']);
+    // Customers Routes
+    Route::get('/customers/search', [CustomerSearchController::class, 'search']);
+    Route::get('customers', [CustomerController::class, 'index']);
+    Route::get('customers/{id}', [CustomerController::class, 'show']);
+    Route::get('customer/customerdetails/{id}', [CustomerDetailsController::class, 'details']);
 
+    Route::middleware(\App\Http\Middleware\CheckRole::class . ':trainer,admin')->group(function () {
+        Route::post('customers', [CustomerController::class, 'store']);
+        Route::put('customers/{id}', [CustomerController::class, 'update']);
+        Route::delete('customers/{id}', [CustomerController::class, 'destroy']);
+        Route::delete('customers', [CustomerController::class, 'destroyMultiple']);
+        Route::put('customer/customerdetails/{id}', [CustomerDetailsController::class, 'update']);
+        Route::delete('customer/{customerId}/car/{carId}', [CustomerController::class, 'removeCarFromCustomer']);
+    });
 
-// Customers Routes
-Route::get('/customers/search', [CustomerSearchController::class, 'search']);
-Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
-Route::get('customer/customerdetails/{id}', [CustomerDetailsController::class, 'details']);
-Route::delete('customers', [CustomerController::class, 'destroyMultiple']);
-Route::put('customer/customerdetails/{id}', [CustomerDetailsController::class, 'update']);
-Route::delete('customer/{customerId}/car/{carId}', [CustomerController::class, 'removeCarFromCustomer']);
-
-
-
-// Services Routes
-Route::apiResource('services', ServiceController::class);
-Route::get('/services/search', [ServiceController::class, 'search']);
-
-// Jobs Routes
-Route::middleware('auth:sanctum')->group(function () {
+    // Jobs Routes
     Route::get('/jobs/search', [App\Http\Controllers\JobController::class, 'search']);
     Route::get('/jobs', [App\Http\Controllers\JobController::class, 'index']);
     Route::get('/jobs/{job}', [App\Http\Controllers\JobController::class, 'show']);
+    Route::put('/jobs/{job}', [App\Http\Controllers\JobController::class, 'update']); // Moved outside of role middleware
     Route::get('/jobs/jobdetails/{id}', [JobDetailsController::class, 'details']);
     Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
 
@@ -77,9 +81,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tasks/{taskId}/images', [ImageReportController::class, 'upload']);
     Route::delete('/images/{imageId}', [ImageReportController::class, 'destroy']);
 
+    Route::get('/services', [App\Http\Controllers\ServiceController::class, 'index']); // Added route for services
+
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':trainer,admin')->group(function () {
         Route::post('/jobs', [App\Http\Controllers\JobController::class, 'store']);
-        Route::put('/jobs/{job}', [App\Http\Controllers\JobController::class, 'update']);
+        // Route::put('/jobs/{job}', [App\Http\Controllers\JobController::class, 'update']); // Moved outside
         Route::delete('/jobs/{job}', [App\Http\Controllers\JobController::class, 'destroy']);
         Route::delete('jobs', [App\Http\Controllers\JobController::class, 'destroyMultiple']);
     });

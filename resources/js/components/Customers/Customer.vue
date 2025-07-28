@@ -53,7 +53,7 @@ export default {
             isSearchActive: false,
             searchDebounceTimer: null,
             customerHeaders: [
-                { title: 'Auswählen', key: 'checkbox', sortable: false, width: '80px' },
+                { title: 'Auswählen', key: 'select', sortable: false, width: '60px' },
                 { title: 'ID', key: 'id', sortable: true, align: 'start' },
                 { title: 'Vorname', key: 'firstname', sortable: true },
                 { title: 'Nachname', key: 'lastname', sortable: true },

@@ -14,7 +14,7 @@
             </div>
         </div>
 
-        <div class="content-container">
+        <div class="content-container" :class="{ 'content-container--trainee': !isAdminOrTrainer }">
             <DefaultButton @click="openAddCarDialog" v-if="isAdminOrTrainer">Fahrzeug hinzufügen</DefaultButton>
         </div>
 
@@ -66,7 +66,7 @@ export default {
             isSearchActive: false,
             searchDebounceTimer: null,
             carHeaders: [
-                { title: 'Auswählen', key: 'checkbox', sortable: false, width: '80px' },
+                { title: 'Auswählen', key: 'select', sortable: false, width: '60px' },
                 { title: 'Kennzeichen', key: 'Kennzeichen', sortable: true, align: 'start' },
                 { title: 'Fahrzeugklasse', key: 'Fahrzeugklasse', sortable: true },
                 { title: 'Automarke', key: 'Automarke', sortable: true },
@@ -86,7 +86,7 @@ export default {
             if (this.isAdminOrTrainer) {
                 return this.carHeaders;
             } else {
-                return this.carHeaders.filter(header => header.key !== 'delete' && header.key !== 'edit' && header.key !== 'checkbox');
+                return this.carHeaders.filter(header => header.key !== 'delete' && header.key !== 'edit' && header.key !== 'select');
             }
         }
     },
@@ -182,6 +182,11 @@ export default {
     margin-top: -80px;
     z-index: 5;
     position: relative;
+}
+
+.content-container--trainee {
+    margin-bottom: 40px;
+    justify-content: flex-end;
 }
 
 .table-container {

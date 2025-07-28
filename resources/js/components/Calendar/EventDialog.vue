@@ -9,133 +9,119 @@
             <v-card-text class="pa-0">
                 <v-list class="bg-transparent">
                     <v-list-item>
-                        <v-list-item-icon>
+                        <template v-slot:prepend>
                             <v-icon color="primary">mdi-information</v-icon>
-                        </v-list-item-icon>
-                        <v-list-item-content>
-                            <v-list-item-title class="font-weight-medium">Status</v-list-item-title>
-                            <v-list-item-subtitle>
-                                <v-chip :class="getStatusChipClass(event.status)" text-color="white" small>
-                                    {{ getStatusText(event.status) }}
-                                </v-chip>
-                            </v-list-item-subtitle>
-                        </v-list-item-content>
+                        </template>
+                        <v-list-item-title class="font-weight-medium">Status</v-list-item-title>
+                        <v-list-item-subtitle>
+                            <v-chip :class="getStatusChipClass(event.status)" text-color="white" small>
+                                {{ getStatusText(event.status) }}
+                            </v-chip>
+                        </v-list-item-subtitle>
                     </v-list-item>
 
                     <v-divider></v-divider>
 
                     <!-- Beschreibung -->
                     <v-list-item v-if="event.content">
-                        <v-list-item-icon>
+                        <template v-slot:prepend>
                             <v-icon color="primary">mdi-text</v-icon>
-                        </v-list-item-icon>
-                        <v-list-item-content>
-                            <v-list-item-title class="font-weight-medium">Beschreibung</v-list-item-title>
-                            <v-list-item-subtitle class="text-wrap">
-                                {{ event.content }}
-                            </v-list-item-subtitle>
-                        </v-list-item-content>
+                        </template>
+                        <v-list-item-title class="font-weight-medium">Beschreibung</v-list-item-title>
+                        <v-list-item-subtitle class="text-wrap">
+                            {{ event.content }}
+                        </v-list-item-subtitle>
                     </v-list-item>
 
                     <v-divider v-if="event.content"></v-divider>
 
                     <!-- Kunde -->
                     <v-list-item v-if="event.customer_id">
-                        <v-list-item-icon>
+                        <template v-slot:prepend>
                             <v-icon color="primary">mdi-account</v-icon>
-                        </v-list-item-icon>
-                        <v-list-item-content>
-                            <v-list-item-title class="font-weight-medium">Kunde</v-list-item-title>
-                            <v-list-item-subtitle>
-                                <router-link :to="'/kunden/kundendetails/' + event.customer_id"
-                                    class="text-decoration-none primary--text font-weight-medium">
-                                    {{ event.customer_firstname }} {{ event.customer_lastname }}
-                                </router-link>
-                            </v-list-item-subtitle>
-                        </v-list-item-content>
+                        </template>
+                        <v-list-item-title class="font-weight-medium">Kunde</v-list-item-title>
+                        <v-list-item-subtitle>
+                            <router-link :to="'/kunden/kundendetails/' + event.customer_id"
+                                class="text-decoration-none primary--text font-weight-medium">
+                                {{ event.customer_firstname }} {{ event.customer_lastname }}
+                            </router-link>
+                        </v-list-item-subtitle>
                     </v-list-item>
 
                     <v-divider v-if="event.customer_id"></v-divider>
 
                     <!-- E-Mail -->
                     <v-list-item v-if="event.email && event.email !== 'N/A'">
-                        <v-list-item-icon>
+                        <template v-slot:prepend>
                             <v-icon color="primary">mdi-email</v-icon>
-                        </v-list-item-icon>
-                        <v-list-item-content>
-                            <v-list-item-title class="font-weight-medium">E-Mail</v-list-item-title>
-                            <v-list-item-subtitle>
-                                <a :href="'mailto:' + event.email" class="text-decoration-none primary--text">
-                                    {{ event.email }}
-                                </a>
-                            </v-list-item-subtitle>
-                        </v-list-item-content>
+                        </template>
+                        <v-list-item-title class="font-weight-medium">E-Mail</v-list-item-title>
+                        <v-list-item-subtitle>
+                            <a :href="'mailto:' + event.email" class="text-decoration-none primary--text">
+                                {{ event.email }}
+                            </a>
+                        </v-list-item-subtitle>
                     </v-list-item>
 
                     <v-divider v-if="event.email && event.email !== 'N/A'"></v-divider>
 
                     <!-- Fahrzeug -->
                     <v-list-item v-if="event.car_kennzeichen && event.car_kennzeichen !== 'N/A'">
-                        <v-list-item-icon>
+                        <template v-slot:prepend>
                             <v-icon color="primary">mdi-car</v-icon>
-                        </v-list-item-icon>
-                        <v-list-item-content>
-                            <v-list-item-title class="font-weight-medium">Fahrzeug</v-list-item-title>
-                            <v-list-item-subtitle>
-                                <router-link :to="'/fahrzeuge/fahrzeugdetails/' + event.car_kennzeichen"
-                                    class="text-decoration-none primary--text font-weight-medium">
-                                    {{ event.car_kennzeichen }}
-                                </router-link>
-                                <span v-if="event.car_make && event.car_model && event.car_make !== 'N/A'">
-                                    - {{ event.car_make }} {{ event.car_model }}
-                                </span>
-                            </v-list-item-subtitle>
-                        </v-list-item-content>
+                        </template>
+                        <v-list-item-title class="font-weight-medium">Fahrzeug</v-list-item-title>
+                        <v-list-item-subtitle>
+                            <router-link :to="'/fahrzeuge/fahrzeugdetails/' + event.car_kennzeichen"
+                                class="text-decoration-none primary--text font-weight-medium">
+                                {{ event.car_kennzeichen }}
+                            </router-link>
+                            <span v-if="event.car_make && event.car_model && event.car_make !== 'N/A'">
+                                - {{ event.car_make }} {{ event.car_model }}
+                            </span>
+                        </v-list-item-subtitle>
                     </v-list-item>
 
                     <v-divider v-if="event.car_kennzeichen && event.car_kennzeichen !== 'N/A'"></v-divider>
 
                     <!-- Services -->
                     <v-list-item v-if="event.services_list && event.services_list.length > 0">
-                        <v-list-item-icon>
+                        <template v-slot:prepend>
                             <v-icon color="primary">mdi-cog</v-icon>
-                        </v-list-item-icon>
-                        <v-list-item-content>
-                            <v-list-item-title class="font-weight-medium">Services</v-list-item-title>
-                            <v-list-item-subtitle>
-                                <div class="mt-2">
-                                    <v-chip v-for="(service, index) in event.services_list" :key="index" class="ma-1"
-                                        color="grey lighten-4" text-color="primary" small outlined>
-                                        <v-icon left small>mdi-wrench</v-icon>
-                                        {{ service }}
-                                    </v-chip>
-                                </div>
-                            </v-list-item-subtitle>
-                        </v-list-item-content>
+                        </template>
+                        <v-list-item-title class="font-weight-medium">Services</v-list-item-title>
+                        <v-list-item-subtitle>
+                            <div class="mt-2">
+                                <v-chip v-for="(service, index) in event.services_list" :key="index" class="ma-1"
+                                    color="grey lighten-4" text-color="primary" small outlined>
+                                    <v-icon left small>mdi-wrench</v-icon>
+                                    {{ service }}
+                                </v-chip>
+                            </div>
+                        </v-list-item-subtitle>
                     </v-list-item>
 
                     <v-divider v-if="event.services_list && event.services_list.length > 0"></v-divider>
 
                     <!-- Zeitraum -->
                     <v-list-item>
-                        <v-list-item-icon>
+                        <template v-slot:prepend>
                             <v-icon color="primary">mdi-clock</v-icon>
-                        </v-list-item-icon>
-                        <v-list-item-content>
-                            <v-list-item-title class="font-weight-medium">Zeitraum</v-list-item-title>
-                            <v-list-item-subtitle>
-                                <div class="d-flex align-center flex-wrap">
-                                    <div class="d-flex align-center mr-4 mb-1">
-                                        <v-icon small color="success" class="mr-2">mdi-play</v-icon>
-                                        <span>{{ formatDateTime(event.start) }}</span>
-                                    </div>
-                                    <div class="d-flex align-center">
-                                        <v-icon small color="error" class="mr-2">mdi-stop</v-icon>
-                                        <span>{{ formatDateTime(event.end) }}</span>
-                                    </div>
+                        </template>
+                        <v-list-item-title class="font-weight-medium">Zeitraum</v-list-item-title>
+                        <v-list-item-subtitle>
+                            <div class="d-flex align-center flex-wrap">
+                                <div class="d-flex align-center mr-4 mb-1">
+                                    <v-icon small color="success" class="mr-2">mdi-play</v-icon>
+                                    <span>{{ formatDateTime(event.start) }}</span>
                                 </div>
-                            </v-list-item-subtitle>
-                        </v-list-item-content>
+                                <div class="d-flex align-center">
+                                    <v-icon small color="error" class="mr-2">mdi-stop</v-icon>
+                                    <span>{{ formatDateTime(event.end) }}</span>
+                                </div>
+                            </div>
+                        </v-list-item-subtitle>
                     </v-list-item>
                 </v-list>
             </v-card-text>

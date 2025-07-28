@@ -19,6 +19,8 @@ class Job extends Model
         'user_id',
         'status',
         'scheduled_at',
+        'trainer_id',
+        'trainee_id',
     ];
 
     public function services()
@@ -36,10 +38,17 @@ class Job extends Model
         return $this->belongsTo(Car::class);
     }
 
-    public function user()
+    public function trainer()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'trainer_id');
     }
+
+    public function trainee()
+    {
+        return $this->belongsTo(User::class, 'trainee_id');
+    }
+
+    
 
     protected $casts = [
         'scheduled_at' => 'datetime',

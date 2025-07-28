@@ -33,7 +33,7 @@ class PageController extends Controller
 
     public function customerDetails($id)
     {
-        $customer = \App\Models\Customer::with('auftraege')->find($id);
+        $customer = \App\Models\Customer::with('auftraege')->findOrFail($id);
         return view('pages.customerdetails', ['id' => $id, 'auftraege' => $customer->auftraege]);
     }
     
@@ -75,6 +75,11 @@ class PageController extends Controller
     public function loginPost()
     {
         return redirect()->route('dashboard');
+    }
+
+    public function users()
+    {
+        return view('pages.users');
     }
 
 }

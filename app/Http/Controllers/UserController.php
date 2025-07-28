@@ -47,10 +47,21 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            return UserResource::collection(User::all());
+            $sortBy = $request->input('sortBy', 'id');
+            // The frontend sends sortDesc=true for ASC order and sortDesc=false for DESC order.
+            $sortOrder = $request->input('sortDesc', 'false') === 'true' ? 'asc' : 'desc';
+            $itemsPerPage = $request->input('itemsPerPage', 10);
+
+            $users = User::orderBy($sortBy, $sortOrder)
+                         ->paginate($itemsPerPage);
+
+            return response()->json([
+                'items' => UserResource::collection($users->items()),
+                'total' => $users->total(),
+            ]);
         } catch (\Exception $e) {
             Log::error('Error in index method: ' . $e->getMessage());
             return response()->json([
@@ -66,29 +77,29 @@ class UserController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse|\App\Http\Resources\UserResource
      */
-    public function update(Request $request)
+    public function update(Request $request, $id = null)
     {
         try {
-            /** @var \App\Models\User|null $user */
-            $user = Auth::user();
-
-            // Überprüfen, ob der Benutzer authentifiziert ist
-            if (!$user) {
-                return response()->json([
-                    'message' => 'Benutzer nicht authentifiziert',
-                ], 401);
+            if ($id) {
+                // An admin or trainer is updating a specific user.
+                $user = User::findOrFail($id);
+            } else {
+                // A user is updating their own profile.
+                $user = Auth::user();
             }
 
-            // Loggen der Benutzerklasse für Debugging-Zwecke
-            Log::info('User class: ' . get_class($user));
+            if (!$user) {
+                return response()->json(['message' => 'Benutzer nicht gefunden'], 404);
+            }
 
             $validatedData = $request->validate([
-                'firstname' => 'required|string|max:255',
-                'lastname' => 'required|string|max:255',
+                'firstname' => 'sometimes|string|max:255',
+                'lastname' => 'sometimes|string|max:255',
                 'phonenumber' => 'nullable|string|max:255',
                 'addressline' => 'nullable|string|max:255',
                 'postalcode' => 'nullable|string|max:255',
                 'city' => 'nullable|string|max:255',
+                'role' => 'sometimes|in:admin,trainer,trainee',
                 'password' => 'nullable|string|min:8',
             ]);
 
@@ -96,39 +107,19 @@ class UserController extends Controller
                 $validatedData['password'] = Hash::make($validatedData['password']);
             }
 
-            // Zuerst versuchen wir es mit direktem Update
-            try {
-                $result = $user->update($validatedData);
-                Log::info('Update result: ' . ($result ? 'success' : 'failure'));
+            $user->update($validatedData);
 
-                if (!$result) {
-                    // Wenn update() fehlschlägt, versuchen wir es mit fill() und save()
-                    $user->fill($validatedData);
-                    $saveResult = $user->save();
-                    Log::info('Save result after fill: ' . ($saveResult ? 'success' : 'failure'));
-
-                    if (!$saveResult) {
-                        throw new \Exception('Sowohl update() als auch fill()->save() sind fehlgeschlagen');
-                    }
-                }
-            } catch (\Exception $e) {
-                Log::error('Error updating user: ' . $e->getMessage());
-                throw $e;
-            }
-
-            // Frischen Benutzer aus der Datenbank abrufen, um zu überprüfen, ob die Änderungen gespeichert wurden
-            $refreshedUser = User::find($user->id);
-            return new UserResource($refreshedUser);
+            return new UserResource($user);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'message' => 'Validierungsfehler',
                 'errors' => $e->validator->errors(),
             ], 422);
         } catch (\Exception $e) {
+            Log::error('Error updating user: ' . $e->getMessage() . ' Stack trace: ' . $e->getTraceAsString());
             return response()->json([
                 'message' => 'Fehler beim Aktualisieren des Benutzers',
                 'error' => $e->getMessage(),
-                'trace' => env('APP_DEBUG') ? $e->getTraceAsString() : null,
             ], 500);
         }
     }
@@ -146,5 +137,16 @@ class UserController extends Controller
         return response()->json([
             'data' => $users,
         ]);
+    }
+
+    /**
+     * Get all users with the 'trainee' role.
+     *
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function getTrainees()
+    {
+        $trainees = User::where('role', 'trainee')->get();
+        return UserResource::collection($trainees);
     }
 }

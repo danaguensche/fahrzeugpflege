@@ -71,5 +71,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/berichte', 'reports')->name('reports');
         Route::get('/profil', 'profile')->name('profile');
         Route::get('/einstellungen', 'settings')->name('settings');
-});
+        Route::get('/benutzer', 'users')->name('benutzer');
+    });
 });

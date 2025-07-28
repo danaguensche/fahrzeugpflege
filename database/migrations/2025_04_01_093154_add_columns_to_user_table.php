@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('phonenumber', 20)->nullable()->after('email');
             $table->string('addressline', 255)->nullable()->after('phonenumber');
-            $table->string('postalcode', 10)->nullable()->after('addressline');
+            $table->string('postalcode', 255)->nullable()->after('addressline');
             $table->string('city', 255)->nullable()->after('postalcode');
         });
     }
