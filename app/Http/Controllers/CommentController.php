@@ -3,24 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
+use App\Models\Job;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    public function store(Request $request)
+    public function index(Job $job)
+    {
+        $comments = $job->comments()->with('user')->latest()->get();
+        return response()->json(['data' => $comments]);
+    }
+
+    public function store(Request $request, Job $job)
     {
         $request->validate([
-            'job_id' => 'required|exists:jobs,id',
-            'comment_text' => 'required|string',
+            'text' => 'required|string',
         ]);
 
-        $comment = Comment::create([
+        $comment = $job->comments()->create([
             'user_id' => auth()->user()->id,
-            'job_id' => $request->job_id,
-            'comment_text' => $request->comment_text,
+            'comment_text' => $request->text,
         ]);
 
-        return response()->json($comment->load('user'), 201);
+        return response()->json(['data' => $comment->load('user')], 201);
     }
 
     public function destroy(Comment $comment)

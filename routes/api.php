@@ -75,7 +75,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
 
     // Comment Routes
-    Route::post('/comments', [App\Http\Controllers\CommentController::class, 'store']);
+    Route::get('/jobs/{job}/comments', [App\Http\Controllers\CommentController::class, 'index']);
+    Route::post('/jobs/{job}/comments', [App\Http\Controllers\CommentController::class, 'store']);
     Route::delete('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'destroy']);
 
     // Image Report Routes
