@@ -177,6 +177,9 @@
                     <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt"
                         :formattedUpdatedAt="formattedUpdatedAt">
                     </MetaData>
+
+                    <!-- Comments Section -->
+                    <CommentsSection :jobId="jobDetails.data.id" @show-snackbar="showSnackbar"></CommentsSection>
                 </v-card-text>
 
                 <v-card-actions class="pa-4">
@@ -220,6 +223,7 @@ import InfoList from "../../Details/InfoList.vue";
 import InfoListEditMode from "../../Details/InfoListEditMode.vue";
 import DefaultHeader from "../../Details/DefaultHeader.vue";
 import CustomerInfoList from "../../Details/CustomerInfoList.vue";
+import CommentsSection from "./CommentsSection.vue";
 
 import { mapState } from 'vuex';
 
@@ -240,6 +244,7 @@ export default {
         InfoListEditMode,
         DefaultHeader,
         CustomerInfoList,
+        CommentsSection,
     },
     data() {
         return {
