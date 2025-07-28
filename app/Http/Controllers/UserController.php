@@ -149,4 +149,32 @@ class UserController extends Controller
         $trainees = User::where('role', 'trainee')->get();
         return UserResource::collection($trainees);
     }
+
+    /**
+     * Remove the specified user from storage.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return response()->json(['message' => 'Benutzer erfolgreich gelöscht']);
+    }
+
+    /**
+     * Remove multiple users from storage.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroyMultiple(Request $request)
+    {
+        $ids = $request->input('ids');
+        User::whereIn('id', $ids)->delete();
+
+        return response()->json(['message' => 'Benutzer erfolgreich gelöscht']);
+    }
 }

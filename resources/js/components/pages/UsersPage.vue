@@ -1,34 +1,32 @@
 <template>
-  <v-container>
-    <v-card>
-      <v-card-title>Users</v-card-title>
-      <v-card-text>
-        <DataTable
-          endpoint="users"
-          :headers="userHeaders"
-          :fields="userFields"
-          itemKey="id"
-          detailsPage="user-details"
-          detailsUrlBasePath="benutzer"
-          deleteKey="ids"
-        >
-          <template v-slot:item.role="{ item }">
-            <v-chip :color="getRoleColor(item.role)" dark>{{ item.role }}</v-chip>
-          </template>
-        </DataTable>
-      </v-card-text>
-    </v-card>
-  </v-container>
+  <div class="users-page" :class="{ 'users-page-sidebar-opened': isSidebarOpen }">
+    <DataTable
+      endpoint="users"
+      :headers="userHeaders"
+      :fields="userFields"
+      itemKey="id"
+      detailsPage="user-details"
+      detailsUrlBasePath="benutzer"
+      deleteKey="ids"
+    >
+      <template v-slot:item.role="{ item }">
+        <v-chip :color="getRoleColor(item.role)" dark>{{ item.role }}</v-chip>
+      </template>
+    </DataTable>
+  </div>
 </template>
-
 
 <script>
 import DataTable from '../Table/DataTable.vue';
+import { mapState } from 'vuex';
 
 export default {
   name: 'UsersPage',
   components: {
     DataTable,
+  },
+  computed: {
+    ...mapState(['isSidebarOpen']),
   },
   data() {
     return {
@@ -86,5 +84,15 @@ export default {
 </script>
 
 <style scoped>
-/* Add any specific styles for UsersPage here */
+.users-page {
+    margin-left: 150px;
+    margin-right: 50px;
+    transition: margin-left 0.3s ease;
+    font-family: var(--font-family);
+}
+
+.users-page-sidebar-opened {
+    margin-left: 330px;
+    transition: margin-left 0.3s ease;
+}
 </style>
