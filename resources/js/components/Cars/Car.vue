@@ -14,7 +14,7 @@
             </div>
         </div>
 
-        <div class="content-container">
+        <div class="content-container" :class="{ 'content-container--trainee': !isAdminOrTrainer }">
             <DefaultButton @click="openAddCarDialog" v-if="isAdminOrTrainer">Fahrzeug hinzufügen</DefaultButton>
         </div>
 
@@ -182,6 +182,11 @@ export default {
     margin-top: -80px;
     z-index: 5;
     position: relative;
+}
+
+.content-container--trainee {
+    margin-bottom: 40px;
+    justify-content: flex-end;
 }
 
 .table-container {
