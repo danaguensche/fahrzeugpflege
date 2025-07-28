@@ -5,98 +5,67 @@
                 <v-icon class="mr-3" color="primary">mdi-briefcase-plus</v-icon>
                 Neue Aufgabe hinzufügen
             </v-card-title>
-
+            
             <v-divider></v-divider>
-
+            
             <v-card-text class="pa-6">
                 <v-form ref="form" v-model="valid" lazy-validation>
                     <v-row>
                         <v-col cols="12">
-                            <v-text-field v-model="job.title" label="Titel"
-                                :rules="[v => !!v || 'Titel ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-format-title" class="mb-3"></v-text-field>
+                            <v-text-field
+                                v-model="job.title"
+                                label="Titel"
+                                :rules="[v => !!v || 'Titel ist erforderlich']"
+                                required
+                                variant="outlined"
+                                density="comfortable"
+                                prepend-inner-icon="mdi-format-title"
+                                class="mb-3"
+                            ></v-text-field>
                         </v-col>
 
                         <v-col cols="12">
-                            <v-textarea v-model="job.description" label="Beschreibung" variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-text" class="mb-3"></v-textarea>
+                            <v-textarea
+                                v-model="job.description"
+                                label="Beschreibung"
+                                variant="outlined"
+                                density="comfortable"
+                                prepend-inner-icon="mdi-text"
+                                class="mb-3"
+                            ></v-textarea>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-autocomplete v-model="job.car" :items="cars" item-title="Kennzeichen" item-value="id"
-                                label="Fahrzeug" placeholder="Fahrzeug auswählen oder suchen"
-                                prepend-inner-icon="mdi-car" variant="outlined" density="comfortable" clearable
-                                :loading="carsLoading" @update:search="searchCars" return-object
-                                :rules="[v => !!v || 'Fahrzeug ist erforderlich']" required class="mb-3">
+                            <v-autocomplete
+                                v-model="job.car"
+                                :items="cars"
+                                item-title="Kennzeichen"
+                                item-value="id"
+                                label="Fahrzeug"
+                                placeholder="Fahrzeug auswählen oder suchen"
+                                prepend-inner-icon="mdi-car"
+                                variant="outlined"
+                                density="comfortable"
+                                clearable
+                                :loading="carsLoading"
+                                @update:search="searchCars"
+                                return-object
+                                :rules="[v => !!v || 'Fahrzeug ist erforderlich']"
+                                required
+                                class="mb-3"
+                            >
                                 <template v-slot:item="{ props, item }">
-                                    <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
-                                        :subtitle="item.raw.Automarke" class="pa-3"></v-list-item>
+                                    <v-list-item
+                                        v-bind="props"
+                                        :title="item.raw.Kennzeichen"
+                                        :subtitle="item.raw.Automarke"
+                                        class="pa-3"
+                                    ></v-list-item>
                                 </template>
                                 <template v-slot:selection="{ item }">
                                     {{ item.raw.Kennzeichen }}
                                 </template>
                             </v-autocomplete>
-                        </v-col>
-
-                        <v-col cols="12" sm="6">
-                            <v-autocomplete v-model="job.customer" :items="customers" item-title="full_name"
-                                item-value="id" label="Kunde" placeholder="Kunde auswählen oder suchen"
-                                prepend-inner-icon="mdi-account" variant="outlined" density="comfortable" clearable
-                                :loading="customersLoading" @update:search="searchCustomers" return-object
-                                :rules="[v => !!v || 'Kunde ist erforderlich']" required class="mb-3">
-
-                                <template v-slot:item="{ props, item }">
-                                    <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                        :subtitle="item.raw.email" class="pa-3"></v-list-item>
-                                </template>
-                                <template v-slot:selection="{ item }">
-                                    {{ item.raw.email }}
-                                </template>
-                            </v-autocomplete>
-                        </v-col>
-
-                        <v-col cols="12" sm="6">
-                            <v-autocomplete v-model="job.user" :items="users" item-title="full_name" item-value="id"
-                                label="Mitarbeiter" placeholder="Mitarbeiter auswählen oder suchen"
-                                prepend-inner-icon="mdi-account" variant="outlined" density="comfortable" clearable
-                                :loading="usersLoading" @update:search="searchUsers" return-object class="mb-3">
-
-                                <template v-slot:item="{ props, item }">
-                                    <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                        :subtitle="item.raw.email" class="pa-3"></v-list-item>
-                                </template>
-                                <template v-slot:selection="{ item }">
-                                    {{ item.raw.email }}
-                                </template>
-                            </v-autocomplete>
-                        </v-col>
-
-                        <v-col cols="12" sm="6">
-                            <v-autocomplete v-model="job.services" :items="services" item-title="name" item-value="id"
-                                label="Dienstleistungen" placeholder="Dienstleistungen auswählen"
-                                prepend-inner-icon="mdi-briefcase" variant="outlined" density="comfortable" multiple
-                                chips clearable :loading="servicesLoading" return-object
-                                :rules="[v => v && v.length > 0 || 'Mindestens eine Dienstleistung ist erforderlich']"
-                                required class="mb-3">
-                                <template v-slot:chip="{ props, item }">
-                                    <v-chip v-bind="props" :text="item.raw.name"></v-chip>
-                                </template>
-                                <template v-slot:item="{ props, item }">
-                                    <v-list-item v-bind="props" :title="item.raw.name" class="pa-3"></v-list-item>
-                                </template>
-                            </v-autocomplete>
-                        </v-col>
-
-                        <v-col cols="12" sm="6">
-                            <v-select v-model="job.status" :items="jobStatuses" label="Status"
-                                :rules="[v => !!v || 'Status ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-information" class="mb-3"></v-select>
-                        </v-col>
-
-                        <v-col cols="12" sm="6">
-                            <v-text-field v-model="job.scheduled_at" label="Abholtermin" type="datetime-local"
-                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-calendar-clock"
-                                class="mb-3"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
@@ -226,23 +195,38 @@
                     </v-row>
                 </v-form>
             </v-card-text>
-
+            
             <v-divider></v-divider>
-
+            
             <v-card-actions class="pa-6 pt-4">
                 <v-spacer></v-spacer>
-                <v-btn variant="outlined" color="grey" @click="closeDialog" class="mr-3">
+                <v-btn 
+                    variant="outlined" 
+                    color="grey" 
+                    @click="closeDialog"
+                    class="mr-3"
+                >
                     <v-icon start>mdi-close</v-icon>
                     Abbrechen
                 </v-btn>
-                <v-btn variant="elevated" color="primary" @click="saveJob" :loading="jobsLoading">
+                <v-btn 
+                    variant="elevated" 
+                    color="primary" 
+                    @click="saveJob"
+                    :loading="jobsLoading"
+                >
                     <v-icon start>mdi-content-save</v-icon>
                     Speichern
                 </v-btn>
             </v-card-actions>
         </v-card>
-
-        <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false" />
+        
+        <SnackBar 
+            v-if="snackbar.show" 
+            :text="snackbar.text" 
+            :color="snackbar.color" 
+            @close="snackbar.show = false"
+        />
     </v-dialog>
 </template>
 
@@ -274,7 +258,6 @@ export default {
             trainees: [],
             cars: [],
             customers: [],
-            users: [],
             services: [],
             jobStatuses: [
                 { title: 'Ausstehend', value: 'ausstehend' },
@@ -285,8 +268,6 @@ export default {
             carsLoading: false,
             carSearchTimeout: null,
             customersLoading: false,
-            usersLoading: false,
-            userSearchTimeout: null,
             customerSearchTimeout: null,
             servicesLoading: false,
             traineesLoading: false,
@@ -389,25 +370,6 @@ export default {
                 this.showSnackbar('Fehler beim Laden der Kunden', 'error');
             } finally {
                 this.customersLoading = false;
-            }
-        },
-
-        async fetchUsers(query = '') {
-            this.usersLoading = true;
-            try {
-                const response = await axios.get(`/api/users/search?query=${query}`);
-                this.users = response.data.data.map(user => ({
-                    id: user.id,
-                    firstname: user.firstname,
-                    lastname: user.lastname,
-                    full_name: `${user.firstname} ${user.lastname}`,
-                    email: user.email,
-                }));
-            } catch (error) {
-                console.error('Error fetching users:', error);
-                this.showSnackbar('Fehler beim Laden der Benutzer', 'error');
-            } finally {
-                this.usersLoading = false;
             }
         },
         searchCustomers(query) {

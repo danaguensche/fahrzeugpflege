@@ -71,6 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //User Routes
     Route::get('/users/search', [UserController::class, 'search']);
+    Route::put('/users/{id}', [UserController::class, 'update']);
     
     // Comment Routes
     Route::post('/comments', [App\Http\Controllers\CommentController::class, 'store']);

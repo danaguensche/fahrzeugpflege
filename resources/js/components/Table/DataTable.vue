@@ -21,116 +21,100 @@
 
         <!-- Table Container -->
         <div class="table-container">
-            
+
             <!-- Scrolling Table -->
             <div class="scrollable-table">
                 <!-- Vuetify server table with pagination and sorting -->
-                <v-data-table-server 
-                    :headers="headers" 
-                    :items="items" 
-                    :itemsLength="totalItems"
-                    height="calc(100vh - 400px)" 
-                    fixed-header 
-                    :loading="loading" 
-                    @update:options="onOptionsUpdate"
-                    :items-per-page="options.itemsPerPage" 
-                    :page="options.page"
-                    :sort-by="options.sortBy"
-                    :multi-sort="false"
-                    :must-sort="false"
-                    return-object
-                    hide-default-footer>
+                <v-data-table-server :headers="headers" :items="items" :itemsLength="totalItems"
+                    height="calc(100vh - 400px)" fixed-header :loading="loading" @update:options="onOptionsUpdate"
+                    :items-per-page="options.itemsPerPage" :page="options.page" :sort-by="options.sortBy"
+                    :multi-sort="false" :must-sort="false" return-object hide-default-footer>
 
                     <!-- Template for each row of the table -->
                     <template v-slot:item="{ item }">
                         <tr :class="{ 'edited-row': editItemId === item[itemKey] }">
                             <!-- Checkbox for vehicle selection -->
-            <td class="checkbox fixed-width" v-if="headers.some(h => h.key === 'select')">
-                <v-checkbox v-model="selectedItems" :value="item[itemKey]"></v-checkbox>
-            </td>
-                            
+                            <td class="checkbox fixed-width" v-if="headers.some(h => h.key === 'select')">
+                                <v-checkbox v-model="selectedItems" :value="item[itemKey]"></v-checkbox>
+                            </td>
+
                             <!-- Vehicle Data Fields -->
                             <td v-for="field in fields" :key="field" class="fixed-width">
                                 <!-- Edit Mode -->
                                 <template v-if="editItemId === item[itemKey]">
                                     <!-- Kennzeichen - link only, not editable -->
                                     <template v-if="field === itemKey">
-                                        <a :href="`/${detailsUrlBasePath}/${detailsPage}/${item[field] ? item[field].toString().replace(/\s/g, '+') : ''}`">
+                                        <a
+                                            :href="`/${detailsUrlBasePath}/${detailsPage}/${item[field] ? item[field].toString().replace(/\s/g, '+') : ''}`">
                                             {{ editItem[field] || '' }}
                                         </a>
                                     </template>
                                     <!-- Services field - not editable -->
                                     <template v-else-if="field === 'services'">
                                         <span v-for="(service, index) in item[field]" :key="service.id">
-                                            {{ service.title }}{{ index < item[field].length - 1 ? ', ' : '' }}
-                                        </span>
+                                            {{ service.title }}{{ index < item[field].length - 1 ? ', ' : '' }} </span>
                                     </template>
                                     <!-- The rest of the fields are editable -->
                                     <template v-else>
                                         <template v-if="getHeader(field).type === 'select'">
-                                            <v-select
-                                                v-model="editItem[field]"
-                                                :items="getHeader(field).options"
-                                                item-title="title"
-                                                item-value="value"
-                                                :rules="getFieldRules(field)"
-                                                :error-messages="fieldErrors[field]"
-                                                density="compact"
-                                                :disabled="canEditStatusOnly && field !== 'status'"
-                                            ></v-select>
+                                            <v-select v-model="editItem[field]" :items="getHeader(field).options"
+                                                item-title="title" item-value="value" :rules="getFieldRules(field)"
+                                                :error-messages="fieldErrors[field]" density="compact"
+                                                :disabled="canEditStatusOnly && field !== 'status'"></v-select>
                                         </template>
                                         <template v-else>
-                                            <v-text-field 
-                                                v-model="editItem[field]" 
-                                                :rules="getFieldRules(field)"
-                                                :error-messages="fieldErrors[field]" 
-                                                density="compact"
+                                            <v-text-field v-model="editItem[field]" :rules="getFieldRules(field)"
+                                                :error-messages="fieldErrors[field]" density="compact"
                                                 :type="field === 'scheduled_at' ? 'datetime-local' : 'text'"
                                                 :disabled="canEditStatusOnly && field !== 'status'">
                                             </v-text-field>
                                         </template>
                                     </template>
                                 </template>
-                                
+
                                 <!-- View Mode -->
                                 <template v-else>
                                     <!-- Kennzeichen as link -->
-                                    <a v-if="field === itemKey" :href="`/${detailsUrlBasePath}/${detailsPage}/${item[field] ? item[field].toString().replace(/\s/g, '+') : ''}`">
+                                    <a v-if="field === itemKey"
+                                        :href="`/${detailsUrlBasePath}/${detailsPage}/${item[field] ? item[field].toString().replace(/\s/g, '+') : ''}`">
                                         {{ item[field] || '' }}
                                     </a>
                                     <!-- The rest of the fields as plain text -->
-                                <span v-else-if="field === 'services'">
-                                    <template v-if="Array.isArray(item[field]) && item[field].length > 0">
-                                        <span v-for="(service, index) in item[field]" :key="service.id">
-                                            {{ service.title }}{{ index < item[field].length - 1 ? ', ' : '' }}
-                                        </span>
-                                    </template>
-                                    <template v-else>
-                                        {{ '' }}
-                                    </template>
-                                </span>
-                                <span v-else-if="field === 'status'">
-                                    {{ getStatusTitle(item[field]) }}
-                                </span>
-                                <span v-else-if="field === 'scheduled_at'">
-                                    {{ formatDateTime(item[field]) }}
-                                </span>
-                                <span v-else>{{ item[field] || '' }}</span>
+                                    <span v-else-if="field === 'services'">
+                                        <template v-if="Array.isArray(item[field]) && item[field].length > 0">
+                                            <span v-for="(service, index) in item[field]" :key="service.id">
+                                                {{ service.title }}{{ index < item[field].length - 1 ? ', ' : '' }}
+                                                    </span>
+                                        </template>
+                                        <template v-else>
+                                            {{ '' }}
+                                        </template>
+                                    </span>
+                                    <span v-else-if="field === 'status'">
+                                        {{ getStatusTitle(item[field]) }}
+                                    </span>
+                                    <span v-else-if="field === 'scheduled_at'">
+                                        {{ formatDateTime(item[field]) }}
+                                    </span>
+                                    <span v-else>{{ item[field] || '' }}</span>
                                 </template>
                             </td>
-                            
+
                             <!-- Delete Button -->
                             <td class="table-icon fixed-width" v-if="isAdminOrTrainer">
-                                <v-btn icon class="delete-button" variant="plain" @click="confirmDeleteItem(item[itemKey])">
+                                <v-btn icon class="delete-button" variant="plain"
+                                    @click="confirmDeleteItem(item[itemKey])">
                                     <v-icon>mdi-delete</v-icon>
                                 </v-btn>
                             </td>
-                            
+
                             <!-- Edit/Save button -->
-                            <td class="table-icon fixed-width" v-if="isAdminOrTrainer || (canEditStatusOnly && item.status)">
+                            <td class="table-icon fixed-width"
+                                v-if="isAdminOrTrainer || (canEditStatusOnly && item.status)">
                                 <v-btn variant="plain" icon
                                     @click="editItemId === item[itemKey] ? saveItem() : editItemDetails(item)">
-                                    <v-icon>{{ editItemId === item[itemKey] ? 'mdi-content-save' : 'mdi-pencil' }}</v-icon>
+                                    <v-icon>{{ editItemId === item[itemKey] ? 'mdi-content-save' : 'mdi-pencil'
+                                        }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
@@ -139,27 +123,17 @@
 
                 <!-- Pagination Component -->
                 <div class="pagination-container">
-                    <Pagination 
-                        v-model:page="options.page" 
-                        v-model:itemsPerPage="options.itemsPerPage"
-                        :total-items="totalItems" 
-                        :items-per-page-options="[10, 20, 50, 100]"
-                        @update:page="handlePageChange" 
-                        @update:itemsPerPage="handleItemsPerPageChange" />
+                    <Pagination v-model:page="options.page" v-model:itemsPerPage="options.itemsPerPage"
+                        :total-items="totalItems" :items-per-page-options="[10, 20, 50, 100]"
+                        @update:page="handlePageChange" @update:itemsPerPage="handleItemsPerPageChange" />
                 </div>
             </div>
         </div>
 
         <!-- Modal confirmation window -->
-        <VuetifyAlert 
-            v-model="isAlertVisible" 
-            maxWidth="500" 
-            alertTypeClass="alertTypeConfirmation"
-            :alertHeading="alertHeading" 
-            :alertParagraph="alertParagraph" 
-            :alertOkayButton="alertOkayButton"
-            alertCloseButton="Abbrechen" 
-            @confirmation="handleConfirmation">
+        <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
+            :alertHeading="alertHeading" :alertParagraph="alertParagraph" :alertOkayButton="alertOkayButton"
+            alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
         </VuetifyAlert>
     </div>
 </template>
@@ -173,10 +147,11 @@ import ConfirmButton from '../CommonSlots/ConfirmButton.vue';
 import CancelButton from '../CommonSlots/CancelButton.vue';
 import DeleteButton from '../CommonSlots/DeleteButton.vue';
 import Pagination from '../CommonSlots/Pagination.vue';
+import { data } from 'autoprefixer';
 
 export default {
     name: "DataTable",
-    
+
     props: {
         endpoint: {
             type: String,
@@ -217,9 +192,15 @@ export default {
         canEditStatusOnly: {
             type: Boolean,
             default: false
-        }
+        },
+
+        dataCleaner: {
+            type: Function,
+            default: null
+        },
+
     },
-    
+
     components: {
         ConfirmButton,
         CancelButton,
@@ -228,7 +209,7 @@ export default {
         VuetifyAlert,
         Pagination
     },
-    
+
     data() {
         return {
             isRefreshing: false,
@@ -562,6 +543,10 @@ export default {
                     this.fields.forEach(field => {
                         payload[field] = this.editItem[field];
                     });
+                }
+
+                if (this.dataCleaner && typeof this.dataCleaner === 'function') {
+                    payload = this.dataCleaner(payload);
                 }
 
                 await axios.put(`/api/${this.endpoint}/${this.editItemId}`, payload);
