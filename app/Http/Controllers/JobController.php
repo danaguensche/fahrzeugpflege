@@ -133,8 +133,8 @@ class JobController extends Controller
         if ($user && $user->role === 'trainee') {
             Log::info('JobController@update: Trainee user detected.', ['user_id' => $user->id, 'job_user_id' => $job->user_id, 'job_id' => $job->id]);
             // Trainee can only update status for their own jobs
-            if ($job->user_id !== $user->id) {
-                Log::error('JobController@update: Trainee attempting to update job not assigned to them.', ['user_id' => $user->id, 'job_user_id' => $job->user_id, 'job_id' => $job->id]);
+            if ($job->trainee_id !== $user->id) {
+                Log::error('JobController@update: Trainee attempting to update job not assigned to them.', ['user_id' => $user->id, 'job_trainee_id' => $job->trainee_id, 'job_id' => $job->id]);
                 abort(403, 'Unauthorized action. You can only update your own jobs.');
             }
 

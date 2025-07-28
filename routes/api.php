@@ -29,6 +29,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users/trainees', [UserController::class, 'getTrainees']);
     });
 
+    Route::middleware(\App\Http\Middleware\CheckRole::class . ':admin')->group(function () {
+        Route::delete('users/{id}', [UserController::class, 'destroy']);
+        Route::delete('users', [UserController::class, 'destroyMultiple']);
+    });
+
     // Cars Routes (View only for trainee, full access for trainer/admin)
     Route::get('/cars/search', [CarSearchController::class, 'search']);
     Route::get('cars', [CarController::class, 'index']);
