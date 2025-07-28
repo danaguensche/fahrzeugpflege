@@ -4,7 +4,12 @@
         <v-list dense class="comment-list">
             <v-list-item v-for="comment in comments" :key="comment.id" class="comment-item">
                 <v-list-item-content>
-                    <v-list-item-title class="comment-author">{{ comment.user.name }}</v-list-item-title>
+                    <div class="d-flex justify-space-between align-center">
+                        <v-list-item-title class="comment-author">{{ comment.user.name }} {{ comment.user.email }}</v-list-item-title>
+                        <v-btn v-if="userRole === 'admin'" icon @click="deleteComment(comment.id)" variant="text" color="error" size="small">
+                            <v-icon>mdi-delete</v-icon>
+                        </v-btn>
+                    </div>
                     <v-list-item-subtitle class="comment-date">{{ formatDate(comment.created_at) }}</v-list-item-subtitle>
                     <v-list-item-text class="comment-text">{{ comment.comment_text }}</v-list-item-text>
                 </v-list-item-content>
@@ -34,6 +39,7 @@
 <script>
 import axios from 'axios';
 import DefaultHeader from '../../Details/DefaultHeader.vue';
+import { mapState } from 'vuex';
 
 export default {
     name: 'CommentsSection',
@@ -53,6 +59,9 @@ export default {
             loading: false,
             error: null,
         };
+    },
+    computed: {
+        ...mapState('auth', ['userRole']),
     },
     async mounted() {
         await this.fetchComments();
@@ -97,12 +106,30 @@ export default {
                 const response = await axios.post(`/api/jobs/${this.jobId}/comments`, {
                     text: this.newCommentText,
                 });
-                this.comments.push(response.data.data); // Assuming the API returns the new comment
+                this.comments.unshift(response.data.data); // Add the new comment to the beginning of the array
                 this.newCommentText = '';
                 this.$emit('show-snackbar', 'Kommentar erfolgreich hinzugefügt.', 'success');
             } catch (error) {
                 console.error('Error adding comment:', error);
                 this.error = 'Fehler beim Hinzufügen des Kommentars.';
+                this.$emit('show-snackbar', this.error, 'error');
+            } finally {
+                this.loading = false;
+            }
+        },
+        async deleteComment(commentId) {
+            if (!confirm('Sind Sie sicher, dass Sie diesen Kommentar löschen möchten?')) {
+                return;
+            }
+
+            this.loading = true;
+            try {
+                await axios.delete(`/api/comments/${commentId}`);
+                this.comments = this.comments.filter(comment => comment.id !== commentId);
+                this.$emit('show-snackbar', 'Kommentar erfolgreich gelöscht.', 'success');
+            } catch (error) {
+                console.error('Error deleting comment:', error);
+                this.error = 'Fehler beim Löschen des Kommentars.';
                 this.$emit('show-snackbar', this.error, 'error');
             } finally {
                 this.loading = false;
@@ -147,6 +174,7 @@ export default {
 .comment-text {
     color: #555;
     white-space: pre-wrap; /* Preserves whitespace and wraps text */
+    font-size: 1.25em;
 }
 
 .comment-form {
