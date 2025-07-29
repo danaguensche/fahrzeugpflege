@@ -84,7 +84,7 @@ export default {
         async fetchComments() {
             this.loading = true;
             try {
-                const response = await axios.get(`/api/jobs/${this.jobId}/comments`);
+                const response = await axios.get(`/api/orders/${this.jobId}/comments`);
                 this.comments = response.data.data;
             } catch (error) {
                 console.error('Error fetching comments:', error);
@@ -103,7 +103,7 @@ export default {
 
             this.loading = true;
             try {
-                const response = await axios.post(`/api/jobs/${this.jobId}/comments`, {
+                const response = await axios.post(`/api/orders/${this.jobId}/comments`, {
                     text: this.newCommentText,
                 });
                 this.comments.unshift(response.data.data); // Add the new comment to the beginning of the array

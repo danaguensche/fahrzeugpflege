@@ -3,24 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
-use App\Models\Job;
+use App\Models\Order;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    public function index(Job $job)
+    public function index(Order $order)
     {
-        $comments = $job->comments()->with('user')->latest()->get();
+        $comments = $order->comments()->with('user')->latest()->get();
         return response()->json(['data' => $comments]);
     }
 
-    public function store(Request $request, Job $job)
+    public function store(Request $request, Order $order)
     {
         $request->validate([
             'text' => 'required|string',
         ]);
 
-        $comment = $job->comments()->create([
+        $comment = $order->comments()->create([
             'user_id' => auth()->user()->id,
             'comment_text' => $request->text,
         ]);

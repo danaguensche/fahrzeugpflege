@@ -79,8 +79,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/users/{id}', [UserController::class, 'update']);
     
     // Comment Routes
-    Route::get('/jobs/{job}/comments', [App\Http\Controllers\CommentController::class, 'index']);
-    Route::post('/jobs/{job}/comments', [App\Http\Controllers\CommentController::class, 'store']);
+    Route::get('/orders/{order}/comments', [App\Http\Controllers\CommentController::class, 'index']);
+    Route::post('/orders/{order}/comments', [App\Http\Controllers\CommentController::class, 'store']);
     Route::delete('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'destroy']);
 
     // Image Report Routes
