@@ -40,7 +40,7 @@ const routes = [
         component: MainLayout,
         children: [
             {
-                path: 'dashboard', // /dashboard
+                path: 'dashboard', // /Dashboard
                 component: DashboardPage,
                 meta: { roles: ['trainee', 'trainer', 'admin'] }
             },
