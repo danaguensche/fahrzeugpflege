@@ -5,17 +5,26 @@ namespace App\Http\Controllers;
 use App\Models\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class ImageController extends Controller
 {
     public function store(Request $request)
     {
-        $request->validate([
+        Log::info('Image upload request received', $request->all());
+
+        $validator = Validator::make($request->all(), [
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'description' => 'nullable|string',
             'car_id' => 'nullable|exists:cars,id',
-            'job_id' => 'nullable|exists:jobs,id',
+            'job_id' => 'nullable|exists:auftraege,id',
         ]);
+
+        if ($validator->fails()) {
+            Log::error('Image upload validation failed', $validator->errors()->toArray());
+            return response()->json($validator->errors(), 422);
+        }
 
         $path = $request->file('image')->store('images', 'public');
 
