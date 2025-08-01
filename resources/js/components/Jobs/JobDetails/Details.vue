@@ -173,13 +173,6 @@
                         </v-autocomplete>
                     </v-sheet>
 
-                    <!-- Photos Section -->
-                    <v-sheet class="section-block">
-                        <DefaultHeader :title="'Fotos'"></DefaultHeader>
-                        <PhotoGallery :jobId="jobDetails.data.id"></PhotoGallery>
-                        <PhotoUpload :jobId="jobDetails.data.id"></PhotoUpload>
-                    </v-sheet>
-
                     <!-- Metadaten -->
                     <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt"
                         :formattedUpdatedAt="formattedUpdatedAt">
@@ -231,8 +224,6 @@ import InfoListEditMode from "../../Details/InfoListEditMode.vue";
 import DefaultHeader from "../../Details/DefaultHeader.vue";
 import CustomerInfoList from "../../Details/CustomerInfoList.vue";
 import CommentsSection from "./CommentsSection.vue";
-import PhotoUpload from '../../PhotoUpload.vue';
-import PhotoGallery from '../../PhotoGallery.vue';
 
 import { mapState } from 'vuex';
 
@@ -254,8 +245,6 @@ export default {
         DefaultHeader,
         CustomerInfoList,
         CommentsSection,
-        PhotoUpload,
-        PhotoGallery,
     },
     data() {
         return {

@@ -11,7 +11,6 @@ use App\Http\Controllers\CustomerSearchController;
 use App\Http\Controllers\CarSearchController;
 use App\Http\Controllers\JobDetailsController;
 use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\ImageController;
 use App\Http\Controllers\ImageReportController;
 
 
@@ -47,7 +46,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('cars/{kennzeichen}', [CarController::class, 'destroy']);
         Route::delete('cars', [CarController::class, 'destroyMultiple']);
         Route::put('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'update']);
-        
+        Route::post('cars/cardetails/{kennzeichen}/images', [CarDetailsController::class, 'uploadImages']);
+        Route::delete('images/{imageId}', [CarDetailsController::class, 'deleteImage']);
+        Route::post('cars/{kennzeichen}/images/{imageId}', [CarDetailsController::class, 'replaceImage']);
     });
 
     // Customers Routes
@@ -82,12 +83,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/orders/{order}/comments', [App\Http\Controllers\CommentController::class, 'store']);
     Route::delete('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'destroy']);
 
-    // Image Routes
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/images', [ImageController::class, 'index']);
-        Route::post('/images', [ImageController::class, 'store']);
-        Route::delete('/images/{image}', [ImageController::class, 'destroy']);
-    });
+    // Image Report Routes
+    Route::get('/tasks/{taskId}/images', [ImageReportController::class, 'index']);
+    Route::post('/tasks/{taskId}/images', [ImageReportController::class, 'upload']);
+    Route::delete('/images/{imageId}', [ImageReportController::class, 'destroy']);
 
     Route::get('/services', [App\Http\Controllers\ServiceController::class, 'index']); // Added route for services
 
