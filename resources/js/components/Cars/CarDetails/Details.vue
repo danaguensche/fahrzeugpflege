@@ -9,15 +9,23 @@
             <v-card class="card">
                 <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon"></Header>
 
-                <!-- Image Carousel with Upload functionality -->
-                <ImageCarousel 
+                <!-- Image Gallery with Upload functionality -->
+                <ImageGallery 
                     :images="images" 
                     :editMode="editMode"
-                    @upload-image="openImageUploadDialog"
-                    @delete-image="handleImageDelete"
-                    @replace-image="handleImageReplace"
-                    :canEdit="isAdminOrTrainer">
-                </ImageCarousel>
+                    :canEdit="isAdminOrTrainer"
+                    :uploadUrl="`/api/cars/cardetails/${$route.params.kennzeichen}/images`"
+                    :deleteUrlTemplate="'/api/images/{imageId}'"
+                    :replaceUrlTemplate="`/api/cars/${$route.params.kennzeichen}/images/{imageId}`"
+                    :entityId="$route.params.kennzeichen"
+                    uploadDialogTitle="Fahrzeugbilder hochladen"
+                    @images-uploaded="handleImagesUploaded"
+                    @image-deleted="handleImageDeleted"
+                    @image-replaced="handleImageReplaced"
+                    @success="showSuccessMessage"
+                    @error="showErrorMessage"
+                    @loading="setImageLoading">
+                </ImageGallery>
 
                 <!-- Fahrzeug information -->
                 <v-card-text class="px-4 pt-4 pb-0">
@@ -111,156 +119,6 @@
             @customer-selected="handleCustomerSelected" @error="handleCustomerAddError">
         </CustomerAddDialog>
 
-        <!-- Image Upload Dialog -->
-        <v-dialog v-model="imageUploadDialog.show" max-width="700px" persistent v-if="isAdminOrTrainer">
-            <v-card>
-                <v-card-title class="d-flex align-center">
-                    <v-icon left>mdi-upload</v-icon>
-                    <span class="headline">Bild hochladen</span>
-                </v-card-title>
-
-                <v-card-text>
-                    <v-container>
-                        <v-row>
-                            <!-- Drag & Drop Zone -->
-                            <v-col cols="12">
-                                <div
-                                    class="drag-drop-zone"
-                                    :class="{ 'drag-over': imageUploadDialog.isDragOver, 'disabled': imageUploadDialog.uploading }"
-                                    @dragover.prevent="handleDragOver"
-                                    @dragleave.prevent="handleDragLeave"
-                                    @drop.prevent="handleDrop"
-                                    @click="triggerFileInput"
-                                >
-                                    <input
-                                        ref="fileInput"
-                                        type="file"
-                                        multiple
-                                        accept="image/*"
-                                        style="display: none;"
-                                        @change="handleFileSelect"
-                                    />
-
-                                    <div class="drag-drop-content">
-                                        <v-icon size="48" :color="imageUploadDialog.isDragOver ? 'primary' : 'grey lighten-1'">
-                                            {{ imageUploadDialog.isDragOver ? 'mdi-cloud-upload' : 'mdi-cloud-upload-outline' }}
-                                        </v-icon>
-                                        
-                                        <h3 class="mt-4 mb-2">
-                                            {{ imageUploadDialog.isDragOver ? 'Dateien hier ablegen' : 'Bilder hochladen' }}
-                                        </h3>
-                                        
-                                        <p class="grey--text">
-                                            Ziehen Sie Bilder hierher oder klicken Sie zum Auswählen
-                                        </p>
-                                    </div>
-
-                                    <!-- Loading Overlay -->
-                                    <v-overlay v-if="imageUploadDialog.uploading" absolute>
-                                        <v-progress-circular indeterminate color="primary"></v-progress-circular>
-                                    </v-overlay>
-                                </div>
-                            </v-col>
-
-                            <!-- File Input Alternative -->
-                            <v-col cols="12">
-                                <v-file-input
-                                    v-model="imageUploadDialog.selectedFiles"
-                                    multiple
-                                    accept="image/*"
-                                    label="Bilder auswählen"
-                                    prepend-icon="mdi-camera"
-                                    show-size
-                                    @change="handleFileChange"
-                                    outlined
-                                    class="mt-4"
-                                ></v-file-input>
-                            </v-col>
-
-                            <!-- Image Preview -->
-                            <v-col cols="12" v-if="imageUploadDialog.imagePreviews.length > 0">
-                                <v-card outlined>
-                                    <v-card-subtitle class="d-flex align-center">
-                                        <v-icon left small>mdi-eye</v-icon>
-                                        Vorschau:
-                                    </v-card-subtitle>
-                                    <v-row dense class="pa-2">
-                                        <v-col v-for="(preview, index) in imageUploadDialog.imagePreviews" :key="index" cols="12" sm="6" md="4">
-                                            <v-card outlined>
-                                                <v-img
-                                                    :src="preview.src"
-                                                    height="150"
-                                                    contain
-                                                    class="ma-2"
-                                                ></v-img>
-                                                <v-card-text class="pt-0">
-                                                    <v-chip small color="primary" outlined class="mr-2">
-                                                        {{ formatFileSize(preview.size) }}
-                                                    </v-chip>
-                                                    <v-chip small color="grey" outlined>
-                                                        {{ preview.name }}
-                                                    </v-chip>
-                                                </v-card-text>
-                                            </v-card>
-                                        </v-col>
-                                    </v-row>
-                                </v-card>
-                            </v-col>
-
-                            <!-- Upload Progress -->
-                            <v-col cols="12" v-if="imageUploadDialog.uploading">
-                                <v-progress-linear
-                                    :value="imageUploadDialog.uploadProgress"
-                                    color="primary"
-                                    height="25"
-                                    rounded
-                                >
-                                    <template v-slot:default="{ value }">
-                                        <strong>{{ Math.ceil(value) }}%</strong>
-                                    </template>
-                                </v-progress-linear>
-                                <p class="text-center mt-2 grey--text">
-                                    Bild wird hochgeladen...
-                                </p>
-                            </v-col>
-
-                            <!-- Error Message -->
-                            <v-col cols="12" v-if="imageUploadDialog.errorMessage">
-                                <v-alert
-                                    type="error"
-                                    dismissible
-                                    @input="imageUploadDialog.errorMessage = ''"
-                                >
-                                    {{ imageUploadDialog.errorMessage }}
-                                </v-alert>
-                            </v-col>
-                        </v-row>
-                    </v-container>
-                </v-card-text>
-
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                        color="grey darken-1"
-                        text
-                        @click="closeImageUploadDialog"
-                        :disabled="imageUploadDialog.uploading"
-                    >
-                        Abbrechen
-                    </v-btn>
-                    <v-btn
-                        color="primary"
-                        @click="uploadImages"
-                        :disabled="imageUploadDialog.selectedFiles.length === 0 || imageUploadDialog.uploading"
-                        :loading="imageUploadDialog.uploading"
-                    >
-                        <v-icon left>mdi-upload</v-icon>
-                        Hochladen
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-
         <!-- Snackbar für Benachrichtigungen -->
         <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false">
         </SnackBar>
@@ -271,7 +129,7 @@
 import axios from "axios";
 import { mapGetters } from 'vuex';
 import Loader from "../../Details/Loader.vue";
-import ImageCarousel from "../../Details/ImageCarousel.vue";
+import ImageGallery from "../../CommonSlots/ImageGallery.vue";
 import InformationHeader from "../../Details/InformationHeader.vue";
 import Header from "../../Details/Header.vue";
 import BackButton from "../../CommonSlots/BackButton.vue";
@@ -291,7 +149,7 @@ export default {
     name: "CarDetails",
     components: {
         Loader,
-        ImageCarousel,
+        ImageGallery,
         InformationHeader,
         Header,
         BackButton,
@@ -339,7 +197,7 @@ export default {
             error: null,
             editMode: false,
             saveLoading: false,
-            imageUploadLoading: false,
+            imageLoading: false,
             customers: [],
             customersLoading: false,
             customerSearch: null,
@@ -348,19 +206,6 @@ export default {
                 show: false,
                 text: '',
                 color: 'success',
-            },
-            // Image upload dialog data
-            imageUploadDialog: {
-                show: false,
-                selectedFiles: [],
-                imagePreviews: [],
-                uploading: false,
-                uploadProgress: 0,
-                errorMessage: '',
-                isDragOver: false,
-                dragCounter: 0,
-                maxFileSize: 5242880, // 5MB
-                acceptedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg']
             }
         };
     },
@@ -557,7 +402,6 @@ export default {
             }
         },
 
-
         showSnackbar(text, color = 'success') {
             this.snackbar = {
                 show: true,
@@ -566,6 +410,35 @@ export default {
             };
         },
 
+        // Image Gallery Event Handlers
+        async handleImagesUploaded(response) {
+            // Reload car details to get updated images
+            await this.getCar();
+        },
+
+        async handleImageDeleted(imageId) {
+            // Reload car details to get updated images
+            await this.getCar();
+        },
+
+        async handleImageReplaced(data) {
+            // Reload car details to get updated images
+            await this.getCar();
+        },
+
+        showSuccessMessage(message) {
+            this.showSnackbar(message, 'success');
+        },
+
+        showErrorMessage(message) {
+            this.showSnackbar(message, 'error');
+        },
+
+        setImageLoading(loading) {
+            this.imageLoading = loading;
+        },
+
+        // Customer Dialog Methods
         openCustomerAddDialog() {
             if (this.$refs.customerAddDialog) {
                 this.$refs.customerAddDialog.open();
@@ -616,262 +489,7 @@ export default {
             this.showSnackbar(errorMessage, 'error');
         },
 
-        // Image Upload Dialog Methods
-        openImageUploadDialog() {
-            this.imageUploadDialog.show = true;
-            this.resetImageUploadForm();
-        },
-
-        closeImageUploadDialog() {
-            this.imageUploadDialog.show = false;
-            this.resetImageUploadForm();
-        },
-
-        resetImageUploadForm() {
-            this.imageUploadDialog.selectedFiles = [];
-            this.imageUploadDialog.imagePreviews = [];
-            this.imageUploadDialog.uploading = false;
-            this.imageUploadDialog.uploadProgress = 0;
-            this.imageUploadDialog.errorMessage = '';
-            this.imageUploadDialog.isDragOver = false;
-            this.imageUploadDialog.dragCounter = 0;
-        },
-
-        // Drag & Drop handlers
-        handleDragOver(e) {
-            if (this.imageUploadDialog.uploading) return;
-            e.preventDefault();
-            this.imageUploadDialog.dragCounter++;
-            this.imageUploadDialog.isDragOver = true;
-        },
-
-        handleDragLeave(e) {
-            if (this.imageUploadDialog.uploading) return;
-            e.preventDefault();
-            this.imageUploadDialog.dragCounter--;
-            if (this.imageUploadDialog.dragCounter === 0) {
-                this.imageUploadDialog.isDragOver = false;
-            }
-        },
-
-        handleDrop(e) {
-            if (this.imageUploadDialog.uploading) return;
-            e.preventDefault();
-            this.imageUploadDialog.isDragOver = false;
-            this.imageUploadDialog.dragCounter = 0;
-
-            const files = Array.from(e.dataTransfer.files);
-            if (files.length > 0) {
-                this.handleFileChange(files);
-            }
-        },
-
-        triggerFileInput() {
-            if (this.imageUploadDialog.uploading) return;
-            this.$refs.fileInput.click();
-        },
-
-        handleFileSelect(e) {
-            const files = Array.from(e.target.files);
-            if (files.length > 0) {
-                this.handleFileChange(files);
-            }
-            // Reset input
-            e.target.value = '';
-        },
-
-        // File validation and processing
-        handleFileChange(files) {
-            if (!files || files.length === 0) {
-                this.imageUploadDialog.selectedFiles = [];
-                this.imageUploadDialog.imagePreviews = [];
-                return;
-            }
-
-            const validFiles = [];
-            for (const file of files) {
-                const validation = this.validateFile(file);
-                if (validation.valid) {
-                    validFiles.push(file);
-                } else {
-                    this.handleImageUploadError(validation.message);
-                }
-            }
-
-            this.imageUploadDialog.selectedFiles = validFiles;
-            this.imageUploadDialog.errorMessage = '';
-            this.createImagePreviews(validFiles);
-        },
-
-        validateFile(file) {
-            if (file.size > this.imageUploadDialog.maxFileSize) {
-                return {
-                    valid: false,
-                    message: `Jede Datei darf maximal ${this.formatFileSize(this.imageUploadDialog.maxFileSize)} groß sein.`
-                };
-            }
-
-            if (!this.imageUploadDialog.acceptedTypes.includes(file.type)) {
-                return {
-                    valid: false,
-                    message: `Nur Bilder im Format ${this.imageUploadDialog.acceptedTypes.map(t => t.split('/')[1].toUpperCase()).join(', ')} sind erlaubt`
-                };
-            }
-
-            return { valid: true };
-        },
-
-        createImagePreviews(files) {
-            this.imageUploadDialog.imagePreviews = [];
-            for (const file of files) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.imageUploadDialog.imagePreviews.push({ src: e.target.result, name: file.name, size: file.size });
-                };
-                reader.readAsDataURL(file);
-            }
-        },
-
-        // Upload functionality
-        async uploadImages() {
-            if (this.imageUploadDialog.selectedFiles.length === 0) {
-                this.handleImageUploadError('Bitte wählen Sie ein oder mehrere Bilder aus');
-                return;
-            }
-
-            this.imageUploadDialog.uploading = true;
-            this.imageUploadDialog.uploadProgress = 0;
-            this.imageUploadDialog.errorMessage = '';
-
-            const formData = new FormData();
-            for (const file of this.imageUploadDialog.selectedFiles) {
-                formData.append('images[]', file);
-            }
-
-            try {
-                const response = await axios.post(
-                    `/api/cars/cardetails/${this.$route.params.kennzeichen}/images`,
-                    formData,
-                    {
-                        headers: { 'Content-Type': 'multipart/form-data' },
-                        onUploadProgress: progressEvent => {
-                            if (progressEvent.lengthComputable) {
-                                this.imageUploadDialog.uploadProgress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                            }
-                        }
-                    }
-                );
-
-                // Refresh car details to get updated images
-                await this.getCar();
-                this.imageUploadDialog.uploadProgress = 100;
-                this.showSnackbar('Bilder erfolgreich hochgeladen', 'success');
-                setTimeout(() => this.closeImageUploadDialog(), 500);
-
-            } catch (error) {
-                const errorMessage = error.response?.data?.message || 'Fehler beim Hochladen der Bilder';
-                this.handleImageUploadError(errorMessage);
-            } finally {
-                this.imageUploadDialog.uploading = false;
-            }
-        },
-
-        handleImageUploadError(message) {
-            this.imageUploadDialog.errorMessage = message;
-            this.showSnackbar(message, 'error');
-        },
-
-        handleImageDelete(imageId) {
-            try {
-                console.log('Attempting to delete image with ID:', imageId);
-                if (imageId) {
-                    this.deleteImageFromServer(imageId);
-                } else {
-                    console.error('Image ID is missing, cannot delete from server.');
-                    this.showSnackbar('Fehler: Bild-ID fehlt.', 'error');
-                }
-            } catch (error) {
-                console.error('Error in handleImageDelete:', error);
-                this.showSnackbar('Fehler beim Löschen des Bildes', 'error');
-            }
-        },
-
-        async deleteImageFromServer(imageId) {
-            try {
-                this.loading = true;
-                const response = await fetch(`/api/images/${imageId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-                    }
-                });
-
-                if (response.ok) {
-                    await this.getCar(); // Refresh car details to update images
-                    this.showSnackbar('Bild erfolgreich gelöscht', 'success');
-                } else {
-                    throw new Error(`Server responded with status: ${response.status}`);
-                }
-            } catch (error) {
-                console.error('Error deleting image from server:', error);
-                this.showSnackbar('Fehler beim Löschen des Bildes vom Server', 'error');
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        async handleImageReplace(imageIndex, newImageFile) {
-            this.imageUploadLoading = true;
-            try {
-                // Get image by index
-                const image = this.images[imageIndex];
-                if (!image) {
-                    throw new Error('Bild nicht gefunden');
-                }
-
-                //Get image ID
-                const imageId = image.id;
-                if (!imageId) {
-                    throw new Error('Bild-ID nicht gefunden');
-                }
-
-                console.log('Replacing image with ID:', imageId);
-
-                const formData = new FormData();
-                formData.append('image', newImageFile);
-
-                await axios.post(
-                    `/api/cars/${this.$route.params.kennzeichen}/images/${imageId}`,
-                    formData,
-                    {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    }
-                );
-
-                // Refresh car details to get updated images
-                await this.getCar();
-                this.showSnackbar('Bild erfolgreich ersetzt', 'success');
-            } catch (error) {
-                console.error('Error replacing image:', error);
-                const errorMessage = error.response?.data?.error || error.message || 'Fehler beim Ersetzen des Bildes';
-                this.showSnackbar(errorMessage, 'error');
-            } finally {
-                this.imageUploadLoading = false;
-            }
-        },
-
-        // Utility methods
-        formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        },
-
+        // Customer Search Methods
         async fetchCustomers(query = '') {
             this.customersLoading = true;
             console.log('Fetching customers with query:', query);
@@ -927,66 +545,6 @@ export default {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-}
-
-/* Drag & Drop Zone */
-.drag-drop-zone {
-    border: 2px dashed #ccc;
-    border-radius: 8px;
-    padding: 40px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background-color: #fafafa;
-    position: relative;
-    min-height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.drag-drop-zone:hover:not(.disabled) {
-    border-color: #1976d2;
-    background-color: #f3f8ff;
-}
-
-.drag-drop-zone.drag-over {
-    border-color: #1976d2;
-    background-color: #e3f2fd;
-    transform: scale(1.02);
-}
-
-.drag-drop-zone.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background-color: #f5f5f5;
-}
-
-.drag-drop-content {
-    width: 100%;
-}
-
-.drag-drop-content h3 {
-    font-weight: 500;
-    color: #424242;
-}
-
-.drag-drop-content p {
-    font-size: 14px;
-    margin-bottom: 0;
-}
-
-/* General styling */
-.v-file-input {
-    margin-bottom: 16px;
-}
-
-.v-img {
-    border-radius: 8px;
-}
-
-.v-alert {
-    margin-top: 16px;
 }
 
 @media (max-width: 575.98px) {

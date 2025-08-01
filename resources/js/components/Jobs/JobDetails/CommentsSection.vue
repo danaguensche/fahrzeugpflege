@@ -5,12 +5,16 @@
             <v-list-item v-for="comment in comments" :key="comment.id" class="comment-item">
                 <v-list-item-content>
                     <div class="d-flex justify-space-between align-center">
-                        <v-list-item-title class="comment-author">{{ comment.user.name }} {{ comment.user.email }}</v-list-item-title>
-                        <v-btn v-if="userRole === 'admin'" icon @click="deleteComment(comment.id)" variant="text" color="error" size="small">
+                        <v-list-item-title class="comment-author">{{ comment.user.name }} {{ comment.user.email
+                        }}</v-list-item-title>
+                        <v-btn v-if="userRole === 'admin' || userRole === 'trainer'" icon @click="confirmDeleteItem(comment.id)" variant="text"
+                            color="error" size="small">
                             <v-icon>mdi-delete</v-icon>
                         </v-btn>
+
                     </div>
-                    <v-list-item-subtitle class="comment-date">{{ formatDate(comment.created_at) }}</v-list-item-subtitle>
+                    <v-list-item-subtitle class="comment-date">{{ formatDate(comment.created_at)
+                    }}</v-list-item-subtitle>
                     <v-list-item-text class="comment-text">{{ comment.comment_text }}</v-list-item-text>
                 </v-list-item-content>
             </v-list-item>
@@ -21,16 +25,14 @@
             </v-list-item>
         </v-list>
 
+        <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
+            :alertHeading="alertHeading" :alertParagraph="alertParagraph" :alertOkayButton="alertOkayButton"
+            alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
+        </VuetifyAlert>
+
         <v-form @submit.prevent="addComment" class="comment-form">
-            <v-textarea
-                v-model="newCommentText"
-                label="Neuer Kommentar"
-                variant="outlined"
-                rows="3"
-                clearable
-                hide-details="auto"
-                class="mb-4"
-            ></v-textarea>
+            <v-textarea v-model="newCommentText" label="Neuer Kommentar" variant="outlined" rows="3" clearable
+                hide-details="auto" class="mb-4"></v-textarea>
             <v-btn type="submit" color="primary" :loading="loading">Kommentar hinzufügen</v-btn>
         </v-form>
     </v-sheet>
@@ -40,11 +42,13 @@
 import axios from 'axios';
 import DefaultHeader from '../../Details/DefaultHeader.vue';
 import { mapState } from 'vuex';
+import VuetifyAlert from '../../Alerts/VuetifyAlert.vue';
 
 export default {
     name: 'CommentsSection',
     components: {
         DefaultHeader,
+        VuetifyAlert,
     },
     props: {
         jobId: {
@@ -58,6 +62,11 @@ export default {
             newCommentText: '',
             loading: false,
             error: null,
+            alertHeading: '',
+            alertParagraph: '',
+            alertOkayButton: '',
+            confirmAction: null,
+            isAlertVisible: false,
         };
     },
     computed: {
@@ -67,6 +76,30 @@ export default {
         await this.fetchComments();
     },
     methods: {
+        showAlert(heading, paragraph, okayButton, action) {
+            this.alertHeading = heading;
+            this.alertParagraph = paragraph;
+            this.alertOkayButton = okayButton;
+            this.confirmAction = action;
+            this.isAlertVisible = true;
+        },
+
+        handleConfirmation() {
+            if (this.confirmAction) {
+                this.confirmAction();
+            }
+            this.isAlertVisible = false;
+        },
+
+        confirmDeleteItem(id) {
+            this.showAlert(
+                'Kommentar löschen',
+                'Möchten Sie den ausgewählten Kommentar wirklich löschen?',
+                'Löschen',
+                () => this.deleteComment(id)
+            );
+        },
+
         formatDate(dateString) {
             if (!dateString) return '';
             try {
@@ -118,9 +151,7 @@ export default {
             }
         },
         async deleteComment(commentId) {
-            if (!confirm('Sind Sie sicher, dass Sie diesen Kommentar löschen möchten?')) {
-                return;
-            }
+
 
             this.loading = true;
             try {
@@ -173,7 +204,8 @@ export default {
 
 .comment-text {
     color: #555;
-    white-space: pre-wrap; /* Preserves whitespace and wraps text */
+    white-space: pre-wrap;
+    /* Preserves whitespace and wraps text */
     font-size: 1.25em;
 }
 

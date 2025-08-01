@@ -9,6 +9,23 @@
             <v-card class="card">
                 <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon"></Header>
 
+                <ImageGallery 
+                    :images="images" 
+                    :editMode="editMode"
+                    :canEdit="isAdminOrTrainer"
+                    :uploadUrl="`/api/jobs/jobdetails/${$route.params.id}/images`"
+                    :deleteUrlTemplate="'/api/images/{imageId}'"
+                    :replaceUrlTemplate="`/api/jobs/jobdetails/${$route.params.id}/images/{imageId}`"
+                    :entityId="$route.params.id"
+                    uploadDialogTitle="Auftragsbilder hochladen"
+                    @images-uploaded="handleImagesUploaded"
+                    @image-deleted="handleImageDeleted"
+                    @image-replaced="handleImageReplaced"
+                    @success="showSuccessMessage"
+                    @error="showErrorMessage"
+                    @loading="setImageLoading">
+                </ImageGallery>
+
                 <!-- Job information -->
                 <v-card-text class="px-4 pt-4 pb-0">
                     <v-sheet>
@@ -224,6 +241,7 @@ import InfoListEditMode from "../../Details/InfoListEditMode.vue";
 import DefaultHeader from "../../Details/DefaultHeader.vue";
 import CustomerInfoList from "../../Details/CustomerInfoList.vue";
 import CommentsSection from "./CommentsSection.vue";
+import ImageGallery from "../../CommonSlots/ImageGallery.vue";
 
 import { mapState } from 'vuex';
 
@@ -245,6 +263,7 @@ export default {
         DefaultHeader,
         CustomerInfoList,
         CommentsSection,
+        ImageGallery
     },
     data() {
         return {
@@ -390,6 +409,35 @@ export default {
         }
     },
     methods: {
+
+                // Image Gallery Event Handlers
+                async handleImagesUploaded(response) {
+            // Reload car details to get updated images
+            await this.getJob();
+        },
+
+        async handleImageDeleted(imageId) {
+            // Reload car details to get updated images
+            await this.getJob();
+        },
+
+        async handleImageReplaced(data) {
+            // Reload car details to get updated images
+            await this.getJob();
+        },
+
+        showSuccessMessage(message) {
+            this.showSnackbar(message, 'success');
+        },
+
+        showErrorMessage(message) {
+            this.showSnackbar(message, 'error');
+        },
+
+        setImageLoading(loading) {
+            this.imageLoading = loading;
+        },
+
         formatDate(dateString) {
             if (!dateString) return 'Unbekannt';
 
