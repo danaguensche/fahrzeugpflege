@@ -212,7 +212,6 @@
                     <!-- Ansichtsmodus Aktionen -->
                     <template v-else>
                         <EditButton :switchEditMode="switchEditMode"></EditButton>
-                        <PrintButton></PrintButton>
                     </template>
                 </v-card-actions>
             </v-card>
@@ -231,7 +230,6 @@ import InformationHeader from "../../Details/InformationHeader.vue";
 import Header from "../../Details/Header.vue";
 import BackButton from "../../CommonSlots/BackButton.vue";
 import SnackBar from "../../Details/SnackBar.vue";
-import PrintButton from "../../CommonSlots/PrintButton.vue";
 import EditButton from "../../Details/EditButton.vue";
 import MetaData from "../../Details/MetaData.vue";
 import CancelButton from "../../Details/CancelButton.vue";
@@ -253,7 +251,6 @@ export default {
         Header,
         BackButton,
         SnackBar,
-        PrintButton,
         EditButton,
         MetaData,
         CancelButton,

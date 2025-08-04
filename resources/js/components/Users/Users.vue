@@ -16,8 +16,8 @@
 
         <div class="table-container">
             <DataTable :searchString="searchText" :isSearchActive="isSearchActive" endpoint="users"
-                :headers="userHeaders" :fields="userFields" itemKey="id" detailsPage="userdetails"
-                detailsUrlBasePath="user" deleteKey="id" @itemsDeleted="handleItemsDeleted" @show-error="handleError" :dataCleaner="cleanUserData" />
+                :headers="userHeaders" :fields="userFields" itemKey="id" deleteKey="id"
+                @itemsDeleted="handleItemsDeleted" @show-error="handleError" :dataCleaner="cleanUserData" />
         </div>
     </div>
 </template>
@@ -40,7 +40,6 @@ export default {
         return {
             userHeaders: [
                 { title: 'Auswählen', key: 'select', sortable: false, width: '60px' },
-                { title: 'ID', key: 'id' },
                 { title: 'Vorname', key: 'firstname' },
                 { title: 'Nachname', key: 'lastname' },
                 { title: 'Email', key: 'email' },
@@ -62,7 +61,6 @@ export default {
                 { title: 'Bearbeiten', key: 'edit', sortable: false, width: '60px' }
             ],
             userFields: [
-                'id',
                 'firstname',
                 'lastname',
                 'email',
@@ -91,9 +89,9 @@ export default {
     },
 
     methods: {
-        cleanUserData(userData){
+        cleanUserData(userData) {
             const fields = ['firstname', 'lastname', 'email', 'phonenumber', 'addressline', 'postalcode', 'city'];
-            const cleanedData = {...userData};
+            const cleanedData = { ...userData };
 
             fields.forEach(field => {
                 if (cleanedData[field] == 'Nicht verfügbar') {
