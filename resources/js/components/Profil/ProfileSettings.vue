@@ -234,22 +234,20 @@ export default {
   data() {
     return {
       loading: true,
-      userId: null,
       userData: {},
       editedUserData: {},
       editMode: false,
       saveLoading: false,
       labels: {
-        firstName: "Vorname",
-        lastName: "Nachname",
-        phoneNumber: "Telefonnummer",
+        firstname: "Vorname",
+        lastname: "Nachname",
+        phonenumber: "Telefonnummer",
         email: "E-Mail",
-        addressLine: "Straße und Hausnummer",
-        postalCode: "PLZ",
+        addressline: "Straße und Hausnummer",
+        postalcode: "PLZ",
         city: "Ort"
       },
       error: null,
-      // Passwort-Änderung
       passwordData: {
         currentPassword: '',
         newPassword: '',
@@ -260,12 +258,6 @@ export default {
       showCurrentPassword: false,
       showNewPassword: false,
       showConfirmPassword: false,
-      rules: {
-        required: v => !!v || 'Dieses Feld ist erforderlich',
-        min: v => v.length >= 8 || 'Mindestens 8 Zeichen erforderlich',
-        passwordMatch: v => v === this.passwordData.newPassword || 'Passwörter stimmen nicht überein'
-      },
-      // Snackbar
       snackbar: {
         show: false,
         text: '',
@@ -276,20 +268,17 @@ export default {
 
   computed: {
     personalInfoKeys() {
-      return ['firstName', 'lastName', 'phoneNumber', 'email'];
+      return ['firstname', 'lastname', 'phonenumber', 'email'];
     },
     addressInfoKeys() {
-      return ['addressLine', 'postalCode', 'city'];
-    }
-  },
-
-  async created() {
-    // Sicherstellen, dass die initial notwendigen Daten vorhanden sind
-    if (!this.userData) {
-      this.userData = {};
-    }
-    if (!this.editedUserData) {
-      this.editedUserData = {};
+      return ['addressline', 'postalcode', 'city'];
+    },
+    rules() {
+      return {
+        required: v => !!v || 'Dieses Feld ist erforderlich',
+        min: v => v.length >= 8 || 'Mindestens 8 Zeichen erforderlich',
+        passwordMatch: v => v === this.passwordData.newPassword || 'Passwörter stimmen nicht überein'
+      };
     }
   },
 
@@ -297,7 +286,6 @@ export default {
     try {
       await this.getUser();
     } catch (error) {
-      console.error("Fehler beim Laden der Komponente:", error);
       this.error = error.message;
       this.showSnackbar(error.message, 'error');
     } finally {
@@ -309,32 +297,24 @@ export default {
     async getUser() {
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          console.error("Kein Token gefunden!");
-          throw new Error("Kein Authentifizierungs-Token gefunden");
-        }
+        if (!token) throw new Error("Kein Authentifizierungs-Token gefunden");
 
         const response = await axios.get("http://localhost:8000/api/users/me", {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        console.log("API-Antwort:", response.data);
         this.userData = {
-          firstName: response.data.data.firstName || "",
-          lastName: response.data.data.lastName || "",
-          phoneNumber: response.data.data.phoneNumber || "",
+          firstname: response.data.data.firstname || "",
+          lastname: response.data.data.lastname || "",
+          phonenumber: response.data.data.phonenumber || "",
           email: response.data.data.email || "",
-          addressLine: response.data.data.addressLine || "",
-          postalCode: response.data.data.postalCode || "",
+          addressline: response.data.data.addressline || "",
+          postalcode: response.data.data.postalcode || "",
           city: response.data.data.city || ""
         };
 
-        // Kopie für Bearbeitungsmodus erstellen
         this.editedUserData = { ...this.userData };
-
-        console.log("Benutzerdaten geladen:", this.userData);
       } catch (error) {
-        console.error("Fehler beim Laden der Benutzerdaten:", error);
         this.error = error.response?.data?.message || error.message;
         throw error;
       }
@@ -342,30 +322,26 @@ export default {
 
     getIconForField(key) {
       const iconMap = {
-        firstName: "mdi-account",
-        lastName: "mdi-account-details",
+        firstname: "mdi-account",
+        lastname: "mdi-account-details",
         email: "mdi-email",
-        phoneNumber: "mdi-phone",
-        addressLine: "mdi-map-marker",
-        postalCode: "mdi-mail",
+        phonenumber: "mdi-phone",
+        addressline: "mdi-map-marker",
+        postalcode: "mdi-mail",
         city: "mdi-city"
       };
-
       return iconMap[key] || "mdi-information-outline";
     },
 
     switchEditMode() {
       this.editMode = !this.editMode;
-
       if (this.editMode) {
-        // Daten für die Bearbeitung kopieren
         this.editedUserData = { ...this.userData };
       }
     },
 
     cancelEdit() {
       this.editMode = false;
-      // Änderungen verwerfen und auf Original zurücksetzen
       this.editedUserData = { ...this.userData };
     },
 
@@ -375,35 +351,27 @@ export default {
 
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error("Kein Authentifizierungs-Token gefunden");
-        }
+        if (!token) throw new Error("Kein Authentifizierungs-Token gefunden");
 
         const dataToSend = {
-          firstname: this.editedUserData.firstName,
-          lastname: this.editedUserData.lastName,
-          phonenumber: this.editedUserData.phoneNumber,
-          addressline: this.editedUserData.addressLine,
-          postalcode: this.editedUserData.postalCode,
+          firstname: this.editedUserData.firstname,
+          lastname: this.editedUserData.lastname,
+          phonenumber: this.editedUserData.phonenumber,
+          addressline: this.editedUserData.addressline,
+          postalcode: this.editedUserData.postalcode,
           city: this.editedUserData.city
+          // Email wird absichtlich nicht mitgeschickt
         };
-        await axios.put(
-          "http://localhost:8000/api/users/me",
-          dataToSend,
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
-        );
 
-        // Aktualisierte Daten übernehmen
+        await axios.put("http://localhost:8000/api/users/me", dataToSend, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
         this.userData = { ...this.editedUserData };
-
-        // Bearbeitungsmodus beenden
         this.editMode = false;
 
         this.showSnackbar('Daten erfolgreich gespeichert', 'success');
       } catch (error) {
-        console.error("Fehler beim Speichern der Benutzerdaten:", error);
         const errorMessage = error.response?.data?.message || "Fehler beim Speichern der Benutzerdaten";
         this.showSnackbar(errorMessage, 'error');
       } finally {
@@ -411,18 +379,10 @@ export default {
       }
     },
 
-    goBack() {
-      try {
-        this.$router.back();
-      } catch (e) {
-        console.error("Fehler beim Navigieren zurück:", e);
-        // Fallback, falls $router.back() nicht funktioniert
-        window.history.back();
-      }
-    },
-
     async changePassword() {
-      if (!this.$refs.passwordForm.validate()) {
+      const validation = await this.$refs.passwordForm.validate();
+      if (!validation.valid) {
+        this.showSnackbar('Bitte fülle alle Felder korrekt aus.', 'error');
         return;
       }
 
@@ -430,31 +390,23 @@ export default {
 
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error("Kein Authentifizierungs-Token gefunden");
-        }
+        if (!token) throw new Error("Kein Authentifizierungs-Token gefunden");
 
-        await axios.post("http://localhost:8000/api/users/change-password",
-          {
-            currentPassword: this.passwordData.currentPassword,
-            newPassword: this.passwordData.newPassword
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
-        );
+        await axios.post("http://localhost:8000/api/users/change-password", {
+          currentPassword: this.passwordData.currentPassword,
+          newPassword: this.passwordData.newPassword
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
-        // Passwort-Formular zurücksetzen
         this.passwordData = {
           currentPassword: '',
           newPassword: '',
           confirmPassword: ''
         };
         this.$refs.passwordForm.reset();
-
         this.showSnackbar('Passwort erfolgreich geändert', 'success');
       } catch (error) {
-        console.error("Fehler beim Ändern des Passworts:", error);
         const errorMessage = error.response?.data?.message || "Fehler beim Ändern des Passworts";
         this.showSnackbar(errorMessage, 'error');
       } finally {
@@ -463,13 +415,20 @@ export default {
     },
 
     showSnackbar(text, color = 'success') {
-      this.snackbar.text = text;
-      this.snackbar.color = color;
-      this.snackbar.show = true;
+      this.snackbar = { text, color, show: true };
+    },
+
+    goBack() {
+      try {
+        this.$router.back();
+      } catch {
+        window.history.back();
+      }
     }
   }
 };
 </script>
+
 
 <style scoped>
 .card-container {
