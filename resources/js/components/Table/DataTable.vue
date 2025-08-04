@@ -133,7 +133,7 @@
         <!-- Modal confirmation window -->
         <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
             :alertHeading="alertHeading" :alertParagraph="alertParagraph" :alertOkayButton="alertOkayButton"
-            alertCloseButton="Abbrechen" @confirmation="handleConfirmation" >
+            alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
         </VuetifyAlert>
     </div>
 </template>
