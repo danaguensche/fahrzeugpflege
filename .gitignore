@@ -20,5 +20,3 @@ yarn-error.log
 /.idea
 /.vscode
 *.log
-vite.config.js
-web.config.js
