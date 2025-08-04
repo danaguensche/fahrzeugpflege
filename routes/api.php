@@ -98,4 +98,4 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Logout Routes
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:sanctum');
+Route::post('/logout', [AuthController::class, 'logout'])->name('api.logout')->middleware('auth:sanctum');
