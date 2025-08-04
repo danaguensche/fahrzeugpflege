@@ -41,4 +41,9 @@ class Order extends Model
     {
         return $this->hasMany(OrderExtraCharge::class); 
     }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'order_id');
+    }
 }

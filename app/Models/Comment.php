@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
-    protected $fillable = ['user_id', 'job_id', 'comment_text'];
+    protected $fillable = ['user_id', 'order_id', 'comment_text'];
 
     /**
      * Get the user that owns the comment.
@@ -16,8 +16,8 @@ class Comment extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function job()
+    public function order()
     {
-        return $this->belongsTo(Job::class);
+        return $this->belongsTo(Order::class);
     }
 }

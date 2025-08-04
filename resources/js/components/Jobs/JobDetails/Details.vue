@@ -9,9 +9,26 @@
             <v-card class="card">
                 <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon"></Header>
 
+                <ImageGallery 
+                    :images="images" 
+                    :editMode="editMode"
+                    :canEdit="isAdminOrTrainer"
+                    :uploadUrl="`/api/jobs/jobdetails/${$route.params.id}/images`"
+                    :deleteUrlTemplate="'/api/images/{imageId}'"
+                    :replaceUrlTemplate="`/api/jobs/jobdetails/${$route.params.id}/images/{imageId}`"
+                    :entityId="$route.params.id"
+                    uploadDialogTitle="Auftragsbilder hochladen"
+                    @images-uploaded="handleImagesUploaded"
+                    @image-deleted="handleImageDeleted"
+                    @image-replaced="handleImageReplaced"
+                    @success="showSuccessMessage"
+                    @error="showErrorMessage"
+                    @loading="setImageLoading">
+                </ImageGallery>
+
                 <!-- Job information -->
                 <v-card-text class="px-4 pt-4 pb-0">
-                    <v-sheet >
+                    <v-sheet>
                         <InformationHeader :title="'Jobinformationen'" :editMode="editMode"
                             :getIconForField="getIconForField">
                         </InformationHeader>
@@ -23,35 +40,34 @@
                         </InfoList>
                         <!-- Bearbeitungsmodus -->
                         <div v-else>
-                            <InfoListEditMode :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin')" :labels="labels"
-                                :editedData="editedJobData" @update:editedData="editedJobData = $event"
+                            <InfoListEditMode
+                                :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin' && k !== 'trainee_id')"
+                                :labels="labels" :editedData="editedJobData" @update:editedData="editedJobData = $event"
                                 :getIconForField="getIconForField" class="job-information-fields"
                                 :disabled="userRole === 'trainee'">
                             </InfoListEditMode>
-                            <v-text-field
-                                v-model="formattedAbholterminForEdit"
-                                type="datetime-local"
-                                :label="labels.Abholtermin"
-                                variant="outlined"
-                                density="comfortable"
-                                hide-details="auto"
-                                class="mt-4 w-50 ms-4"
-                                :prepend-inner-icon="getIconForField('Abholtermin')"
-                                @keydown.prevent
-                                :disabled="userRole === 'trainee'"
-                            ></v-text-field>
-                            <v-select
-                                v-model="editedJobData.Status"
-                                :items="statuses"
-                                item-title="title"
-                                item-value="value"
-                                label="Status"
-                                variant="outlined"
-                                density="comfortable"
-                                hide-details="auto"
-                                class="mt-4 w-50 ms-4"
-                                :prepend-inner-icon="getIconForField('Status')"
-                            ></v-select>
+                            <v-text-field v-model="formattedAbholterminForEdit" type="datetime-local"
+                                :label="labels.Abholtermin" variant="outlined" density="comfortable" hide-details="auto"
+                                class="mt-4 w-50 ms-4" :prepend-inner-icon="getIconForField('Abholtermin')"
+                                @keydown.prevent :disabled="userRole === 'trainee'"></v-text-field>
+                            <v-select v-model="editedJobData.Status" :items="statuses" item-title="title"
+                                item-value="value" label="Status" variant="outlined" density="comfortable"
+                                hide-details="auto" class="mt-4 w-50 ms-4"
+                                :prepend-inner-icon="getIconForField('Status')"></v-select>
+                            <v-autocomplete v-model="editedJobData.trainee" class="mt-4 w-50 ms-4" :items="trainees"
+                                item-title="full_name" item-value="id" label="Mitarbeiter"
+                                placeholder="Mitarbeiter auswählen oder suchen" prepend-inner-icon="mdi-toolbox"
+                                variant="outlined" density="comfortable" hide-details="auto" clearable
+                                :loading="traineesLoading" :search-input.sync="traineeSearch"
+                                @update:search-input="searchTrainees" return-object :disabled="userRole === 'trainee'">
+                                <template v-slot:item="{ props, item }">
+                                    <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                        :subtitle="item.raw.email"></v-list-item>
+                                </template>
+                                <template v-slot:selection="{ item }">
+                                    {{ item.raw.full_name }}
+                                </template>
+                            </v-autocomplete>
                         </div>
                     </v-sheet>
 
@@ -135,7 +151,8 @@
                             item-title="Kennzeichen" item-value="id" label="Fahrzeug"
                             placeholder="Fahrzeug auswählen oder suchen" prepend-inner-icon="mdi-car" variant="outlined"
                             density="comfortable" hide-details="auto" clearable :loading="carsLoading"
-                            :search-input.sync="carSearch" @update:search-input="searchCars" return-object :disabled="userRole === 'trainee'">
+                            :search-input.sync="carSearch" @update:search-input="searchCars" return-object
+                            :disabled="userRole === 'trainee'">
                             <template v-slot:item="{ props, item }">
                                 <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
                                     :subtitle="item.raw.Automarke"></v-list-item>
@@ -177,6 +194,9 @@
                     <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt"
                         :formattedUpdatedAt="formattedUpdatedAt">
                     </MetaData>
+
+                    <!-- Comments Section -->
+                    <CommentsSection :jobId="jobDetails.data.id" @show-snackbar="showSnackbar"></CommentsSection>
                 </v-card-text>
 
                 <v-card-actions class="pa-4">
@@ -220,6 +240,8 @@ import InfoList from "../../Details/InfoList.vue";
 import InfoListEditMode from "../../Details/InfoListEditMode.vue";
 import DefaultHeader from "../../Details/DefaultHeader.vue";
 import CustomerInfoList from "../../Details/CustomerInfoList.vue";
+import CommentsSection from "./CommentsSection.vue";
+import ImageGallery from "../../CommonSlots/ImageGallery.vue";
 
 import { mapState } from 'vuex';
 
@@ -240,6 +262,8 @@ export default {
         InfoListEditMode,
         DefaultHeader,
         CustomerInfoList,
+        CommentsSection,
+        ImageGallery
     },
     data() {
         return {
@@ -248,6 +272,7 @@ export default {
                     customer: null,
                     car: null,
                     services: [],
+                    trainee: null,
                 }
             },
             editedJobData: {},
@@ -259,11 +284,13 @@ export default {
                 Beschreibung: "Beschreibung",
                 Abholtermin: "Abholtermin",
                 Status: "Status",
+                trainee_id: "Mitarbeiter",
                 customer_id: "Kunden-ID",
                 car_id: "Fahrzeug-ID",
                 customer: "Kunde",
                 car: "Fahrzeug",
                 services: "Dienstleistungen",
+                trainee: "Mitarbeiter",
                 Kennzeichen: "Kennzeichen",
                 Automarke: "Automarke",
                 Typ: "Typ",
@@ -286,6 +313,10 @@ export default {
             carSearchTimeout: null,
             services: [],
             servicesLoading: false,
+            trainees: [],
+            traineesLoading: false,
+            traineeSearch: null,
+            traineeSearchTimeout: null,
             statuses: [
                 { title: 'Ausstehend', value: 'ausstehend' },
                 { title: 'In Bearbeitung', value: 'in_bearbeitung' },
@@ -302,7 +333,7 @@ export default {
     computed: {
         ...mapState('auth', ['userRole']),
         jobInfoKeys() {
-            return ['id', 'Title', 'Beschreibung', 'Abholtermin', 'Status'];
+            return ['id', 'Title', 'Beschreibung', 'Abholtermin', 'Status', 'trainee_id'];
         },
         carInfoKeys() {
             return ['Kennzeichen', 'Automarke', 'Typ', 'Farbe', 'Sonstiges'];
@@ -317,13 +348,26 @@ export default {
         displayedJobDetails() {
             if (!this.jobDetails.data) return {};
             const displayedData = { ...this.jobDetails.data };
+
+            // Status formatieren
             if (displayedData.Status) {
                 const foundStatus = this.statuses.find(s => s.value === displayedData.Status);
                 displayedData.Status = foundStatus ? foundStatus.title : displayedData.Status;
             }
+
+            // Abholtermin formatieren
             if (displayedData.Abholtermin) {
                 displayedData.Abholtermin = this.formatDate(displayedData.Abholtermin);
             }
+
+            if (this.jobDetails.data.trainee) {
+                displayedData.trainee_id = `${this.jobDetails.data.trainee.firstname} ${this.jobDetails.data.trainee.lastname}`;
+            } else if (displayedData.trainee_id) {
+                displayedData.trainee_id = 'Mitarbeiter nicht gefunden';
+            } else {
+                displayedData.trainee_id = 'Kein Mitarbeiter zugewiesen';
+            }
+
             return displayedData;
         },
         formattedAbholterminForEdit: {
@@ -356,6 +400,7 @@ export default {
             await this.fetchCustomers();
             await this.fetchCars();
             await this.fetchServices();
+            await this.fetchTrainees();
         } catch (error) {
             this.error = error.message;
             this.showSnackbar(error.message, 'error');
@@ -364,6 +409,35 @@ export default {
         }
     },
     methods: {
+
+                // Image Gallery Event Handlers
+                async handleImagesUploaded(response) {
+            // Reload car details to get updated images
+            await this.getJob();
+        },
+
+        async handleImageDeleted(imageId) {
+            // Reload car details to get updated images
+            await this.getJob();
+        },
+
+        async handleImageReplaced(data) {
+            // Reload car details to get updated images
+            await this.getJob();
+        },
+
+        showSuccessMessage(message) {
+            this.showSnackbar(message, 'success');
+        },
+
+        showErrorMessage(message) {
+            this.showSnackbar(message, 'error');
+        },
+
+        setImageLoading(loading) {
+            this.imageLoading = loading;
+        },
+
         formatDate(dateString) {
             if (!dateString) return 'Unbekannt';
 
@@ -404,6 +478,7 @@ export default {
 
                 console.log('JobDetails component received jobDetails:', this.jobDetails);
                 console.log('JobDetails component received car data:', this.jobDetails.data.car);
+                console.log('JobDetails component received trainee data:', this.jobDetails.data.trainee);
 
                 // Set customer for autocomplete
                 if (this.jobDetails.data.customer) {
@@ -425,6 +500,19 @@ export default {
                     };
                 } else {
                     this.editedJobData.car = null;
+                }
+
+                // Set trainee for autocomplete
+                if (this.jobDetails.data.trainee) {
+                    this.editedJobData.trainee = {
+                        id: this.jobDetails.data.trainee.id,
+                        full_name: `${this.jobDetails.data.trainee.firstname} ${this.jobDetails.data.trainee.lastname}`,
+                        firstname: this.jobDetails.data.trainee.firstname,
+                        lastname: this.jobDetails.data.trainee.lastname,
+                        email: this.jobDetails.data.trainee.email
+                    };
+                } else {
+                    this.editedJobData.trainee = null;
                 }
 
                 // Set services for autocomplete
@@ -460,6 +548,7 @@ export default {
                 if (this.editedJobData.Abholtermin) {
                     this.editedJobData.Abholtermin = this.formatDateTimeForInput(this.editedJobData.Abholtermin);
                 }
+
                 // Ensure services are mapped correctly for the autocomplete
                 if (this.jobDetails.data.services) {
                     this.editedJobData.services = this.jobDetails.data.services.map(service => ({
@@ -468,6 +557,19 @@ export default {
                     }));
                 } else {
                     this.editedJobData.services = [];
+                }
+
+                // Ensure trainee is mapped correctly for the autocomplete
+                if (this.jobDetails.data.trainee) {
+                    this.editedJobData.trainee = {
+                        id: this.jobDetails.data.trainee.id,
+                        full_name: `${this.jobDetails.data.trainee.firstname} ${this.jobDetails.data.trainee.lastname}`,
+                        firstname: this.jobDetails.data.trainee.firstname,
+                        lastname: this.jobDetails.data.trainee.lastname,
+                        email: this.jobDetails.data.trainee.email
+                    };
+                } else {
+                    this.editedJobData.trainee = null;
                 }
             }
         },
@@ -488,6 +590,18 @@ export default {
             if (this.jobDetails.data.Status) {
                 const foundStatus = this.statuses.find(s => s.title === this.jobDetails.data.Status);
                 this.editedJobData.Status = foundStatus ? foundStatus.value : this.jobDetails.data.Status;
+            }
+            // Reset trainee to original for display
+            if (this.jobDetails.data.trainee) {
+                this.editedJobData.trainee = {
+                    id: this.jobDetails.data.trainee.id,
+                    full_name: `${this.jobDetails.data.trainee.firstname} ${this.jobDetails.data.trainee.lastname}`,
+                    firstname: this.jobDetails.data.trainee.firstname,
+                    lastname: this.jobDetails.data.trainee.lastname,
+                    email: this.jobDetails.data.trainee.email
+                };
+            } else {
+                this.editedJobData.trainee = null;
             }
         },
 
@@ -512,6 +626,18 @@ export default {
                     // Handle car_id
                     dataToSubmit.car_id = dataToSubmit.car ? dataToSubmit.car.id : null;
                     delete dataToSubmit.car;
+
+                    // Handle trainee_id
+                    if (dataToSubmit.trainee && typeof dataToSubmit.trainee === 'object') {
+                        dataToSubmit.trainee_id = dataToSubmit.trainee.id ?? null;
+                    } else if (typeof dataToSubmit.trainee === 'number') {
+                        dataToSubmit.trainee_id = dataToSubmit.trainee;
+                    } else {
+                        dataToSubmit.trainee_id = null;
+                    }
+
+                    delete dataToSubmit.trainee;
+
 
                     // Handle services (send only IDs)
                     dataToSubmit.services = dataToSubmit.services ? dataToSubmit.services.map(s => s.id) : [];
@@ -578,6 +704,7 @@ export default {
                 Beschreibung: "mdi-text-box-outline",
                 Abholtermin: "mdi-calendar",
                 Status: "mdi-check-circle-outline",
+                trainee_id: "mdi-toolbox",
                 Kennzeichen: "mdi-car-info",
                 Automarke: "mdi-car-traction-control",
                 Typ: "mdi-car-cog",
@@ -683,7 +810,35 @@ export default {
                 this.servicesLoading = false;
             }
         },
-    },
+
+        async fetchTrainees(query = '') {
+            this.traineesLoading = true;
+            try {
+                const response = await axios.get(`/api/users/search?query=${query}`);
+                this.trainees = response.data.data.map(trainee => ({
+                    id: trainee.id,
+                    firstname: trainee.firstname,
+                    lastname: trainee.lastname,
+                    full_name: `${trainee.firstname} ${trainee.lastname}`,
+                    email: trainee.email
+                }));
+            } catch (error) {
+                console.error('Error fetching trainees:', error.response || error);
+                this.showSnackbar('Fehler beim Laden der Mitarbeiter', 'error');
+            } finally {
+                this.traineesLoading = false;
+            }
+        },
+
+        searchTrainees(query) {
+            if (this.traineeSearchTimeout) {
+                clearTimeout(this.traineeSearchTimeout);
+            }
+            this.traineeSearchTimeout = setTimeout(() => {
+                this.fetchTrainees(query);
+            }, 300);
+        },
+    }
 };
 </script>
 
@@ -715,9 +870,9 @@ export default {
 }
 
 .section-block {
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid #eee;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
 }
 
 

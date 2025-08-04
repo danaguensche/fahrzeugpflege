@@ -223,7 +223,7 @@ class CarController extends Controller
             $validatedData = $request->validate([
                 'Kennzeichen' => 'required|string',
                 'Fahrzeugklasse' => 'nullable|integer',
-                'Automarke' => 'nullable|string',
+                'Automarke' => 'nullable|string', 
                 'Typ' => 'nullable|string',
                 'Farbe' => 'nullable|string',
                 'Sonstiges' => 'nullable|string',

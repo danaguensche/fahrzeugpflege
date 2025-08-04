@@ -7,6 +7,7 @@ use App\Models\Job;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class JobController extends Controller
 {
@@ -24,6 +25,8 @@ class JobController extends Controller
             'service_ids' => 'required|array',
             'service_ids.*' => 'exists:services,id',
             'trainee_id' => 'nullable|exists:users,id',
+            'images' => 'nullable|array',
+            'images.*' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
         ]);
 
         $user = auth()->user();
@@ -33,6 +36,18 @@ class JobController extends Controller
         }
         $job = Job::create(array_merge($validatedData, ['trainer_id' => $user->id]));
         $job->services()->sync($request->input('service_ids'));
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('jobs', 'public');
+
+                $job->images()->create([
+                    'path' => $path,
+                ]);
+            }
+        }
+
+        $job->load(['services', 'images']);
 
         return response()->json($job, 201);
     }
@@ -47,7 +62,7 @@ class JobController extends Controller
 
         $allowedSortFields = ['id', 'title', 'description', 'scheduled_at', 'status'];
 
-        $query = Job::with(['customer', 'car', 'services', 'trainer', 'trainee']);
+        $query = Job::with(['customer', 'car', 'services', 'trainer', 'trainee', 'images']);
 
         // Filter by user role
         /** @var \App\Models\User|null $user */
@@ -123,7 +138,7 @@ class JobController extends Controller
 
     public function show(Job $job)
     {
-        return response()->json($job->load(['services', 'comments.user']));
+        return response()->json($job->load(['services', 'comments.user', 'images']));
     }
 
     public function update(Request $request, Job $job)
@@ -156,8 +171,9 @@ class JobController extends Controller
 
             $job->update($validatedData);
 
-            return response()->json($job->load('services'));
+            Log::info('Job trainee_id after update', ['trainee_id' => $job->trainee_id]);
 
+            return response()->json($job->load('services'));
         } else { // Admin or Trainer
             // Convert empty string for scheduled_at to null
             if ($request->has('scheduled_at') && $request->input('scheduled_at') === '') {
@@ -167,6 +183,7 @@ class JobController extends Controller
             $validatedData = $request->validate([
                 'title' => 'sometimes|required|string|max:255',
                 'description' => 'nullable|string',
+                'trainee_id' => 'nullable|exists:users,id',
                 'car_id' => 'sometimes|required|exists:cars,id',
                 'customer_id' => 'sometimes|required|exists:customers,id',
                 'status' => 'sometimes|required|string',
@@ -177,11 +194,14 @@ class JobController extends Controller
 
             $job->update($validatedData);
 
+            Log::info('Job trainee_id after update', ['trainee_id' => $job->trainee_id]);
+
             if ($request->has('services')) {
                 $serviceIds = collect($request->input('services'))->pluck('id')->toArray();
                 $job->services()->sync($serviceIds);
             }
 
+            Log::info('JobController@update payload', $request->all());
             return response()->json($job->load('services'));
         }
     }
@@ -189,6 +209,14 @@ class JobController extends Controller
     public function destroy(Job $job)
     {
         $job->delete();
+
+        foreach ($job->images as $image) {
+            $imagePath = str_replace('storage/', '', $image->path);
+            if (Storage::disk('public')->exists($imagePath)) {
+                Storage::disk('public')->delete($imagePath);
+            }
+            $image->delete();
+        }
 
         return response()->json(null, 204);
     }
