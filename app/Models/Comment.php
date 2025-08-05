@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
-    protected $fillable = ['user_id', 'order_id', 'comment_text'];
+    protected $fillable = ['user_id', 'order_id', 'comment_text', 'job_id'];
+
+    protected $attributes = [
+        'job_id' => null,
+    ];
 
     /**
      * Get the user that owns the comment.

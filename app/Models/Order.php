@@ -39,7 +39,7 @@ class Order extends Model
     }
     public function orderExtraCharges()
     {
-        return $this->hasMany(OrderExtraCharge::class); 
+        return $this->hasMany(OrderExtraCharge::class);
     }
 
     public function comments()

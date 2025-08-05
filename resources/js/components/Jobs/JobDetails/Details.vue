@@ -269,6 +269,7 @@ export default {
         return {
             jobDetails: {
                 data: {
+                    id: null,
                     customer: null,
                     car: null,
                     services: [],
@@ -469,6 +470,7 @@ export default {
                 }
                 this.jobDetails = data;
                 this.editedJobData = { ...this.jobDetails.data };
+                this.jobDetails.data.id = this.$route.params.id;
 
                 // Map status to its value for the dropdown
                 if (this.jobDetails.data.Status) {

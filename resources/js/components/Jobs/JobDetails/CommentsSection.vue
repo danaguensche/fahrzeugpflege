@@ -5,7 +5,7 @@
             <v-list-item v-for="comment in comments" :key="comment.id" class="comment-item">
                 <v-list-item-content>
                     <div class="d-flex justify-space-between align-center">
-                        <v-list-item-title class="comment-author">{{ comment.user.name }} {{ comment.user.email
+                        <v-list-item-title class="comment-author">{{ comment.user.firstname }} {{ comment.user.lastname
                         }}</v-list-item-title>
                         <v-btn v-if="userRole === 'admin' || userRole === 'trainer'" icon @click="confirmDeleteItem(comment.id)" variant="text"
                             color="error" size="small">
@@ -136,6 +136,7 @@ export default {
 
             this.loading = true;
             try {
+                console.log(this.jobId)
                 const response = await axios.post(`/api/orders/${this.jobId}/comments`, {
                     text: this.newCommentText,
                 });
