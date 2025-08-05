@@ -332,6 +332,32 @@ export default {
         };
     },
     computed: {
+        images() {
+            const img = this.jobDetails.data?.images;
+            console.log("Raw images data:", img);
+
+            if (!img) {
+                return [];
+            }
+
+            const mapImage = (image) => {
+                if (image && image.id) {
+                    return {
+                        id: image.id,
+                        path: image.path, // Keep path for consistency if needed
+                        url: image.url
+                    };
+                }
+                return null;
+            };
+
+            if (Array.isArray(img)) {
+                return img.filter(Boolean).map(mapImage).filter(Boolean);
+            }
+
+            const singleImage = mapImage(img);
+            return singleImage ? [singleImage] : [];
+        },
         ...mapState('auth', ['userRole']),
         jobInfoKeys() {
             return ['id', 'Title', 'Beschreibung', 'Abholtermin', 'Status', 'trainee_id'];
