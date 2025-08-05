@@ -40,7 +40,6 @@ export default {
         return {
             userHeaders: [
                 { title: 'Auswählen', key: 'select', sortable: false, width: '60px' },
-                { title: 'ID', key: 'id' },
                 { title: 'Vorname', key: 'firstname' },
                 { title: 'Nachname', key: 'lastname' },
                 { title: 'Email', key: 'email' },
@@ -62,7 +61,6 @@ export default {
                 { title: 'Bearbeiten', key: 'edit', sortable: false, width: '60px' }
             ],
             userFields: [
-                'id',
                 'firstname',
                 'lastname',
                 'email',
