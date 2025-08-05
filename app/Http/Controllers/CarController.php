@@ -157,7 +157,7 @@ class CarController extends Controller
                 }
                 $image->delete();
             }
-
+ 
             $car->delete();
             return response()->json(['success' => true, 'message' => 'Fahrzeug und Bilder wurden gelöscht.']);
         } else {

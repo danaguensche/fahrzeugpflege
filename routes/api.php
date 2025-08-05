@@ -72,12 +72,18 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Jobs Routes
-    Route::get('/jobs/search', [JobController::class, 'search']);
-    Route::get('/jobs', [JobController::class, 'index']);
-    Route::get('/jobs/{job}', [JobController::class, 'show']);
-    Route::put('/jobs/{job}', [JobController::class, 'update']); // Moved outside of role middleware
-    Route::get('/jobs/jobdetails/{id}', [JobDetailsController::class, 'details']);
-    Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
+
+    Route::middleware(CheckRole::class . ':trainer,admin,trainee')->group(function () {
+        Route::get('/jobs/search', [JobController::class, 'search']);
+        Route::get('/jobs', [JobController::class, 'index']);
+        Route::get('/jobs/{job}', [JobController::class, 'show']);
+        Route::put('/jobs/{job}', [JobController::class, 'update']); // Moved outside of role middleware
+        Route::get('/jobs/jobdetails/{id}', [JobDetailsController::class, 'details']);
+        Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
+        Route::delete('jobs/{job}/images/{imageId}', [JobController::class, 'deleteImage']);
+        Route::post('jobs/{job}/images', [JobController::class, 'addImages']);
+    });
+
 
     //User Routes
     Route::get('/users/search', [UserController::class, 'search']);

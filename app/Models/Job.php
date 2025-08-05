@@ -21,7 +21,10 @@ class Job extends Model
         'scheduled_at',
         'trainer_id',
         'trainee_id',
+        'image',
     ];
+
+
 
     public function services()
     {
@@ -48,7 +51,7 @@ class Job extends Model
         return $this->belongsTo(User::class, 'trainee_id');
     }
 
-    
+
 
     protected $casts = [
         'scheduled_at' => 'datetime',
@@ -61,6 +64,6 @@ class Job extends Model
 
     public function images()
     {
-        return $this->hasMany(ImageReport::class, 'task_id');
+        return $this->hasMany(ImageReport::class, 'job_id');
     }
 }

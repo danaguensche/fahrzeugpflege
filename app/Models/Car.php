@@ -19,7 +19,7 @@ class Car extends Model
         'Typ',
         'Farbe',
         'Sonstiges',
-        'image',
+        'image', 
         'customer_id'
     ];
 

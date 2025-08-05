@@ -13,9 +13,9 @@
                     :images="images" 
                     :editMode="editMode"
                     :canEdit="isAdminOrTrainer"
-                    :uploadUrl="`/api/jobs/jobdetails/${$route.params.id}/images`"
+                    :uploadUrl="`/api/jobs/${$route.params.id}/images`"
                     :deleteUrlTemplate="'/api/images/{imageId}'"
-                    :replaceUrlTemplate="`/api/jobs/jobdetails/${$route.params.id}/images/{imageId}`"
+                    :replaceUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`"
                     :entityId="$route.params.id"
                     uploadDialogTitle="Auftragsbilder hochladen"
                     @images-uploaded="handleImagesUploaded"
@@ -461,8 +461,10 @@ export default {
                     throw new Error("Keine Job-ID angegeben");
                 }
 
+                const jobId = this.$route.params.id;
+
                 const { data } = await axios.get(
-                    `/api/jobs/jobdetails/${this.$route.params.id}`
+                    `/api/jobs/jobdetails/${jobId}`
                 );
 
                 if (!data) {
@@ -664,7 +666,7 @@ export default {
                 console.log('Submitting job data:', dataToSubmit);
 
                 await axios.put(
-                    `/api/jobs/jobdetails/${this.$route.params.id}`,
+                    `/api/jobs/${this.$route.params.id}`,
                     dataToSubmit
                 );
 

@@ -11,7 +11,7 @@ class ImageReportController extends Controller
 {
     public function index($taskId)
     {
-        $images = ImageReport::where('task_id', $taskId)->get();
+        $images = ImageReport::where('job_id', $taskId)->get();
 
         return response()->json($images);
     }
@@ -29,8 +29,8 @@ class ImageReportController extends Controller
         $file->storeAs('public/' . $filePath, $fileName);
 
         $imageReport = ImageReport::create([
-            'task_id' => $taskId,
-            'user_id' => Auth::id(),
+            'job_id' => $taskId,
+            'user_id' => auth()->id,
             'file_path' => $filePath . '/' . $fileName,
             'file_name' => $fileName,
             'file_size' => $file->getSize(),
