@@ -1,6 +1,6 @@
 <template>
         <div class="widget-header">
-            <h3>Letzte Akitivitäten</h3>
+            <h3>Letzte Aktivitäten</h3>
         </div>
 </template>
 

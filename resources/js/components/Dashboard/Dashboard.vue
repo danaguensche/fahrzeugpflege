@@ -174,7 +174,8 @@ export default {
     font-family: var(--font-family);
     margin-left: 180px;
     /* min-height: 100vh; */
-    background-color: #f5f5f5;
+    /* background-color: #f5f5f5; */
+    border-radius: 12px;
 }
 
 .dashboard-page-sidebar-opened {
@@ -185,6 +186,7 @@ export default {
     align-self: flex-start;
     margin: 0 auto;
     padding: 32px 32px;
+    border-radius: 12px;
 }
 
 .widgets-card {
