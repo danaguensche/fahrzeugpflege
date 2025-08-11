@@ -19,13 +19,10 @@ export default {
     },
     mounted() {
         this.getNumberOfTodaysJobs();
-        setInterval(() => {
-            this.getNumberOfTodaysJobs();
-        }, 60000); // Update every 60 seconds
     },
     methods: {
-        getNumberOfTodaysJobs() {
-            axios.get('/api/jobs/countjobstoday')
+        async getNumberOfTodaysJobs() {
+            await axios.get('/api/jobs/countjobstoday')
                 .then(response => {
                     this.numberOfTodaysJobs = response.data.count;
                 })

@@ -17,14 +17,11 @@ export default {
     },
     mounted() {
         this.getNumberOfCars();
-        setInterval(() => {
-            this.getNumberOfCars();
-        }, 60000); // Update every 60 seconds
     },
 
     methods: {
-        getNumberOfCars() {
-            axios.get('/api/cars/countcars')
+        async getNumberOfCars() {
+            await axios.get('/api/cars/countcars')
                 .then(response => {
                     this.numberOfCars = response.data.count;
                 })

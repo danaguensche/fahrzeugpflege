@@ -17,13 +17,11 @@ export default {
     },
     mounted() {
         this.getNumberOfOpenJobs();
-        setInterval(() => {
-            this.getNumberOfOpenJobs();
-        }, 60000);
+
     },
     methods: {
-        getNumberOfOpenJobs() {
-            axios.get('/api/jobs/openjobs')
+        async getNumberOfOpenJobs() {
+            await axios.get('/api/jobs/openjobs')
                 .then(response => {
                     this.numberOfOpenJobs = response.data.count;
                 })

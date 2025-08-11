@@ -18,13 +18,10 @@ export default {
     },
     mounted() {
         this.getNumberOfCustomers();
-        setInterval(() => {
-            this.getNumberOfCustomers();
-        }, 60000); // Update every 60 seconds
     },
     methods: {
-        getNumberOfCustomers() {
-            axios.get('/api/customers/customerscurrentmonth')
+        async getNumberOfCustomers() {
+            await axios.get('/api/customers/customerscurrentmonth')
                 .then(response => {
                     this.numberOfCustomersOneMonth = response.data.count;
                 })

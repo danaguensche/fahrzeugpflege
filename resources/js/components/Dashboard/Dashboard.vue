@@ -19,10 +19,38 @@
                 </v-col>
             </v-row>
         </v-container>
+
+        <v-container fluid>
+            <CalendarWidget></CalendarWidget>
+        </v-container>
+
+        <v-container fluid>
+            <v-actions>
+                <v-row>
+                    <v-col cols="12" sm="6" md="3">
+                        <v-btn color="primary" @click="openAddCarDialog" prepend-icon="mdi-plus">Fahrzeug hinzufügen</v-btn>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="3">
+                        <v-btn color="secondary" @click="openAddCustomerDialog" prepend-icon="mdi-plus">Kunde hinzufügen</v-btn>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="3">
+                        <v-btn color="info" @click="openAddJobDialog" prepend-icon="mdi-plus">Auftrag hinzufügen</v-btn>
+                    </v-col>
+                </v-row>
+            </v-actions>
+        </v-container>
+
+        <AddCarForm v-model="showAddCarDialog" @car-added="handleCarAdded" />
+        <AddCustomerForm v-model="showAddCustomerDialog" @customer-added="handleCustomerAdded" />
+        <AddJobForm v-model="showAddJobDialog" @job-added="handleJobAdded" />
+
     </div>
 </template>
 
 <script>
+import AddCarForm from '../Cars/addCar/AddCarForm.vue';
+import AddCustomerForm from '../Customers/addCustomer/AddCustomerForm.vue';
+import AddJobForm from '../Jobs/AddJobForm.vue';
 import { mapState, mapGetters } from 'vuex';
 import OpenJobsWidget from './Widgets/OpenJobsWidget.vue';
 import WidgetLayout from './Widgets/WidgetLayout.vue';
@@ -30,6 +58,7 @@ import axios from 'axios';
 import CarsWidget from './Widgets/CarsWidget.vue';
 import CustomersWidget from './Widgets/CustomersWidget.vue';
 import TodaysJobsWidget from './Widgets/TodaysJobsWidget.vue';
+import CalendarWidget from './Widgets/CalendarWidget.vue';
 export default {
     name: 'Dashboard',
     components: {
@@ -37,11 +66,18 @@ export default {
         OpenJobsWidget,
         CarsWidget,
         CustomersWidget,
-        TodaysJobsWidget
+        TodaysJobsWidget,
+        AddCarForm,
+        AddCustomerForm,
+        AddJobForm,
+        CalendarWidget
     },
     data() {
         return {
             numberOfCars: 0,
+            showAddCarDialog: false,
+            showAddCustomerDialog: false,
+            showAddJobDialog: false,
         };
     },
 
@@ -54,11 +90,35 @@ export default {
         this.getNumberOfCars();
         setInterval(() => {
             this.getNumberOfCars();
-        }, 10000); 
+        }, 10000);
     },
 
-    methods:{
-        getNumberOfCars(){
+    methods: {
+        openAddCarDialog() {
+            this.showAddCarDialog = true;
+        },
+
+        handleCarAdded() {
+            this.showAddCarDialog = false;
+        },
+
+        openAddCustomerDialog() {
+            this.showAddCustomerDialog = true;
+        },
+
+        handleCustomerAdded() {
+            this.showAddCustomerDialog = false;
+        },
+
+        openAddJobDialog() {
+            this.showAddJobDialog = true;
+        },
+
+        handleJobAdded() {
+            this.showAddJobDialog = false;
+        },
+
+        getNumberOfCars() {
             axios.get('/api/cars/countcars')
                 .then(response => {
                     this.numberOfCars = response.data.count;
