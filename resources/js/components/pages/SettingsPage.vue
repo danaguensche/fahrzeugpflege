@@ -1,17 +1,18 @@
 <template>
     <MainSidebar></MainSidebar>
+    <Settings></Settings>
 </template>
 
 <script>
 
-import Footer from '../CommonSlots/Footer.vue';
 import MainSidebar from '../sidebar/MainSidebar.vue';
+import Settings from '../Settings/Settings.vue';
 
 export default {
     name: "SettingsPage",
     components: {
         MainSidebar,
-        Footer
+        Settings,
     }
 }
 

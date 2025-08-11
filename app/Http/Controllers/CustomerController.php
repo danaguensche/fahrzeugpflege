@@ -6,6 +6,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\CustomerResource;
+use Illuminate\Support\Carbon;
 
 class CustomerController extends Controller
 {
@@ -97,17 +98,17 @@ class CustomerController extends Controller
             $queryBuilder = Customer::query();
 
             // Search by all main fields
-            $queryBuilder->where(function($q) use ($query) {
+            $queryBuilder->where(function ($q) use ($query) {
                 $searchTerm = '%' . $query . '%';
                 $q->where('firstname', 'like', $searchTerm)
-                  ->orWhere('lastname', 'like', $searchTerm)
-                  ->orWhere('email', 'like', $searchTerm)
-                  ->orWhere('phonenumber', 'like', $searchTerm)
-                  ->orWhere('company', 'like', $searchTerm)
-                  ->orWhere('addressline', 'like', $searchTerm)
-                  ->orWhere('postalcode', 'like', $searchTerm)
-                  ->orWhere('city', 'like', $searchTerm);
-                
+                    ->orWhere('lastname', 'like', $searchTerm)
+                    ->orWhere('email', 'like', $searchTerm)
+                    ->orWhere('phonenumber', 'like', $searchTerm)
+                    ->orWhere('company', 'like', $searchTerm)
+                    ->orWhere('addressline', 'like', $searchTerm)
+                    ->orWhere('postalcode', 'like', $searchTerm)
+                    ->orWhere('city', 'like', $searchTerm);
+
                 // Search by ID if the query is numeric
                 if (is_numeric($query)) {
                     $q->orWhere('id', '=', (int)$query);
@@ -126,7 +127,6 @@ class CustomerController extends Controller
                 'items' => CustomerResource::collection($customers),
                 'total' => $total,
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error in customer search: ' . $e->getMessage());
             return response()->json([
@@ -149,12 +149,12 @@ class CustomerController extends Controller
             if ($customer) {
                 $customer->delete();
                 return response()->json([
-                    'success' => true, 
+                    'success' => true,
                     'message' => 'Kunde wurde gelöscht.'
                 ]);
             } else {
                 return response()->json([
-                    'success' => false, 
+                    'success' => false,
                     'message' => 'Kunde nicht gefunden.'
                 ], 404);
             }
@@ -176,12 +176,11 @@ class CustomerController extends Controller
             ]);
 
             Customer::destroy($validated['ids']);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Kunden wurden erfolgreich gelöscht.'
             ], 200);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
@@ -222,7 +221,6 @@ class CustomerController extends Controller
                 'message' => 'Kunde erfolgreich aktualisiert',
                 'customer' => new CustomerResource($customer)
             ], 200);
-
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
@@ -256,6 +254,30 @@ class CustomerController extends Controller
             return response()->json(['success' => true, 'message' => 'Fahrzeug erfolgreich vom Kunden entfernt.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Fehler beim Entfernen des Fahrzeugs.'], 500);
+        }
+    }
+
+    public function getCurrentMonthCustomers()
+    {
+        try {
+            $customers = Customer::whereMonth('created_at', Carbon::now()->month)
+                ->whereYear('created_at', Carbon::now()->year)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'count' => $customers->count(),
+                'data' => CustomerResource::collection($customers),
+                'month' => Carbon::now()->format('F Y') 
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Abrufen der Kunden des aktuellen Monats: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler beim Abrufen der Kunden',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

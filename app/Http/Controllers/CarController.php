@@ -66,8 +66,8 @@ class CarController extends Controller
         $total = $query->count();
 
         $cars = $query->skip(($page - 1) * $perPage)
-                    ->take($perPage)
-                    ->get();
+            ->take($perPage)
+            ->get();
 
         return response()->json([
             'items' => CarResource::collection($cars),
@@ -79,7 +79,8 @@ class CarController extends Controller
      * Car Search
      */
     public function search(Request $request)
-    {   $maxPerPage = 100;
+    {
+        $maxPerPage = 100;
         try {
             $query = $request->input('query', '');
             $perPage = min((int) request()->input('itemsPerPage', 20), $maxPerPage);
@@ -100,14 +101,14 @@ class CarController extends Controller
             $queryBuilder = Car::with('images');
 
             // Search by all main fields
-            $queryBuilder->where(function($q) use ($query) {
+            $queryBuilder->where(function ($q) use ($query) {
                 $searchTerm = '%' . $query . '%';
                 $q->where('Kennzeichen', 'like', $searchTerm)
-                  ->orWhere('Automarke', 'like', $searchTerm)
-                  ->orWhere('Typ', 'like', $searchTerm)
-                  ->orWhere('Farbe', 'like', $searchTerm)
-                  ->orWhere('Sonstiges', 'like', $searchTerm);
-                
+                    ->orWhere('Automarke', 'like', $searchTerm)
+                    ->orWhere('Typ', 'like', $searchTerm)
+                    ->orWhere('Farbe', 'like', $searchTerm)
+                    ->orWhere('Sonstiges', 'like', $searchTerm);
+
                 // Search by ID if the query is numeric
                 if (is_numeric($query)) {
                     $q->orWhere('id', '=', (int)$query);
@@ -128,7 +129,6 @@ class CarController extends Controller
                 'items' => CarResource::collection($cars),
                 'total' => $total,
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error in car search: ' . $e->getMessage());
             return response()->json([
@@ -157,7 +157,7 @@ class CarController extends Controller
                 }
                 $image->delete();
             }
- 
+
             $car->delete();
             return response()->json(['success' => true, 'message' => 'Fahrzeug und Bilder wurden gelöscht.']);
         } else {
@@ -223,7 +223,7 @@ class CarController extends Controller
             $validatedData = $request->validate([
                 'Kennzeichen' => 'required|string',
                 'Fahrzeugklasse' => 'nullable|integer',
-                'Automarke' => 'nullable|string', 
+                'Automarke' => 'nullable|string',
                 'Typ' => 'nullable|string',
                 'Farbe' => 'nullable|string',
                 'Sonstiges' => 'nullable|string',
@@ -249,6 +249,17 @@ class CarController extends Controller
         } catch (\Exception $e) {
             Log::error('Fehler beim Aktualisieren des Fahrzeugs: ' . $e->getMessage());
             return response()->json(['error' => 'Fehler beim Aktualisieren des Fahrzeugs'], 500);
+        }
+    }
+
+    public function countCars()
+    {
+        try {
+            $count = Car::count();
+            return response()->json(['count' => $count]);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Zählen der Fahrzeuge: ' . $e->getMessage());
+            return response()->json(['error' => 'Fehler beim Zählen der Fahrzeuge'], 500);
         }
     }
 }
