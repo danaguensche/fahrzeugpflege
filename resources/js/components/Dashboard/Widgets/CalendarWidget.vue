@@ -1,5 +1,5 @@
 <template>
-    <div class="today-widget">
+    <div class="today-widget fixed-height">
         <div class="widget-header">
             <h3>Heute - {{ formatDate(today) }}</h3>
             <div class="event-count-badge">{{ todayEvents.length }}</div>
@@ -178,8 +178,13 @@ export default {
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     padding: 20px;
-    max-width: 400px;
     font-family: 'Rubik', sans-serif;
+    
+}
+
+.fixed-height {
+    height: 380px;
+    overflow: hidden;
 }
 
 .widget-header {
@@ -203,7 +208,7 @@ export default {
     color: white;
     border-radius: 50%;
     width: 32px;
-    height: 32px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -237,6 +242,8 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    height: 200px;
+    overflow-y: auto;
 }
 
 .event-item {
@@ -285,6 +292,7 @@ export default {
 
 .event-details {
     flex: 1;
+    z-index: 1;
 }
 
 .event-title {

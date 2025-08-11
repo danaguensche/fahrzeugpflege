@@ -1,5 +1,5 @@
 <template>
-    <WidgetLayout title="Fahrzeuge in Pflege" :value="numberOfCars" icon="mdi-car" color="green lighten-4" />
+    <WidgetLayout title="Fahrzeuge in Pflege" :value="numberOfCars" icon="mdi-car" :link="'/fahrzeuge'" color="green lighten-4" />
 </template>
 
 <script>

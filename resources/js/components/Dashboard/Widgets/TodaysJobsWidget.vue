@@ -1,5 +1,5 @@
 <template>
-    <WidgetLayout title="Heute fällige Termine" :value="numberOfTodaysJobs" icon="mdi-calendar" color="orange lighten-4"
+    <WidgetLayout title="Heute fällige Termine" :value="numberOfTodaysJobs" icon="mdi-calendar" color="orange-lighten-3" :link="'/kalender'"
         outlined>
     </WidgetLayout>
 </template>
@@ -29,6 +29,12 @@ export default {
                 .catch(error => {
                     console.error('Error fetching number of today\'s jobs:', error);
                 });
+        },
+
+        goToCalenderPage() {
+            this.$router.push({
+                name: 'CalendarPage'
+            });
         }
     }
 }

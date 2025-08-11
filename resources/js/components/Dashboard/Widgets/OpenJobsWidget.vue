@@ -1,5 +1,5 @@
 <template>
-    <WidgetLayout title="Ausstehende Aufträge" :value="numberOfOpenJobs" icon="mdi-briefcase" color="blue lighten-4" outlined>
+    <WidgetLayout title="Ausstehende Aufträge" :value="numberOfOpenJobs" icon="mdi-briefcase" color="blue lighten-4" :link="'/auftraege'" outlined>
     </WidgetLayout>
 </template>
 

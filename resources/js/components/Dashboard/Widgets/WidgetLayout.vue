@@ -1,5 +1,5 @@
 <template>
-    <v-card class="pa-4 d-flex flex-column align-center justify-center text-center" :color="color" :outlined="outlined"
+    <v-card class="pa-4 d-flex flex-column align-center justify-center text-center" :color="color" :outlined="outlined" @click="pushToSide"
         elevation="2">
         <slot name="icon">
             <v-icon large>{{ icon }}</v-icon>
@@ -35,6 +35,18 @@ export default {
         outlined: {
             type: Boolean,
             default: false
+        },
+        link: {
+            type: String,
+            default: null
+        }
+    },
+
+    methods: {
+        pushToSide() {
+            if (this.link) {
+                this.$router.push({path: this.link});
+            }
         }
     }
 };

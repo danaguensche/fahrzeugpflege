@@ -1,5 +1,5 @@
 <template>
-    <WidgetLayout title="Neue Kunden diesen Monat" :value="numberOfCustomersOneMonth" icon="mdi-account-plus" ></WidgetLayout>
+    <WidgetLayout title="Neue Kunden diesen Monat" :value="numberOfCustomersOneMonth" :color="'teal-lighten-2'" :link="'/kunden'" icon="mdi-account-plus" ></WidgetLayout>
 </template>
 
 <script>
