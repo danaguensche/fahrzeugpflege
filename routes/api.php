@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Cars Routes (View only for trainee, full access for trainer/admin)
+    Route::get('cars/countcars', [CarController::class, 'countCars']);
     Route::get('/cars/search', [CarSearchController::class, 'search']);
     Route::get('cars', [CarController::class, 'index']);
     Route::get('cars/{kennzeichen}', [CarController::class, 'show']);
@@ -57,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Customers Routes
+    Route::get('/customers/customerscurrentmonth', [CustomerController::class, 'getCurrentMonthCustomers']);
     Route::get('/customers/search', [CustomerSearchController::class, 'search']);
     Route::get('customers', [CustomerController::class, 'index']);
     Route::get('customers/{id}', [CustomerController::class, 'show']);
@@ -74,6 +76,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Jobs Routes
 
     Route::middleware(CheckRole::class . ':trainer,admin,trainee')->group(function () {
+        Route::get('/jobs/countjobstoday', [JobController::class, 'getTodayJobsCount']);
+        Route::get('/jobs/openjobs', [JobController::class, 'getOpenJobsCount']);
         Route::get('/jobs/search', [JobController::class, 'search']);
         Route::get('/jobs', [JobController::class, 'index']);
         Route::get('/jobs/{job}', [JobController::class, 'show']);
