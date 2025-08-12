@@ -60,10 +60,10 @@
                     </v-snackbar>
                 </v-card-text>
                 <v-card-actions class="pa-4 grey lighten-4">
-                    <v-btn color="secondary" @click="step = 'createNew'">
-                        <v-icon left>mdi-car-plus</v-icon>
-                        Neues Fahrzeug
-                    </v-btn>
+                    <v-btn color="green lighten-4" @click="openAddCarDialog" prepend-icon="mdi-plus"
+                                        size="small" class="mb-2">
+                                        Fahrzeug hinzufügen
+                                    </v-btn>
                     <v-spacer></v-spacer>
                     <v-btn color="grey darken-1" text @click="closeDialog">
                         <v-icon left>mdi-close</v-icon>
@@ -74,76 +74,24 @@
                         Suchen
                     </v-btn>
                 </v-card-actions>
+
+                <AddCarForm v-model="showAddCarDialog" @car-added="handleCarAdded" :addCustomerField="false" />
+
             </template>
 
-            <!-- Neues Fahrzeug Schritt -->
-            <template v-else-if="step === 'createNew'">
-                <v-card-title class="headline primary white--text py-4">
-                    <v-icon left large color="white">mdi-car-plus</v-icon>
-                    <span class="text-h5">Neues Fahrzeug hinzufügen</span>
-                </v-card-title>
-                <v-card-text class="pa-5">
-                    <v-form ref="carForm" v-model="valid" lazy-validation>
-                        <v-container>
-                            <v-row>
-                                <v-col cols="12" md="6">
-                                    <v-text-field v-model="newCar.Kennzeichen"
-                                        :rules="[v => !!v || 'Kennzeichen ist erforderlich']" label="Kennzeichen"
-                                        outlined required></v-text-field>
-                                </v-col>
-                                <v-col cols="12" md="6">
-                                    <v-text-field v-model="newCar.Fahrzeugklasse"
-                                        :rules="[v => !!v || 'Fahrzeugklasse ist erforderlich']" label="Fahrzeugklasse"
-                                        outlined required></v-text-field>
-                                </v-col>
-                                <v-col cols="12" md="6">
-                                    <v-text-field v-model="newCar.Automarke" label="Automarke" outlined></v-text-field>
-                                </v-col>
-                                <v-col cols="12" md="6">
-                                    <v-text-field v-model="newCar.Typ" label="Typ" outlined></v-text-field>
-                                </v-col>
-                                <v-col cols="12" md="6">
-                                    <v-text-field v-model="newCar.Farbe" label="Farbe" outlined></v-text-field>
-                                </v-col>
-                                <v-col cols="12" md="6">
-                                    <v-text-field v-model="newCar.Sonstiges" label="Sonstiges" outlined></v-text-field>
-                                </v-col>
-
-                                <v-col v-if="customerId" cols="12">
-                                    <v-alert type="info" text class="mb-0">
-                                        Dieses Fahrzeug wird dem ausgewählten Kunden zugeordnet.
-                                    </v-alert>
-                                </v-col>
-                            </v-row>
-                        </v-container>
-                    </v-form>
-                </v-card-text>
-
-                <v-card-actions class="pa-4 grey lighten-4">
-                    <v-btn color="grey" text @click="step = 'checkExisting'">
-                        <v-icon left>mdi-arrow-left</v-icon>
-                        Zurück
-                    </v-btn>
-                    <v-spacer></v-spacer>
-                    <v-btn color="grey darken-1" text @click="closeDialog">
-                        <v-icon left>mdi-close</v-icon>
-                        Abbrechen
-                    </v-btn>
-                    <v-btn color="success" @click="saveCar" :disabled="!valid" :loading="isSaving">
-                        <v-icon left>mdi-content-save</v-icon>
-                        Speichern
-                    </v-btn>
-                </v-card-actions>
-            </template>
         </v-card>
     </v-dialog>
 </template>
 
 <script>
 import axios from 'axios';
+import AddCarForm from '../../Cars/addCar/AddCarForm.vue';
 
 export default {
     name: 'CarAddDialog',
+    components: {
+        AddCarForm
+    },
     props: {
         customerId: {
             type: [String, Number],
@@ -153,6 +101,7 @@ export default {
 
     data() {
         return {
+            showAddCarDialog: false,
             dialog: false,
             step: 'checkExisting',
             valid: false,
@@ -176,6 +125,14 @@ export default {
     },
 
     methods: {
+
+        openAddCarDialog() {
+            this.showAddCarDialog = true;
+        },
+        handleCarAdded() {
+            this.showAddCarDialog = false;
+        },
+
         open() {
             this.dialog = true;
             this.step = 'checkExisting';

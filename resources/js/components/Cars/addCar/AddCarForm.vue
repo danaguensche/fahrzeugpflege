@@ -70,7 +70,7 @@
                             ></v-text-field>
                         </v-col>
 
-                        <v-col cols="12" sm="6">
+                        <v-col cols="12" sm="6" v-if="addCustomerField">
                             <v-autocomplete
                                 v-model="car.customer"
                                 :items="customers"
@@ -161,6 +161,10 @@ export default {
     },
     props: {
         modelValue: Boolean,
+        addCustomerField: {
+            type: Boolean,
+            default: true,
+        },
     },
     data() {
         return {

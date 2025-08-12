@@ -58,7 +58,7 @@
                                 prepend-inner-icon="mdi-city" class="mb-3"></v-text-field>
                         </v-col>
 
-                        <v-col cols="12">
+                        <v-col cols="12" v-if="showCarField">
                             <v-autocomplete v-model="customer.car" :items="cars" item-title="Kennzeichen"
                                 item-value="id" label="Fahrzeug" placeholder="Fahrzeug auswählen oder suchen"
                                 prepend-inner-icon="mdi-car" variant="outlined" density="comfortable" clearable
@@ -132,6 +132,12 @@ export default {
                 color: 'success',
             },
         };
+    },
+    props: {
+        showCarField: {
+            type: Boolean,
+            default: true,
+        },
     },
     computed: {
         showDialogLocal: {
