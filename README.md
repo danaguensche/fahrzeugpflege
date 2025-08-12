@@ -45,6 +45,8 @@ php artisan serve
 npm run dev
 ```
 
+**Genauere Anleitung und Informationen befinden sich im Wiki des Repositorys.**  
+
 ## Server  
 
 **Prodserver Web-01**  
