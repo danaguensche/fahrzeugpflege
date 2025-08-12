@@ -33,7 +33,8 @@
                 <v-col cols="12" md="6">
                     <v-card elevation="2" class="h-100">
                         <v-card-title class="text-h6 pb-2">
-                            Letzte Aktivitäten
+                            <v-icon left color="primary">mdi-timeline</v-icon>
+                             |   Letzte Aktivitäten
                         </v-card-title>
                         <v-divider></v-divider>
                         <v-card-text class="pt-4">
