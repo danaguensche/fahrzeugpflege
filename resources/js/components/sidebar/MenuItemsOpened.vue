@@ -50,7 +50,7 @@ export default {
                 // { id: 6, name: 'Berichte', roles: ['trainee', 'trainer', 'admin'] },
                 { id: 7, name: 'Benutzer', roles: ['admin'] },
                 { id: 8, name: 'Profil', roles: ['trainee', 'trainer', 'admin'] },
-                // { id: 9, name: 'Einstellungen', roles: ['trainer', 'admin'] },
+                { id: 9, name: 'Einstellungen', roles: ['trainer', 'admin'] },
                 { id: 10, name: 'Abmelden', roles: ['trainee', 'trainer', 'admin'] },
             ],
 
@@ -64,7 +64,7 @@ export default {
                 // { id: 6, name: new URL('@/img/sidebar-img/reports-icon.png', import.meta.url).href },
                 { id: 7, name: new URL('@/img/sidebar-img/user-icon.png', import.meta.url).href }, /* New icon for Users */
                 { id: 8, name: new URL('@/img/sidebar-img/profile-icon.png', import.meta.url).href },
-                // { id: 9, name: new URL('@/img/sidebar-img/settings-icon.png', import.meta.url).href },
+                { id: 9, name: new URL('@/img/sidebar-img/settings-icon.png', import.meta.url).href },
                 { id: 10, name: new URL('@/img/sidebar-img/logout-icon.png', import.meta.url).href },
             ]
         }

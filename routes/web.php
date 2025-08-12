@@ -11,14 +11,8 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-
-// Wenn die Route nicht existiert, wird man automatisch auf die Login-Seite weitergeleitet
-Route::fallback(function () {
-    return redirect()->route('login');
-});
-
 Route::controller(PageController::class)->group(function () {
-    Route::get('/', 'login')->name('login');
+    // Route::get('/', 'login')->name('login');
     Route::get('/login', 'login')->name('login');
     Route::get('/signup', 'signup')->name('signup');
     Route::get('/reset-password/{token}', function () {

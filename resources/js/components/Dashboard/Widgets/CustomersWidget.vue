@@ -1,0 +1,34 @@
+<template>
+    <WidgetLayout title="Neue Kunden diesen Monat" :value="numberOfCustomersOneMonth" :color="'teal-lighten-2'" :link="'/kunden'" icon="mdi-account-plus" ></WidgetLayout>
+</template>
+
+<script>
+import WidgetLayout from './WidgetLayout.vue';
+import axios from 'axios';
+
+export default {
+    name: 'CustomersWidget',
+    components: {
+        WidgetLayout
+    },
+    data() {
+        return {
+            numberOfCustomersOneMonth: 0,
+        };
+    },
+    mounted() {
+        this.getNumberOfCustomers();
+    },
+    methods: {
+        async getNumberOfCustomers() {
+            await axios.get('/api/customers/customerscurrentmonth')
+                .then(response => {
+                    this.numberOfCustomersOneMonth = response.data.count;
+                })
+                .catch(error => {
+                    console.error('Error fetching number of new customers:', error);
+                });
+        }
+    }
+}
+</script>

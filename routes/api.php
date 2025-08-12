@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Middleware\CheckRole;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\CommentController;
+use Spatie\Activitylog\Models\Activity;
 
 
 // Auth Routes
@@ -32,6 +33,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users/search', [UserController::class, 'search']);
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::get('/users/trainees', [UserController::class, 'getTrainees']);
+    });
+
+    //Dashboard Routes
+    Route::get('cars/countcars', [CarController::class, 'countCars']);
+    Route::get('/customers/customerscurrentmonth', [CustomerController::class, 'getCurrentMonthCustomers']);
+    Route::get('/jobs/countjobstoday', [JobController::class, 'getTodayJobsCount']);
+    Route::get('/jobs/openjobs', [JobController::class, 'getOpenJobsCount']);
+    //Activity Log Routes
+
+    Route::get('/activities', function () {
+        return Activity::with('causer')
+            ->latest()
+            ->take(10)
+            ->get();
     });
 
     Route::middleware(CheckRole::class . ':admin')->group(function () {

@@ -55,11 +55,19 @@ class JobController extends Controller
 
             $job->load(['services', 'images']);
 
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'job_id' => $job->id,
+                    'title' => $job->title,
+                    'status' => $job->status,
+                ])
+                ->log('Auftrag erstellt: ' . $job->title . ' mit Status ' . $job->status . ' von ' . $user->firstname . ' ' . $user->lastname);
+
             return response()->json([
                 'message' => 'Job erfolgreich gespeichert',
                 'job' => $job,
             ], 201);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             return response()->json(['error' => $e->errors()], 422);
@@ -155,12 +163,12 @@ class JobController extends Controller
 
             $query = Job::with(['customer', 'car', 'services', 'trainer', 'trainee', 'images']);
 
-            $query->where(function($q) use ($searchQuery) {
+            $query->where(function ($q) use ($searchQuery) {
                 $searchTerm = '%' . $searchQuery . '%';
                 $q->where('title', 'like', $searchTerm)
-                  ->orWhere('description', 'like', $searchTerm)
-                  ->orWhere('status', 'like', $searchTerm);
-                
+                    ->orWhere('description', 'like', $searchTerm)
+                    ->orWhere('status', 'like', $searchTerm);
+
                 // Search by ID if the query is numeric
                 if (is_numeric($searchQuery)) {
                     $q->orWhere('id', '=', (int)$searchQuery);
@@ -179,7 +187,6 @@ class JobController extends Controller
                 'items' => $jobs,
                 'total' => $total,
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error in job search: ' . $e->getMessage());
             return response()->json([
@@ -202,7 +209,7 @@ class JobController extends Controller
 
             if ($user && $user->role === 'trainee') {
                 Log::info('JobController@update: Trainee user detected.', ['user_id' => $user->id, 'job_user_id' => $job->user_id, 'job_id' => $job->id]);
-                
+
                 // Trainee can only update status for their own jobs
                 if ($job->trainee_id !== $user->id) {
                     Log::error('JobController@update: Trainee attempting to update job not assigned to them.', ['user_id' => $user->id, 'job_trainee_id' => $job->trainee_id, 'job_id' => $job->id]);
@@ -229,11 +236,19 @@ class JobController extends Controller
 
                 Log::info('Job trainee_id after update', ['trainee_id' => $job->trainee_id]);
 
+                activity()
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'job_id' => $job->id,
+                    'title' => $job->title,
+                    'status' => $job->status,
+                ])
+                ->log('Auftrag bearbeitet: ' . $job->title . ' mit Status ' . $job->status . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+
                 return response()->json([
                     'message' => 'Job Status erfolgreich aktualisiert',
                     'job' => $job->load('services')
                 ]);
-
             } else { // Admin or Trainer
                 DB::beginTransaction();
 
@@ -284,7 +299,6 @@ class JobController extends Controller
                     'job' => $job->load(['services', 'images'])
                 ]);
             }
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             return response()->json(['error' => $e->errors()], 422);
@@ -313,11 +327,19 @@ class JobController extends Controller
 
             DB::commit();
 
+            activity()
+            ->causedBy(auth()->user())
+            ->withProperties([
+                'job_id' => $job->id,
+                'title' => $job->title,
+                'status' => $job->status,
+            ])
+            ->log('Auftrag gelöscht: ' . $job->title . ' mit Status ' . $job->status . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Job und alle zugehörigen Bilder wurden gelöscht.'
             ], 204);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Fehler beim Löschen des Jobs: ' . $e->getMessage());
@@ -362,11 +384,18 @@ class JobController extends Controller
 
             DB::commit();
 
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'job_ids' => $validated['ids'],
+                    'count' => count($jobs),
+                ])
+                ->log('Mehrere Aufträge gelöscht: ' . count($jobs) . ' Jobs von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+
             return response()->json([
                 'success' => true,
                 'message' => count($jobs) . ' Jobs wurden erfolgreich gelöscht.'
             ], 200);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             return response()->json([
@@ -391,19 +420,18 @@ class JobController extends Controller
     {
         try {
             $image = $job->images()->findOrFail($imageId);
-            
+
             $imagePath = str_replace('storage/', '', $image->path);
             if (Storage::disk('public')->exists($imagePath)) {
                 Storage::disk('public')->delete($imagePath);
             }
-            
+
             $image->delete();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Bild erfolgreich gelöscht.'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Fehler beim Löschen des Bildes: ' . $e->getMessage());
             return response()->json([
@@ -434,25 +462,33 @@ class JobController extends Controller
             $addedImages = [];
             foreach ($request->file('images') as $image) {
                 $path = $image->store('jobs', 'public');
-                
-                // Stelle sicher, dass alle erforderlichen Felder gesetzt sind
+
                 $imageData = [
                     'path' => $path,
                     'user_id' => $user->id,
                 ];
-                
+
                 $newImage = $job->images()->create($imageData);
                 $addedImages[] = $newImage;
             }
 
             DB::commit();
 
+            activity()
+                ->causedBy($user)
+                ->withProperties([
+                    'job_id' => $job->id,
+                    'title' => $job->title,
+                    'status' => $job->status,
+                    'added_images_count' => count($addedImages),
+                ])
+                ->log('Bilder hinzugefügt zum Auftrag: ' . $job->title . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+
             return response()->json([
                 'success' => true,
                 'message' => count($addedImages) . ' Bilder erfolgreich hinzugefügt.',
                 'images' => $addedImages
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             return response()->json([
@@ -466,6 +502,66 @@ class JobController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Fehler beim Hinzufügen der Bilder.'
+            ], 500);
+        }
+    }
+
+    public function getOpenJobsCount()
+    {
+        try {
+            $user = auth()->user();
+            if (!$user) {
+                abort(401, 'Unauthenticated.');
+            }
+
+            $query = Job::query();
+
+            // Filter based on user role
+            if ($user->role === 'trainee') {
+                $query->where('trainee_id', $user->id);
+            }
+
+            $openStatusList = ['ausstehend'];
+            $openJobsCount = $query->whereIn('status', $openStatusList)->count();
+
+            return response()->json([
+                'count' => $openJobsCount
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Abrufen der offenen Aufträge: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Fehler beim Abrufen der offenen Aufträge'
+            ], 500);
+        }
+    }
+
+    public function getTodayJobsCount()
+    {
+        try {
+            $user = auth()->user();
+            if (!$user) {
+                abort(401, 'Unauthenticated.');
+            }
+
+            $today = Carbon::today();
+            $query = Job::query();
+
+            // Filter based on user role
+            if ($user->role === 'trainee') {
+                // Trainee sees only their assigned jobs
+                $query->where('trainee_id', $user->id);
+            }
+            // Count jobs scheduled for today
+            $todayJobsCount = $query->whereDate('scheduled_at', $today)->count();
+
+            return response()->json([
+                'count' => $todayJobsCount,
+                'date' => $today->format('Y-m-d')
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Abrufen der heutigen Aufträge: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Fehler beim Abrufen der heutigen Aufträge'
             ], 500);
         }
     }
