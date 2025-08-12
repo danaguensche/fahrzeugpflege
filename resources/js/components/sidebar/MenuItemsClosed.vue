@@ -55,7 +55,7 @@ export default {
                 // { id: 6, name: 'Berichte', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/reports-icon.png', import.meta.url).href },
                 { id: 7, name: 'Benutzer', roles: ['admin'], icon: new URL('@/img/sidebar-img/user-icon.png', import.meta.url).href },
                 { id: 8, name: 'Profil', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/profile-icon.png', import.meta.url).href },
-                { id: 9, name: 'Einstellungen', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/settings-icon.png', import.meta.url).href },
+                // { id: 9, name: 'Einstellungen', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/settings-icon.png', import.meta.url).href },
                 { id: 10, name: 'Abmelden', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/logout-icon.png', import.meta.url).href },
             ]
         }
