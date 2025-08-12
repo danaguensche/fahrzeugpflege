@@ -55,21 +55,21 @@
                         <v-card-text class="pt-4">
                             <v-row dense>
                                 <v-col cols="12" sm="6" md="4">
-                                    <v-btn block color="primary" @click="openAddCarDialog" prepend-icon="mdi-plus"
+                                    <v-btn block color="blue lighten-4" @click="openAddJobDialog"
+                                        prepend-icon="mdi-briefcase-plus" size="large" class="mb-2">
+                                        Auftrag hinzufügen
+                                    </v-btn>
+                                </v-col>
+                                <v-col cols="12" sm="6" md="4">
+                                    <v-btn block color="green lighten-4" @click="openAddCarDialog" prepend-icon="mdi-plus"
                                         size="large" class="mb-2">
                                         Fahrzeug hinzufügen
                                     </v-btn>
                                 </v-col>
                                 <v-col cols="12" sm="6" md="4">
-                                    <v-btn block color="secondary" @click="openAddCustomerDialog"
+                                    <v-btn block color="teal-lighten-2" @click="openAddCustomerDialog"
                                         prepend-icon="mdi-account-plus" size="large" class="mb-2">
                                         Kunde hinzufügen
-                                    </v-btn>
-                                </v-col>
-                                <v-col cols="12" sm="6" md="4">
-                                    <v-btn block color="success" @click="openAddJobDialog"
-                                        prepend-icon="mdi-briefcase-plus" size="large" class="mb-2">
-                                        Auftrag hinzufügen
                                     </v-btn>
                                 </v-col>
                             </v-row>
@@ -77,7 +77,7 @@
                     </v-card>
                 </v-col>
             </v-row>
-
+            
             <AddCarForm v-model="showAddCarDialog" @car-added="handleCarAdded" />
             <AddCustomerForm v-model="showAddCustomerDialog" @customer-added="handleCustomerAdded" />
             <AddJobForm v-model="showAddJobDialog" @job-added="handleJobAdded" />
