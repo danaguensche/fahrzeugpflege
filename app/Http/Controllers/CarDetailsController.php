@@ -196,25 +196,96 @@ class CarDetailsController extends CarController
                         continue;
                     }
 
+                    $tempPath = $image->getRealPath();
+                    $tempName = $image->getPathname(); // Alternative zum getRealPath()
+                    
                     Log::info("Processing file {$index}", [
                         'original_name' => $image->getClientOriginalName(),
                         'mime_type' => $image->getMimeType(),
                         'size' => $image->getSize(),
-                        'temp_path' => $image->getRealPath(),
+                        'temp_path' => $tempPath,
+                        'temp_name' => $tempName,
                         'is_valid' => $image->isValid(),
-                        'error' => $image->getError()
+                        'error' => $image->getError(),
+                        'temp_exists' => $tempPath ? file_exists($tempPath) : false,
+                        'name_exists' => $tempName ? file_exists($tempName) : false
                     ]);
+
+                    // Wenn getRealPath() false zurückgibt, verwende alternative Methoden
+                    if (!$tempPath) {
+                        Log::warning("getRealPath() returned false, trying alternatives", [
+                            'temp_name' => $tempName,
+                            'name_exists' => file_exists($tempName)
+                        ]);
+                    }
 
                     try {
                         // Generate unique filename
                         $extension = $image->getClientOriginalExtension();
                         $filename = uniqid('car_' . $car->id . '_') . '.' . $extension;
                         
-                        // Store with custom filename to avoid path issues
-                        $path = $image->storeAs('cars', $filename, 'public');
+                        // Alternative Upload-Methoden für Windows-Server
+                        $path = null;
+                        $attempts = [];
+                        
+                        // Versuch 1: Standard storeAs
+                        try {
+                            $path = $image->storeAs('cars', $filename, 'public');
+                            $attempts[] = 'storeAs: ' . ($path ? 'success' : 'failed');
+                        } catch (Exception $e) {
+                            $attempts[] = 'storeAs: exception - ' . $e->getMessage();
+                        }
+                        
+                        // Versuch 2: Manueller Upload wenn storeAs fehlschlägt
+                        if (!$path) {
+                            try {
+                                $destinationPath = storage_path('app/public/cars/' . $filename);
+                                $tempFile = $image->getPathname();
+                                
+                                if ($tempFile && file_exists($tempFile)) {
+                                    if (move_uploaded_file($tempFile, $destinationPath)) {
+                                        $path = 'cars/' . $filename;
+                                        $attempts[] = 'move_uploaded_file: success';
+                                    } else {
+                                        $attempts[] = 'move_uploaded_file: failed';
+                                    }
+                                } else {
+                                    $attempts[] = 'move_uploaded_file: no temp file';
+                                }
+                            } catch (Exception $e) {
+                                $attempts[] = 'move_uploaded_file: exception - ' . $e->getMessage();
+                            }
+                        }
+                        
+                        // Versuch 3: Copy als letzter Ausweg
+                        if (!$path) {
+                            try {
+                                $destinationPath = storage_path('app/public/cars/' . $filename);
+                                $tempFile = $image->getPathname();
+                                
+                                if ($tempFile && file_exists($tempFile)) {
+                                    if (copy($tempFile, $destinationPath)) {
+                                        $path = 'cars/' . $filename;
+                                        $attempts[] = 'copy: success';
+                                    } else {
+                                        $attempts[] = 'copy: failed';
+                                    }
+                                } else {
+                                    $attempts[] = 'copy: no temp file';
+                                }
+                            } catch (Exception $e) {
+                                $attempts[] = 'copy: exception - ' . $e->getMessage();
+                            }
+                        }
+                        
+                        Log::info("Upload attempts", [
+                            'filename' => $filename,
+                            'attempts' => $attempts,
+                            'final_path' => $path
+                        ]);
                         
                         if (!$path) {
-                            throw new Exception('Datei konnte nicht gespeichert werden - store() gab false zurück');
+                            throw new Exception('Alle Upload-Versuche fehlgeschlagen: ' . implode(', ', $attempts));
                         }
 
                         $carImage = $car->images()->create(['path' => $path]);
@@ -330,6 +401,7 @@ class CarDetailsController extends CarController
     /**
      * Delete specific image
      */
+    
     public function deleteImage($imageId)
     {
         try {
@@ -371,6 +443,7 @@ class CarDetailsController extends CarController
             }
 
             // Delete record from database
+            
             $image->delete();
 
             Log::info("Image successfully deleted from database");
@@ -404,6 +477,7 @@ class CarDetailsController extends CarController
     /**
      * Replace specific image
      */
+
     public function replaceImage(Request $request, $kennzeichen, $imageId)
     {
         try {

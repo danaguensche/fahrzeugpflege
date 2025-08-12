@@ -32,9 +32,9 @@ export default defineConfig({
         },
     },
 
-    // server: {
-    //     cors: true,
-    //     host: '172.17.100.242',
-    //     port: 8082
-    // },
+    server: {
+        cors: true,
+        host: '127.0.0.1',
+        port: 8085
+    },
 });
