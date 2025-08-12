@@ -299,7 +299,7 @@ export default {
         const token = localStorage.getItem('token');
         if (!token) throw new Error("Kein Authentifizierungs-Token gefunden");
 
-        const response = await axios.get("http://localhost:8000/api/users/me", {
+        const response = await axios.get("/api/users/me", {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -363,7 +363,7 @@ export default {
           // Email wird absichtlich nicht mitgeschickt
         };
 
-        await axios.put("http://localhost:8000/api/users/me", dataToSend, {
+        await axios.put("/api/users/me", dataToSend, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -392,7 +392,7 @@ export default {
         const token = localStorage.getItem('token');
         if (!token) throw new Error("Kein Authentifizierungs-Token gefunden");
 
-        await axios.post("http://localhost:8000/api/users/change-password", {
+        await axios.post("/api/users/change-password", {
           currentPassword: this.passwordData.currentPassword,
           newPassword: this.passwordData.newPassword
         }, {
