@@ -1,13 +1,13 @@
 # Fahrzeugpflege Verwaltungssoftware
 
-Eine Webanwendung zur Verwaltung von Kunden, Fahrzeugen, Aufträgen und Fotos für Fahrzeugpflegebetriebe.  
+Eine Webanwendung zur Verwaltung von Kunden, Fahrzeugen, Aufträgen und Fotos für unseren Fahrzeugpflegebetrieb.  
 Entwickelt mit **Laravel 11**, **Vue.js** und **Vuetify**.
 
 ## Funktionen
 
-- **Kundenverwaltung** (Anlegen, Bearbeiten, Löschen)  
-- **Fahrzeugverwaltung** mit Foto-Upload und Detailansicht  
-- **Auftragsverwaltung** mit Status, Beschreibung und Terminen  
+- **Kundenverwaltung** (Anlegen, Bearbeiten, Löschen, Detailansicht)  
+- **Fahrzeugverwaltung** (Anlegen, Bearbeiten, Löschen, Detailansicht, Foto-Upload)  
+- **Auftragsverwaltung** (Anlegen, Bearbeiten, Löschen, Foto-Upload, Detailansicht mit Status, Beschreibung und Termin)  
 - **Kalender**-Integration zur Terminplanung  
 - Mehrfach- und Einzel-Löschfunktion  
 - **Benutzer-Authentifizierung** mit Laravel Sanctum  
