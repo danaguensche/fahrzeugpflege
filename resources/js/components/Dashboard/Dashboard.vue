@@ -156,14 +156,14 @@ export default {
     display: flex;
     transition: margin-left 0.3s ease;
     font-family: var(--font-family);
-    margin-left: 180px;
+    margin-left: 150px;
     /* min-height: 100vh; */
     /* background-color: #f5f5f5; */
     border-radius: 12px;
 }
 
 .dashboard-page-sidebar-opened {
-    margin-left: 330px;
+    margin-left: 320px;
 }
 
 .dashboard-container {
