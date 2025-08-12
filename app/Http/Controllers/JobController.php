@@ -55,6 +55,15 @@ class JobController extends Controller
 
             $job->load(['services', 'images']);
 
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'job_id' => $job->id,
+                    'title' => $job->title,
+                    'status' => $job->status,
+                ])
+                ->log('Auftrag erstellt: ' . $job->title . ' mit Status ' . $job->status . ' von ' . $user->firstname . ' ' . $user->lastname);
+
             return response()->json([
                 'message' => 'Job erfolgreich gespeichert',
                 'job' => $job,
@@ -227,6 +236,15 @@ class JobController extends Controller
 
                 Log::info('Job trainee_id after update', ['trainee_id' => $job->trainee_id]);
 
+                activity()
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'job_id' => $job->id,
+                    'title' => $job->title,
+                    'status' => $job->status,
+                ])
+                ->log('Auftrag bearbeitet: ' . $job->title . ' mit Status ' . $job->status . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+
                 return response()->json([
                     'message' => 'Job Status erfolgreich aktualisiert',
                     'job' => $job->load('services')
@@ -309,6 +327,15 @@ class JobController extends Controller
 
             DB::commit();
 
+            activity()
+            ->causedBy(auth()->user())
+            ->withProperties([
+                'job_id' => $job->id,
+                'title' => $job->title,
+                'status' => $job->status,
+            ])
+            ->log('Auftrag gelöscht: ' . $job->title . ' mit Status ' . $job->status . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Job und alle zugehörigen Bilder wurden gelöscht.'
@@ -356,6 +383,14 @@ class JobController extends Controller
             }
 
             DB::commit();
+
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'job_ids' => $validated['ids'],
+                    'count' => count($jobs),
+                ])
+                ->log('Mehrere Aufträge gelöscht: ' . count($jobs) . ' Jobs von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
             return response()->json([
                 'success' => true,
@@ -438,6 +473,16 @@ class JobController extends Controller
             }
 
             DB::commit();
+
+            activity()
+                ->causedBy($user)
+                ->withProperties([
+                    'job_id' => $job->id,
+                    'title' => $job->title,
+                    'status' => $job->status,
+                    'added_images_count' => count($addedImages),
+                ])
+                ->log('Bilder hinzugefügt zum Auftrag: ' . $job->title . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
             return response()->json([
                 'success' => true,

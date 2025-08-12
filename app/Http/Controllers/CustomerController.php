@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\CustomerResource;
 use Illuminate\Support\Carbon;
+use Spatie\Activitylog\Models\Activity;
+use function activity;
 
 class CustomerController extends Controller
 {
@@ -26,6 +28,11 @@ class CustomerController extends Controller
             ]);
 
             $customer = Customer::create($validated);
+
+            activity()
+            ->causedBy(auth()->user())
+            ->withProperties(['customer_id' => $customer->id])
+            ->log('Kunde erstellt: ' . $customer->firstname . ' ' . $customer->lastname . ' von' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
             return response()->json([
                 'success' => true,
@@ -148,6 +155,12 @@ class CustomerController extends Controller
             $customer = Customer::find($id);
             if ($customer) {
                 $customer->delete();
+
+                activity()
+            ->causedBy(auth()->user())
+            ->withProperties(['customer_id' => $customer->id])
+            ->log('Kunde gelöscht: ' . $customer->firstname . ' ' . $customer->lastname . ' von' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Kunde wurde gelöscht.'
@@ -176,6 +189,11 @@ class CustomerController extends Controller
             ]);
 
             Customer::destroy($validated['ids']);
+
+            activity()
+            ->causedBy(auth()->user())
+            ->withProperties(['customer_ids' => $validated['ids']])
+            ->log('Mehrere Kunden gelöscht von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
             return response()->json([
                 'success' => true,
@@ -216,6 +234,11 @@ class CustomerController extends Controller
             // CORRECTED: send all validated data
             $customer->update($validatedData);
 
+            activity()
+            ->causedBy(auth()->user())
+            ->withProperties(['customer_id' => $customer->id])
+            ->log('Kunde bearbeitet: ' . $customer->firstname . ' ' . $customer->lastname . ' von' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Kunde erfolgreich aktualisiert',
@@ -250,6 +273,11 @@ class CustomerController extends Controller
             // Assuming a one-to-many relationship where Car has a customer_id
             $car->customer_id = null;
             $car->save();
+
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties(['customer_id' => $customer->id, 'car_id' => $car->id])
+                ->log('Fahrzeug entfernt: ' . $car->kennzeichen . ' von Kunde ' . $customer->firstname . ' ' . $customer->lastname . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
             return response()->json(['success' => true, 'message' => 'Fahrzeug erfolgreich vom Kunden entfernt.']);
         } catch (\Exception $e) {

@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Middleware\CheckRole;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\CommentController;
+use Spatie\Activitylog\Models\Activity;
 
 
 // Auth Routes
@@ -34,13 +35,26 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users/trainees', [UserController::class, 'getTrainees']);
     });
 
+    //Dashboard Routes
+    Route::get('cars/countcars', [CarController::class, 'countCars']);
+    Route::get('/customers/customerscurrentmonth', [CustomerController::class, 'getCurrentMonthCustomers']);
+    Route::get('/jobs/countjobstoday', [JobController::class, 'getTodayJobsCount']);
+    Route::get('/jobs/openjobs', [JobController::class, 'getOpenJobsCount']);
+    //Activity Log Routes
+
+    Route::get('/activities', function () {
+        return Activity::with('causer')
+            ->latest()
+            ->take(10)
+            ->get();
+    });
+
     Route::middleware(CheckRole::class . ':admin')->group(function () {
         Route::delete('users/{id}', [UserController::class, 'destroy']);
         Route::delete('users', [UserController::class, 'destroyMultiple']);
     });
 
     // Cars Routes (View only for trainee, full access for trainer/admin)
-    Route::get('cars/countcars', [CarController::class, 'countCars']);
     Route::get('/cars/search', [CarSearchController::class, 'search']);
     Route::get('cars', [CarController::class, 'index']);
     Route::get('cars/{kennzeichen}', [CarController::class, 'show']);
@@ -58,7 +72,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Customers Routes
-    Route::get('/customers/customerscurrentmonth', [CustomerController::class, 'getCurrentMonthCustomers']);
     Route::get('/customers/search', [CustomerSearchController::class, 'search']);
     Route::get('customers', [CustomerController::class, 'index']);
     Route::get('customers/{id}', [CustomerController::class, 'show']);
@@ -76,8 +89,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Jobs Routes
 
     Route::middleware(CheckRole::class . ':trainer,admin,trainee')->group(function () {
-        Route::get('/jobs/countjobstoday', [JobController::class, 'getTodayJobsCount']);
-        Route::get('/jobs/openjobs', [JobController::class, 'getOpenJobsCount']);
         Route::get('/jobs/search', [JobController::class, 'search']);
         Route::get('/jobs', [JobController::class, 'index']);
         Route::get('/jobs/{job}', [JobController::class, 'show']);

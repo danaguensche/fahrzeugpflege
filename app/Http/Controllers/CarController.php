@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Resources\CarResource;
 use Illuminate\Support\Facades\DB;
+use Spatie\Activitylog\Models\Activity;
+use function activity;
 
 class CarController extends Controller
 {
@@ -37,6 +39,11 @@ class CarController extends Controller
                 }
             }
             $car->load('images');
+
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties(['Kennzeichen' => $car->Kennzeichen])
+                ->log('Fahrzeug erstellt: ' . $car->Kennzeichen . 'von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
             return response()->json([
                 'message' => 'Fahrzeug erfolgreich gespeichert',
@@ -159,6 +166,13 @@ class CarController extends Controller
             }
 
             $car->delete();
+
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties(['Kennzeichen' => $car->Kennzeichen])
+                ->log('Fahrzeug gelöscht: ' . $car->Kennzeichen . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+
+            
             return response()->json(['success' => true, 'message' => 'Fahrzeug und Bilder wurden gelöscht.']);
         } else {
             return response()->json(['success' => false, 'message' => 'Fahrzeug nicht gefunden.'], 404);
@@ -200,6 +214,11 @@ class CarController extends Controller
 
             DB::commit();
 
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties(['Kennzeichen' => implode(', ', $kennzeichen)])
+                ->log('Mehrere Fahrzeuge gelöscht: ' . implode(', ', $kennzeichen) . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+
             return response()->json([
                 'success' => true,
                 'message' => count($cars) . ' Fahrzeuge wurden gelöscht.'
@@ -239,6 +258,13 @@ class CarController extends Controller
                     $car->images()->create(['path' => $path]);
                 }
             }
+
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties(['Kennzeichen' => $car->Kennzeichen])
+                ->log('Fahrzeug aktualisiert: ' . $car->Kennzeichen . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+
+            $car->load('images');
 
             return response()->json([
                 'message' => 'Fahrzeug erfolgreich aktualisiert',

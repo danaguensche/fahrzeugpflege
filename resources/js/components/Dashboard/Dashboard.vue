@@ -127,13 +127,6 @@ export default {
         ...mapGetters('auth', ['isAdminOrTrainer']),
     },
 
-    mounted() {
-        this.getNumberOfCars();
-        setInterval(() => {
-            this.getNumberOfCars();
-        }, 10000);
-    },
-
     methods: {
         openAddCarDialog() {
             this.showAddCarDialog = true;
@@ -153,16 +146,6 @@ export default {
         handleJobAdded() {
             this.showAddJobDialog = false;
         },
-        getNumberOfCars() {
-            axios.get('/api/cars/countcars')
-                .then(response => {
-                    this.numberOfCars = response.data.count;
-                    console.log('Number of cars:', this.numberOfCars);
-                })
-                .catch(error => {
-                    console.error('Error fetching number of cars:', error);
-                });
-        }
     }
 }
 </script>
