@@ -9,21 +9,12 @@
             <v-card class="card">
                 <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon"></Header>
 
-                <ImageGallery 
-                    :images="images" 
-                    :editMode="editMode"
-                    :canEdit="isAdminOrTrainer"
-                    :uploadUrl="`/api/jobs/${$route.params.id}/images`"
-                    :deleteUrlTemplate="'/api/images/{imageId}'"
-                    :replaceUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`"
-                    :entityId="$route.params.id"
-                    uploadDialogTitle="Auftragsbilder hochladen"
-                    @images-uploaded="handleImagesUploaded"
-                    @image-deleted="handleImageDeleted"
-                    @image-replaced="handleImageReplaced"
-                    @success="showSuccessMessage"
-                    @error="showErrorMessage"
-                    @loading="setImageLoading">
+                <ImageGallery :images="images" :editMode="editMode" :canEdit="isAdminOrTrainer"
+                    :uploadUrl="`/api/jobs/${$route.params.id}/images`" :deleteUrlTemplate="'/api/images/{imageId}'"
+                    :replaceUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`" :entityId="$route.params.id"
+                    uploadDialogTitle="Auftragsbilder hochladen" @images-uploaded="handleImagesUploaded"
+                    @image-deleted="handleImageDeleted" @image-replaced="handleImageReplaced"
+                    @success="showSuccessMessage" @error="showErrorMessage" @loading="setImageLoading">
                 </ImageGallery>
 
                 <!-- Job information -->
@@ -434,8 +425,8 @@ export default {
     },
     methods: {
 
-                // Image Gallery Event Handlers
-                async handleImagesUploaded(response) {
+        // Image Gallery Event Handlers
+        async handleImagesUploaded(response) {
             // Reload car details to get updated images
             await this.getJob();
         },
@@ -697,6 +688,7 @@ export default {
                 await this.getJob();
                 this.editMode = false;
                 this.showSnackbar("Jobdaten erfolgreich gespeichert", 'success');
+                console.log('Job data saved successfully:', dataToSubmit);
             } catch (error) {
                 console.error('Error saving job data:', error);
                 console.error('Error response:', error.response?.data);
@@ -870,11 +862,6 @@ export default {
 </script>
 
 <style scoped>
-.job-information-fields {
-    width: 102%;
-}
-
-
 .card-container {
     width: 100%;
     height: calc(100vh - 40px);
@@ -895,13 +882,6 @@ export default {
     flex-direction: column;
     overflow-y: auto;
 }
-
-.section-block {
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px solid #eee;
-}
-
 
 @media (max-width: 575.98px) {
     .card-container {
@@ -937,11 +917,6 @@ export default {
     .card-container {
         max-width: calc(100% - 280px);
     }
-}
-
-.v-card-text {
-    flex: 1;
-    overflow-y: auto;
 }
 
 @media (max-width: 767.98px) {

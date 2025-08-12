@@ -18,6 +18,7 @@ use App\Http\Middleware\CheckRole;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\CommentController;
 use Spatie\Activitylog\Models\Activity;
+use App\Http\Controllers\ImageController;
 
 
 // Auth Routes
@@ -97,6 +98,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
         Route::delete('jobs/{job}/images/{imageId}', [JobController::class, 'deleteImage']);
         Route::post('jobs/{job}/images', [JobController::class, 'addImages']);
+        Route::post('images/assign-to-car', [ImageController::class, 'assignToCar']);
     });
 
 
