@@ -40,7 +40,7 @@
                             <v-text-field v-model="formattedAbholterminForEdit" type="datetime-local"
                                 :label="labels.Abholtermin" variant="outlined" density="comfortable" hide-details="auto"
                                 class="mt-4 w-50 ms-4" :prepend-inner-icon="getIconForField('Abholtermin')"
-                                @keydown.prevent :disabled="userRole === 'trainee'"></v-text-field>
+                                :disabled="userRole === 'trainee'"></v-text-field>
                             <v-select v-model="editedJobData.Status" :items="statuses" item-title="title"
                                 item-value="value" label="Status" variant="outlined" density="comfortable"
                                 hide-details="auto" class="mt-4 w-50 ms-4"
@@ -388,12 +388,13 @@ export default {
         formattedAbholterminForEdit: {
             get() {
                 if (!this.editedJobData.Abholtermin) return '';
-                try {
-                    const date = new Date(this.editedJobData.Abholtermin);
-                    return date.toISOString().slice(0, 16);
-                } catch {
-                    return '';
-                }
+                const date = new Date(this.editedJobData.Abholtermin);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
             },
             set(newValue) {
                 if (newValue) {
@@ -563,10 +564,6 @@ export default {
                     this.editedJobData.Status = foundStatus ? foundStatus.value : this.jobDetails.data.Status;
                 }
 
-                if (this.editedJobData.Abholtermin) {
-                    this.editedJobData.Abholtermin = this.formatDateTimeForInput(this.editedJobData.Abholtermin);
-                }
-
                 // Ensure services are mapped correctly for the autocomplete
                 if (this.jobDetails.data.services) {
                     this.editedJobData.services = this.jobDetails.data.services.map(service => ({
@@ -658,7 +655,9 @@ export default {
 
 
                     // Handle services (send only IDs)
-                    dataToSubmit.services = dataToSubmit.services ? dataToSubmit.services.map(s => s.id) : [];
+                    dataToSubmit.services = dataToSubmit.services
+                        ? dataToSubmit.services.map(s => ({ id: typeof s === 'object' ? s.id : s }))
+                        : [];
 
                     // Handle status casing for backend
                     if (Object.prototype.hasOwnProperty.call(dataToSubmit, 'Status')) {
@@ -678,6 +677,15 @@ export default {
                 }
 
                 console.log('Submitting job data:', dataToSubmit);
+
+                if (!dataToSubmit.images || !Array.isArray(dataToSubmit.images) || dataToSubmit.images.length === 0) {
+                    delete dataToSubmit.images;
+                } else {
+                    // prüft ob es wirklich File Objekte sind, weil sonst 422 Unprocessable Content
+                    if (!(dataToSubmit.images[0] instanceof File)) {
+                        delete dataToSubmit.images;
+                    }
+                }
 
                 await axios.put(
                     `/api/jobs/${this.$route.params.id}`,

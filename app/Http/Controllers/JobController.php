@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use \App\Models\Customer;
+use \App\Models\Car;
 
 class JobController extends Controller
 {
@@ -28,6 +30,7 @@ class JobController extends Controller
                 'trainee_id' => 'nullable|exists:users,id',
                 'images' => 'nullable|array',
                 'images.*' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
+                'assign_car_to_customer' => 'boolean'
             ]);
 
             $user = auth()->user();
@@ -40,7 +43,20 @@ class JobController extends Controller
             $job = Job::create(array_merge($validatedData, ['trainer_id' => $user->id]));
             $job->services()->sync($request->input('service_ids'));
 
-            // Erweiterte Bild-Verarbeitung
+            // Automatische Fahrzeug-Zuweisung
+            $assignCar = $request->input('assign_car_to_customer', true);
+            if ($assignCar) {
+                $car = \App\Models\Car::find($validatedData['car_id']);
+                if ($car && (!$car->customer_id || $car->customer_id == 0)) {
+                    $car->update(['customer_id' => $validatedData['customer_id']]);
+                    Log::info('Fahrzeug automatisch dem Kunden zugewiesen', [
+                        'car_id' => $car->id,
+                        'customer_id' => $validatedData['customer_id'],
+                        'job_id' => $job->id
+                    ]);
+                }
+            }
+
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $path = $image->store('jobs', 'public');
@@ -53,7 +69,7 @@ class JobController extends Controller
 
             DB::commit();
 
-            $job->load(['services', 'images']);
+            $job->load(['services', 'images', 'car', 'customer']);
 
             activity()
                 ->causedBy(auth()->user())
@@ -61,12 +77,14 @@ class JobController extends Controller
                     'job_id' => $job->id,
                     'title' => $job->title,
                     'status' => $job->status,
+                    'car_assigned' => $assignCar
                 ])
                 ->log('Auftrag erstellt: ' . $job->title . ' mit Status ' . $job->status . ' von ' . $user->firstname . ' ' . $user->lastname);
 
             return response()->json([
                 'message' => 'Job erfolgreich gespeichert',
                 'job' => $job,
+                'car_assigned' => $assignCar
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
@@ -77,6 +95,7 @@ class JobController extends Controller
             return response()->json(['error' => 'Fehler beim Speichern des Jobs'], 500);
         }
     }
+
 
     public function index(Request $request)
     {
@@ -208,23 +227,16 @@ class JobController extends Controller
             $user = auth()->user();
 
             if ($user && $user->role === 'trainee') {
-                Log::info('JobController@update: Trainee user detected.', ['user_id' => $user->id, 'job_user_id' => $job->user_id, 'job_id' => $job->id]);
-
-                // Trainee can only update status for their own jobs
+                // Trainee darf nur Status updaten
                 if ($job->trainee_id !== $user->id) {
-                    Log::error('JobController@update: Trainee attempting to update job not assigned to them.', ['user_id' => $user->id, 'job_trainee_id' => $job->trainee_id, 'job_id' => $job->id]);
                     abort(403, 'Unauthorized action. You can only update your own jobs.');
                 }
 
-                // Validate that only 'status' is being updated
                 $allowedFields = ['status'];
-                Log::info('JobController@update: Request all for trainee.', ['request_all' => $request->all()]);
                 $requestFields = array_keys($request->all());
-                Log::info('JobController@update: Trainee update request fields.', ['request_fields' => $requestFields]);
                 $diff = array_diff($requestFields, $allowedFields);
 
                 if (!empty($diff)) {
-                    Log::error('JobController@update: Trainee attempting to update fields other than status.', ['user_id' => $user->id, 'job_id' => $job->id, 'attempted_fields' => $requestFields]);
                     abort(403, 'Unauthorized action. Trainees can only update job status.');
                 }
 
@@ -234,25 +246,22 @@ class JobController extends Controller
 
                 $job->update($validatedData);
 
-                Log::info('Job trainee_id after update', ['trainee_id' => $job->trainee_id]);
-
                 activity()
-                ->causedBy(auth()->user())
-                ->withProperties([
-                    'job_id' => $job->id,
-                    'title' => $job->title,
-                    'status' => $job->status,
-                ])
-                ->log('Auftrag bearbeitet: ' . $job->title . ' mit Status ' . $job->status . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+                    ->causedBy($user)
+                    ->withProperties([
+                        'job_id' => $job->id,
+                        'title' => $job->title,
+                        'status' => $job->status,
+                    ])
+                    ->log('Auftrag bearbeitet: ' . $job->title . ' mit Status ' . $job->status . ' von ' . $user->firstname . ' ' . $user->lastname);
 
                 return response()->json([
                     'message' => 'Job Status erfolgreich aktualisiert',
                     'job' => $job->load('services')
                 ]);
-            } else { // Admin or Trainer
+            } else { // Admin oder Trainer
                 DB::beginTransaction();
 
-                // Convert empty string for scheduled_at to null
                 if ($request->has('scheduled_at') && $request->input('scheduled_at') === '') {
                     $request->merge(['scheduled_at' => null]);
                 }
@@ -269,18 +278,31 @@ class JobController extends Controller
                     'services.*.id' => 'required|exists:services,id',
                     'images' => 'nullable|array',
                     'images.*' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
+                    'assign_car_to_customer' => 'boolean'
                 ]);
 
                 $job->update($validatedData);
 
-                Log::info('Job trainee_id after update', ['trainee_id' => $job->trainee_id]);
-
+                // Services aktualisieren
                 if ($request->has('services')) {
                     $serviceIds = collect($request->input('services'))->pluck('id')->toArray();
                     $job->services()->sync($serviceIds);
                 }
 
-                // Handle new images
+                // Automatische Fahrzeug-Zuweisung
+                if ($request->has('assign_car_to_customer') && $request->boolean('assign_car_to_customer')) {
+                    $car = \App\Models\Car::find($validatedData['car_id'] ?? $job->car_id);
+                    if ($car && (!$car->customer_id || $car->customer_id == 0)) {
+                        $car->update(['customer_id' => $validatedData['customer_id'] ?? $job->customer_id]);
+                        Log::info('Fahrzeug automatisch dem Kunden zugewiesen (Update)', [
+                            'car_id' => $car->id,
+                            'customer_id' => $validatedData['customer_id'] ?? $job->customer_id,
+                            'job_id' => $job->id
+                        ]);
+                    }
+                }
+
+                // Neue Bilder hochladen
                 if ($request->hasFile('images')) {
                     foreach ($request->file('images') as $image) {
                         $path = $image->store('jobs', 'public');
@@ -293,7 +315,6 @@ class JobController extends Controller
 
                 DB::commit();
 
-                Log::info('JobController@update payload', $request->all());
                 return response()->json([
                     'message' => 'Job erfolgreich aktualisiert',
                     'job' => $job->load(['services', 'images'])
@@ -308,7 +329,6 @@ class JobController extends Controller
             return response()->json(['error' => 'Fehler beim Aktualisieren des Jobs'], 500);
         }
     }
-
     public function destroy(Job $job)
     {
         try {
@@ -328,13 +348,13 @@ class JobController extends Controller
             DB::commit();
 
             activity()
-            ->causedBy(auth()->user())
-            ->withProperties([
-                'job_id' => $job->id,
-                'title' => $job->title,
-                'status' => $job->status,
-            ])
-            ->log('Auftrag gelöscht: ' . $job->title . ' mit Status ' . $job->status . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'job_id' => $job->id,
+                    'title' => $job->title,
+                    'status' => $job->status,
+                ])
+                ->log('Auftrag gelöscht: ' . $job->title . ' mit Status ' . $job->status . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
             return response()->json([
                 'success' => true,
@@ -564,5 +584,38 @@ class JobController extends Controller
                 'error' => 'Fehler beim Abrufen der heutigen Aufträge'
             ], 500);
         }
+    }
+
+    public function getAvailableCars(Request $request)
+    {
+        try {
+            $cars = Car::whereNull('customer_id')
+                ->orderBy('license_plate')
+                ->get();
+
+            return response()->json([
+                'cars' => $cars
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Abrufen verfügbarer Fahrzeuge: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Fehler beim Abrufen verfügbarer Fahrzeuge'
+            ], 500);
+        }
+    }
+
+    public function getCarsForCustomer($customerId)
+    {
+        $customer = Customer::with('cars')->findOrFail($customerId);
+
+        if ($customer->cars()->exists()) {
+            $cars = $customer->cars()->get();
+        } else {
+            $cars = Car::whereNull('customer_id')->get();
+        }
+
+        return response()->json([
+            'cars' => $cars
+        ]);
     }
 }

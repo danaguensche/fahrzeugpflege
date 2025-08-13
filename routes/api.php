@@ -77,9 +77,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('customers', [CustomerController::class, 'index']);
     Route::get('customers/{id}', [CustomerController::class, 'show']);
     Route::get('customer/customerdetails/{id}', [CustomerDetailsController::class, 'details']);
+    Route::post('customers', [CustomerController::class, 'store']);
+
 
     Route::middleware(CheckRole::class . ':trainer,admin')->group(function () {
-        Route::post('customers', [CustomerController::class, 'store']);
         Route::put('customers/{id}', [CustomerController::class, 'update']);
         Route::delete('customers/{id}', [CustomerController::class, 'destroy']);
         Route::delete('customers', [CustomerController::class, 'destroyMultiple']);
@@ -99,6 +100,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('jobs/{job}/images/{imageId}', [JobController::class, 'deleteImage']);
         Route::post('jobs/{job}/images', [JobController::class, 'addImages']);
         Route::post('images/assign-to-car', [ImageController::class, 'assignToCar']);
+
+
+        Route::get('/jobs/cars-for-customer/{customerId}', [JobController::class, 'getCarsForCustomer']);
+        Route::post('/jobs', [JobController::class, 'store']);
+        Route::put('/jobs/{id}', [JobController::class, 'update']);
     });
 
 

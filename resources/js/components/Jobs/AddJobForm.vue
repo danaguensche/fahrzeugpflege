@@ -22,34 +22,39 @@
                                 density="comfortable" prepend-inner-icon="mdi-text" class="mb-3"></v-textarea>
                         </v-col>
 
-                        <v-col cols="12" sm="6">
-                            <v-autocomplete v-model="job.car" :items="cars" item-title="Kennzeichen" item-value="id"
-                                label="Fahrzeug" placeholder="Fahrzeug auswählen oder suchen"
-                                prepend-inner-icon="mdi-car" variant="outlined" density="comfortable" clearable
-                                :loading="carsLoading" @update:search="searchCars" return-object
-                                :rules="[v => !!v || 'Fahrzeug ist erforderlich']" required class="mb-3">
-                                <template v-slot:item="{ props, item }">
-                                    <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
-                                        :subtitle="item.raw.Automarke" class="pa-3"></v-list-item>
-                                </template>
-                                <template v-slot:selection="{ item }">
-                                    {{ item.raw.Kennzeichen }}
-                                </template>
-                            </v-autocomplete>
-                        </v-col>
-
+                        <!-- Kunde zuerst auswählen -->
                         <v-col cols="12" sm="6">
                             <v-autocomplete v-model="job.customer" :items="customers" item-title="full_name"
-                                item-value="id" label="Kunde" placeholder="Kunde auswählen oder suchen"
+                                item-value="id" label="Kunde" placeholder="Kunde auswählen"
                                 prepend-inner-icon="mdi-account" variant="outlined" density="comfortable" clearable
-                                :loading="customersLoading" @update:search="searchCustomers" return-object
-                                :rules="[v => !!v || 'Kunde ist erforderlich']" required class="mb-3">
+                                :loading="customersLoading" return-object
+                                :rules="[v => !!v || 'Kunde ist erforderlich']" required class="mb-3"
+                                @update:model-value="onCustomerChange">
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
                                         :subtitle="item.raw.email" class="pa-3"></v-list-item>
                                 </template>
                                 <template v-slot:selection="{ item }">
-                                    {{ item.raw.email }}
+                                    {{ item.raw.firstname }} {{ item.raw.lastname }}
+                                </template>
+                            </v-autocomplete>
+                        </v-col>
+
+                        <!-- Fahrzeuge basierend auf Kundenauswahl -->
+                        <v-col cols="12" sm="6">
+                            <v-autocomplete v-model="job.car" :items="availableCars" item-title="Kennzeichen"
+                                item-value="id" label="Fahrzeug"
+                                :placeholder="job.customer ? 'Fahrzeug für Kunde auswählen' : 'Zuerst Kunde auswählen'"
+                                prepend-inner-icon="mdi-car" variant="outlined" density="comfortable" clearable
+                                :loading="carsLoading" return-object :disabled="!job.customer"
+                                :rules="[v => !!v || 'Fahrzeug ist erforderlich']" required class="mb-3">
+                                <template v-slot:item="{ props, item }">
+                                    <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
+                                        :subtitle="`${item.raw.Automarke} ${getCarOwnershipLabel(item.raw)}`"
+                                        class="pa-3"></v-list-item>
+                                </template>
+                                <template v-slot:selection="{ item }">
+                                    {{ item.raw.Kennzeichen }}
                                 </template>
                             </v-autocomplete>
                         </v-col>
@@ -94,11 +99,19 @@
                                             :subtitle="item.raw.email" class="pa-3"></v-list-item>
                                     </template>
                                     <template v-slot:selection="{ item }">
-                                        {{ item.raw.email }}
+                                        {{ item.raw.firstname }} {{ item.raw.lastname }}
                                     </template>
                                 </v-autocomplete>
                             </v-col>
                         </template>
+
+                        <!-- Car Assignment Option -->
+                        <v-col cols="12" v-if="job.car && job.customer && !isCarOwnedByCustomer">
+                            <v-alert type="info" variant="tonal" class="mb-3">
+                                <v-icon start>mdi-information</v-icon>
+                                Das ausgewählte Fahrzeug wird automatisch dem Kunden zugewiesen.
+                            </v-alert>
+                        </v-col>
 
                     </v-row>
                 </v-form>
@@ -150,8 +163,8 @@ export default {
                 trainee: null,
             },
             trainees: [],
-            cars: [],
             customers: [],
+            availableCars: [], // Fahrzeuge für den ausgewählten Kunden
             services: [],
             jobStatuses: [
                 { title: 'Ausstehend', value: 'ausstehend' },
@@ -160,9 +173,7 @@ export default {
                 { title: 'Abgeschlossen', value: 'abgeschlossen' },
             ],
             carsLoading: false,
-            carSearchTimeout: null,
             customersLoading: false,
-            customerSearchTimeout: null,
             servicesLoading: false,
             traineesLoading: false,
             jobsLoading: false,
@@ -193,6 +204,12 @@ export default {
                 this.$emit('update:modelValue', value);
             },
         },
+
+        // Prüft ob das ausgewählte Auto bereits dem Kunden gehört
+        isCarOwnedByCustomer() {
+            if (!this.job.car || !this.job.customer) return false;
+            return this.job.car.customer_id === this.job.customer.id;
+        }
     },
     watch: {
         modelValue(val) {
@@ -206,6 +223,7 @@ export default {
             this.$emit('update:modelValue', false);
             this.resetForm();
         },
+
         async saveJob() {
             const { valid } = await this.$refs.form.validate();
             if (valid) {
@@ -216,7 +234,9 @@ export default {
                         car_id: this.job.car ? this.job.car.id : null,
                         customer_id: this.job.customer ? this.job.customer.id : null,
                         service_ids: this.job.services ? this.job.services.map(s => s.id) : [],
-                        trainee_id: this.isTrainee ? this.$store.state.auth.userId : (this.job.trainee ? this.job.trainee.id : null),                    };
+                        trainee_id: this.isTrainee ? this.$store.state.auth.userId : (this.job.trainee ? this.job.trainee.id : null),
+                        assign_car_to_customer: true // Automatische Zuweisung aktivieren
+                    };
                     delete jobData.car;
                     delete jobData.customer;
                     delete jobData.services;
@@ -234,30 +254,7 @@ export default {
                 }
             }
         },
-        async fetchCars(query = '') {
-            this.carsLoading = true;
-            try {
-                const response = await axios.get(`/api/cars/search?query=${query}`);
-                this.cars = response.data.data.map(car => ({
-                    id: car.id,
-                    Kennzeichen: car.Kennzeichen,
-                    Automarke: car.Automarke,
-                }));
-            } catch (error) {
-                console.error('Error fetching cars:', error);
-                this.showSnackbar('Fehler beim Laden der Fahrzeuge', 'error');
-            } finally {
-                this.carsLoading = false;
-            }
-        },
-        searchCars(query) {
-            if (this.carSearchTimeout) {
-                clearTimeout(this.carSearchTimeout);
-            }
-            this.carSearchTimeout = setTimeout(() => {
-                this.fetchCars(query);
-            }, 300);
-        },
+
         async fetchCustomers(query = '') {
             this.customersLoading = true;
             try {
@@ -276,14 +273,48 @@ export default {
                 this.customersLoading = false;
             }
         },
-        searchCustomers(query) {
-            if (this.customerSearchTimeout) {
-                clearTimeout(this.customerSearchTimeout);
+
+
+        // Neue Methode: Wird aufgerufen wenn ein Kunde ausgewählt wird
+        async onCustomerChange(customer) {
+            this.job.car = null; // Auto-Auswahl zurücksetzen
+            this.availableCars = [];
+
+            if (customer) {
+                console.log('Customer ID:', customer.id);
+                await this.fetchCarsForCustomer(customer.id);
             }
-            this.customerSearchTimeout = setTimeout(() => {
-                this.fetchCustomers(query);
-            }, 300);
         },
+
+        async fetchCarsForCustomer(customerId) {
+            this.carsLoading = true;
+            try {
+                const response = await axios.get(`/api/jobs/cars-for-customer/${customerId}`);
+                this.availableCars = response.data.cars.map(car => ({
+                    id: car.id,
+                    Kennzeichen: car.Kennzeichen || car.license_plate,
+                    Automarke: car.Automarke || car.brand,
+                    customer_id: car.customer_id
+                }));
+            } catch (error) {
+                console.error('Error fetching cars for customer:', error);
+                this.showSnackbar('Fehler beim Laden der Fahrzeuge', 'error');
+            } finally {
+                this.carsLoading = false;
+            }
+        },
+
+
+        // Hilfsmethode für Auto-Besitz Label
+        getCarOwnershipLabel(car) {
+            if (!car.customer_id) {
+                return '(verfügbar)';
+            } else if (this.job.customer && car.customer_id === this.job.customer.id) {
+                return '(bereits zugewiesen)';
+            }
+            return '';
+        },
+
         async fetchTrainees() {
             this.traineesLoading = true;
             try {
@@ -302,6 +333,7 @@ export default {
                 this.traineesLoading = false;
             }
         },
+
         async fetchServices() {
             this.servicesLoading = true;
             try {
@@ -317,9 +349,9 @@ export default {
                 this.servicesLoading = false;
             }
         },
+
         async fetchInitialData() {
-            this.fetchCars();
-            this.fetchCustomers();
+            this.fetchCustomers(); // Jetzt verfügbare Kunden laden
             this.fetchServices();
 
             if (this.isAdmin || this.isTrainer) {
@@ -340,8 +372,11 @@ export default {
                 services: [],
                 status: 'ausstehend',
                 scheduled_at: null,
+                trainee: null,
             };
+            this.availableCars = [];
         },
+
         showSnackbar(text, color = 'success') {
             this.snackbar = {
                 show: true,
