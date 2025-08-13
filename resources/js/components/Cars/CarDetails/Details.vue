@@ -7,13 +7,13 @@
         <template v-else>
             <!-- Header -->
             <v-card class="card">
-                <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon"></Header>
+                <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon">
+                </Header>
 
                 <!-- Image Gallery with Upload functionality -->
                 <ImageGallery 
                     :images="images" 
                     :editMode="editMode"
-                    :canEdit="isAdminOrTrainer"
                     :uploadUrl="`/api/cars/cardetails/${$route.params.kennzeichen}/images`"
                     :deleteUrlTemplate="'/api/images/{imageId}'"
                     :replaceUrlTemplate="`/api/cars/${$route.params.kennzeichen}/images/{imageId}`"
@@ -30,7 +30,7 @@
                 <!-- Fahrzeug information -->
                 <v-card-text class="px-4 pt-4 pb-0">
                     <v-sheet>
-                        <InformationHeader :title="'Fahrzeuginformationen'" :editMode="editMode" v-if="isAdminOrTrainer">
+                        <InformationHeader :title="'Fahrzeuginformationen'" :editMode="editMode">
                         </InformationHeader>
 
                         <!-- Ansichtsmodus -->
@@ -83,7 +83,7 @@
 
                         <!-- Button wird nur angezeigt wenn noch kein Kunde eingetragen wurde -->
                         <v-btn class="mt-4" color="primary"
-                            v-if="(!carDetails.data.customer || carDetails.data.customer === 0) && isAdminOrTrainer"
+                            v-if="(!carDetails.data.customer || carDetails.data.customer === 0)"
                             @click="openCustomerAddDialog">
                             Kunde hinzufügen
                         </v-btn>
@@ -100,14 +100,14 @@
                     <v-spacer></v-spacer>
 
                     <!-- Bearbeitungsmodus Aktionen -->
-                    <template v-if="editMode && isAdminOrTrainer">
+                    <template v-if="editMode">
                         <CancelButton :cancelEdit="cancelEdit"></CancelButton>
                         <SaveButton :saveData="saveCarData"></SaveButton>
                     </template>
 
                     <!-- Ansichtsmodus Aktionen -->
                     <template v-else>
-                        <EditButton :switchEditMode="switchEditMode" v-if="isAdminOrTrainer"></EditButton>
+                        <EditButton :switchEditMode="switchEditMode"></EditButton>
                     </template>
                 </v-card-actions>
             </v-card>

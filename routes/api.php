@@ -60,14 +60,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('cars', [CarController::class, 'index']);
     Route::get('cars/{kennzeichen}', [CarController::class, 'show']);
     Route::get('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'details']);
+    Route::post('cars', [CarController::class, 'store']);
+    Route::post('cars/cardetails/{kennzeichen}/images', [CarDetailsController::class, 'uploadImages']);
+    Route::put('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'update']);
+
+
 
     Route::middleware(CheckRole::class . ':trainer,admin')->group(function () {
         Route::post('cars', [CarController::class, 'store']);
         Route::put('cars/{kennzeichen}', [CarController::class, 'update']);
         Route::delete('cars/{kennzeichen}', [CarController::class, 'destroy']);
         Route::delete('cars', [CarController::class, 'destroyMultiple']);
-        Route::put('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'update']);
-        Route::post('cars/cardetails/{kennzeichen}/images', [CarDetailsController::class, 'uploadImages']);
         Route::delete('images/{imageId}', [CarDetailsController::class, 'deleteImage']);
         Route::post('cars/{kennzeichen}/images/{imageId}', [CarDetailsController::class, 'replaceImage']);
     });

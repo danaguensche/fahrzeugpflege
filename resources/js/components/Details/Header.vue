@@ -8,7 +8,7 @@
         <v-icon size="24" class="mr-2">{{ icon }}</v-icon>
         <span class="text-h5 font-weight-medium">{{ title }}</span>
         <v-spacer></v-spacer>
-        <v-btn icon @click="switchEditMode" variant="text" color="white" v-if="isAdminOrTrainer">
+        <v-btn icon @click="switchEditMode" variant="text" color="white" v-if="isAdminOrTrainer || title === 'Fahrzeugdetails' || title === 'Accountdetails'">
             <v-tooltip activator="parent" location="bottom">
                 Bearbeiten
             </v-tooltip>
