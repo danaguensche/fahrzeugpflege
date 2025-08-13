@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class ImageController extends Controller
 {
@@ -72,5 +73,25 @@ class ImageController extends Controller
         $image->delete();
 
         return response()->json(['message' => 'Image deleted successfully']);
+    }
+
+    // In ImageController oder einem passenden Controller
+    public function assignToCar(Request $request)
+    {
+        $request->validate([
+            'image_ids' => 'required|array',
+            'image_ids.*' => 'exists:images,id',
+            'car_id' => 'required|exists:cars,id'
+        ]);
+
+        // Einfach die car_id in der images Tabelle aktualisieren
+        DB::table('images')
+            ->whereIn('id', $request->image_ids)
+            ->update(['car_id' => $request->car_id]);
+
+        return response()->json([
+            'message' => 'Images successfully assigned to car',
+            'updated_count' => count($request->image_ids)
+        ]);
     }
 }

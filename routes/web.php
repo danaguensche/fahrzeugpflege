@@ -11,6 +11,11 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+Route::fallback(function () {
+    return redirect()->route('login');
+});
+
+
 Route::controller(PageController::class)->group(function () {
     // Route::get('/', 'login')->name('login');
     Route::get('/login', 'login')->name('login');
