@@ -11,19 +11,13 @@
                 </Header>
 
                 <!-- Image Gallery with Upload functionality -->
-                <ImageGallery 
-                    :images="images" 
-                    :editMode="editMode"
+                <ImageGallery :apiHeaders="apiHeaders" :images="images" :editMode="editMode"
                     :uploadUrl="`/api/cars/cardetails/${$route.params.kennzeichen}/images`"
-                    :deleteUrlTemplate="'/api/images/{imageId}'"
+                    :deleteUrlTemplate="'/api/cars/images/{imageId}'"
                     :replaceUrlTemplate="`/api/cars/${$route.params.kennzeichen}/images/{imageId}`"
-                    :entityId="$route.params.kennzeichen"
-                    uploadDialogTitle="Fahrzeugbilder hochladen"
-                    @images-uploaded="handleImagesUploaded"
-                    @image-deleted="handleImageDeleted"
-                    @image-replaced="handleImageReplaced"
-                    @success="showSuccessMessage"
-                    @error="showErrorMessage"
+                    :entityId="$route.params.kennzeichen" uploadDialogTitle="Fahrzeugbilder hochladen"
+                    @images-uploaded="handleImagesUploaded" @image-deleted="handleImageDeleted"
+                    @image-replaced="handleImageReplaced" @success="showSuccessMessage" @error="showErrorMessage"
                     @loading="setImageLoading">
                 </ImageGallery>
 
@@ -47,34 +41,19 @@
                     <!-- Customer information -->
                     <v-sheet>
                         <DefaultHeader :title="'Kundeninformation'"></DefaultHeader>
-                        <CustomerInfoList v-if="!editMode" :customer="carDetails.data.customer" :customerId="carDetails.data.customer_id"
-                            :labels="labels">
+                        <CustomerInfoList v-if="!editMode" :customer="carDetails.data.customer"
+                            :customerId="carDetails.data.customer_id" :labels="labels">
                         </CustomerInfoList>
 
-                        <v-autocomplete
-                            v-else-if="isAdminOrTrainer"
-                            v-model="editedCarData.customer"
-                            :items="customers"
-                            item-title="full_name"
-                            item-value="id"
-                            label="Kunde"
-                            placeholder="Kunde auswählen oder suchen"
-                            prepend-inner-icon="mdi-account"
-                            variant="outlined"
-                            density="comfortable"
-                            hide-details="auto"
-                            clearable
-                            :loading="customersLoading"
-                            :search-input.sync="customerSearch"
-                            @update:search-input="searchCustomers"
-                            return-object
-                        >
+                        <v-autocomplete v-else-if="isAdminOrTrainer" v-model="editedCarData.customer" :items="customers"
+                            item-title="full_name" item-value="id" label="Kunde"
+                            placeholder="Kunde auswählen oder suchen" prepend-inner-icon="mdi-account"
+                            variant="outlined" density="comfortable" hide-details="auto" clearable
+                            :loading="customersLoading" :search-input.sync="customerSearch"
+                            @update:search-input="searchCustomers" return-object>
                             <template v-slot:item="{ props, item }">
-                                <v-list-item
-                                    v-bind="props"
-                                    :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                    :subtitle="item.raw.email"
-                                ></v-list-item>
+                                <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                    :subtitle="item.raw.email"></v-list-item>
                             </template>
                             <template v-slot:selection="{ item }">
                                 {{ item.raw.email }}
@@ -207,6 +186,13 @@ export default {
         };
     },
     computed: {
+        
+        apiHeaders() {
+            const token = localStorage.getItem('api_token') || this.$store.state.auth.token;
+            return token ? {
+                'Authorization': `Bearer ${token}`
+            } : {};
+        },
         ...mapGetters('auth', ['isAdminOrTrainer']),
         vehicleInfoKeys() {
             return ['id', 'Kennzeichen', 'Fahrzeugklasse', 'Automarke', 'Typ', 'Farbe', 'Sonstiges'];
@@ -219,7 +205,7 @@ export default {
             }
             return `${customer.firstname} ${customer.lastname}`;
         },
-        
+
         // Add this to safely handle customer ID
         customerIdDisplay() {
             const customerId = this.carDetails.data?.customer_id;
@@ -264,7 +250,7 @@ export default {
     async mounted() {
         try {
             await this.getCar();
-            await this.fetchCustomers(); 
+            await this.fetchCustomers();
         } catch (error) {
             this.error = error.message;
             this.showSnackbar(error.message, 'error');
@@ -356,7 +342,7 @@ export default {
             try {
                 // Prepare data for submission
                 const dataToSubmit = { ...this.editedCarData };
-                
+
                 // Handle customer_id - convert empty/null values to null
                 if (dataToSubmit.customer) {
                     dataToSubmit.customer_id = dataToSubmit.customer.id;
@@ -382,9 +368,9 @@ export default {
             } catch (error) {
                 console.error('Error saving car data:', error);
                 console.error('Error response:', error.response?.data);
-                
+
                 let errorMessage = "Fehler beim Speichern der Fahrzeugdaten";
-                
+
                 if (error.response?.data?.message) {
                     errorMessage = error.response.data.message;
                 } else if (error.response?.data?.errors) {
@@ -392,7 +378,7 @@ export default {
                     const validationErrors = Object.values(error.response.data.errors).flat();
                     errorMessage = validationErrors.join(', ');
                 }
-                
+
                 this.showSnackbar(errorMessage, 'error');
             } finally {
                 this.saveLoading = false;
@@ -524,75 +510,75 @@ export default {
 
 <style scoped>
 .card-container {
-  width: 100%;
-  height: calc(100vh - 40px);
-  padding: 20px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
+    width: 100%;
+    height: calc(100vh - 40px);
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 .card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
 @media (max-width: 575.98px) {
-  .card-container {
-    padding: 10px;
-    height: calc(100vh - 20px);
-  }
+    .card-container {
+        padding: 10px;
+        height: calc(100vh - 20px);
+    }
 
-  .card {
-    font-size: 14px;
-  }
+    .card {
+        font-size: 14px;
+    }
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
-  .card-container {
-    padding: 15px;
-    height: calc(100vh - 30px);
-  }
+    .card-container {
+        padding: 15px;
+        height: calc(100vh - 30px);
+    }
 }
 
 @media (min-width: 768px) and (max-width: 991.98px) {
-  .card-container {
-    max-width: calc(100% - 80px);
-  }
+    .card-container {
+        max-width: calc(100% - 80px);
+    }
 }
 
 @media (min-width: 992px) and (max-width: 1199.98px) {
-  .card-container {
-    max-width: calc(100% - 250px);
-  }
+    .card-container {
+        max-width: calc(100% - 250px);
+    }
 }
 
 @media (min-width: 1200px) {
-  .card-container {
-    max-width: calc(100% - 280px);
-  }
+    .card-container {
+        max-width: calc(100% - 280px);
+    }
 }
 
 @media (max-width: 767.98px) {
-  .v-card-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    .v-card-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-  .v-card-actions button {
-    margin-bottom: 8px;
-    width: 100%;
-  }
+    .v-card-actions button {
+        margin-bottom: 8px;
+        width: 100%;
+    }
 
-  .v-spacer {
-    display: none;
-  }
+    .v-spacer {
+        display: none;
+    }
 }
 </style>
