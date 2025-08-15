@@ -71,7 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('cars/{kennzeichen}', [CarController::class, 'update']);
         Route::delete('cars/{kennzeichen}', [CarController::class, 'destroy']);
         Route::delete('cars', [CarController::class, 'destroyMultiple']);
-        Route::delete('images/{imageId}', [CarDetailsController::class, 'deleteImage']);
+        Route::delete('cars/images/{imageId}', [CarDetailsController::class, 'deleteImage']);
         Route::post('cars/{kennzeichen}/images/{imageId}', [CarDetailsController::class, 'replaceImage']);
     });
 
