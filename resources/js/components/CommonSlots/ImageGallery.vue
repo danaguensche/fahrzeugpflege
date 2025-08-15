@@ -428,18 +428,13 @@ export default {
                 this.$emit('loading', true);
                 
                 const deleteUrl = this.deleteUrlTemplate.replace('{imageId}', imageId);
-
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');          
+                
                 const response = await fetch(deleteUrl, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'X-Requested-With': 'XMLHttpRequest',
-                        ...this.defaultHeaders,
-                    },
-                    withCredentials: true
+                        ...this.defaultHeaders
+                    }
                 });
 
                 if (response.ok) {
@@ -490,7 +485,7 @@ export default {
                     {
                         headers: {
                             'Content-Type': 'multipart/form-data',
-                            ...this.defaultHeaders,
+                            ...this.defaultHeaders
                         },
                     }
                 );

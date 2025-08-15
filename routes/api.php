@@ -71,7 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('cars/{kennzeichen}', [CarController::class, 'update']);
         Route::delete('cars/{kennzeichen}', [CarController::class, 'destroy']);
         Route::delete('cars', [CarController::class, 'destroyMultiple']);
-        Route::delete('cars/images/{imageId}', [CarDetailsController::class, 'deleteImage']);
+        Route::delete('images/{imageId}', [CarDetailsController::class, 'deleteImage']);
         Route::post('cars/{kennzeichen}/images/{imageId}', [CarDetailsController::class, 'replaceImage']);
     });
 
@@ -94,13 +94,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Jobs Routes
 
     Route::middleware(CheckRole::class . ':trainer,admin,trainee')->group(function () {
-        Route::delete('jobs/{job}/images/{imageId}', [JobController::class, 'deleteImage']);
-
         Route::get('/jobs/search', [JobController::class, 'search']);
         Route::get('/jobs', [JobController::class, 'index']);
         Route::get('/jobs/{job}', [JobController::class, 'show']);
-        Route::put('/jobs/{job}', [JobController::class, 'update']);
+        Route::put('/jobs/{job}', [JobController::class, 'update']); // Moved outside of role middleware
+        Route::get('/jobs/jobdetails/{id}', [JobDetailsController::class, 'details']);
         Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
+        Route::delete('jobs/{job}/images/{imageId}', [JobController::class, 'deleteImage']);
         Route::post('jobs/{job}/images', [JobController::class, 'addImages']);
         Route::post('images/assign-to-car', [ImageController::class, 'assignToCar']);
 
@@ -130,6 +130,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware(CheckRole::class . ':trainer,admin,trainee')->group(function () {
         Route::post('/jobs', [JobController::class, 'store']);
+        // Route::put('/jobs/{job}', [App\Http\Controllers\JobController::class, 'update']); // Moved outside
         Route::delete('/jobs/{job}', [JobController::class, 'destroy']);
         Route::delete('jobs', [JobController::class, 'destroyMultiple']);
     });

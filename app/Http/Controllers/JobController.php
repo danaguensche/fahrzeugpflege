@@ -439,74 +439,24 @@ class JobController extends Controller
     public function deleteImage(Request $request, Job $job, $imageId)
     {
         try {
-            Log::info('Attempting to delete image', [
-                'job_id' => $job->id,
-                'image_id' => $imageId
-            ]);
+            $image = $job->images()->findOrFail($imageId);
 
-            // Find the image that belongs to this job
-            $image = $job->images()->where('id', $imageId)->first();
-
-            if (!$image) {
-                Log::warning('Image not found', [
-                    'job_id' => $job->id,
-                    'image_id' => $imageId
-                ]);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Bild nicht gefunden oder gehört nicht zu diesem Auftrag.'
-                ], 404);
-            }
-
-            DB::beginTransaction();
-
-            // Delete the physical file from storage
             $imagePath = str_replace('storage/', '', $image->path);
-            Log::info('Attempting to delete file from storage', ['path' => $imagePath]);
-
             if (Storage::disk('public')->exists($imagePath)) {
-                $deleted = Storage::disk('public')->delete($imagePath);
-                Log::info('File deletion result', ['deleted' => $deleted, 'path' => $imagePath]);
-            } else {
-                Log::warning('File not found in storage', ['path' => $imagePath]);
+                Storage::disk('public')->delete($imagePath);
             }
 
-            // Delete the database record
             $image->delete();
-
-            DB::commit();
-
-            // Log activity
-            activity()
-                ->causedBy(auth()->user())
-                ->withProperties([
-                    'job_id' => $job->id,
-                    'image_id' => $imageId,
-                    'image_path' => $image->path
-                ])
-                ->log('Bild gelöscht von Auftrag: ' . $job->title);
-
-            Log::info('Image successfully deleted', [
-                'job_id' => $job->id,
-                'image_id' => $imageId
-            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Bild erfolgreich gelöscht.'
             ]);
         } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Fehler beim Löschen des Bildes', [
-                'job_id' => $job->id,
-                'image_id' => $imageId,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
+            Log::error('Fehler beim Löschen des Bildes: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Fehler beim Löschen des Bildes: ' . $e->getMessage()
+                'message' => 'Fehler beim Löschen des Bildes.'
             ], 500);
         }
     }

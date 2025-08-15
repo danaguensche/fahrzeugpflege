@@ -10,8 +10,8 @@
                 <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon"></Header>
 
                 <ImageGallery :images="images" :editMode="editMode" :canEdit="isAdminOrTrainer"
-                    :uploadUrl="`/api/jobs/${$route.params.id}/images`" :deleteUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`"
-                    :replaceUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`" :entityId="$route.params.id" :apiHeaders="apiHeaders"
+                    :uploadUrl="`/api/jobs/${$route.params.id}/images`" :deleteUrlTemplate="'/api/images/{imageId}'"
+                    :replaceUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`" :entityId="$route.params.id"
                     uploadDialogTitle="Auftragsbilder hochladen" @images-uploaded="handleImagesUploaded"
                     @image-deleted="handleImageDeleted" @image-replaced="handleImageReplaced"
                     @success="showSuccessMessage" @error="showErrorMessage" @loading="setImageLoading">
@@ -320,12 +320,6 @@ export default {
         };
     },
     computed: {
-        apiHeaders() {
-            const token = localStorage.getItem('api_token') || this.$store.state.auth.token;
-            return token ? {
-                'Authorization': `Bearer ${token}`
-            } : {};
-        },
         images() {
             const img = this.jobDetails.data?.images;
             console.log("Raw images data:", img);
