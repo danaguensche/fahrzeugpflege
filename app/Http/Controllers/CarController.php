@@ -43,7 +43,7 @@ class CarController extends Controller
             activity()
                 ->causedBy(auth()->user())
                 ->withProperties(['Kennzeichen' => $car->Kennzeichen])
-                ->log('Fahrzeug erstellt: ' . $car->Kennzeichen . 'von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+                ->log('Fahrzeug erstellt: ' . $car->Kennzeichen . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
             return response()->json([
                 'message' => 'Fahrzeug erfolgreich gespeichert',

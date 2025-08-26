@@ -32,7 +32,7 @@ class CustomerController extends Controller
             activity()
             ->causedBy(auth()->user())
             ->withProperties(['customer_id' => $customer->id])
-            ->log('Kunde erstellt: ' . $customer->firstname . ' ' . $customer->lastname . ' von' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+            ->log('Kunde erstellt: ' . $customer->firstname . ' ' . $customer->lastname . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
             return response()->json([
                 'success' => true,
@@ -159,7 +159,7 @@ class CustomerController extends Controller
                 activity()
             ->causedBy(auth()->user())
             ->withProperties(['customer_id' => $customer->id])
-            ->log('Kunde gelöscht: ' . $customer->firstname . ' ' . $customer->lastname . ' von' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+            ->log('Kunde gelöscht: ' . $customer->firstname . ' ' . $customer->lastname . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
                 return response()->json([
                     'success' => true,
@@ -237,7 +237,7 @@ class CustomerController extends Controller
             activity()
             ->causedBy(auth()->user())
             ->withProperties(['customer_id' => $customer->id])
-            ->log('Kunde bearbeitet: ' . $customer->firstname . ' ' . $customer->lastname . ' von' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+            ->log('Kunde bearbeitet: ' . $customer->firstname . ' ' . $customer->lastname . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
             return response()->json([
                 'success' => true,
