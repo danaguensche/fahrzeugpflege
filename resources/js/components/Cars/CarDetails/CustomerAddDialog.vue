@@ -77,7 +77,7 @@
         <v-card-actions class="pa-4 grey lighten-4">
           <v-btn color="green lighten-4" @click="openAddCustomerDialog" prepend-icon="mdi-plus" size="small"
             class="mb-2">
-            Fahrzeug hinzufügen
+            Kunden hinzufügen
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn color="grey darken-1" text @click="closeDialog">
