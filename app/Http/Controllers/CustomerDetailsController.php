@@ -13,8 +13,21 @@ class CustomerDetailsController extends CustomerController
     {
         $customer = Customer::with(['cars', 'auftraege'])->where('id', $id)->first();
 
+        $perPage = 1;
+
+        $auftraege = $customer->auftraege()->paginate($perPage);
+
         if ($customer !== null) {
-            return new CustomerResource($customer);
+            $customerResource = new CustomerResource($customer);
+            return response()->json([
+                'success' => true,
+                'customer' => $customerResource,
+                'auftraege' => $auftraege,
+                'last_page' => $auftraege->lastPage(),
+                'total' => $auftraege->total(),
+                'current_page' => $auftraege->currentPage(),
+                'per_page' => $auftraege->perPage(),
+            ]);
         } else {
             return response()->json([
                 'success' => false,

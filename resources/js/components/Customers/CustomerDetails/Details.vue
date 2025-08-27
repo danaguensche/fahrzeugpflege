@@ -83,7 +83,7 @@
             </div>
           </v-sheet>
 
-          <!-- Fahrzeuge --> 
+          <!-- Fahrzeuge -->
           <v-sheet>
             <HeaderWithChip :customerDetails="customerDetails"></HeaderWithChip>
             <CarList v-if="customerDetails.data.cars && customerDetails.data.cars.length > 0"
@@ -114,15 +114,16 @@
           <!-- Auftragsinformationen -->
           <v-sheet>
             <DefaultHeader :title="'Auftragsinformationen'"></DefaultHeader>
-            <template v-if="customerDetails.data.auftraege && customerDetails.data.auftraege.length > 0">
-              <div v-for="auftrag in customerDetails.data.auftraege" :key="auftrag.id" class="mb-4 pa-4">
+            <template v-if="customerDetails.auftraege.data && customerDetails.auftraege.data.length > 0">
+              <div v-for="auftrag in customerDetails.auftraege.data" :key="auftrag.id" class="mb-4 pa-4">
                 <v-list class="bg-transparent">
                   <v-list-item>
                     <template v-slot:prepend>
                       <v-icon icon="mdi-identifier" color="primary" class="mr-2"></v-icon>
                     </template>
                     <v-list-item-title class="font-weight-medium">
-                      <router-link :to="`/auftraege/jobdetails/${auftrag.id}`" class="text-decoration-none text-primary">
+                      <router-link :to="`/auftraege/jobdetails/${auftrag.id}`"
+                        class="text-decoration-none text-primary">
                         Auftrag ID: {{ auftrag.id }}
                       </router-link>
                     </v-list-item-title>
@@ -144,7 +145,7 @@
                           {{ formatDate(auftrag[key]) }}
                         </template>
                         <template v-else-if="key === 'Status'">
-                          {{ statusOptions.find(option => option.value === auftrag[key])?.title || auftrag[key] }}
+                          {{statusOptions.find(option => option.value === auftrag[key])?.title || auftrag[key]}}
                         </template>
                       </v-list-item-subtitle>
                     </v-list-item>
@@ -164,6 +165,12 @@
               </v-list-item>
             </template>
           </v-sheet>
+
+          <!-- Paginierung -->
+          <div class="text-center">
+            <v-pagination v-model="page" :length="customerDetails.auftraege.last_page"
+              @update:model-value="loadPage" :total-visible="5"></v-pagination>
+          </div>
 
           <!-- Metadaten -->
           <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt" :formattedUpdatedAt="formattedUpdatedAt">
@@ -257,10 +264,10 @@ export default {
         cars: "Fahrzeuge",
         created_at: "Erstellt am",
         updated_at: "Zuletzt aktualisiert am",
-        Title: "Titel",
-        Beschreibung: "Beschreibung",
-        Abholtermin: "Abholtermin",
-        Status: "Status",
+        title: "Titel",
+        description: "Beschreibung",
+        scheduled_at: "Abholtermin",
+        status: "Status",
       },
       loading: true,
       error: null,
@@ -275,6 +282,8 @@ export default {
         { title: 'im Rückblick', value: 'im_rueckblick' },
         { title: 'Abgeschlossen', value: 'abgeschlossen' },
       ],
+      page: 1,
+      perPage: 1
     };
   },
 
@@ -288,16 +297,36 @@ export default {
     },
 
     auftragInfoKeys() {
-      return ['Title', 'Beschreibung', 'Abholtermin', 'Status'];
+      return ['title', 'description', 'scheduled_at', 'status'];
     },
 
     formattedCreatedAt() {
-      return this.formatDate(this.customerDetails.data?.created_at);
+      return this.formatDate(this.customerDetails.customer?.created_at);
     },
 
     formattedUpdatedAt() {
-      return this.formatDate(this.customerDetails.data?.updated_at);
-    }
+      return this.formatDate(this.customerDetails.customer?.updated_at);
+    },
+
+    totalPages() {
+      return this.customerDetails?.auftraege?.last_page || 1;
+    },
+
+    currentPage() {
+      return this.customerDetails?.auftraege?.current_page || 1;
+    },
+
+    totalAuftraege() {
+      return this.customerDetails?.auftraege?.total || 0;
+    },
+
+    hasNextPage() {
+      return this.currentPage < this.totalPages;
+    },
+
+    hasPrevPage() {
+      return this.currentPage > 1;
+    },
   },
 
   async mounted() {
@@ -308,6 +337,12 @@ export default {
       this.showSnackbar(error.message, 'error');
     } finally {
       this.loading = false;
+    }
+  },
+
+  watch: {
+    page(newPage) {
+      this.loadPage(newPage);
     }
   },
 
@@ -328,23 +363,50 @@ export default {
       }
     },
 
-    async getCustomer() {
+    async loadPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        await this.getCustomer(page);
+      }
+    },
+
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.page = page;
+      }
+    },
+
+    nextPage() {
+      if (this.page < this.totalPages) {
+        this.page++;
+      }
+    },
+
+    prevPage() {
+      if (this.page > 1) {
+        this.page--;
+      }
+    },
+
+    async getCustomer(page = 1) {
       try {
         if (!this.$route?.params?.id) {
           throw new Error("Keine Kunden-ID angegeben");
         }
 
         const { data } = await axios.get(
-          `/api/customer/customerdetails/${this.$route.params.id}`
+          `/api/customer/customerdetails/${this.$route.params.id}?page=${page}`
         );
 
         if (!data) {
           throw new Error("Keine Daten vom Server erhalten");
         }
 
-        this.customerDetails = data;
-        this.customerDetails.data.jobs = data.jobs; 
-        this.editedCustomerData = { ...this.customerDetails.data };
+        this.customerDetails = {
+          data: data.customer,
+          auftraege: data.auftraege
+        };
+        this.page = page;
+        this.editedCustomerData = { ...data.customer };
       } catch (error) {
         this.error = error.response?.data?.message || error.message;
         this.showSnackbar("Fehler beim Laden der Kundendetails: " + this.error, 'error');
@@ -374,12 +436,12 @@ export default {
         addressline: "mdi-map-marker",
         postalcode: "mdi-mail",
         city: "mdi-city",
-        
+
         cars: "mdi-car-multiple",
-        Title: "mdi-format-title",
-        Beschreibung: "mdi-text-box-outline",
-        Abholtermin: "mdi-calendar",
-        Status: "mdi-check-circle-outline"
+        title: "mdi-format-title",
+        description: "mdi-text-box-outline",
+        scheduled_at: "mdi-calendar",
+        status: "mdi-check-circle-outline"
       };
 
       return iconMap[key] || "mdi-information-outline";
@@ -449,7 +511,6 @@ export default {
         console.log('Sende Anfrage an:', endpoint);
         console.log('Mit Payload:', JSON.stringify(requestPayload));
 
-        // Setze explizite Header
         const response = await axios.put(
           endpoint,
           requestPayload,
