@@ -3,13 +3,16 @@
         <div class="search-wrapper">
             <div class="search-input-container">
                 <Search :context="searchContext" v-model="searchText" @clearSearch="clearSearch" />
+
                 <div class="search-buttons">
                     <v-btn :icon="true" :prepend-icon="'mdi-magnify'" class="search-button" variant="text"
                         @click="searchCustomers">
                         <v-icon>mdi-magnify</v-icon>
                     </v-btn>
+
                     <CloseButton :isVisible="searchText.length > 0" class="close-button" @close="clearSearch">
                     </CloseButton>
+                    
                 </div>
             </div>
         </div>
@@ -18,9 +21,19 @@
             <DefaultButton @click="openAddCustomerDialog">Kunde hinzufügen</DefaultButton>
         </div>
 
-        <DataTable :searchString="searchText" :isSearchActive="isSearchActive" endpoint="customers"
-            :headers="customerHeaders" :fields="customerFields" itemKey="id" detailsPage="kundendetails"
-            detailsUrlBasePath="kunden" @itemsDeleted="handleItemsDeleted" @show-error="handleError" />
+        <!-- Kundendaten Tabelle -->
+        <DataTable :searchString="searchText" 
+        :isSearchActive="isSearchActive" 
+        endpoint="customers"
+        :headers="customerHeaders"
+        :fields="customerFields" 
+        itemKey="id" 
+        detailsPage="kundendetails"
+        detailsUrlBasePath="kunden" 
+        @itemsDeleted="handleItemsDeleted" 
+        @show-error="handleError" />
+
+
         <AddCustomerForm v-model="showAddCustomerDialog" @customer-added="handleCustomerAdded" />
 
     </div>

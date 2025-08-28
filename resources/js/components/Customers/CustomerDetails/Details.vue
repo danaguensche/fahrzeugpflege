@@ -7,39 +7,46 @@
 
     <!-- Vollständige Ansicht der Daten wenn loading false ist -->
     <template v-else>
+
       <!-- Header der Karte -->
       <v-card class="card">
-        <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon">
+        <Header :title="headerTitle" 
+                :switchEditMode="switchEditMode" 
+                :icon="headerIcon">
         </Header>
 
         <!-- Persönliche Informationen -->
         <v-card-text class="px-4 pt-4 pb-0">
           <v-sheet>
-            <InformationHeader :title="'Persönliche Informationen'" :editMode="editMode" :icon="headerIcon"
-              :getIconForField="getIconForField">
+            <InformationHeader :title="'Persönliche Informationen'" 
+                               :editMode="editMode" 
+                               :icon="headerIcon"
+                               :getIconForField="getIconForField">
             </InformationHeader>
-
             <!-- Ansichtsmodus -->
-            <InfoList v-if="!editMode" :details="customerDetails" :labels="labels" :infoKeys="personalInfoKeys"
-              :getIconForField="getIconForField">
+            <InfoList v-if="!editMode"  :details="customerDetails" 
+                                        :labels="labels" 
+                                        :infoKeys="personalInfoKeys"
+                                        :getIconForField="getIconForField">
             </InfoList>
-
             <!-- Bearbeitungsmodus -->
-            <InfoListEditMode v-else :personalInfoKeys="personalInfoKeys" :labels="labels"
-              :editedData="editedCustomerData" :getIconForField="getIconForField">
+            <InfoListEditMode v-else  :personalInfoKeys="personalInfoKeys" 
+                                      :labels="labels"
+                                      :editedData="editedCustomerData" 
+                                      :getIconForField="getIconForField">
             </InfoListEditMode>
           </v-sheet>
 
           <!-- Adressinformationen -->
           <v-sheet>
             <DefaultHeader :title="'Adressinformationen'"></DefaultHeader>
+
             <!-- Ansichtsmodus -->
             <v-list class="bg-transparent" v-if="!editMode">
               <template v-for="key in addressInfoKeys" :key="key">
                 <v-list-item v-if="customerDetails.data[key] !== undefined">
                   <template v-slot:prepend>
-                    <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
-                    </v-icon>
+                    <v-icon :icon="getIconForField(key)" color="primary" class="mr-2"></v-icon>
                   </template>
 
                   <v-list-item-title class="font-weight-medium">
@@ -55,8 +62,7 @@
                     </template>
                   </v-list-item-subtitle>
                 </v-list-item>
-                <v-divider v-if="key !== addressInfoKeys[addressInfoKeys.length - 1]">
-                </v-divider>
+                <v-divider v-if="key !== addressInfoKeys[addressInfoKeys.length - 1]"></v-divider>
               </template>
             </v-list>
 
@@ -87,33 +93,41 @@
           <v-sheet>
             <HeaderWithChip :customerDetails="customerDetails"></HeaderWithChip>
             <CarList v-if="customerDetails.data.cars && customerDetails.data.cars.length > 0"
-              :cars="customerDetails.data.cars" :edit-mode="editMode" @delete-car="deleteCar">
+              :cars="customerDetails.data.cars" 
+              :edit-mode="editMode" 
+              @delete-car="deleteCar">
             </CarList>
+
             <!-- Wenn keine Fahrzeuge vorhanden sind -->
             <template v-else>
               <v-list-item>
                 <v-list-item-subtitle class="text-grey">
                   <div class="d-flex align-center justify-center pa-4">
-                    <v-icon icon="mdi-car-off" color="grey-lighten-1" size="32" class="mr-2">
-                    </v-icon>
+                    <v-icon icon="mdi-car-off" color="grey-lighten-1" size="32" class="mr-2"></v-icon>
                     <span>Keine Fahrzeuge zugeordnet</span>
                   </div>
                 </v-list-item-subtitle>
               </v-list-item>
             </template>
+
+            
+            <!-- Fahrzeug hinzufügen Button -->
             <v-btn class="mt-4" color="primary" @click="openCarAddDialog">
               Fahrzeug hinzufügen
             </v-btn>
           </v-sheet>
 
           <!-- Fahrzeug hinzufügen Dialog -->
-          <CarAddDialog ref="carAddDialog" :kundeId="$route.params.id" @car-added="handleNewCar"
-            @car-assigned="handleCarAssigned" @car-selected="handleCarSelected" @error="handleCarAddError">
+          <CarAddDialog ref="carAddDialog"  :kundeId="$route.params.id" 
+                                            @car-added="handleNewCar"
+                                            @car-assigned="handleCarAssigned" 
+                                            @error="handleCarAddError">
           </CarAddDialog>
 
           <!-- Auftragsinformationen -->
           <v-sheet>
             <DefaultHeader :title="'Auftragsinformationen'"></DefaultHeader>
+
             <template v-if="customerDetails.auftraege.data && customerDetails.auftraege.data.length > 0">
               <div v-for="auftrag in customerDetails.auftraege.data" :key="auftrag.id" class="mb-4 pa-4">
                 <v-list class="bg-transparent">
@@ -158,6 +172,8 @@
                 </v-list>
               </div>
             </template>
+
+            <!-- Keine Aufträge vorhanden -->
             <template v-else>
               <v-list-item>
                 <v-list-item-subtitle class="text-grey">
@@ -170,15 +186,14 @@
             </template>
           </v-sheet>
 
-          <!-- Paginierung -->
+          <!-- Paginierung für Aufträge-->
           <div class="text-center">
             <v-pagination v-model="page" :length="customerDetails.auftraege.last_page" @update:model-value="loadPage"
               :total-visible="5"></v-pagination>
           </div>
 
           <!-- Metadaten -->
-          <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt" :formattedUpdatedAt="formattedUpdatedAt">
-          </MetaData>
+          <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt" :formattedUpdatedAt="formattedUpdatedAt"></MetaData>
         </v-card-text>
 
         <v-card-actions class="pa-4">
@@ -200,8 +215,7 @@
     </template>
 
     <!-- Snackbar für Benachrichtigungen -->
-    <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false">
-    </SnackBar>
+    <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false"></SnackBar>
   </v-container>
 </template>
 
@@ -292,6 +306,7 @@ export default {
   },
 
   computed: {
+
     personalInfoKeys() {
       return ['id', 'company', 'firstname', 'lastname', 'email', 'phonenumber', 'notes'];
     },
@@ -338,7 +353,7 @@ export default {
       await this.getCustomer();
     } catch (error) {
       this.error = error.message;
-      this.showSnackbar(error.message, 'error');
+      this.showSnackbar(error.message, 'Kundendaten konnten nicht geladen werden');
     } finally {
       this.loading = false;
     }
@@ -593,11 +608,6 @@ export default {
         const errorMessage = error.response?.data?.message || "Fehler beim Aktualisieren der Kundenfahrzeuge";
         this.showSnackbar(errorMessage, 'error');
       }
-    },
-
-    handleCarSelected(car) {
-      // Dieser Handler wird aufgerufen, wenn ein Auto aus der Liste ausgewählt wurde
-      console.log('Auto ausgewählt:', car);
     },
 
     async deleteCar(car) {

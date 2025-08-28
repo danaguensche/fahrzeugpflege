@@ -70,6 +70,8 @@
                             ></v-text-field>
                         </v-col>
 
+
+                        <!-- Kunde hinzufügen (mit Suche und Autovervollständigung) -->
                         <v-col cols="12" sm="6" v-if="addCustomerField">
                             <v-autocomplete
                                 v-model="car.customer"
@@ -85,8 +87,8 @@
                                 :loading="customersLoading"
                                 @update:search="searchCustomers"
                                 return-object
-                                class="mb-3"
-                            >
+                                class="mb-3">
+
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item
                                         v-bind="props"
@@ -109,8 +111,8 @@
                                 density="comfortable"
                                 prepend-inner-icon="mdi-note-text"
                                 rows="3"
-                                class="mb-3"
-                            ></v-textarea>
+                                class="mb-3">
+                            </v-textarea>
                         </v-col>
                     </v-row>
                 </v-form>
@@ -118,26 +120,29 @@
             
             <v-divider></v-divider>
             
+
+            <!-- Buttons -->
             <v-card-actions class="pa-6 pt-4">
+
                 <v-spacer></v-spacer>
                 <v-btn 
                     variant="outlined" 
                     color="grey" 
                     @click="closeDialog"
-                    class="mr-3"
-                >
-                    <v-icon start>mdi-close</v-icon>
+                    class="mr-3">
+                 <v-icon start>mdi-close</v-icon>
                     Abbrechen
                 </v-btn>
+
                 <v-btn 
                     variant="elevated" 
                     color="primary" 
                     @click="saveCar"
-                    :loading="carsLoading"
-                >
+                    :loading="carsLoading">
                     <v-icon start>mdi-content-save</v-icon>
                     Speichern
                 </v-btn>
+
             </v-card-actions>
         </v-card>
         
@@ -145,8 +150,7 @@
             v-if="snackbar.show" 
             :text="snackbar.text" 
             :color="snackbar.color" 
-            @close="snackbar.show = false"
-        />
+            @close="snackbar.show = false"/>
     </v-dialog>
 </template>
 
@@ -206,10 +210,12 @@ export default {
         },
     },
     methods: {
+
         closeDialog() {
             this.$emit('update:modelValue', false);
             this.resetForm();
         },
+
         async saveCar() {
             const { valid } = await this.$refs.form.validate();
             if (valid) {
@@ -295,6 +301,7 @@ export default {
 </script>
 
 <style scoped>
+
 .v-dialog {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }

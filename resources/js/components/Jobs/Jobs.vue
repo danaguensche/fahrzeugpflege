@@ -1,5 +1,6 @@
 <template>
     <div class="jobs-page" :class="{ 'jobs-page-sidebar-opened': isSidebarOpen }">
+
         <div class="search-wrapper">
             <div class="search-input-container">
                 <Search :context="searchContext" v-model="searchText" @clearSearch="clearSearch" />
@@ -18,10 +19,22 @@
             <DefaultButton @click="openAddJobDialog">Auftrag hinzufügen</DefaultButton>
         </div>
 
-        <DataTable ref="jobDataTable" :searchString="searchText" :isSearchActive="isSearchActive" endpoint="jobs"
-            :headers="filteredJobHeaders" :fields="jobFields" itemKey="id" detailsPage="jobdetails"
-            detailsUrlBasePath="auftraege" deleteKey="ids" @itemsDeleted="handleJobsDeleted"
-            @show-error="handleError" :canEditStatusOnly="userRole === 'trainee'" />
+
+        <!-- Auftragsdaten Tabelle -->
+
+        <DataTable  ref="jobDataTable" 
+                    :searchString="searchText" 
+                    :isSearchActive="isSearchActive" 
+                    endpoint="jobs"
+                    :headers="filteredJobHeaders" 
+                    :fields="jobFields" 
+                    itemKey="id" 
+                    detailsPage="jobdetails"
+                    detailsUrlBasePath="auftraege" 
+                    deleteKey="ids" 
+                    @itemsDeleted="handleJobsDeleted"
+                    @show-error="handleError" 
+                    :canEditStatusOnly="userRole === 'trainee'" />
 
         <AddJobForm v-model="showAddJobDialog" @job-added="handleJobAdded" />
 

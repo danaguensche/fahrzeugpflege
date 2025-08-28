@@ -8,13 +8,17 @@
 
             <v-divider></v-divider>
 
+            <!-- Formular Felder mit Validierung -->
+
             <v-card-text class="pa-6">
                 <v-form ref="form" v-model="valid" lazy-validation>
+
                     <v-row>
                         <v-col cols="12">
                             <v-text-field v-model="job.title" label="Titel"
                                 :rules="[v => !!v || 'Titel ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-format-title" class="mb-3"></v-text-field>
+                                density="comfortable" prepend-inner-icon="mdi-format-title" class="mb-3">
+                            </v-text-field>
                         </v-col>
 
                         <v-col cols="12">
@@ -24,15 +28,28 @@
 
                         <!-- Kunde zuerst auswählen -->
                         <v-col cols="12" sm="6">
-                            <v-autocomplete v-model="job.customer" :items="customers" item-title="full_name"
-                                item-value="id" label="Kunde" placeholder="Kunde auswählen"
-                                prepend-inner-icon="mdi-account" variant="outlined" density="comfortable" clearable
-                                :loading="customersLoading" return-object
-                                :rules="[v => !!v || 'Kunde ist erforderlich']" required class="mb-3"
-                                @update:model-value="onCustomerChange">
+                            <v-autocomplete v-model="job.customer" 
+                                            :items="customers" 
+                                            item-title="full_name"
+                                            item-value="id" 
+                                            label="Kunde" 
+                                            placeholder="Kunde auswählen"
+                                            prepend-inner-icon="mdi-account" 
+                                            variant="outlined" 
+                                            density="comfortable" 
+                                            clearable
+                                            :loading="customersLoading" 
+                                            return-object
+                                            :rules="[v => !!v || 'Kunde ist erforderlich']" 
+                                            required class="mb-3"
+                                            @update:model-value="onCustomerChange">
+
                                 <template v-slot:item="{ props, item }">
-                                    <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                        :subtitle="item.raw.email" class="pa-3"></v-list-item>
+                                    <v-list-item v-bind="props" 
+                                                :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                                :subtitle="item.raw.email" 
+                                                class="pa-3">
+                                    </v-list-item>
                                 </template>
                                 <template v-slot:selection="{ item }">
                                     {{ item.raw.firstname }} {{ item.raw.lastname }}
@@ -40,19 +57,32 @@
                             </v-autocomplete>
                         </v-col>
 
-                        <!-- Fahrzeuge basierend auf Kundenauswahl -->
+                        <!-- Fahrzeuge basierend auf Kundenauswahl (Es werden die Fahrzeuge angezeigt die zum Kunden gehören/noch nicht zugewiesen wurden)-->
                         <v-col cols="12" sm="6">
-                            <v-autocomplete v-model="job.car" :items="availableCars" item-title="Kennzeichen"
-                                item-value="id" label="Fahrzeug"
-                                :placeholder="job.customer ? 'Fahrzeug für Kunde auswählen' : 'Zuerst Kunde auswählen'"
-                                prepend-inner-icon="mdi-car" variant="outlined" density="comfortable" clearable
-                                :loading="carsLoading" return-object :disabled="!job.customer"
-                                :rules="[v => !!v || 'Fahrzeug ist erforderlich']" required class="mb-3">
+                            <v-autocomplete v-model="job.car" 
+                                            :items="availableCars" 
+                                            item-title="Kennzeichen"
+                                            item-value="id" 
+                                            label="Fahrzeug"
+                                            :placeholder="job.customer ? 'Fahrzeug für Kunde auswählen' : 'Zuerst Kunde auswählen'"
+                                            prepend-inner-icon="mdi-car" 
+                                            variant="outlined" 
+                                            density="comfortable" 
+                                            clearable
+                                            :loading="carsLoading" 
+                                            return-object 
+                                            :disabled="!job.customer"
+                                            :rules="[v => !!v || 'Fahrzeug ist erforderlich']" 
+                                            required 
+                                            class="mb-3">
+
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
-                                        :subtitle="`${item.raw.Automarke} ${getCarOwnershipLabel(item.raw)}`"
-                                        class="pa-3"></v-list-item>
+                                                                :subtitle="`${item.raw.Automarke} ${getCarOwnershipLabel(item.raw)}`"
+                                                                class="pa-3">
+                                    </v-list-item>
                                 </template>
+
                                 <template v-slot:selection="{ item }">
                                     {{ item.raw.Kennzeichen }}
                                 </template>
@@ -60,15 +90,24 @@
                         </v-col>
 
                         <v-col cols="12">
-                            <v-autocomplete v-model="job.services" :items="services" item-title="name" item-value="id"
-                                label="Dienstleistungen" placeholder="Dienstleistungen auswählen"
-                                prepend-inner-icon="mdi-briefcase" variant="outlined" density="comfortable" multiple
-                                chips clearable :loading="servicesLoading" return-object
-                                :rules="[v => v && v.length > 0 || 'Mindestens eine Dienstleistung ist erforderlich']"
-                                required class="mb-3">
+                            <v-autocomplete v-model="job.services" 
+                                            :items="services" 
+                                            item-title="name" 
+                                            item-value="id"
+                                            label="Dienstleistungen" 
+                                            placeholder="Dienstleistungen auswählen"
+                                            prepend-inner-icon="mdi-briefcase" 
+                                            variant="outlined" density="comfortable" 
+                                            multiple chips clearable 
+                                            :loading="servicesLoading" 
+                                            return-object
+                                            :rules="[v => v && v.length > 0 || 'Mindestens eine Dienstleistung ist erforderlich']"
+                                            required class="mb-3">
+
                                 <template v-slot:chip="{ props, item }">
                                     <v-chip v-bind="props" :text="item.raw.name"></v-chip>
                                 </template>
+
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item v-bind="props" :title="item.raw.name" class="pa-3"></v-list-item>
                                 </template>
@@ -76,27 +115,46 @@
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-select v-model="job.status" :items="jobStatuses" label="Status"
-                                :rules="[v => !!v || 'Status ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-information" class="mb-3"></v-select>
+                            <v-select   v-model="job.status" 
+                                        :items="jobStatuses" 
+                                        label="Status"
+                                        :rules="[v => !!v || 'Status ist erforderlich']" required variant="outlined"
+                                        density="comfortable" prepend-inner-icon="mdi-information" class="mb-3">
+                            </v-select>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="job.scheduled_at" label="Abholtermin" type="datetime-local"
-                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-calendar-clock"
-                                class="mb-3"></v-text-field>
+                            <v-text-field   v-model="job.scheduled_at" 
+                                            label="Abholtermin" 
+                                            type="datetime-local"
+                                            variant="outlined" 
+                                            density="comfortable" 
+                                            prepend-inner-icon="mdi-calendar-clock"
+                                            class="mb-3">
+                            </v-text-field>
                         </v-col>
+
+                        <!-- Zuweisung eines Auszubildenden/Mitarbeiter nur für Admins und Mitarbeiter -->
 
                         <template v-if="!isTrainee">
                             <v-col cols="12" sm="6">
-                                <v-autocomplete v-model="job.trainee" :items="trainees" item-title="full_name"
-                                    item-value="id" label="Auszubildender" placeholder="Auszubildenden auswählen"
-                                    prepend-inner-icon="mdi-account-school" variant="outlined" density="comfortable"
-                                    clearable :loading="traineesLoading" return-object class="mb-3">
+                                <v-autocomplete v-model="job.trainee" 
+                                                :items="trainees" 
+                                                item-title="full_name"
+                                                item-value="id" 
+                                                label="Auszubildender" 
+                                                placeholder="Auszubildenden auswählen"
+                                                prepend-inner-icon="mdi-account-school" 
+                                                variant="outlined" 
+                                                density="comfortable"
+                                                clearable 
+                                                :loading="traineesLoading" 
+                                                return-object class="mb-3">
                                     <template v-slot:item="{ props, item }">
                                         <v-list-item v-bind="props"
                                             :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                            :subtitle="item.raw.email" class="pa-3"></v-list-item>
+                                            :subtitle="item.raw.email" class="pa-3">
+                                        </v-list-item>
                                     </template>
                                     <template v-slot:selection="{ item }">
                                         {{ item.raw.firstname }} {{ item.raw.lastname }}
@@ -105,7 +163,7 @@
                             </v-col>
                         </template>
 
-                        <!-- Car Assignment Option -->
+                        <!-- Fahrzeug zum Kunden zufügen falls das noch nicht gemacht wurde -->
                         <v-col cols="12" v-if="job.car && job.customer && !isCarOwnedByCustomer">
                             <v-alert type="info" variant="tonal" class="mb-3">
                                 <v-icon start>mdi-information</v-icon>
@@ -119,6 +177,7 @@
 
             <v-divider></v-divider>
 
+            <!-- Aktions Buttons zum Abbrechen oder Speichern -->
             <v-card-actions class="pa-6 pt-4">
                 <v-spacer></v-spacer>
                 <v-btn variant="outlined" color="grey" @click="closeDialog" class="mr-3">

@@ -1,6 +1,7 @@
 <template>
     <v-dialog v-model="showDialogLocal" persistent max-width="700px">
         <v-card class="pa-2">
+
             <v-card-title class="headline pa-6 pb-4">
                 <v-icon class="mr-3" color="primary">mdi-account-plus</v-icon>
                 Neuen Kunden hinzufügen
@@ -9,8 +10,12 @@
             <v-divider></v-divider>
 
             <v-card-text class="pa-6">
+
+                <!-- Formular Felder  -->
+
                 <v-form ref="form" v-model="valid" lazy-validation>
                     <v-row>
+
                         <v-col cols="12">
                             <v-text-field v-model="customer.company" label="Firma" variant="outlined"
                                 density="comfortable" prepend-inner-icon="mdi-office-building"
@@ -57,17 +62,33 @@
                             <v-text-field v-model="customer.city" label="Stadt" variant="outlined" density="comfortable"
                                 prepend-inner-icon="mdi-city" class="mb-3"></v-text-field>
                         </v-col>
-
+                        
+                        <!-- Fahrzeug hinzufügen (mit Suche und Autovervollständigung) -->
                         <v-col cols="12" v-if="showCarField">
-                            <v-autocomplete v-model="customer.car" :items="cars" item-title="Kennzeichen"
-                                item-value="id" label="Fahrzeug" placeholder="Fahrzeug auswählen oder suchen"
-                                prepend-inner-icon="mdi-car" variant="outlined" density="comfortable" clearable
-                                :loading="carsLoading" @update:search="searchCars" return-object class="mb-3"
-                                @update:modelValue="(val) => val && loadFullCarDetails(val.Kennzeichen)">
+                            <v-autocomplete v-model="customer.car" 
+                                            :items="cars" 
+                                            item-title="Kennzeichen"
+                                            item-value="id" 
+                                            label="Fahrzeug" 
+                                            placeholder="Fahrzeug auswählen oder suchen"
+                                            prepend-inner-icon="mdi-car" 
+                                            variant="outlined" 
+                                            density="comfortable"
+                                            clearable
+                                            :loading="carsLoading"
+                                            @update:search="searchCars" 
+                                            return-object 
+                                            class="mb-3"
+                                            @update:modelValue="(val) => val && loadFullCarDetails(val.Kennzeichen)">
+
+                                <!-- Anzeige des Fahrzeuges im Feld (Kennzeichen + Automarke) -->
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
-                                        :subtitle="item.raw.Automarke" class="pa-3"></v-list-item>
+                                                                :subtitle="item.raw.Automarke"
+                                                                class="pa-3">
+                                    </v-list-item>
                                 </template>
+
                                 <template v-slot:selection="{ item }">
                                     {{ item.raw.Kennzeichen }}
                                 </template>
@@ -79,6 +100,7 @@
 
             <v-divider></v-divider>
 
+            <!-- Aktionen (Speichern und Abbrechen) -->
             <v-card-actions class="pa-6 pt-4">
                 <v-spacer></v-spacer>
                 <v-btn variant="outlined" color="grey" @click="closeDialog" class="mr-3">
