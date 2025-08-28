@@ -138,15 +138,19 @@
                         {{ labels[key] || key }}
                       </v-list-item-title>
                       <v-list-item-subtitle class="mt-1 text-body-1">
-                        <template v-if="auftrag[key] === null || auftrag[key] === ''">
-                          <span class="text-grey">Keine Daten vorhanden</span>
-                        </template>
-                        <template v-else-if="key === 'Abholtermin'">
+                        <span v-if="auftrag[key] === null || auftrag[key] === '' || auftrag[key] === undefined"
+                          class="text-grey">
+                          Keine Daten vorhanden
+                        </span>
+                        <span v-else-if="key === 'scheduled_at'">
                           {{ formatDate(auftrag[key]) }}
-                        </template>
-                        <template v-else-if="key === 'Status'">
+                        </span>
+                        <span v-else-if="key === 'status'">
                           {{statusOptions.find(option => option.value === auftrag[key])?.title || auftrag[key]}}
-                        </template>
+                        </span>
+                        <span v-else>
+                          {{ auftrag[key] }}
+                        </span>
                       </v-list-item-subtitle>
                     </v-list-item>
                     <v-divider v-if="key !== auftragInfoKeys[auftragInfoKeys.length - 1]"></v-divider>
