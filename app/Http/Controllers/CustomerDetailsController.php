@@ -52,7 +52,7 @@ class CustomerDetailsController extends CustomerController
                 'addressline' => 'required|string',
                 'postalcode' => 'required|string',
                 'city' => 'required|string',
-                'notes' => 'nullable|text'
+                'notes' => 'nullable|string'
             ]);
 
             $updated = $customer->update($validatedData);

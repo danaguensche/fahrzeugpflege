@@ -168,8 +168,8 @@
 
           <!-- Paginierung -->
           <div class="text-center">
-            <v-pagination v-model="page" :length="customerDetails.auftraege.last_page"
-              @update:model-value="loadPage" :total-visible="5"></v-pagination>
+            <v-pagination v-model="page" :length="customerDetails.auftraege.last_page" @update:model-value="loadPage"
+              :total-visible="5"></v-pagination>
           </div>
 
           <!-- Metadaten -->
@@ -301,11 +301,11 @@ export default {
     },
 
     formattedCreatedAt() {
-      return this.formatDate(this.customerDetails.customer?.created_at);
+      return this.formatDate(this.customerDetails.data?.created_at);
     },
 
     formattedUpdatedAt() {
-      return this.formatDate(this.customerDetails.customer?.updated_at);
+      return this.formatDate(this.customerDetails.data?.updated_at);
     },
 
     totalPages() {
@@ -465,26 +465,40 @@ export default {
       this.error = null;
 
       try {
+        const payload = {
+          company: this.editedCustomerData.company,
+          firstname: this.editedCustomerData.firstname,
+          lastname: this.editedCustomerData.lastname,
+          email: this.editedCustomerData.email,
+          phonenumber: this.editedCustomerData.phonenumber,
+          notes: this.editedCustomerData.notes,
+          addressline: this.editedCustomerData.addressline,
+          postalcode: this.editedCustomerData.postalcode,
+          city: this.editedCustomerData.city,
+        };
+
         await axios.put(
           `/api/customer/customerdetails/${this.$route.params.id}`,
-          this.editedCustomerData
+          payload,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+            }
+          }
         );
 
-        // Aktualisieren der Kundendaten nach erfolgreicher Speicherung
-        const { data } = await axios.get(
-          `/api/customer/customerdetails/${this.$route.params.id}`
-        );
-
-        this.customerDetails = data;
         this.editMode = false;
-        this.showSnackbar("Kundendaten erfolgreich gespeichert", 'success');
+        this.showSnackbar("Kundendaten erfolgreich gespeichert", "success");
+        await this.getCustomer(this.page); // neu laden, um aktuelle Daten zu sehen
       } catch (error) {
         const errorMessage = error.response?.data?.message || "Fehler beim Speichern der Kundendaten";
-        this.showSnackbar(errorMessage, 'error');
+        this.showSnackbar(errorMessage, "error");
       } finally {
         this.saveLoading = false;
       }
     },
+
 
     openCarAddDialog() {
       if (this.$refs.carAddDialog) {
