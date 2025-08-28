@@ -46,13 +46,35 @@
 
                         <!-- Bearbeitungsmodus -->
                         <div v-else>
-                            <InfoListEditMode   :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin' && k !== 'trainee_id')"
+                            <InfoListEditMode   :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin' && k !== 'trainee_id' && k !== 'cleaning_start' && k !== 'cleaning_end')"
                                                 :labels="labels" :editedData="editedJobData" 
                                                 @update:editedData="editedJobData = $event"
                                                 :getIconForField="getIconForField" 
                                                 class="job-information-fields"
                                                 :disabled="userRole === 'trainee'">
                             </InfoListEditMode>
+
+                            <v-text-field   v-model="formattedCleaningStartForEdit" 
+                                            type="datetime-local"
+                                            :label="labels.cleaning_start" 
+                                            variant="outlined" 
+                                            density="comfortable" 
+                                            hide-details="auto"
+                                            class="mt-4 w-50 ms-4" 
+                                            :prepend-inner-icon="getIconForField('cleaning_start')"
+                                            :disabled="userRole === 'trainee'">
+                            </v-text-field>
+
+                            <v-text-field   v-model="formattedCleaningEndForEdit" 
+                                            type="datetime-local"
+                                            :label="labels.cleaning_end" 
+                                            variant="outlined" 
+                                            density="comfortable" 
+                                            hide-details="auto"
+                                            class="mt-4 w-50 ms-4" 
+                                            :prepend-inner-icon="getIconForField('cleaning_end')"
+                                            :disabled="userRole === 'trainee'">
+                            </v-text-field>
 
                             <v-text-field   v-model="formattedAbholterminForEdit" 
                                             type="datetime-local"
@@ -358,6 +380,8 @@ export default {
                 id: "ID",
                 Title: "Titel",
                 Beschreibung: "Beschreibung",
+                cleaning_start: "Startzeitpunkt Reinigung",
+                cleaning_end: "Endezeitpunkt Reinigung",
                 Abholtermin: "Abholtermin",
                 Status: "Status",
                 trainee_id: "Mitarbeiter",
@@ -425,7 +449,7 @@ export default {
                 if (image && image.id) {
                     return {
                         id: image.id,
-                        path: image.path, // Keep path for consistency if needed
+                        path: image.path,
                         url: image.url
                     };
                 }
@@ -441,7 +465,7 @@ export default {
         },
         ...mapState('auth', ['userRole']),
         jobInfoKeys() {
-            return ['id', 'Title', 'Beschreibung', 'Abholtermin', 'Status', 'trainee_id'];
+            return ['id', 'Title', 'Beschreibung', 'cleaning_start', 'cleaning_end', 'Abholtermin', 'Status', 'trainee_id'];
         },
         carInfoKeys() {
             return ['Kennzeichen', 'Automarke', 'Typ', 'Farbe', 'Sonstiges'];
@@ -457,15 +481,25 @@ export default {
             if (!this.jobDetails.data) return {};
             const displayedData = { ...this.jobDetails.data };
 
-            // Status formatieren
             if (displayedData.Status) {
                 const foundStatus = this.statuses.find(s => s.value === displayedData.Status);
                 displayedData.Status = foundStatus ? foundStatus.title : displayedData.Status;
             }
 
-            // Abholtermin formatieren
             if (displayedData.Abholtermin) {
                 displayedData.Abholtermin = this.formatDate(displayedData.Abholtermin);
+            }
+
+            if (displayedData.cleaning_start) {
+                displayedData.cleaning_start = this.formatDate(displayedData.cleaning_start);
+            } else {
+                displayedData.cleaning_start = 'Nicht definiert';
+            }
+
+            if (displayedData.cleaning_end) {
+                displayedData.cleaning_end = this.formatDate(displayedData.cleaning_end);
+            } else {
+                displayedData.cleaning_end = 'Nicht definiert';
             }
 
             if (this.jobDetails.data.trainee) {
@@ -501,6 +535,56 @@ export default {
                     this.editedJobData.Abholtermin = null;
                 }
             }
+        },
+
+        formattedCleaningStartForEdit: {
+            get() {
+                if (!this.editedJobData.cleaning_start) return '';
+                const date = new Date(this.editedJobData.cleaning_start);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            },
+            set(newValue) {
+                if (newValue) {
+                    try {
+                        const date = new Date(newValue);
+                        this.editedJobData.cleaning_start = date.toISOString();
+                    } catch {
+                        this.editedJobData.cleaning_start = null;
+                    }
+                } else {
+                    this.editedJobData.cleaning_start = null;
+                }
+            }
+        },
+
+        formattedCleaningEndForEdit: {
+            get() {
+                if (!this.editedJobData.cleaning_end) return '';
+                const date = new Date(this.editedJobData.cleaning_end);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            },
+            set(newValue) {
+                if (newValue) {
+                    try {
+                        const date = new Date(newValue);
+                        this.editedJobData.cleaning_end = date.toISOString();
+                    } catch {
+                        this.editedJobData.cleaning_end = null;
+                    }
+                } else {
+                    this.editedJobData.cleaning_end = null;
+                }
+            }
         }
     },
     async mounted() {
@@ -519,19 +603,15 @@ export default {
     },
     methods: {
 
-        // Image Gallery Event Handlers
         async handleImagesUploaded(response) {
-            // Reload car details to get updated images
             await this.getJob();
         },
 
         async handleImageDeleted(imageId) {
-            // Reload car details to get updated images
             await this.getJob();
         },
 
         async handleImageReplaced(data) {
-            // Reload car details to get updated images
             await this.getJob();
         },
 
@@ -582,7 +662,6 @@ export default {
                 this.editedJobData = { ...this.jobDetails.data };
                 this.jobDetails.data.id = this.$route.params.id;
 
-                // Map status to its value for the dropdown
                 if (this.jobDetails.data.Status) {
                     const foundStatus = this.statuses.find(s => s.title === this.jobDetails.data.Status);
                     this.editedJobData.Status = foundStatus ? foundStatus.value : this.jobDetails.data.Status;
@@ -592,7 +671,6 @@ export default {
                 console.log('JobDetails component received car data:', this.jobDetails.data.car);
                 console.log('JobDetails component received trainee data:', this.jobDetails.data.trainee);
 
-                // Set customer for autocomplete
                 if (this.jobDetails.data.customer) {
                     this.editedJobData.customer = {
                         id: this.jobDetails.data.customer.id,
@@ -603,7 +681,6 @@ export default {
                     this.editedJobData.customer = null;
                 }
 
-                // Set car for autocomplete
                 if (this.jobDetails.data.car) {
                     this.editedJobData.car = {
                         id: this.jobDetails.data.car.id,
@@ -614,7 +691,6 @@ export default {
                     this.editedJobData.car = null;
                 }
 
-                // Set trainee for autocomplete
                 if (this.jobDetails.data.trainee) {
                     this.editedJobData.trainee = {
                         id: this.jobDetails.data.trainee.id,
@@ -627,7 +703,6 @@ export default {
                     this.editedJobData.trainee = null;
                 }
 
-                // Set services for autocomplete
                 if (this.jobDetails.data.services) {
                     this.editedJobData.services = this.jobDetails.data.services.map(service => ({
                         id: service.id,
@@ -767,6 +842,11 @@ export default {
 
                     dataToSubmit.scheduled_at = dataToSubmit.Abholtermin || null;
                     delete dataToSubmit.Abholtermin;
+
+                    dataToSubmit.cleaning_start = dataToSubmit.cleaning_start || null;
+                    dataToSubmit.cleaning_end = dataToSubmit.cleaning_end || null;
+                    // delete dataToSubmit.cleaning_start;
+                    // delete dataToSubmit.cleaning_end;
                 }
 
                 console.log('Submitting job data:', dataToSubmit);
@@ -822,6 +902,8 @@ export default {
                 id: "mdi-identifier",
                 Title: "mdi-format-title",
                 Beschreibung: "mdi-text-box-outline",
+                cleaning_start: "mdi-clock-time-eight-outline",
+                cleaning_end: "mdi-progress-check",
                 Abholtermin: "mdi-calendar",
                 Status: "mdi-check-circle-outline",
                 trainee_id: "mdi-toolbox",
