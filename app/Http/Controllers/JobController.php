@@ -606,17 +606,16 @@ class JobController extends Controller
                 'error' => 'Fehler beim Abrufen verfügbarer Fahrzeuge'
             ], 500);
         }
-    }
+    } 
 
     public function getCarsForCustomer($customerId)
     {
         $customer = Customer::with('cars')->findOrFail($customerId);
 
-        if ($customer->cars()->exists()) {
-            $cars = $customer->cars()->get();
-        } else {
-            $cars = Car::whereNull('customer_id')->get();
-        }
+        $cars = Car::where(function($query) use ($customerId) {
+            $query->where('customer_id', $customerId)
+                  ->orWhereNull('customer_id');
+        })->get();
 
         return response()->json([
             'cars' => $cars

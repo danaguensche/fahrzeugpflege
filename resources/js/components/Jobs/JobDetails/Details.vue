@@ -54,7 +54,7 @@
                                                 :disabled="userRole === 'trainee'">
                             </InfoListEditMode>
 
-                            <v-text-field   v-model="formattedCleaningStartForEdit" 
+                            <v-text-field   v-model="editedJobData.cleaning_start" 
                                             type="datetime-local"
                                             :label="labels.cleaning_start" 
                                             variant="outlined" 
@@ -65,7 +65,7 @@
                                             :disabled="userRole === 'trainee'">
                             </v-text-field>
 
-                            <v-text-field   v-model="formattedCleaningEndForEdit" 
+                            <v-text-field   v-model="editedJobData.cleaning_end" 
                                             type="datetime-local"
                                             :label="labels.cleaning_end" 
                                             variant="outlined" 
@@ -76,7 +76,7 @@
                                             :disabled="userRole === 'trainee'">
                             </v-text-field>
 
-                            <v-text-field   v-model="formattedAbholterminForEdit" 
+                            <v-text-field   v-model="editedJobData.Abholtermin" 
                                             type="datetime-local"
                                             :label="labels.Abholtermin" 
                                             variant="outlined" 
@@ -512,81 +512,8 @@ export default {
 
             return displayedData;
         },
-        formattedAbholterminForEdit: {
-            get() {
-                if (!this.editedJobData.Abholtermin) return '';
-                const date = new Date(this.editedJobData.Abholtermin);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                return `${year}-${month}-${day}T${hours}:${minutes}`;
-            },
-            set(newValue) {
-                if (newValue) {
-                    try {
-                        const date = new Date(newValue);
-                        this.editedJobData.Abholtermin = date.toISOString();
-                    } catch {
-                        this.editedJobData.Abholtermin = null;
-                    }
-                } else {
-                    this.editedJobData.Abholtermin = null;
-                }
-            }
-        },
-
-        formattedCleaningStartForEdit: {
-            get() {
-                if (!this.editedJobData.cleaning_start) return '';
-                const date = new Date(this.editedJobData.cleaning_start);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                return `${year}-${month}-${day}T${hours}:${minutes}`;
-            },
-            set(newValue) {
-                if (newValue) {
-                    try {
-                        const date = new Date(newValue);
-                        this.editedJobData.cleaning_start = date.toISOString();
-                    } catch {
-                        this.editedJobData.cleaning_start = null;
-                    }
-                } else {
-                    this.editedJobData.cleaning_start = null;
-                }
-            }
-        },
-
-        formattedCleaningEndForEdit: {
-            get() {
-                if (!this.editedJobData.cleaning_end) return '';
-                const date = new Date(this.editedJobData.cleaning_end);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                return `${year}-${month}-${day}T${hours}:${minutes}`;
-            },
-            set(newValue) {
-                if (newValue) {
-                    try {
-                        const date = new Date(newValue);
-                        this.editedJobData.cleaning_end = date.toISOString();
-                    } catch {
-                        this.editedJobData.cleaning_end = null;
-                    }
-                } else {
-                    this.editedJobData.cleaning_end = null;
-                }
-            }
-        }
     },
+
     async mounted() {
         try {
             await this.getJob();
@@ -904,7 +831,7 @@ export default {
                 Title: "mdi-format-title",
                 Beschreibung: "mdi-text-box-outline",
                 cleaning_start: "mdi-clock-time-eight-outline",
-                cleaning_end: "mdi-progress-check",
+                cleaning_end: "mdi-clock-check-outline",
                 Abholtermin: "mdi-calendar",
                 Status: "mdi-check-circle-outline",
                 trainee_id: "mdi-toolbox",
@@ -926,22 +853,6 @@ export default {
             };
 
             return iconMap[key] || iconMap.default;
-        },
-        formatDateTimeForInput(dateString) {
-            if (!dateString) return '';
-
-            try {
-                const date = new Date(dateString);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-
-                return `${year}-${month}-${day}T${hours}:${minutes}`;
-            } catch {
-                return '';
-            }
         },
 
         async fetchCustomers(query = '') {

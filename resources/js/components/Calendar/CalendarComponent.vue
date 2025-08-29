@@ -37,6 +37,7 @@
         </template>
       </vue-cal>
 
+      <!-- Legende für Status -->
       <div class="legend-container">
         <h4>Legende:</h4>
         <div class="legend-item">
@@ -55,6 +56,10 @@
           <span class="legend-color im-rueckblick"></span>
           <span>Im Rückblick</span>
         </div>
+        <div class="legend-item">
+          <span class="legend-color pickup"></span>
+          <span>Abholung</span>
+        </div>
       </div>
 
       <!-- Event Dialog Komponente -->
@@ -68,7 +73,7 @@ import VueCal from 'vue-cal';
 import 'vue-cal/dist/vuecal.css';
 import axios from 'axios';
 import { mapState } from 'vuex';
-import EventDialog from './EventDialog.vue'; // Pfad zur EventDialog-Komponente anpassen
+import EventDialog from './EventDialog.vue';
 
 export default {
   components: {
@@ -97,39 +102,96 @@ export default {
   methods: {
     fetchEvents(startDate, endDate) {
       axios.get('/api/jobs', {
-        params: {
-          start: startDate.toISOString().slice(0, 10) + ' 00:00:00',
-          end: endDate.toISOString().slice(0, 10) + ' 23:59:59',
-        },
+        
       })
         .then(response => {
-          this.events = response.data.items.map(job => {
-            const start = new Date(job.scheduled_at);
-            const end = new Date(start.getTime() + 60 * 60 * 1000); // Assuming 1 hour duration
-            const eventClass = job.status.replace(/_/g, '-');
-            console.log(`Job Status: ${job.status}, Assigned Class: ${eventClass}`);
-            return {
-              start: start.toISOString().slice(0, 16).replace('T', ' '),
-              end: end.toISOString().slice(0, 16).replace('T', ' '),
-              title: job.title,
-              content: job.description,
-              status: job.status,
-              email: job.customer ? job.customer.email : 'N/A',
-              customer_firstname: job.customer ? job.customer.firstname : 'N/A',
-              customer_lastname: job.customer ? job.customer.lastname : 'N/A',
-              customer_id: job.customer ? job.customer.id : null,
-              car_kennzeichen: job.car ? job.car.Kennzeichen : 'N/A',
-              car_make: job.car ? job.car.make : 'N/A',
-              car_model: job.car ? job.car.model : 'N/A',
-              services_list: job.services ? job.services.map(service => service.title) : [],
-              job_id: job.id,
-              class: job.status.replace(/_/g, '-'),
-            };
+          this.events = [];
+
+          console.log("Fetched jobs:", response.data.items);
+          
+          response.data.items.forEach(job => {
+            // Erstelle Reinigungstermin (falls vorhanden)
+            const cleaningEvent = this.createCleaningEvent(job);
+            if (cleaningEvent) {
+              this.events.push(cleaningEvent);
+            }
+            
+            // Erstelle Abholtermin (scheduled_at)
+            const pickupEvent = this.createPickupEvent(job);
+            if (pickupEvent) {
+              this.events.push(pickupEvent);
+            }
           });
         })
         .catch(error => {
           console.error("Error fetching events:", error);
         });
+    },
+
+    createCleaningEvent(job) {
+      // Prüfe ob Reinigungstermin vorhanden ist
+      if (!job.cleaning_start || !job.cleaning_end) {
+        return null;
+      }
+
+      const startTime = new Date(job.cleaning_start);
+      const endTime = new Date(job.cleaning_end);
+      const eventClass = job.status.replace(/_/g, '-');
+      
+      console.log(`Cleaning Event - Start: ${startTime}, End: ${endTime}`);
+      
+      return {
+        start: startTime,
+        end: endTime,
+        title: `Reinigung ${job.title}`,
+        content: `Reinigung - ${job.description || 'Fahrzeugpflege'}`,
+        status: job.status,
+        email: job.customer ? job.customer.email : 'N/A',
+        customer_firstname: job.customer ? job.customer.firstname : 'N/A',
+        customer_lastname: job.customer ? job.customer.lastname : 'N/A',
+        customer_id: job.customer ? job.customer.id : null,
+        car_kennzeichen: job.car ? job.car.Kennzeichen : 'N/A',
+        car_make: job.car ? job.car.make : 'N/A',
+        car_model: job.car ? job.car.model : 'N/A',
+        services_list: job.services ? job.services.map(service => service.title) : [],
+        job_id: job.id,
+        class: eventClass,
+        event_type: 'cleaning',
+        cleaning_start: job.cleaning_start,
+        cleaning_end: job.cleaning_end,
+      };
+    },
+
+    createPickupEvent(job) {
+      // scheduled_at ist der Abholtermin
+      if (!job.scheduled_at) {
+        return null;
+      }
+
+      const pickupStartTime = new Date(job.scheduled_at);
+      const pickupEndTime = new Date(pickupStartTime.getTime() + 30 * 60 * 1000); // 30 Minuten
+      
+      console.log(`Pickup Event - Start: ${pickupStartTime}, End: ${pickupEndTime}`);
+      
+      return {
+        start: pickupStartTime,
+        end: pickupEndTime,
+        title: `Abholung - ${job.customer.firstname} ${job.customer.lastname}`,
+        content: job.description || 'Fahrzeugabholung',
+        status: job.status,
+        email: job.customer ? job.customer.email : 'N/A',
+        customer_firstname: job.customer ? job.customer.firstname : 'N/A',
+        customer_lastname: job.customer ? job.customer.lastname : 'N/A',
+        customer_id: job.customer ? job.customer.id : null,
+        car_kennzeichen: job.car ? job.car.Kennzeichen : 'N/A',
+        car_make: job.car ? job.car.make : 'N/A',
+        car_model: job.car ? job.car.model : 'N/A',
+        services_list: job.services ? job.services.map(service => service.title) : [],
+        job_id: job.id,
+        class: 'pickup',
+        event_type: 'pickup',
+        scheduled_at: job.scheduled_at,
+      };
     },
 
     onEventClick(event, e) {
@@ -313,11 +375,19 @@ export default {
   color: #333;
   border-left: 4px solid #4caf50;
 }
+
 .vuecal__event.im-rueckblick {
   background: linear-gradient(135deg, #ffecb3 0%, #ffe082 100%);
   color: #333;
   border-left: 4px solid #e9c455;
 }
+
+.vuecal__event.pickup {
+  background: linear-gradient(135deg, #ce93d8 0%, #ba68c8 100%);
+  color: #333;
+  border-left: 4px solid #9c27b0;
+}
+
 .vuecal__event-title {
   font-weight: 600;
   margin-bottom: 4px;
@@ -380,6 +450,10 @@ export default {
 
 .legend-color.abgeschlossen {
   background: linear-gradient(135deg, #a5d6a7 0%, #81c784 100%);
+}
+
+.legend-color.pickup {
+  background: linear-gradient(135deg, #ce93d8 0%, #ba68c8 100%);
 }
 
 /* Event Details Styles */

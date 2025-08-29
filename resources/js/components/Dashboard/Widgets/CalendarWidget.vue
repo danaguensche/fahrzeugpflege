@@ -12,13 +12,22 @@
             </div>
 
             <div v-else class="events-list">
-                <div v-for="event in todayEvents" :key="event.job_id" class="event-item"
-                    :class="event.status.replace(/_/g, '-')" @click="onEventClick(event)">
+                <div v-for="event in todayEvents" :key="event.id" class="event-item"
+                    :class="[event.status.replace(/_/g, '-'), event.type]" @click="onEventClick(event)">
                     <div class="event-time">
-                        {{ formatTime(event.start) }}
+                        <div v-if="event.type === 'cleaning'">
+                            {{ formatTime(event.start) }} - {{ formatTime(event.end) }}
+                        </div>
+                        <div v-else>
+                            {{ formatTime(event.start) }}
+                        </div>
                     </div>
                     <div class="event-details">
-                        <div class="event-title">{{ event.title }}</div>
+                        <div class="event-title">
+                            {{ event.title }}
+                            <span v-if="event.type === 'cleaning'" class="event-type-badge cleaning">Reinigung</span>
+                            <span v-else class="event-type-badge pickup">Abholung</span>
+                        </div>
                         <div class="event-customer">
                             {{ event.customer_firstname }} {{ event.customer_lastname }}
                         </div>
@@ -51,6 +60,10 @@
                 <span class="legend-dot im-rueckblick"></span>
                 <span>Rückblick</span>
             </div>
+            <div class="legend-item">
+                <span class="legend-color pickup"></span>
+                <span>Abholung</span>
+            </div>
         </div>
 
         <!-- Event Dialog -->
@@ -79,11 +92,11 @@ export default {
         todayEvents() {
             const todayStr = this.today.toISOString().slice(0, 10);
             return this.events.filter(event => {
-                const eventDate = new Date(event.start.replace(' ', 'T')).toISOString().slice(0, 10);
+                const eventDate = new Date(event.start).toISOString().slice(0, 10);
                 return eventDate === todayStr;
             }).sort((a, b) => {
-                const timeA = new Date(a.start.replace(' ', 'T'));
-                const timeB = new Date(b.start.replace(' ', 'T'));
+                const timeA = new Date(a.start);
+                const timeB = new Date(b.start);
                 return timeA - timeB;
             });
         }
@@ -115,27 +128,58 @@ export default {
                 },
             })
                 .then(response => {
-                    this.events = response.data.items.map(job => {
-                        const start = new Date(job.scheduled_at);
-                        const end = new Date(start.getTime() + 60 * 60 * 1000);
+                    this.events = [];
 
-                        return {
-                            start: start.toISOString().slice(0, 16).replace('T', ' '),
-                            end: end.toISOString().slice(0, 16).replace('T', ' '),
-                            title: job.title,
-                            content: job.description,
-                            status: job.status,
-                            email: job.customer ? job.customer.email : 'N/A',
-                            customer_firstname: job.customer ? job.customer.firstname : 'N/A',
-                            customer_lastname: job.customer ? job.customer.lastname : 'N/A',
-                            customer_id: job.customer ? job.customer.id : null,
-                            car_kennzeichen: job.car ? job.car.Kennzeichen : 'N/A',
-                            car_make: job.car ? job.car.make : 'N/A',
-                            car_model: job.car ? job.car.model : 'N/A',
-                            services_list: job.services ? job.services.map(service => service.title) : [],
-                            job_id: job.id,
-                            class: job.status.replace(/_/g, '-'),
-                        };
+                    response.data.items.forEach(job => {
+                        if (job.cleaning_start && job.cleaning_end) {
+                            const cleaningStart = new Date(job.cleaning_start);
+                            const cleaningEnd = new Date(job.cleaning_end);
+
+                            this.events.push({
+                                id: `${job.id}-cleaning`,
+                                start: cleaningStart.toISOString(),
+                                end: cleaningEnd.toISOString(),
+                                title: job.title,
+                                content: job.description,
+                                status: job.status,
+                                type: 'cleaning',
+                                email: job.customer ? job.customer.email : 'N/A',
+                                customer_firstname: job.customer ? job.customer.firstname : 'N/A',
+                                customer_lastname: job.customer ? job.customer.lastname : 'N/A',
+                                customer_id: job.customer ? job.customer.id : null,
+                                car_kennzeichen: job.car ? job.car.Kennzeichen : 'N/A',
+                                car_make: job.car ? job.car.make : 'N/A',
+                                car_model: job.car ? job.car.model : 'N/A',
+                                services_list: job.services ? job.services.map(service => service.title) : [],
+                                job_id: job.id,
+                                class: job.status.replace(/_/g, '-'),
+                            });
+                        }
+
+                        if (job.scheduled_at) {
+                            const scheduledAt = new Date(job.scheduled_at);
+                            const scheduledEnd = new Date(scheduledAt.getTime() + 30 * 60 * 1000); // 30 Minuten später
+
+                            this.events.push({
+                                id: `${job.id}-pickup`,
+                                start: scheduledAt.toISOString(),
+                                end: scheduledEnd.toISOString(),
+                                title: job.title,
+                                content: job.description,
+                                status: job.status,
+                                type: 'pickup',
+                                email: job.customer ? job.customer.email : 'N/A',
+                                customer_firstname: job.customer ? job.customer.firstname : 'N/A',
+                                customer_lastname: job.customer ? job.customer.lastname : 'N/A',
+                                customer_id: job.customer ? job.customer.id : null,
+                                car_kennzeichen: job.car ? job.car.Kennzeichen : 'N/A',
+                                car_make: job.car ? job.car.make : 'N/A',
+                                car_model: job.car ? job.car.model : 'N/A',
+                                services_list: job.services ? job.services.map(service => service.title) : [],
+                                job_id: job.id,
+                                class: job.status.replace(/_/g, '-'),
+                            });
+                        }
                     });
                 })
                 .catch(error => {
@@ -154,22 +198,34 @@ export default {
         },
 
         formatDate(date) {
-            return new Intl.DateTimeFormat('de-DE', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long'
-            }).format(date);
+            if (!date) return 'Unbekannt';
+            try {
+                return new Intl.DateTimeFormat('de-DE', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                }).format(new Date(date));
+            } catch {
+                return 'Ungültiges Datum';
+            }
         },
 
         formatTime(dateTimeString) {
-            const date = new Date(dateTimeString.replace(' ', 'T'));
-            return new Intl.DateTimeFormat('de-DE', {
-                hour: '2-digit',
-                minute: '2-digit'
-            }).format(date);
-        }
-    }
-};
+            if (!dateTimeString) return 'Unbekannt';
+            try {
+                return new Intl.DateTimeFormat('de-DE', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: 'Europe/Berlin'
+                }).format(new Date(dateTimeString));
+            } catch {
+                return 'Ungültiges Datum';
+            }
+        },
+    },
+
+}
+
 </script>
 
 <style scoped>
@@ -179,7 +235,7 @@ export default {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     padding: 20px;
     font-family: 'Rubik', sans-serif;
-    
+
 }
 
 .fixed-height {
@@ -282,11 +338,17 @@ export default {
     border-left-color: #e9c455;
 }
 
+/* Spezielle Stile für Abholtermine */
+.event-item.pickup {
+    border-left: 4px solid #9c27b0;
+    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+}
+
 .event-time {
     font-weight: 700;
     font-size: 1.1em;
     color: #212529;
-    min-width: 60px;
+    min-width: 80px;
     text-align: center;
 }
 
@@ -300,6 +362,27 @@ export default {
     font-size: 1em;
     color: #212529;
     margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.event-type-badge {
+    font-size: 0.7em;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.event-type-badge.cleaning {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.event-type-badge.pickup {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
 }
 
 .event-customer {
@@ -400,8 +483,8 @@ export default {
     }
 
     .event-time {
-        min-width: 50px;
-        font-size: 1em;
+        min-width: 70px;
+        font-size: 0.9em;
     }
 
     .widget-legend {

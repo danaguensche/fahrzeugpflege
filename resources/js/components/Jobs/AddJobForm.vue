@@ -123,41 +123,6 @@
                             </v-select>
                         </v-col>
 
-                        <v-col cols="12" sm="6">
-                            <v-text-field   v-model="formattedCleaningStart" 
-                                            label="Startzeit Reinigung" 
-                                            type="datetime-local"
-                                            variant="outlined" 
-                                            density="comfortable" 
-                                            prepend-inner-icon="mdi-calendar-clock"
-                                            class="mb-3">
-                            </v-text-field>
-                        </v-col>
-
-                        <v-col cols="12" sm="6">
-                            <v-text-field   v-model="formattedCleaningEnd" 
-                                            label="Endzeit Reinigung" 
-                                            type="datetime-local"
-                                            variant="outlined" 
-                                            density="comfortable" 
-                                            prepend-inner-icon="mdi-calendar-clock"
-                                            class="mb-3">
-                            </v-text-field>
-                        </v-col>
-
-                        <v-col cols="12" sm="6">
-                            <v-text-field   v-model="formattedScheduledAt" 
-                                            label="Abholtermin" 
-                                            type="datetime-local"
-                                            variant="outlined" 
-                                            density="comfortable" 
-                                            prepend-inner-icon="mdi-calendar-clock"
-                                            class="mb-3">
-                            </v-text-field>
-                        </v-col>
-
-                        <!-- Zuweisung eines Auszubildenden/Mitarbeiter nur für Admins und Mitarbeiter -->
-
                         <template v-if="!isTrainee">
                             <v-col cols="12" sm="6">
                                 <v-autocomplete v-model="job.trainee" 
@@ -184,6 +149,43 @@
                                 </v-autocomplete>
                             </v-col>
                         </template>
+
+                        <v-col cols="12" sm="6">
+                            <v-text-field   v-model="job.cleaning_start" 
+                                            label="Startzeit Reinigung" 
+                                            type="datetime-local"
+                                            variant="outlined" 
+                                            density="comfortable" 
+                                            prepend-inner-icon="mdi-calendar-clock"
+                                            class="mb-3">
+                            </v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <v-text-field   v-model="job.cleaning_end" 
+                                            label="Endzeit Reinigung" 
+                                            type="datetime-local"
+                                            variant="outlined" 
+                                            density="comfortable" 
+                                            prepend-inner-icon="mdi-calendar-clock"
+                                            class="mb-3">
+                            </v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <v-text-field   v-model="job.scheduled_at" 
+                                            label="Abholtermin" 
+                                            type="datetime-local"
+                                            variant="outlined" 
+                                            density="comfortable" 
+                                            prepend-inner-icon="mdi-calendar-clock"
+                                            class="mb-3">
+                            </v-text-field>
+                        </v-col>
+
+                        <!-- Zuweisung eines Auszubildenden/Mitarbeiter nur für Admins und Mitarbeiter -->
+
+                        
 
                         <!-- Fahrzeug zum Kunden zufügen falls das noch nicht gemacht wurde -->
                         <v-col cols="12" v-if="job.car && job.customer && !isCarOwnedByCustomer">
@@ -278,82 +280,6 @@ export default {
         isTrainee() {
             return this.userRole === 'trainee';
         },
-
-        formattedCleaningStart: {
-            get() {
-                if (!this.job.cleaning_start ) return '';
-                const date = new Date(this.job.cleaning_start );
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                return `${year}-${month}-${day}T${hours}:${minutes}`;
-            },
-            set(newValue) {
-                if (newValue) {
-                    try {
-                        const date = new Date(newValue);
-                        this.job.cleaning_start  = date.toISOString();
-                    } catch {
-                        this.job.cleaning_start  = null;
-                    }
-                } else {
-                    this.job.cleaning_start  = null;
-                }
-            }
-        },
-
-        formattedCleaningEnd: {
-            get() {
-                if (!this.job.cleaning_end) return '';
-                const date = new Date(this.job.cleaning_end);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                return `${year}-${month}-${day}T${hours}:${minutes}`;
-            },
-            set(newValue) {
-                if (newValue) {
-                    try {
-                        const date = new Date(newValue);
-                        this.job.cleaning_end = date.toISOString();
-                    } catch {
-                        this.job.cleaning_end= null;
-                    }
-                } else {
-                    this.job.cleaning_end = null;
-                }
-            }
-        },
-
-        formattedScheduledAt: {
-            get() {
-                if (!this.job.scheduled_at) return '';
-                const date = new Date(this.job.scheduled_at);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                return `${year}-${month}-${day}T${hours}:${minutes}`;
-            },
-            set(newValue) {
-                if (newValue) {
-                    try {
-                        const date = new Date(newValue);
-                        this.job.scheduled_at = date.toISOString();
-                    } catch {
-                        this.job.scheduled_at = null;
-                    }
-                } else {
-                    this.job.scheduled_at = null;
-                }
-            }
-        },
-
 
         showDialogLocal: {
             get() {
