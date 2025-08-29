@@ -844,8 +844,9 @@ export default {
                     delete dataToSubmit.Abholtermin;
 
                     dataToSubmit.cleaning_start = dataToSubmit.cleaning_start || null;
-                    dataToSubmit.cleaning_end = dataToSubmit.cleaning_end || null;
                     // delete dataToSubmit.cleaning_start;
+
+                    dataToSubmit.cleaning_end = dataToSubmit.cleaning_end || null;
                     // delete dataToSubmit.cleaning_end;
                 }
 

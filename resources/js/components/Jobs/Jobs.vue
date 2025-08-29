@@ -137,7 +137,7 @@ export default {
                 filters.end = this.endDate;
             }
             return filters;
-        }
+        },
     },
 
     watch: {
