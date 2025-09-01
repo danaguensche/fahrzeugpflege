@@ -104,7 +104,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('jobs/{job}/images', [JobController::class, 'addImages']);
         Route::post('images/assign-to-car', [ImageController::class, 'assignToCar']);
 
-
         Route::get('/jobs/cars-for-customer/{customerId}', [JobController::class, 'getCarsForCustomer']);
         Route::post('/jobs', [JobController::class, 'store']);
         Route::put('/jobs/{id}', [JobController::class, 'update']);

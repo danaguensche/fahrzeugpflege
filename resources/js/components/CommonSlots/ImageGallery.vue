@@ -62,7 +62,7 @@
                             </v-col>
 
                             <!-- File Input Alternative -->
-                            <v-col cols="12">
+                            <!-- <v-col cols="12">
                                 <v-file-input
                                     v-model="imageUploadDialog.selectedFiles"
                                     multiple
@@ -74,7 +74,7 @@
                                     outlined
                                     class="mt-4"
                                 ></v-file-input>
-                            </v-col>
+                            </v-col> -->
 
                             <!-- Image Preview -->
                             <v-col cols="12" v-if="imageUploadDialog.imagePreviews.length > 0">
