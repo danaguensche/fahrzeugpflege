@@ -9,7 +9,6 @@ use App\Http\Resources\CustomerResource;
 use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Activity;
 use function activity;
-use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
 {
@@ -31,9 +30,9 @@ class CustomerController extends Controller
             $customer = Customer::create($validated);
 
             activity()
-                ->causedBy(auth()->user())
-                ->withProperties(['customer_id' => $customer->id])
-                ->log('Kunde erstellt: ' . $customer->firstname . ' ' . $customer->lastname . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+            ->causedBy(auth()->user())
+            ->withProperties(['customer_id' => $customer->id])
+            ->log('Kunde erstellt: ' . $customer->firstname . ' ' . $customer->lastname . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
             return response()->json([
                 'success' => true,
@@ -158,9 +157,9 @@ class CustomerController extends Controller
                 $customer->delete();
 
                 activity()
-                    ->causedBy(auth()->user())
-                    ->withProperties(['customer_id' => $customer->id])
-                    ->log('Kunde gelöscht: ' . $customer->firstname . ' ' . $customer->lastname . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+            ->causedBy(auth()->user())
+            ->withProperties(['customer_id' => $customer->id])
+            ->log('Kunde gelöscht: ' . $customer->firstname . ' ' . $customer->lastname . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
                 return response()->json([
                     'success' => true,
@@ -186,66 +185,35 @@ class CustomerController extends Controller
         try {
             $validated = $request->validate([
                 'ids' => 'required|array',
-                'ids.*' => 'integer|exists:jobs,id'
+                'ids.*' => 'integer|exists:customers,id'
             ]);
 
-            DB::beginTransaction();
-
-            // Get jobs with images
-            $jobs = Job::whereIn('id', $validated['ids'])->with('images')->get();
-
-            if ($jobs->isEmpty()) {
-                DB::rollBack();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Keine Jobs gefunden.'
-                ], 404);
-            }
-
-            // Delete all associated images from storage and database
-            foreach ($jobs as $job) {
-                foreach ($job->images as $image) {
-                    $imagePath = str_replace('storage/', '', $image->path);
-                    if (Storage::disk('public')->exists($imagePath)) {
-                        Storage::disk('public')->delete($imagePath);
-                    }
-                    $image->delete();
-                }
-            }
-
-            // Delete jobs using the same method as customers
-            Job::destroy($validated['ids']);
-
-            DB::commit();
+            Customer::destroy($validated['ids']);
 
             activity()
-                ->causedBy(auth()->user())
-                ->withProperties([
-                    'job_ids' => $validated['ids'],
-                    'count' => count($jobs),
-                ])
-                ->log('Mehrere Aufträge gelöscht: ' . count($jobs) . ' Jobs von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+            ->causedBy(auth()->user())
+            ->withProperties(['customer_ids' => $validated['ids']])
+            ->log('Mehrere Kunden gelöscht von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
             return response()->json([
                 'success' => true,
-                'message' => count($jobs) . ' Jobs wurden erfolgreich gelöscht.'
+                'message' => 'Kunden wurden erfolgreich gelöscht.'
             ], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Validierungsfehler',
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Fehler beim Löschen mehrerer Jobs: ' . $e->getMessage());
+            Log::error('Fehler beim Löschen mehrerer Kunden: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Fehler beim Löschen der Jobs'
+                'message' => 'Fehler beim Löschen der Kunden'
             ], 500);
         }
     }
+
     public function update(Request $request, $id)
     {
         try {
@@ -267,9 +235,9 @@ class CustomerController extends Controller
             $customer->update($validatedData);
 
             activity()
-                ->causedBy(auth()->user())
-                ->withProperties(['customer_id' => $customer->id])
-                ->log('Kunde bearbeitet: ' . $customer->firstname . ' ' . $customer->lastname . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+            ->causedBy(auth()->user())
+            ->withProperties(['customer_id' => $customer->id])
+            ->log('Kunde bearbeitet: ' . $customer->firstname . ' ' . $customer->lastname . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
             return response()->json([
                 'success' => true,
@@ -329,7 +297,7 @@ class CustomerController extends Controller
                 'success' => true,
                 'count' => $customers->count(),
                 'data' => CustomerResource::collection($customers),
-                'month' => Carbon::now()->format('F Y')
+                'month' => Carbon::now()->format('F Y') 
             ]);
         } catch (\Exception $e) {
             Log::error('Fehler beim Abrufen der Kunden des aktuellen Monats: ' . $e->getMessage());
