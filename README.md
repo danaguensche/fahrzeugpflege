@@ -5,6 +5,19 @@ Entwickelt mit **Laravel 11**, **Vue.js** und **Vuetify**.
 
  **Mehr Details, Hintergrundinfos und Screenshots gibt’s im [Wiki](../../wiki).**
 
+ ## Demo-Video
+
+**Hinweis:** Im Video wirken die Ladezeiten länger, da das Projekt lokal mit Testdaten läuft.  
+Auf einem Server reagiert die Anwendung deutlich schneller.
+
+[▶️ Hier das Demo ansehen](https://github.com/user-attachments/assets/46fe539b-1e7b-469e-8f60-90e62612e869)
+
+---
+
+## Sreenshots
+
+---
+
 ## Funktionen
 
 - **Kundenverwaltung** (Anlegen, Bearbeiten, Löschen, Detailansicht)  
