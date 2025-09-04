@@ -3,6 +3,8 @@
 Eine Webanwendung zur Verwaltung von Kunden, Fahrzeugen, Aufträgen und Fotos für unseren Fahrzeugpflegebetrieb.  
 Entwickelt mit **Laravel 11**, **Vue.js** und **Vuetify**.
 
+ **Mehr Details, Hintergrundinfos und Screenshots gibt’s im [Wiki](../../wiki).**
+
 ## Funktionen
 
 - **Kundenverwaltung** (Anlegen, Bearbeiten, Löschen, Detailansicht)  
