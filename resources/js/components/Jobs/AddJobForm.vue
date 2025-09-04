@@ -3,7 +3,7 @@
         <v-card class="pa-2">
             <v-card-title class="headline pa-6 pb-4">
                 <v-icon class="mr-3" color="primary">mdi-briefcase-plus</v-icon>
-                Neue Aufgabe hinzufügen
+                Neuen Auftrag hinzufügen
             </v-card-title>
 
             <v-divider></v-divider>
