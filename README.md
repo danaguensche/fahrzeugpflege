@@ -16,6 +16,8 @@ Auf einem Server reagiert die Anwendung deutlich schneller.
 
 ## Sreenshots
 
+Ein paar Screenshots die grob zeigen um was es geht sind hier zu finden [Wiki](../../wiki/Screenshots)
+
 ---
 
 ## Funktionen
