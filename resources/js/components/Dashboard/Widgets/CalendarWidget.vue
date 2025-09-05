@@ -61,7 +61,7 @@
                 <span>Rückblick</span>
             </div>
             <div class="legend-item">
-                <span class="legend-color pickup"></span>
+                <span class="legend-dot pickup"></span>
                 <span>Abholung</span>
             </div>
         </div>
@@ -338,7 +338,6 @@ export default {
     border-left-color: #e9c455;
 }
 
-/* Spezielle Stile für Abholtermine */
 .event-item.pickup {
     border-left: 4px solid #9c27b0;
     background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
@@ -465,6 +464,11 @@ export default {
 .legend-dot.im-rueckblick {
     background: #e9c455;
 }
+
+.legend-dot.pickup {
+    background: #9c27b0;
+}
+
 
 /* Responsive Design */
 @media (max-width: 480px) {
