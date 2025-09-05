@@ -62,7 +62,7 @@ php artisan serve
 npm run dev
 ```
 
-**Genauere Anleitung und Informationen befinden sich im [Wiki](../../wiki) des Repositorys.**  
+**Genauere Anleitung und Informationen befinden sich im [Wiki](../../wiki/Installation) des Repositorys.**  
 
 ## Server  
 
