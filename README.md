@@ -73,3 +73,8 @@ Webserver: IIS
 IP: 172.17.100.242
 URL: http:172.17.100.242:80/login  
 
+## Entwicklungsprozess  
+
+Ich habe das Projekt ursprünglich auf einem Firmeninternen Gitea-Server entwickelt, Branching-Strategien und genauere Commit-Messages  
+sind daher dort dokumentiert. Für GitHub habe ich das Projekt gespiegelt.  
+
