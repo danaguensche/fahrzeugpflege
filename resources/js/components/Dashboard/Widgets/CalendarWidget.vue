@@ -106,7 +106,7 @@ export default {
         // Aktualisiere alle 5 Minuten
         this.refreshInterval = setInterval(() => {
             this.fetchTodayEvents();
-        }, 5 * 60 * 1);
+        }, 5 * 60 * 1000);
     },
     beforeDestroy() {
         if (this.refreshInterval) {
