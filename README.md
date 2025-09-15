@@ -62,14 +62,10 @@ php artisan serve
 npm run dev
 ```
 
-**Genauere Anleitung und Informationen befinden sich im Wiki des Repositorys.**  
+**Genauere Anleitung und Informationen befinden sich im [Wiki](../../wiki/Installation) des Repositorys.**  
 
-## Server  
+## Entwicklungsprozess  
 
-**Prodserver Web-01**  
-  
-Windows Server 2022 Standard  
-Webserver: IIS  
-IP: 172.17.100.242
-URL: http:172.17.100.242:80/login  
+Ich habe das Projekt ursprünglich auf einem Firmeninternen Gitea-Server entwickelt, Branching-Strategien und genauere Commit-Messages  
+sind daher dort dokumentiert. Für GitHub habe ich das Projekt gespiegelt.  
 
