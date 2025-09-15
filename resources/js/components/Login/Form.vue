@@ -18,11 +18,7 @@
         </v-container>
 
         <v-card-text class="pa-8 ps-16 pr-16">
-            <v-slide-y-transition>
-                <v-alert v-if="error" type="error" dismissible @click:close="error = null" class="mb-4">
-                    {{ error }}
-                </v-alert>
-            </v-slide-y-transition>
+
 
             <v-form ref="form" v-model="valid" @submit.prevent="submitForm">
                 <v-container>
@@ -110,6 +106,12 @@
                             </div>
                         </v-slide-y-transition>
                     </v-row>
+
+                    <v-slide-y-transition>
+                        <v-alert v-if="error" type="error" dismissible @click:close="error = null" class="mb-4">
+                            {{ error }}
+                        </v-alert>
+                    </v-slide-y-transition>
                 </v-container>
             </v-form>
         </v-card-text>
