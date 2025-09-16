@@ -4,7 +4,7 @@
             <!-- Titel und Untertitel mit Vuetify Fade-Transition -->
             <v-fade-transition mode="out-in">
                 <v-card-title :key="isRegistered ? 'login' : 'signup'"
-                    class="text-h5 text-center font-weight-bold pt-6">
+                    class="text-h4 text-center font-weight-bold pt-6">
                     {{ isRegistered ? 'Willkommen zurück!' : 'Erstellen Sie Ihr Konto' }}
                 </v-card-title>
             </v-fade-transition>
@@ -334,8 +334,39 @@ export default {
 }
 
 .header {
+    background-image: url('/resources/img/verlauf3.png');
+    background-size: cover;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     border-radius: 12px;
     height: 700px;
 }
+
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px white inset !important; /* Hintergrund überschreiben */
+    box-shadow: 0 0 0px 1000px white inset !important;
+    -webkit-text-fill-color: #000 !important; /* Textfarbe */
+}
+
+input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px #fff inset !important;
+    box-shadow: 0 0 0px 1000px #fff inset !important;
+}
+
+input:autofill {
+    background-color: white !important;
+    color: #000 !important;
+}
+
+/* Firefox */
+input:autofill {
+    background-color: white !important;  /* Hintergrundfarbe */
+    color: #000 !important;              /* Textfarbe */
+}
+
+/* Für den Fall, dass Firefox einen Rahmen setzt */
+input:autofill {
+    box-shadow: 0 0 0px 1000px white inset !important;
+}
+
+
 </style>
