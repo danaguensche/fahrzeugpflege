@@ -177,6 +177,11 @@ return [
             'rule-name' => 'custom-message',
             
         ],
+
+        'username' => [
+            'exists' => 'Der Benutzername wurde nicht von einem Admin freigegeben.',
+            'unique' => 'Der Benutzername wird bereits verwendet.',
+        ],
     ],
 
     /*

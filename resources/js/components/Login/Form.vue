@@ -45,10 +45,10 @@
                                     </v-col>
 
                                     <v-col cols="12">
-                                        <v-text-field v-model="formData.email" label="E-Mail" :rules="emailRules"
+                                        <v-text-field v-model="formData.username" label="Benutzername"
                                             required variant="outlined" density="comfortable"
-                                            prepend-inner-icon="mdi-email" class="mb-6" type="email"
-                                            autocomplete="email" :disabled="loading">
+                                            prepend-inner-icon="mdi-account-circle" class="mb-6" type="text"
+                                            autocomplete="username" :disabled="loading">
                                         </v-text-field>
                                     </v-col>
 
@@ -57,9 +57,9 @@
                         </v-expand-transition>
 
                         <v-col cols="12" v-if="isRegistered">
-                            <v-text-field v-model="formData.email" label="E-Mail" :rules="emailRules" required
-                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-email" class="mb-3"
-                                type="email" autocomplete="email" :disabled="loading">
+                            <v-text-field v-model="formData.username" label="Benutzername" required
+                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-account-circle" class="mb-3"
+                                type="text" autocomplete="username" :disabled="loading">
                             </v-text-field>
                         </v-col>
 
@@ -159,7 +159,7 @@ export default {
             formData: {
                 firstname: '',
                 lastname: '',
-                email: '',
+                username: '',
                 password: '',
                 passwordConfirm: ''
             },
@@ -176,10 +176,6 @@ export default {
                 v => !!v || 'Dieses Feld ist erforderlich',
                 v => (v && v.length >= 2) || 'Mindestens 2 Zeichen erforderlich',
                 v => /^[a-zA-ZäöüÄÖÜß\s-]+$/.test(v) || 'Nur Buchstaben, Leerzeichen und Bindestriche erlaubt'
-            ],
-            emailRules: [
-                v => !!v || 'E-Mail ist erforderlich',
-                v => /.+@.+\..+/.test(v) || 'E-Mail muss gültig sein'
             ],
             passwordRules: [
                 v => !!v || 'Passwort ist erforderlich',
@@ -211,7 +207,7 @@ export default {
             this.formData = {
                 firstname: '',
                 lastname: '',
-                email: '',
+                username: '',
                 password: '',
                 passwordConfirm: ''
             };
@@ -232,13 +228,13 @@ export default {
                 const endpoint = this.isRegistered ? '/login' : '/signup';
                 const payload = this.isRegistered
                     ? {
-                        email: this.formData.email,
+                        username: this.formData.username,
                         password: this.formData.password,
                     }
                     : {
                         firstname: this.formData.firstname,
                         lastname: this.formData.lastname,
-                        email: this.formData.email,
+                        username: this.formData.username,
                         password: this.formData.password,
                         password_confirmation: this.formData.passwordConfirm,
                         role: 'trainee'
