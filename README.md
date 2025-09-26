@@ -3,22 +3,7 @@
 Eine Webanwendung zur Verwaltung von Kunden, Fahrzeugen, Aufträgen und Fotos für unseren Fahrzeugpflegebetrieb.  
 Entwickelt mit **Laravel 11**, **Vue.js** und **Vuetify**.
 
- **Mehr Details, Hintergrundinfos und Screenshots gibt’s im [Wiki](../../wiki).**
-
- ## Demo-Video
-
-**Hinweis:** Im Video wirken die Ladezeiten länger, da das Projekt lokal mit Testdaten läuft.  
-Auf einem Server reagiert die Anwendung deutlich schneller.
-
-[▶️ Hier das Demo-Video ansehen](https://github.com/user-attachments/assets/46fe539b-1e7b-469e-8f60-90e62612e869)
-
----
-
-## Sreenshots
-
-Ein paar Screenshots die grob zeigen um was es geht sind hier zu finden [Wiki](../../wiki/Screenshots)
-
----
+ **Mehr Details gibt’s im [Wiki](https://dac-gitea01.bbw-hof.de/dana.guensche/fahrzeugpflege-laravel-vue/wiki).**
 
 ## Funktionen
 
@@ -62,10 +47,14 @@ php artisan serve
 npm run dev
 ```
 
-**Genauere Anleitung und Informationen befinden sich im [Wiki](../../wiki/Installation) des Repositorys.**  
+**Genauere Anleitung und Informationen befinden sich im [Wiki](https://dac-gitea01.bbw-hof.de/dana.guensche/fahrzeugpflege-laravel-vue/wiki). des Repositorys.**  
 
-## Entwicklungsprozess  
+## Server  
 
-Ich habe das Projekt ursprünglich auf einem Firmeninternen Gitea-Server entwickelt, Branching-Strategien und genauere Commit-Messages  
-sind daher dort dokumentiert. Für GitHub habe ich das Projekt gespiegelt.  
+**Prodserver Web-01**  
+  
+Windows Server 2022 Standard  
+Webserver: IIS  
+IP: 172.17.100.242
+URL: http:172.17.100.242:80/login  
 
