@@ -87,6 +87,7 @@ class AuthController extends Controller
             'lastname'  => $request->lastname,
             'username'  => $request->username,
             'password'  => Hash::make($request->password),
+            'role'      => $allowed->role,
         ]);
     
         // markiere den Username als verbraucht

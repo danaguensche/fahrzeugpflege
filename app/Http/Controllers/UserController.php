@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Http\Requests\StoreAllowedUsernameRequest;
 
 class UserController extends Controller
 {
@@ -18,15 +20,26 @@ class UserController extends Controller
      * @param StoreUserRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(StoreUserRequest $request)
-    {
-        $validatedData = $request->validated();
-        $user = User::create($validatedData);
-        return response()->json([
-            'message' => 'Benutzer erfolgreich erstellt',
-            'user' => new UserResource($user)
-        ], 201);
-    }
+
+
+     public function store(StoreAllowedUsernameRequest $request)
+     {
+         $validatedData = $request->validated();
+     
+         DB::table('allowed_usernames')->insert([
+             'username' => $validatedData['username'],
+             'role' => $validatedData['role'],
+             'claimed' => false,
+             'created_at' => now(),
+             'updated_at' => now(),
+         ]);
+     
+         return response()->json([
+             'message' => 'Benutzername erfolgreich freigegeben',
+         ], 201);
+     }
+     
+    
 
     /**
      * Get the authenticated user.
@@ -99,7 +112,7 @@ class UserController extends Controller
                 'addressline' => 'nullable|string|max:255',
                 'postalcode' => 'nullable|string|max:255',
                 'city' => 'nullable|string|max:255',
-                'role' => 'sometimes|in:admin,trainer,trainee',
+                'role' => 'required|string|in:admin,trainer,trainee',
                 'password' => 'nullable|string|min:8',
             ]);
 

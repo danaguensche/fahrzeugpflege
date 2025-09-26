@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users/search', [UserController::class, 'search']);
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::get('/users/trainees', [UserController::class, 'getTrainees']);
+        Route::post('/users', [UserController::class, 'store']);
     });
 
     //Dashboard Routes
