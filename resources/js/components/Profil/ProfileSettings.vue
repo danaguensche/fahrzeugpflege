@@ -54,9 +54,9 @@
                         <span class="font-weight-medium">{{ labels[key] }}</span>
                       </div>
                       <v-text-field v-model="editedUserData[key]" variant="outlined" density="comfortable"
-                        hide-details="auto" :readonly="key === 'email'" :disabled="key === 'email'"
-                        :hint="key === 'email' ? 'E-Mail kann nicht geändert werden' : ''"
-                        :persistent-hint="key === 'email'"></v-text-field>
+                        hide-details="auto" :readonly="key === 'username'" :disabled="key === 'username'"
+                        :hint="key === 'username' ? 'Benutzername kann nicht geändert werden.' : ''"
+                        :persistent-hint="key === 'username'"></v-text-field>
                     </v-col>
                   </v-row>
                 </template>
@@ -242,7 +242,7 @@ export default {
         firstname: "Vorname",
         lastname: "Nachname",
         phonenumber: "Telefonnummer",
-        email: "E-Mail",
+        username: "Benutzername",
         addressline: "Straße und Hausnummer",
         postalcode: "PLZ",
         city: "Ort"
@@ -268,7 +268,7 @@ export default {
 
   computed: {
     personalInfoKeys() {
-      return ['firstname', 'lastname', 'phonenumber', 'email'];
+      return ['firstname', 'lastname', 'phonenumber', 'username'];
     },
     addressInfoKeys() {
       return ['addressline', 'postalcode', 'city'];
@@ -307,7 +307,7 @@ export default {
           firstname: response.data.data.firstname || "",
           lastname: response.data.data.lastname || "",
           phonenumber: response.data.data.phonenumber || "",
-          email: response.data.data.email || "",
+          username: response.data.data.username || "",
           addressline: response.data.data.addressline || "",
           postalcode: response.data.data.postalcode || "",
           city: response.data.data.city || ""
@@ -324,7 +324,7 @@ export default {
       const iconMap = {
         firstname: "mdi-account",
         lastname: "mdi-account-details",
-        email: "mdi-email",
+        username: "mdi-account",
         phonenumber: "mdi-phone",
         addressline: "mdi-map-marker",
         postalcode: "mdi-mail",
@@ -360,7 +360,6 @@ export default {
           addressline: this.editedUserData.addressline,
           postalcode: this.editedUserData.postalcode,
           city: this.editedUserData.city
-          // Email wird absichtlich nicht mitgeschickt
         };
 
         await axios.put("/api/users/me", dataToSend, {
