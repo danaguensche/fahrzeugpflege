@@ -67,4 +67,9 @@ class User extends Authenticatable implements CanResetPassword
             'city' => $this->city
         ];
     }
+
+    public function getAuthIdentifier()
+    {
+        return 'username';
+    }
 }

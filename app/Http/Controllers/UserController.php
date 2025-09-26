@@ -131,7 +131,7 @@ class UserController extends Controller
         $users = User::where(function ($queryBuilder) use ($searchQuery) {
             $queryBuilder->where('firstname', 'like', '%' . $searchQuery . '%')
                          ->orWhere('lastname', 'like', '%' . $searchQuery . '%')
-                         ->orWhere('email', 'like', '%' . $searchQuery . '%');
+                         ->orWhere('username', 'like', '%' . $searchQuery . '%');
         })->get();
 
         return response()->json([
