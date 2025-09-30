@@ -108,4 +108,18 @@ export default {
     font-size: 1.1rem;
     font-weight: 600;
 }
+
+@media (max-width: 1024px) {
+    .widget-content {
+        padding: 5px;
+    }
+
+    .widget-header h3 {
+        font-size: 1em;
+    }
+
+    .widget-content {
+        height: 200px;
+    }
+}
 </style>

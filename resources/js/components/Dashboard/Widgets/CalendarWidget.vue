@@ -235,11 +235,14 @@ export default {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     padding: 20px;
     font-family: 'Rubik', sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 
 }
 
 .fixed-height {
-    height: 380px;
+    height: 400px;
     overflow: hidden;
 }
 
@@ -275,6 +278,7 @@ export default {
 
 .widget-content {
     margin-bottom: 20px;
+    flex: 1;
 }
 
 .no-events {
@@ -298,7 +302,7 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    height: 200px;
+    height: 300px;
     overflow-y: auto;
 }
 
@@ -426,12 +430,13 @@ export default {
 
 .widget-legend {
     display: flex;
+    justify-content: flex-start;
     flex-wrap: wrap;
     gap: 15px;
-    padding: 15px;
+    padding: 5px;
     background-color: #f8f9fa;
     border-radius: 8px;
-    margin-top: 20px;
+    margin-top: auto;
 }
 
 .legend-item {
@@ -470,29 +475,22 @@ export default {
 }
 
 
-/* Responsive Design */
-@media (max-width: 480px) {
+
+@media (max-width: 1024px) {
     .today-widget {
         padding: 15px;
-        max-width: 100%;
+    }
+
+    .fixed-height {
+        height: 300px;
     }
 
     .widget-header h3 {
-        font-size: 1.1em;
+        font-size: 1em;
     }
 
-    .event-item {
-        padding: 12px;
-        gap: 10px;
-    }
-
-    .event-time {
-        min-width: 70px;
-        font-size: 0.9em;
-    }
-
-    .widget-legend {
-        gap: 10px;
+    .events-list {
+        max-height: 250px;
     }
 }
 </style>
