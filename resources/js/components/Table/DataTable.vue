@@ -44,10 +44,10 @@
                                 <template v-if="editItemId === item[itemKey]">
                                     <!-- Kennzeichen - link only, not editable -->
                                     <template v-if="field === itemKey">
-                                        <a
-                                            :href="`/${detailsUrlBasePath}/${detailsPage}/${item[field] ? item[field].toString().replace(/\s/g, '+') : ''}`">
+                                        <router-link
+                                            :to="`/${detailsUrlBasePath}/${detailsPage}/${item[field] ? encodeURIComponent(item[field]) : ''}`">
                                             {{ editItem[field] || '' }}
-                                        </a>
+                                        </router-link>
                                     </template>
                                     <!-- Services field - not editable -->
                                     <template v-else-if="field === 'services'">
@@ -75,10 +75,10 @@
                                 <!-- View Mode -->
                                 <template v-else>
                                     <!-- Kennzeichen as link -->
-                                    <a v-if="field === itemKey"
-                                        :href="`/${detailsUrlBasePath}/${detailsPage}/${item[field] ? item[field].toString().replace(/\s/g, '+') : ''}`">
+                                    <router-link v-if="field === itemKey"
+                                        :to="`/${detailsUrlBasePath}/${detailsPage}/${item[field] ? encodeURIComponent(item[field]) : ''}`">
                                         {{ item[field] || '' }}
-                                    </a>
+                                    </router-link>
                                     <!-- The rest of the fields as plain text -->
                                     <span v-else-if="field === 'services'">
                                         <template v-if="Array.isArray(item[field]) && item[field].length > 0">
@@ -114,7 +114,7 @@
                                 <v-btn variant="plain" icon
                                     @click="editItemId === item[itemKey] ? saveItem() : editItemDetails(item)">
                                     <v-icon>{{ editItemId === item[itemKey] ? 'mdi-content-save' : 'mdi-pencil'
-                                        }}</v-icon>
+                                    }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
