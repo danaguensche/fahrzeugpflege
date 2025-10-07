@@ -10,122 +10,81 @@
                 <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon"></Header>
 
                 <!-- Fotos -->
-                <ImageGallery   :images="images" 
-                                :editMode="editMode" 
-                                :canEdit="isAdminOrTrainer"
-                                :uploadUrl="`/api/jobs/${$route.params.id}/images`" 
-                                :deleteUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`"
-                                :replaceUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`" 
-                                :entityId="$route.params.id" 
-                                :apiHeaders="apiHeaders"
-                                uploadDialogTitle="Auftragsbilder hochladen"
-                                @images-uploaded="handleImagesUploaded"
-                                @image-deleted="handleImageDeleted" 
-                                @image-replaced="handleImageReplaced"
-                                @success="showSuccessMessage" 
-                                @error="showErrorMessage"
-                                @loading="setImageLoading">
+                <ImageGallery :images="images" :editMode="editMode" :canEdit="isAdminOrTrainer"
+                    :uploadUrl="`/api/jobs/${$route.params.id}/images`"
+                    :deleteUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`"
+                    :replaceUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`" :entityId="$route.params.id"
+                    :apiHeaders="apiHeaders" uploadDialogTitle="Auftragsbilder hochladen"
+                    @images-uploaded="handleImagesUploaded" @image-deleted="handleImageDeleted"
+                    @image-replaced="handleImageReplaced" @success="showSuccessMessage" @error="showErrorMessage"
+                    @loading="setImageLoading">
                 </ImageGallery>
 
                 <!-- Job information -->
                 <v-card-text class="px-4 pt-4 pb-0">
                     <v-sheet>
 
-                        <InformationHeader  :title="'Jobinformationen'" 
-                                            :editMode="editMode"
-                                            :getIconForField="getIconForField">
+                        <InformationHeader :title="'Jobinformationen'" :editMode="editMode"
+                            :getIconForField="getIconForField">
                         </InformationHeader>
 
                         <!-- Ansichtsmodus -->
-                        <InfoList v-if="!editMode" 
-                                    :details="displayedJobDetails" 
-                                    :labels="labels"
-                                    :infoKeys="jobInfoKeys" 
-                                    :getIconForField="getIconForField">
+                        <InfoList v-if="!editMode" :details="displayedJobDetails" :labels="labels"
+                            :infoKeys="jobInfoKeys" :getIconForField="getIconForField">
                         </InfoList>
 
                         <!-- Bearbeitungsmodus -->
                         <div v-else>
-                            <InfoListEditMode   :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin' && k !== 'trainee_id' && k !== 'cleaning_start' && k !== 'cleaning_end')"
-                                                :labels="labels" :editedData="editedJobData" 
-                                                @update:editedData="editedJobData = $event"
-                                                :getIconForField="getIconForField" 
-                                                class="job-information-fields"
-                                                :disabled="userRole === 'trainee'">
+                            <InfoListEditMode
+                                :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin' && k !== 'trainee_id' && k !== 'cleaning_start' && k !== 'cleaning_end')"
+                                :labels="labels" :editedData="editedJobData" @update:editedData="editedJobData = $event"
+                                :getIconForField="getIconForField" class="job-information-fields"
+                                :disabled="userRole === 'trainee'">
                             </InfoListEditMode>
 
-                            <v-text-field   v-model="editedJobData.cleaning_start" 
-                                            type="datetime-local"
-                                            :label="labels.cleaning_start" 
-                                            variant="outlined" 
-                                            density="comfortable" 
-                                            hide-details="auto"
-                                            class="mt-4 w-50 ms-4" 
-                                            :prepend-inner-icon="getIconForField('cleaning_start')"
-                                            :disabled="userRole === 'trainee'">
+                            <v-text-field v-model="formattedCleaningStart"
+                                @input="editedJobData.cleaning_start = $event" type="datetime-local"
+                                :label="labels.cleaning_start" variant="outlined" density="comfortable"
+                                hide-details="auto" class="mt-4 w-50 ms-4"
+                                :prepend-inner-icon="getIconForField('cleaning_start')"
+                                :disabled="userRole === 'trainee'">
                             </v-text-field>
 
-                            <v-text-field   v-model="editedJobData.cleaning_end" 
-                                            type="datetime-local"
-                                            :label="labels.cleaning_end" 
-                                            variant="outlined" 
-                                            density="comfortable" 
-                                            hide-details="auto"
-                                            class="mt-4 w-50 ms-4" 
-                                            :prepend-inner-icon="getIconForField('cleaning_end')"
-                                            :disabled="userRole === 'trainee'">
+                            <v-text-field v-model="formattedCleaningEnd" @input="editedJobData.cleaning_end = $event"
+                                type="datetime-local" :label="labels.cleaning_end" variant="outlined"
+                                density="comfortable" hide-details="auto" class="mt-4 w-50 ms-4"
+                                :prepend-inner-icon="getIconForField('cleaning_end')"
+                                :disabled="userRole === 'trainee'">
                             </v-text-field>
 
-                            <v-text-field   v-model="editedJobData.Abholtermin" 
-                                            type="datetime-local"
-                                            :label="labels.Abholtermin" 
-                                            variant="outlined" 
-                                            density="comfortable" 
-                                            hide-details="auto"
-                                            class="mt-4 w-50 ms-4" 
-                                            :prepend-inner-icon="getIconForField('Abholtermin')"
-                                            :disabled="userRole === 'trainee'">
+                            <v-text-field v-model="formattedAbholtermin" @input="editedJobData.Abholtermin = $event"
+                                type="datetime-local" :label="labels.Abholtermin" variant="outlined"
+                                density="comfortable" hide-details="auto" class="mt-4 w-50 ms-4"
+                                :prepend-inner-icon="getIconForField('Abholtermin')" :disabled="userRole === 'trainee'">
                             </v-text-field>
 
-                            <v-select   v-model="editedJobData.Status" 
-                                        :items="statuses" 
-                                        item-title="title"
-                                        item-value="value"
-                                        label="Status" 
-                                        variant="outlined" 
-                                        density="comfortable"
-                                        hide-details="auto" 
-                                        class="mt-4 w-50 ms-4"
-                                        :prepend-inner-icon="getIconForField('Status')">
+                            <v-select v-model="editedJobData.Status" :items="statuses" item-title="title"
+                                item-value="value" label="Status" variant="outlined" density="comfortable"
+                                hide-details="auto" class="mt-4 w-50 ms-4"
+                                :prepend-inner-icon="getIconForField('Status')">
                             </v-select>
 
 
                             <!-- Mitarbeiter zum Auftrag hinzufügen/ändern -->
-                            <v-autocomplete v-model="editedJobData.trainee" 
-                                            class="mt-4 w-50 ms-4" 
-                                            :items="trainees"
-                                            item-title="full_name"
-                                            item-value="id" 
-                                            label="Mitarbeiter"
-                                            placeholder="Mitarbeiter auswählen oder suchen" 
-                                            prepend-inner-icon="mdi-toolbox"
-                                            variant="outlined" 
-                                            density="comfortable" 
-                                            hide-details="auto" 
-                                            clearable
-                                            :loading="traineesLoading" 
-                                            :search-input.sync="traineeSearch"
-                                            @update:search-input="searchTrainees"
-                                            return-object 
-                                            :disabled="userRole === 'trainee'">
+                            <v-autocomplete v-model="editedJobData.trainee" class="mt-4 w-50 ms-4" :items="trainees"
+                                item-title="full_name" item-value="id" label="Mitarbeiter"
+                                placeholder="Mitarbeiter auswählen oder suchen" prepend-inner-icon="mdi-toolbox"
+                                variant="outlined" density="comfortable" hide-details="auto" clearable
+                                :loading="traineesLoading" :search-input.sync="traineeSearch"
+                                @update:search-input="searchTrainees" return-object :disabled="userRole === 'trainee'">
 
-                                    <template v-slot:item="{ props, item }">
-                                        <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                            :subtitle="item.raw.email"></v-list-item>
-                                    </template>
-                                    <template v-slot:selection="{ item }">
-                                        {{ item.raw.full_name }}
-                                    </template>
+                                <template v-slot:item="{ props, item }">
+                                    <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                        :subtitle="item.raw.email"></v-list-item>
+                                </template>
+                                <template v-slot:selection="{ item }">
+                                    {{ item.raw.full_name }}
+                                </template>
                             </v-autocomplete>
                         </div>
                     </v-sheet>
@@ -133,112 +92,88 @@
                     <!-- Customer information -->
                     <v-sheet class="section-block">
                         <DefaultHeader :title="'Kundeninformation'"></DefaultHeader>
-                        <CustomerInfoList v-if="!editMode" 
-                                        :customer="jobDetails.data.customer"
-                                        :customerId="jobDetails.data.customer_id" 
-                                        :labels="labels">
+                        <CustomerInfoList v-if="!editMode" :customer="jobDetails.data.customer"
+                            :customerId="jobDetails.data.customer_id" :labels="labels">
                         </CustomerInfoList>
 
-                        <v-autocomplete v-else  v-model="editedJobData.customer"
-                                                class="w-50 ms-4" 
-                                                :items="customers"
-                                                item-title="full_name" 
-                                                item-value="id" 
-                                                label="Kunde"
-                                                placeholder="Kunde auswählen oder suchen" 
-                                                prepend-inner-icon="mdi-account"
-                                                variant="outlined" 
-                                                density="comfortable" 
-                                                hide-details="auto" 
-                                                clearable
-                                                :loading="customersLoading" 
-                                                :search-input.sync="customerSearch"
-                                                @update:search-input="searchCustomers" return-object 
-                                                :disabled="userRole === 'trainee'">
+                        <v-autocomplete v-else v-model="editedJobData.customer" class="w-50 ms-4" :items="customers"
+                            item-title="full_name" item-value="id" label="Kunde"
+                            placeholder="Kunde auswählen oder suchen" prepend-inner-icon="mdi-account"
+                            variant="outlined" density="comfortable" hide-details="auto" clearable
+                            :loading="customersLoading" :search-input.sync="customerSearch"
+                            @update:search-input="searchCustomers" return-object :disabled="userRole === 'trainee'">
 
-                                    <template v-slot:item="{ props, item }">
-                                        <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                            :subtitle="item.raw.email"></v-list-item>
-                                    </template>
-                                    <template v-slot:selection="{ item }">
-                                        {{ item.raw.email }}
-                                    </template>
+                            <template v-slot:item="{ props, item }">
+                                <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                    :subtitle="item.raw.email"></v-list-item>
+                            </template>
+                            <template v-slot:selection="{ item }">
+                                {{ item.raw.email }}
+                            </template>
                         </v-autocomplete>
                     </v-sheet>
 
                     <!-- Fahrzeuginformationen (Wenn Fahrzeug zum Auftrag zugewiesen wurde)-->
                     <v-sheet class="section-block">
-                        
+
                         <DefaultHeader :title="'Fahrzeuginformationen'"></DefaultHeader>
 
-                            <template v-if="!editMode">
-                                <template v-if="jobDetails.data.car && jobDetails.data.car.Kennzeichen">
-                                    <v-list class="bg-transparent">
-                                        <template v-for="key in carInfoKeys" :key="key">
-                                            <v-list-item
-                                                v-if="jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
-                                                
-                                                <template v-slot:prepend>
-                                                    <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
-                                                    </v-icon>
-                                                </template>
+                        <template v-if="!editMode">
+                            <template v-if="jobDetails.data.car && jobDetails.data.car.Kennzeichen">
+                                <v-list class="bg-transparent">
+                                    <template v-for="key in carInfoKeys" :key="key">
+                                        <v-list-item
+                                            v-if="jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
 
-                                                <v-list-item-title class="font-weight-medium">
-                                                    {{ labels[key] || key }}
-                                                </v-list-item-title>
-
-                                                <v-list-item-subtitle class="mt-1 text-body-1">
-                                                    <template v-if="key === 'Kennzeichen'">
-                                                        <router-link
-                                                            :to="`/fahrzeuge/fahrzeugdetails/${jobDetails.data.car.Kennzeichen}`"
-                                                            class="text-decoration-none text-primary">
-                                                            {{ jobDetails.data.car.Kennzeichen }}
-                                                        </router-link>
-                                                    </template>
-                                                    <template v-else>
-                                                        {{ jobDetails.data.car[key] }}
-                                                    </template>
-                                                </v-list-item-subtitle>
-                                            </v-list-item>
-                                            <v-divider
-                                                v-if="key !== carInfoKeys[carInfoKeys.length - 1] && jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
-                                            </v-divider>
-                                        </template>
-                                    </v-list>
-                                </template>
-
-                                <!-- Wenn kein Fahrzeug zugeordnet ist -->
-                                <template v-else>
-                                    <v-list-item>
-                                        <v-list-item-subtitle class="text-grey">
-                                            <div class="d-flex align-center justify-center pa-4">
-                                                <v-icon icon="mdi-car-off" color="grey-lighten-1" size="32"
-                                                    class="mr-2">
+                                            <template v-slot:prepend>
+                                                <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
                                                 </v-icon>
-                                                <span>Kein Fahrzeug zugeordnet</span>
-                                            </div>
-                                        </v-list-item-subtitle>
-                                    </v-list-item>
-                                </template>
+                                            </template>
+
+                                            <v-list-item-title class="font-weight-medium">
+                                                {{ labels[key] || key }}
+                                            </v-list-item-title>
+
+                                            <v-list-item-subtitle class="mt-1 text-body-1">
+                                                <template v-if="key === 'Kennzeichen'">
+                                                    <router-link
+                                                        :to="`/fahrzeuge/fahrzeugdetails/${jobDetails.data.car.Kennzeichen}`"
+                                                        class="text-decoration-none text-primary">
+                                                        {{ jobDetails.data.car.Kennzeichen }}
+                                                    </router-link>
+                                                </template>
+                                                <template v-else>
+                                                    {{ jobDetails.data.car[key] }}
+                                                </template>
+                                            </v-list-item-subtitle>
+                                        </v-list-item>
+                                        <v-divider
+                                            v-if="key !== carInfoKeys[carInfoKeys.length - 1] && jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
+                                        </v-divider>
+                                    </template>
+                                </v-list>
+                            </template>
+
+                            <!-- Wenn kein Fahrzeug zugeordnet ist -->
+                            <template v-else>
+                                <v-list-item>
+                                    <v-list-item-subtitle class="text-grey">
+                                        <div class="d-flex align-center justify-center pa-4">
+                                            <v-icon icon="mdi-car-off" color="grey-lighten-1" size="32" class="mr-2">
+                                            </v-icon>
+                                            <span>Kein Fahrzeug zugeordnet</span>
+                                        </div>
+                                    </v-list-item-subtitle>
+                                </v-list-item>
+                            </template>
                         </template>
 
-                        <v-autocomplete v-else  class="w-50 ms-4" 
-                                                v-model="editedJobData.car" 
-                                                :items="cars"
-                                                item-title="Kennzeichen" 
-                                                item-value="id" 
-                                                label="Fahrzeug"
-                                                placeholder="Fahrzeug auswählen oder suchen" 
-                                                prepend-inner-icon="mdi-car" 
-                                                variant="outlined"
-                                                density="comfortable" 
-                                                hide-details="auto" 
-                                                clearable 
-                                                :loading="carsLoading"
-                                                :search-input.sync="carSearch" 
-                                                @update:search-input="searchCars" 
-                                                return-object
-                                                :disabled="userRole === 'trainee'">
+                        <v-autocomplete v-else class="w-50 ms-4" v-model="editedJobData.car" :items="cars"
+                            item-title="Kennzeichen" item-value="id" label="Fahrzeug"
+                            placeholder="Fahrzeug auswählen oder suchen" prepend-inner-icon="mdi-car" variant="outlined"
+                            density="comfortable" hide-details="auto" clearable :loading="carsLoading"
+                            :search-input.sync="carSearch" @update:search-input="searchCars" return-object
+                            :disabled="userRole === 'trainee'">
 
                             <template v-slot:item="{ props, item }">
                                 <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
@@ -265,19 +200,11 @@
                             </span>
                         </div>
 
-                        <v-autocomplete v-else class="w-50 ms-4" 
-                                                v-model="editedJobData.services" 
-                                                :items="services"
-                                                item-title="name" 
-                                                item-value="id" 
-                                                label="Dienstleistungen"
-                                                placeholder="Dienstleistungen auswählen" 
-                                                prepend-inner-icon="mdi-briefcase"
-                                                variant="outlined" 
-                                                density="comfortable" 
-                                                hide-details="auto" 
-                                                multiple chips clearable
-                                                :loading="servicesLoading" return-object :disabled="userRole === 'trainee'">
+                        <v-autocomplete v-else class="w-50 ms-4" v-model="editedJobData.services" :items="services"
+                            item-title="name" item-value="id" label="Dienstleistungen"
+                            placeholder="Dienstleistungen auswählen" prepend-inner-icon="mdi-briefcase"
+                            variant="outlined" density="comfortable" hide-details="auto" multiple chips clearable
+                            :loading="servicesLoading" return-object :disabled="userRole === 'trainee'">
 
                             <template v-slot:chip="{ props, item }">
                                 <v-chip v-bind="props" :text="item.raw.name"></v-chip>
@@ -463,6 +390,15 @@ export default {
             const singleImage = mapImage(img);
             return singleImage ? [singleImage] : [];
         },
+        formattedCleaningStart() {
+            return this.formatDateTimeForInput(this.editedJobData.cleaning_start);
+        },
+        formattedCleaningEnd() {
+            return this.formatDateTimeForInput(this.editedJobData.cleaning_end);
+        },
+        formattedAbholtermin() {
+            return this.formatDateTimeForInput(this.editedJobData.Abholtermin);
+        },
         ...mapState('auth', ['userRole']),
         jobInfoKeys() {
             return ['id', 'Title', 'Beschreibung', 'cleaning_start', 'cleaning_end', 'Abholtermin', 'Status', 'trainee_id'];
@@ -529,6 +465,26 @@ export default {
         }
     },
     methods: {
+
+        formatDateTimeForInput(dateString) {
+            if (!dateString) return '';
+
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return '';
+
+                // Lokale Zeitzone verwenden
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            } catch {
+                return '';
+            }
+        },
 
         async handleImagesUploaded(response) {
             await this.getJob();
@@ -770,11 +726,16 @@ export default {
                     dataToSubmit.scheduled_at = dataToSubmit.Abholtermin || null;
                     delete dataToSubmit.Abholtermin;
 
-                    dataToSubmit.cleaning_start = dataToSubmit.cleaning_start || null;
-                    // delete dataToSubmit.cleaning_start;
-
-                    dataToSubmit.cleaning_end = dataToSubmit.cleaning_end || null;
-                    // delete dataToSubmit.cleaning_end;
+                    // Datumsfelder in ISO Format konvertieren falls vorhanden
+                    if (dataToSubmit.cleaning_start) {
+                        dataToSubmit.cleaning_start = new Date(dataToSubmit.cleaning_start).toISOString();
+                    }
+                    if (dataToSubmit.cleaning_end) {
+                        dataToSubmit.cleaning_end = new Date(dataToSubmit.cleaning_end).toISOString();
+                    }
+                    if (dataToSubmit.scheduled_at) {
+                        dataToSubmit.scheduled_at = new Date(dataToSubmit.scheduled_at).toISOString();
+                    }
                 }
 
                 console.log('Submitting job data:', dataToSubmit);
