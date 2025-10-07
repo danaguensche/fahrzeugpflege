@@ -58,15 +58,15 @@
                                     <template v-else>
                                         <template v-if="getHeader(field).type === 'select'">
                                             <v-select v-model="editItem[field]" :items="getHeader(field).options"
-                                                item-title="title" item-value="value" :rules="getFieldRules(field)"
-                                                :error-messages="fieldErrors[field]" density="compact"
+                                                item-title="title" item-value="value" :rules="fieldRules"
+                                                :error-messages="fieldErrors[field]" density="compact" variant="outlined"
                                                 :disabled="canEditStatusOnly && field !== 'status'"></v-select>
                                         </template>
                                         <template v-else>
-                                            <v-text-field v-model="editItem[field]" :rules="getFieldRules(field)"
-                                                :error-messages="fieldErrors[field]" density="compact"
+                                            <v-text-field v-model="editItem[field]" :rules="fieldRules" align="center"
+                                                :error-messages="fieldErrors[field]" density="compact" variant="outlined"
                                                 :type="field === 'scheduled_at' ? 'datetime-local' : 'text'"
-                                                :disabled="canEditStatusOnly && field !== 'status'">
+                                                :disabled="canEditStatusOnly && field !== 'status'" class="mt-5">
                                             </v-text-field>
                                         </template>
                                     </template>
@@ -148,11 +148,16 @@ import CancelButton from '../CommonSlots/CancelButton.vue';
 import DeleteButton from '../CommonSlots/DeleteButton.vue';
 import Pagination from '../CommonSlots/Pagination.vue';
 import { data } from 'autoprefixer';
+import { fi } from 'vuetify/locale';
 
 export default {
     name: "DataTable",
 
     props: {
+        fieldRules: {
+            type: Object,
+            default: () => ({})
+        },
         endpoint: {
             type: String,
             required: true
@@ -397,10 +402,6 @@ export default {
             else {
                 this.loadItems();
             }
-        },
-
-        getFieldRules(field) {
-            return [value => !!value || `${field} is required`];
         },
 
         getHeader(field) {
@@ -806,15 +807,6 @@ export default {
 
 :deep(.mdi-content-save) {
     color: #4caf50;
-}
-
-:deep(.v-text-field) {
-    margin: 0;
-    padding: 0;
-}
-
-:deep(.v-text-field .v-input__control) {
-    min-height: 36px;
 }
 
 :deep(.v-checkbox) {
