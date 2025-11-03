@@ -92,6 +92,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('customer/{customerId}/car/{carId}', [CustomerController::class, 'removeCarFromCustomer']);
     });
 
+    //Car Groups Routes
+
+    Route::get('/cargroups', [App\Http\Controllers\CarGroupController::class, 'index']);
+    Route::get('/cargroups/search', [App\Http\Controllers\CarGroupController::class, 'search']);
+
     // Jobs Routes
 
     Route::middleware(CheckRole::class . ':trainer,admin,trainee')->group(function () {

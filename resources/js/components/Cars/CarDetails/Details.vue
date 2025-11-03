@@ -33,9 +33,43 @@
                         </InfoList>
 
                         <!-- Bearbeitungsmodus -->
-                        <InfoListEditMode v-else :personalInfoKeys="vehicleInfoKeys" :labels="labels"
-                            :editedData="editedCarData" :getIconForField="getIconForField">
-                        </InfoListEditMode>
+                        <template v-else>
+                            <v-row class="pa-4">
+                                <!-- Standard Felder (außer Fahrzeugklasse) -->
+                                <template v-for="key in vehicleInfoKeys.filter(k => k !== 'Fahrzeugklasse')" :key="key">
+                                    <v-col cols="12" sm="6">
+                                        <v-text-field
+                                            v-model="editedCarData[key]"
+                                            :label="labels[key]"
+                                            :prepend-inner-icon="getIconForField(key)"
+                                            variant="outlined"
+                                            density="comfortable"
+                                            hide-details="auto"
+                                            :readonly="key === 'id'"
+                                        ></v-text-field>
+                                    </v-col>
+                                </template>
+                                
+                                <!-- Fahrzeugklasse Dropdown -->
+                                <v-col cols="12" sm="6">
+                                    <v-autocomplete
+                                        v-model="editedCarData.Fahrzeugklasse"
+                                        :items="carGroups"
+                                        item-title="title"
+                                        item-value="title"
+                                        label="Fahrzeugklasse"
+                                        placeholder="Fahrzeugklasse auswählen oder suchen"
+                                        prepend-inner-icon="mdi-car-multiple"
+                                        variant="outlined"
+                                        density="comfortable"
+                                        hide-details="auto"
+                                        clearable
+                                        :loading="carGroupsLoading"
+                                        @update:search="searchCarGroups"
+                                    ></v-autocomplete>
+                                </v-col>
+                            </v-row>
+                        </template>
                     </v-sheet>
 
                     <!-- Customer information -->
@@ -178,6 +212,9 @@ export default {
             customersLoading: false,
             customerSearch: null,
             customerSearchTimeout: null,
+            carGroups: [],
+            carGroupsLoading: false,
+            carGroupSearchTimeout: null,
             snackbar: {
                 show: false,
                 text: '',
@@ -251,6 +288,7 @@ export default {
         try {
             await this.getCar();
             await this.fetchCustomers();
+            await this.fetchCarGroups();
         } catch (error) {
             this.error = error.message;
             this.showSnackbar(error.message, 'error');
@@ -502,6 +540,32 @@ export default {
             }
             this.customerSearchTimeout = setTimeout(() => {
                 this.fetchCustomers(query);
+            }, 300);
+        },
+
+        // Car Group Search Methods
+        async fetchCarGroups(query = '') {
+            this.carGroupsLoading = true;
+            try {
+                const response = await axios.get(`/api/cargroups/search?query=${query}`);
+                this.carGroups = response.data.data.map(group => ({
+                    id: group.id,
+                    title: group.title,
+                }));
+            } catch (error) {
+                console.error('Error fetching car groups:', error);
+                this.showSnackbar('Fehler beim Laden der Fahrzeugklassen', 'error');
+            } finally {
+                this.carGroupsLoading = false;
+            }
+        },
+
+        searchCarGroups(query) {
+            if (this.carGroupSearchTimeout) {
+                clearTimeout(this.carGroupSearchTimeout);
+            }
+            this.carGroupSearchTimeout = setTimeout(() => {
+                this.fetchCarGroups(query);
             }, 300);
         }
     },

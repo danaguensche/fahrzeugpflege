@@ -33,20 +33,11 @@ class Car extends Model
         return $this->hasMany(Image::class);
     }
 
-    public function carGroup()
-    {
-        return $this->belongsTo(CarGroup::class, 'Fahrzeugklasse');
-    }
-
     public function getRouteKeyName()
     {
         return 'Kennzeichen';
     }
-        
-    public function carGroupSubgroup()
-    {
-        return $this->belongsTo(CarGroupSubgroup::class, 'Fahrzeugklasse');
-    }
+    
     public function orders()
     {
         return $this->hasMany(Order::class); 

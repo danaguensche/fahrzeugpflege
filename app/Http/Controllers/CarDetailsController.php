@@ -38,7 +38,7 @@ class CarDetailsController extends CarController
             // Prepare validation rules
             $validationRules = [
                 'Kennzeichen' => 'required|string',
-                'Fahrzeugklasse' => 'nullable|integer',
+                'Fahrzeugklasse' => 'nullable|string',
                 'Automarke' => 'nullable|string',
                 'Typ' => 'nullable|string',
                 'Farbe' => 'nullable|string',

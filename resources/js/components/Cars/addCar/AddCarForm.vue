@@ -24,17 +24,22 @@
                             ></v-text-field>
                         </v-col>
 
-                        <v-col cols="12" sm="6">
-                            <v-text-field
+                        <v-col cols="12" sm="6" v-if="addCarGroupField">
+                            <v-autocomplete
                                 v-model="car.Fahrzeugklasse"
+                                :items="carGroups"
+                                item-title="title"
+                                item-value="title"
                                 label="Fahrzeugklasse"
-                                :rules="[v => !!v || 'Fahrzeugklasse ist erforderlich']"
-                                required
+                                placeholder="Fahrzeugklasse auswählen oder suchen"
+                                prepend-inner-icon="mdi-car-multiple"
                                 variant="outlined"
                                 density="comfortable"
-                                prepend-inner-icon="mdi-car-hatchback"
-                                class="mb-3"
-                            ></v-text-field>
+                                clearable
+                                :loading="carGroupsLoading"
+                                @update:search="searchCarGroups"
+                                class="mb-3">
+                            </v-autocomplete>
                         </v-col>
 
                         <v-col cols="12" sm="6">
@@ -169,6 +174,10 @@ export default {
             type: Boolean,
             default: true,
         },
+        addCarGroupField: {
+            type: Boolean,
+            default: true,
+        },
     },
     data() {
         return {
@@ -182,6 +191,9 @@ export default {
                 Sonstiges: '',
             },
             customers: [],
+            carGroups: [],
+            carGroupsLoading: false,
+            carsSearchTimeout: null,
             customersLoading: false,
             carsLoading: false,
             customerSearchTimeout: null,
@@ -222,11 +234,15 @@ export default {
                 this.carsLoading = true;
                 try {
                     const carData = {
-                        ...this.car,
+                        Kennzeichen: this.car.Kennzeichen,
+                        Fahrzeugklasse: this.car.Fahrzeugklasse || null,
+                        Automarke: this.car.Automarke,
+                        Typ: this.car.Typ,
+                        Farbe: this.car.Farbe,
+                        Sonstiges: this.car.Sonstiges,
                         customer_id: this.car.customer ? this.car.customer.id : null,
                         service_ids: this.car.services ? this.car.services.map(s => s.id) : [],
                     };
-                    delete carData.customer;
 
                     await axios.post('/api/cars', carData);
                     this.$emit('car-added');
@@ -259,6 +275,23 @@ export default {
                 this.customersLoading = false;
             }
         },
+
+        async fetchCarGroups(query = '') {
+            this.carGroupsLoading = true;
+            try {
+                const response = await axios.get(`/api/cargroups/search?query=${query}`);
+                console.log(response.data);
+                this.carGroups = response.data.data.map(group => ({
+                    id: group.id,
+                    title: group.title,
+                }));
+            } catch (error) {
+                console.error('Error fetching car groups:', error);
+                this.showSnackbar('Fehler beim Laden der Fahrzeugklassen', 'error');
+            } finally {
+                this.carGroupsLoading = false;
+            }
+        },
         
         searchCustomers(query) {
             if (this.customerSearchTimeout) {
@@ -269,8 +302,20 @@ export default {
             }, 300);
         },
 
+        searchCarGroups(query) {
+            if (this.carsSearchTimeout) {
+                clearTimeout(this.carsSearchTimeout);
+            } 
+            this.carsSearchTimeout = setTimeout(() => {
+                this.fetchCarGroups(query);
+            }, 300);
+        },
+
+        
+
         fetchInitialData() {
             this.fetchCustomers();
+            this.fetchCarGroups();
         },
         
         resetForm() {
