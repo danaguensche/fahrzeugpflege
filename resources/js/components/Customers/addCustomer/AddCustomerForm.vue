@@ -43,7 +43,7 @@
 
                         <v-col cols="12" sm="6">
                             <v-text-field v-model="customer.phonenumber"
-                                :rules="[v => /^[0-9+\-\s()]{6,}$/.test(v) || 'Ungültige Telefonnummer']"
+                                :rules="[v => !v || /^[0-9+\-\s()]{6,}$/.test(v) || 'Ungültige Telefonnummer']"
                                 label="Telefonnummer" variant="outlined" density="comfortable"
                                 prepend-inner-icon="mdi-phone" type="tel" class="mb-3"></v-text-field>
                         </v-col>
@@ -55,10 +55,9 @@
                         </v-col>
 
                         <v-col cols="12" sm="4">
-                            <v-text-field v-model="customer.postalcode"
-                                :rules="[v => /^[0-9]{5}$/.test(v) || 'Ungültige Postleitzahl']" label="Postleitzahl"
-                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-mailbox"
-                                class="mb-3"></v-text-field>
+                            <v-text-field v-model="customer.postalcode" :rules="[
+                                v => !v || /^[0-9]{5}$/.test(v) || 'Ungültige Postleitzahl']" 
+                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-mailbox" class="mb-3"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="8">

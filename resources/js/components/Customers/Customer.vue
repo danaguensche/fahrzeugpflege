@@ -69,7 +69,6 @@ export default {
                     v => /^[0-9+\-\s()]{6,}$/.test(v) || 'Ungültige Telefonnummer'
                 ],
                 postalcode: [
-                    v => !!v || 'PLZ ist erforderlich',
                     v => /^[0-9]{5}$/.test(v) || 'Ungültige PLZ'
                 ]
             },
