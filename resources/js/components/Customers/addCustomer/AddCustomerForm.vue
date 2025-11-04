@@ -35,16 +35,17 @@
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="customer.email" label="E-Mail"
-                                :rules="[v => !!v || 'E-Mail ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-email" type="email"
-                                class="mb-3"></v-text-field>
+                            <v-text-field v-model="customer.email" label="E-Mail" :rules="[v => !!v || 'E-Mail ist erforderlich',
+                            v => /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
+                            ]" required variant="outlined" density="comfortable" prepend-inner-icon="mdi-email"
+                                type="email" class="mb-3"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="customer.phonenumber" label="Telefonnummer" variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-phone" type="tel"
-                                class="mb-3"></v-text-field>
+                            <v-text-field v-model="customer.phonenumber"
+                                :rules="[v => /^[0-9+\-\s()]{6,}$/.test(v) || 'Ungültige Telefonnummer']"
+                                label="Telefonnummer" variant="outlined" density="comfortable"
+                                prepend-inner-icon="mdi-phone" type="tel" class="mb-3"></v-text-field>
                         </v-col>
 
                         <v-col cols="12">
@@ -54,38 +55,29 @@
                         </v-col>
 
                         <v-col cols="12" sm="4">
-                            <v-text-field v-model="customer.postalcode" label="Postleitzahl" variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-mailbox" class="mb-3"></v-text-field>
+                            <v-text-field v-model="customer.postalcode"
+                                :rules="[v => /^[0-9]{5}$/.test(v) || 'Ungültige Postleitzahl']" label="Postleitzahl"
+                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-mailbox"
+                                class="mb-3"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="8">
                             <v-text-field v-model="customer.city" label="Stadt" variant="outlined" density="comfortable"
                                 prepend-inner-icon="mdi-city" class="mb-3"></v-text-field>
                         </v-col>
-                        
+
                         <!-- Fahrzeug hinzufügen (mit Suche und Autovervollständigung) -->
                         <v-col cols="12" v-if="showCarField">
-                            <v-autocomplete v-model="customer.car" 
-                                            :items="cars" 
-                                            item-title="Kennzeichen"
-                                            item-value="id" 
-                                            label="Fahrzeug" 
-                                            placeholder="Fahrzeug auswählen oder suchen"
-                                            prepend-inner-icon="mdi-car" 
-                                            variant="outlined" 
-                                            density="comfortable"
-                                            clearable
-                                            :loading="carsLoading"
-                                            @update:search="searchCars" 
-                                            return-object 
-                                            class="mb-3"
-                                            @update:modelValue="(val) => val && loadFullCarDetails(val.Kennzeichen)">
+                            <v-autocomplete v-model="customer.car" :items="cars" item-title="Kennzeichen"
+                                item-value="id" label="Fahrzeug" placeholder="Fahrzeug auswählen oder suchen"
+                                prepend-inner-icon="mdi-car" variant="outlined" density="comfortable" clearable
+                                :loading="carsLoading" @update:search="searchCars" return-object class="mb-3"
+                                @update:modelValue="(val) => val && loadFullCarDetails(val.Kennzeichen)">
 
                                 <!-- Anzeige des Fahrzeuges im Feld (Kennzeichen + Automarke) -->
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
-                                                                :subtitle="item.raw.Automarke"
-                                                                class="pa-3">
+                                        :subtitle="item.raw.Automarke" class="pa-3">
                                     </v-list-item>
                                 </template>
 

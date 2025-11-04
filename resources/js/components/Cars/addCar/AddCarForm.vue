@@ -67,6 +67,7 @@
                         <v-col cols="12" sm="6">
                             <v-text-field
                                 v-model="car.Farbe"
+                                :rules="[v => /^[A-Za-z]+$/.test(v) || 'Bitte geben Sie eine gültige Farbe ein']"
                                 label="Farbe"
                                 variant="outlined"
                                 density="comfortable"

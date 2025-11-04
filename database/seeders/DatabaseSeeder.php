@@ -19,8 +19,8 @@ class DatabaseSeeder extends Seeder
             PriceConditionSeeder::class,
             ServicePricingSeeder::class,
             ExtraChargeSeeder::class,
-            // CarSeeder::class,
-            // CustomerSeeder::class,
+            CarSeeder::class,
+            CustomerSeeder::class,
             OrderSeeder::class,
             OrderExtraChargeSeeder::class
         ]);
