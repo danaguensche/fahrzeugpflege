@@ -56,8 +56,8 @@
 
                         <v-col cols="12" sm="4">
                             <v-text-field v-model="customer.postalcode" :rules="[
-                                v => !v || /^[0-9]{5}$/.test(v) || 'Ungültige Postleitzahl']" 
-                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-mailbox" class="mb-3"></v-text-field>
+                                v => !v || /^[0-9]{5}$/.test(v) || 'Ungültige Postleitzahl']" variant="outlined"
+                                density="comfortable" prepend-inner-icon="mdi-mailbox" class="mb-3"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="8">
@@ -120,6 +120,10 @@ export default {
     },
     props: {
         modelValue: Boolean,
+        showCarField: {
+            type: Boolean,
+            default: true,
+        },
     },
     data() {
         return {
@@ -145,12 +149,6 @@ export default {
                 color: 'success',
             },
         };
-    },
-    props: {
-        showCarField: {
-            type: Boolean,
-            default: true,
-        },
     },
     computed: {
         showDialogLocal: {
@@ -188,7 +186,7 @@ export default {
                     lastname: this.customer.lastname,
                     email: this.customer.email || '',
                     phonenumber: this.customer.phonenumber || '',
-                    adressline: this.customer.adressline || '',
+                    addressline: this.customer.addressline || '',
                     postalcode: this.customer.postalcode || '',
                     city: this.customer.city || '',
                 };
@@ -218,6 +216,7 @@ export default {
             this.carsLoading = true;
             try {
                 const response = await axios.get(`/api/cars/search?query=${query}`);
+                console.log('API Antwort:', response.data); // <--- HIER
                 this.cars = response.data.data.map(car => ({
                     id: car.id,
                     Kennzeichen: car.Kennzeichen,
