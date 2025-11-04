@@ -114,6 +114,7 @@ class UserController extends Controller
                 'city' => 'nullable|string|max:255',
                 'role' => 'required|string|in:admin,trainer,trainee',
                 'password' => 'nullable|string|min:8',
+                
             ]);
 
             if (isset($validatedData['password'])) {
@@ -189,5 +190,24 @@ class UserController extends Controller
         User::whereIn('id', $ids)->delete();
 
         return response()->json(['message' => 'Benutzer erfolgreich gelöscht']);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        $validatedData = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if (!Hash::check($validatedData['current_password'], $user->password)) {
+            return response()->json(['message' => 'Aktuelles Passwort ist falsch'], 400);
+        }
+
+        $user->password = Hash::make($validatedData['new_password']);
+        $user->save();
+
+        return response()->json(['message' => 'Passwort erfolgreich geändert']);
     }
 }

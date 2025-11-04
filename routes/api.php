@@ -119,6 +119,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //User Routes
     Route::get('/users/search', [UserController::class, 'search']);
     Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::post('/users/change-password', [UserController::class, 'changePassword']);
 
     // Comment Routes
     Route::get('/orders/{order}/comments', [App\Http\Controllers\CommentController::class, 'index']);
