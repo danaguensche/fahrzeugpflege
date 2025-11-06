@@ -11,7 +11,7 @@
                 <ConfirmButton class="confirm-button" @click="confirmEditItem" :disabled="!editItemId">
                     Bestätigen
                 </ConfirmButton>
-                <CancelButton class="cancel-button" @click="cancelEdit">Abbrechen</CancelButton>
+                <CancelButton class="cancel-button" :disabled="editItemId === null" @click="cancelEdit">Abbrechen</CancelButton>
                 <DeleteButton class="delete-button" :disabled="selectedItems.length === 0"
                     @click="confirmDeleteSelectedItems" v-if="isAdminOrTrainer">
                     Löschen
