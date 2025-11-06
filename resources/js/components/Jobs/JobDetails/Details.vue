@@ -42,25 +42,30 @@
                                 :disabled="userRole === 'trainee'">
                             </InfoListEditMode>
 
-                            <v-text-field v-model="formattedCleaningStart"
-                                @input="editedJobData.cleaning_start = $event" type="datetime-local"
+                            <!-- Cleaning Start -->
+                            <v-text-field :model-value="formatDateTimeForInput(editedJobData.cleaning_start)"
+                                @update:model-value="editedJobData.cleaning_start = $event" type="datetime-local"
                                 :label="labels.cleaning_start" variant="outlined" density="comfortable"
                                 hide-details="auto" class="mt-4 w-50 ms-4"
                                 :prepend-inner-icon="getIconForField('cleaning_start')"
                                 :disabled="userRole === 'trainee'">
                             </v-text-field>
 
-                            <v-text-field v-model="formattedCleaningEnd" @input="editedJobData.cleaning_end = $event"
-                                type="datetime-local" :label="labels.cleaning_end" variant="outlined"
-                                density="comfortable" hide-details="auto" class="mt-4 w-50 ms-4"
+                            <!-- Cleaning End -->
+                            <v-text-field :model-value="formatDateTimeForInput(editedJobData.cleaning_end)"
+                                @update:model-value="editedJobData.cleaning_end = $event" type="datetime-local"
+                                :label="labels.cleaning_end" variant="outlined" density="comfortable"
+                                hide-details="auto" class="mt-4 w-50 ms-4"
                                 :prepend-inner-icon="getIconForField('cleaning_end')"
                                 :disabled="userRole === 'trainee'">
                             </v-text-field>
 
-                            <v-text-field v-model="formattedAbholtermin" @input="editedJobData.Abholtermin = $event"
-                                type="datetime-local" :label="labels.Abholtermin" variant="outlined"
-                                density="comfortable" hide-details="auto" class="mt-4 w-50 ms-4"
-                                :prepend-inner-icon="getIconForField('Abholtermin')" :disabled="userRole === 'trainee'">
+                            <!-- Abholtermin -->
+                            <v-text-field :model-value="formatDateTimeForInput(editedJobData.Abholtermin)"
+                                @update:model-value="editedJobData.Abholtermin = $event" type="datetime-local"
+                                :label="labels.Abholtermin" variant="outlined" density="comfortable" hide-details="auto"
+                                class="mt-4 w-50 ms-4" :prepend-inner-icon="getIconForField('Abholtermin')"
+                                :disabled="userRole === 'trainee'">
                             </v-text-field>
 
                             <v-select v-model="editedJobData.Status" :items="statuses" item-title="title"
@@ -417,11 +422,13 @@ export default {
             if (!this.jobDetails.data) return {};
             const displayedData = { ...this.jobDetails.data };
 
+            // Status anzeigen (Titel statt Wert)
             if (displayedData.Status) {
                 const foundStatus = this.statuses.find(s => s.value === displayedData.Status);
                 displayedData.Status = foundStatus ? foundStatus.title : displayedData.Status;
             }
 
+            // Datumsfelder formatieren
             if (displayedData.Abholtermin) {
                 displayedData.Abholtermin = this.formatDate(displayedData.Abholtermin);
             }
@@ -438,6 +445,7 @@ export default {
                 displayedData.cleaning_end = 'Nicht definiert';
             }
 
+            // Trainee anzeigen
             if (this.jobDetails.data.trainee) {
                 displayedData.trainee_id = `${this.jobDetails.data.trainee.firstname} ${this.jobDetails.data.trainee.lastname}`;
             } else if (displayedData.trainee_id) {
@@ -727,15 +735,37 @@ export default {
                     delete dataToSubmit.Abholtermin;
 
                     // Datumsfelder in ISO Format konvertieren falls vorhanden
-                    if (dataToSubmit.cleaning_start) {
-                        dataToSubmit.cleaning_start = new Date(dataToSubmit.cleaning_start).toISOString();
-                    }
-                    if (dataToSubmit.cleaning_end) {
-                        dataToSubmit.cleaning_end = new Date(dataToSubmit.cleaning_end).toISOString();
-                    }
-                    if (dataToSubmit.scheduled_at) {
-                        dataToSubmit.scheduled_at = new Date(dataToSubmit.scheduled_at).toISOString();
-                    }
+                    // Datumsfelder formatieren - als lokale Zeit behandeln ohne UTC-Konvertierung
+                    const formatDateForBackend = (dateString) => {
+                        if (!dateString) return null;
+                        try {
+                            // Wenn es bereits ein ISO-Format mit Zeitzone ist, direkt verwenden
+                            if (dateString.includes('T') && !dateString.includes('Z') && dateString.length === 16) {
+                                // Format: "YYYY-MM-DDTHH:mm" - Sekunden hinzufügen
+                                return dateString + ':00';
+                            }
+                            // Andernfalls als lokale Zeit parsen
+                            const date = new Date(dateString);
+                            if (!isNaN(date.getTime())) {
+                                // Als lokale Zeit im Format "YYYY-MM-DD HH:mm:ss" zurückgeben
+                                const year = date.getFullYear();
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                const hours = String(date.getHours()).padStart(2, '0');
+                                const minutes = String(date.getMinutes()).padStart(2, '0');
+                                const seconds = String(date.getSeconds()).padStart(2, '0');
+                                return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                            }
+                            return null;
+                        } catch (e) {
+                            console.error('Invalid date:', dateString, e);
+                            return null;
+                        }
+                    };
+
+                    dataToSubmit.cleaning_start = formatDateForBackend(dataToSubmit.cleaning_start);
+                    dataToSubmit.cleaning_end = formatDateForBackend(dataToSubmit.cleaning_end);
+                    dataToSubmit.scheduled_at = formatDateForBackend(dataToSubmit.scheduled_at);
                 }
 
                 console.log('Submitting job data:', dataToSubmit);
@@ -921,7 +951,7 @@ export default {
 .card-container {
     width: 100%;
     height: 99vh;
-    margin-left:110px;
+    margin-left: 110px;
     /* padding: 20px; */
     box-sizing: border-box;
     display: flex;
