@@ -575,8 +575,9 @@ export default {
 <style scoped>
 .card-container {
     width: 100%;
-    height: calc(100vh - 40px);
-    padding: 20px;
+    height: 99vh;
+    margin-left:110px;
+    /* padding: 20px; */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -614,19 +615,19 @@ export default {
 
 @media (min-width: 768px) and (max-width: 991.98px) {
     .card-container {
-        max-width: calc(100% - 80px);
+        max-width: calc(100% - 50px);
     }
 }
 
 @media (min-width: 992px) and (max-width: 1199.98px) {
     .card-container {
-        max-width: calc(100% - 250px);
+        max-width: calc(100% - 150px);
     }
 }
 
 @media (min-width: 1200px) {
     .card-container {
-        max-width: calc(100% - 280px);
+        max-width: calc(100% - 180px);
     }
 }
 

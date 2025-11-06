@@ -61,7 +61,7 @@ export default {
             this.loading = true;
             try {
                 const response = await axios.get('/api/activities');
-                this.activities = response.data.slice(0, 5); // Limit to last 5 activities
+                this.activities = response.data.slice(0, 10); // Limit to last 10 activities
             } catch (error) {
                 console.error('Error fetching activities:', error);
                 this.$toast?.error('Fehler beim Laden der Aktivitäten');
