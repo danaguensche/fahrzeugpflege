@@ -109,6 +109,11 @@ export default {
     font-weight: 600;
 }
 
+@media (min-width:1900px) {
+    .widget-content {
+        height: 700px;
+    }
+}
 @media (max-width: 1024px) {
     .widget-content {
         padding: 5px;

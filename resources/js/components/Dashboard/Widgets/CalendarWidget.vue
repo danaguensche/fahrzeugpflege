@@ -475,6 +475,23 @@ export default {
 }
 
 
+@media (min-width: 1900px) {
+    .today-widget {
+        padding: 25px;
+    }
+
+    .fixed-height {
+        min-height: 850px;
+    }
+
+    .widget-header h3 {
+        font-size: 1.4em;
+    }
+
+    .events-list {
+        height: 700px;
+    }
+}
 
 @media (max-width: 1024px) {
     .today-widget {

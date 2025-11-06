@@ -254,7 +254,7 @@ export default {
   margin-left: 150px;
   padding: 30px;
   width: calc(100% - 160px);
-  max-width: 1400px;
+  max-width: 100%px;
   margin-right: auto;
   height: calc(100vh - 70px);
 }

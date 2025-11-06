@@ -156,7 +156,7 @@ export default {
     transition: margin-left 0.3s ease;
     font-family: var(--font-family);
     margin-left: 150px;
-    /* min-height: 100vh; */
+    height: 100vh;
     /* background-color: #f5f5f5; */
     border-radius: 12px;
 }
