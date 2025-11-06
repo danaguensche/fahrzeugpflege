@@ -302,7 +302,7 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    height: 300px;
+    height: 250px;
     overflow-y: auto;
 }
 
