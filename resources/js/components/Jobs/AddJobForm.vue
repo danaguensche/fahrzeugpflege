@@ -158,7 +158,9 @@
                                                     type="date"
                                                     variant="outlined" 
                                                     density="comfortable"
-                                                    class="mb-3">
+                                                    class="mb-3"
+                                                    :rules="[v => !!v || 'Startdatum ist erforderlich']"
+                                                    required>
                                     </v-text-field>
                                 </v-col>
 
@@ -168,7 +170,9 @@
                                                     type="time"
                                                     variant="outlined" 
                                                     density="comfortable"
-                                                    class="mb-3">
+                                                    class="mb-3"
+                                                    :rules="[v => !!v || 'Startzeit ist erforderlich']"
+                                                    required>
                                     </v-text-field>
                                 </v-col>
                             </v-row>
@@ -182,7 +186,9 @@
                                                     type="date"
                                                     variant="outlined" 
                                                     density="comfortable"
-                                                    class="mb-3">
+                                                    class="mb-3"
+                                                    :rules="[v => !!v || 'Enddatum ist erforderlich']"
+                                                    required>
                                     </v-text-field>
                                 </v-col>
 
@@ -192,7 +198,9 @@
                                                     type="time"
                                                     variant="outlined" 
                                                     density="comfortable"
-                                                    class="mb-3">
+                                                    class="mb-3"
+                                                    :rules="[v => !!v || 'Endzeit ist erforderlich']"
+                                                    required>
                                     </v-text-field>
                                 </v-col>
                             </v-row>
@@ -206,7 +214,9 @@
                                                     type="date"
                                                     variant="outlined" 
                                                     density="comfortable"
-                                                    class="mb-3">
+                                                    class="mb-3"
+                                                    :rules="[v => !!v || 'Abholtermin ist erforderlich']"
+                                                    required>
                                     </v-text-field>
                                 </v-col>
 
@@ -216,7 +226,9 @@
                                                     type="time"
                                                     variant="outlined" 
                                                     density="comfortable"
-                                                    class="mb-3">
+                                                    class="mb-3"
+                                                    :rules="[v => !!v || 'Abholzeit ist erforderlich']"
+                                                    required>
                                     </v-text-field>
                                 </v-col>
                             </v-row>
