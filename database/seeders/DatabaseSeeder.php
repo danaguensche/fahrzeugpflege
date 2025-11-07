@@ -16,16 +16,17 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            // CarGroupSeeder::class,
-            // ServiceSeeder::class,
-            // PriceConditionSeeder::class,
-            // ServicePricingSeeder::class,
-            // ExtraChargeSeeder::class,
+            CarGroupSeeder::class,
+            ServiceSeeder::class,
+            PriceConditionSeeder::class,
+            ServicePricingSeeder::class,
+            ExtraChargeSeeder::class,
             CarSeeder::class,
             CustomerSeeder::class,
             JobSeeder::class,
-            // OrderSeeder::class,
-            // OrderExtraChargeSeeder::class
+            JobServiceSeeder::class,
+            OrderSeeder::class,
+            OrderExtraChargeSeeder::class
         ]);
     }
 }
