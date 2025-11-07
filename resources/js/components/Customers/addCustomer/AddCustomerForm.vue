@@ -55,7 +55,7 @@
                         </v-col>
 
                         <v-col cols="12" sm="4">
-                            <v-text-field v-model="customer.postalcode" :rules="[
+                            <v-text-field v-model="customer.postalcode" label="Postleitzahl" :rules="[
                                 v => !v || /^[0-9]{5}$/.test(v) || 'Ungültige Postleitzahl']" variant="outlined"
                                 density="comfortable" prepend-inner-icon="mdi-mailbox" class="mb-3"></v-text-field>
                         </v-col>
