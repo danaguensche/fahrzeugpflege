@@ -9,7 +9,6 @@ import ReportsPage from './components/pages/ReportsPage.vue';
 import ProfilePage from './components/pages/ProfilePage.vue';
 import SettingsPage from './components/pages/SettingsPage.vue';
 import LoginPage from './components/pages/LoginPage.vue';
-import SignUpPage from './components/pages/SignUpPage.vue';
 import WelcomePage from './components/pages/WelcomePage.vue';
 import CustomerPage from './components/pages/CustomerPage.vue';
 import CarDetailsPage from './components/pages/CarDetailsPage.vue';
@@ -19,8 +18,7 @@ import ForgotPassword from './components/Auth/ForgotPassword.vue';
 import ResetPassword from './components/Auth/ResetPassword.vue';
 import store from './storage/index.js'; // Import your Vuex store
 
-const routes = [
-    {
+const routes = [{
         path: '/',
         component: WelcomePage, // Public landing page
         name: 'Welcome'
@@ -31,15 +29,9 @@ const routes = [
         name: 'Login'
     },
     {
-        path: '/signup',
-        component: SignUpPage,
-        name: 'SignUp'
-    },
-    {
         path: '/', // This is a parent route for authenticated sections
         component: MainLayout,
-        children: [
-            {
+        children: [{
                 path: 'dashboard', // /Dashboard
                 component: DashboardPage,
                 meta: { roles: ['trainee', 'trainer', 'admin'] }
@@ -102,7 +94,8 @@ const routes = [
             // Add a route for 'Benutzer' (Users) page, visible only to admin
             {
                 path: 'benutzer',
-                component: () => import('./components/pages/UsersPage.vue'), // Assuming you will create this component
+                component: () =>
+                    import ('./components/pages/UsersPage.vue'), // Assuming you will create this component
                 meta: { roles: ['admin'] }
             },
         ],

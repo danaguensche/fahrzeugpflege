@@ -24,17 +24,22 @@
                             ></v-text-field>
                         </v-col>
 
-                        <v-col cols="12" sm="6">
-                            <v-text-field
+                        <v-col cols="12" sm="6" v-if="addCarGroupField">
+                            <v-autocomplete
                                 v-model="car.Fahrzeugklasse"
+                                :items="carGroups"
+                                item-title="title"
+                                item-value="title"
                                 label="Fahrzeugklasse"
-                                :rules="[v => !!v || 'Fahrzeugklasse ist erforderlich']"
-                                required
+                                placeholder="Fahrzeugklasse auswählen oder suchen"
+                                prepend-inner-icon="mdi-car-multiple"
                                 variant="outlined"
                                 density="comfortable"
-                                prepend-inner-icon="mdi-car-hatchback"
-                                class="mb-3"
-                            ></v-text-field>
+                                clearable
+                                :loading="carGroupsLoading"
+                                @update:search="searchCarGroups"
+                                class="mb-3">
+                            </v-autocomplete>
                         </v-col>
 
                         <v-col cols="12" sm="6">
@@ -62,6 +67,7 @@
                         <v-col cols="12" sm="6">
                             <v-text-field
                                 v-model="car.Farbe"
+                                :rules="[v =>  !v || /^[A-Za-z]+$/.test(v) || 'Bitte geben Sie eine gültige Farbe ein']"
                                 label="Farbe"
                                 variant="outlined"
                                 density="comfortable"
@@ -70,6 +76,8 @@
                             ></v-text-field>
                         </v-col>
 
+
+                        <!-- Kunde hinzufügen (mit Suche und Autovervollständigung) -->
                         <v-col cols="12" sm="6" v-if="addCustomerField">
                             <v-autocomplete
                                 v-model="car.customer"
@@ -85,8 +93,8 @@
                                 :loading="customersLoading"
                                 @update:search="searchCustomers"
                                 return-object
-                                class="mb-3"
-                            >
+                                class="mb-3">
+
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item
                                         v-bind="props"
@@ -109,8 +117,8 @@
                                 density="comfortable"
                                 prepend-inner-icon="mdi-note-text"
                                 rows="3"
-                                class="mb-3"
-                            ></v-textarea>
+                                class="mb-3">
+                            </v-textarea>
                         </v-col>
                     </v-row>
                 </v-form>
@@ -118,26 +126,29 @@
             
             <v-divider></v-divider>
             
+
+            <!-- Buttons -->
             <v-card-actions class="pa-6 pt-4">
+
                 <v-spacer></v-spacer>
                 <v-btn 
                     variant="outlined" 
                     color="grey" 
                     @click="closeDialog"
-                    class="mr-3"
-                >
-                    <v-icon start>mdi-close</v-icon>
+                    class="mr-3">
+                 <v-icon start>mdi-close</v-icon>
                     Abbrechen
                 </v-btn>
+
                 <v-btn 
                     variant="elevated" 
                     color="primary" 
                     @click="saveCar"
-                    :loading="carsLoading"
-                >
+                    :loading="carsLoading">
                     <v-icon start>mdi-content-save</v-icon>
                     Speichern
                 </v-btn>
+
             </v-card-actions>
         </v-card>
         
@@ -145,8 +156,7 @@
             v-if="snackbar.show" 
             :text="snackbar.text" 
             :color="snackbar.color" 
-            @close="snackbar.show = false"
-        />
+            @close="snackbar.show = false"/>
     </v-dialog>
 </template>
 
@@ -165,6 +175,10 @@ export default {
             type: Boolean,
             default: true,
         },
+        addCarGroupField: {
+            type: Boolean,
+            default: true,
+        },
     },
     data() {
         return {
@@ -178,6 +192,9 @@ export default {
                 Sonstiges: '',
             },
             customers: [],
+            carGroups: [],
+            carGroupsLoading: false,
+            carsSearchTimeout: null,
             customersLoading: false,
             carsLoading: false,
             customerSearchTimeout: null,
@@ -206,21 +223,27 @@ export default {
         },
     },
     methods: {
+
         closeDialog() {
             this.$emit('update:modelValue', false);
             this.resetForm();
         },
+
         async saveCar() {
             const { valid } = await this.$refs.form.validate();
             if (valid) {
                 this.carsLoading = true;
                 try {
                     const carData = {
-                        ...this.car,
+                        Kennzeichen: this.car.Kennzeichen,
+                        Fahrzeugklasse: this.car.Fahrzeugklasse || null,
+                        Automarke: this.car.Automarke,
+                        Typ: this.car.Typ,
+                        Farbe: this.car.Farbe,
+                        Sonstiges: this.car.Sonstiges,
                         customer_id: this.car.customer ? this.car.customer.id : null,
                         service_ids: this.car.services ? this.car.services.map(s => s.id) : [],
                     };
-                    delete carData.customer;
 
                     await axios.post('/api/cars', carData);
                     this.$emit('car-added');
@@ -253,6 +276,23 @@ export default {
                 this.customersLoading = false;
             }
         },
+
+        async fetchCarGroups(query = '') {
+            this.carGroupsLoading = true;
+            try {
+                const response = await axios.get(`/api/cargroups/search?query=${query}`);
+                console.log(response.data);
+                this.carGroups = response.data.data.map(group => ({
+                    id: group.id,
+                    title: group.title,
+                }));
+            } catch (error) {
+                console.error('Error fetching car groups:', error);
+                this.showSnackbar('Fehler beim Laden der Fahrzeugklassen', 'error');
+            } finally {
+                this.carGroupsLoading = false;
+            }
+        },
         
         searchCustomers(query) {
             if (this.customerSearchTimeout) {
@@ -263,8 +303,20 @@ export default {
             }, 300);
         },
 
+        searchCarGroups(query) {
+            if (this.carsSearchTimeout) {
+                clearTimeout(this.carsSearchTimeout);
+            } 
+            this.carsSearchTimeout = setTimeout(() => {
+                this.fetchCarGroups(query);
+            }, 300);
+        },
+
+        
+
         fetchInitialData() {
             this.fetchCustomers();
+            this.fetchCarGroups();
         },
         
         resetForm() {
@@ -295,6 +347,7 @@ export default {
 </script>
 
 <style scoped>
+
 .v-dialog {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }

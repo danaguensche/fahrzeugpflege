@@ -1,16 +1,13 @@
 export default {
     namespaced: true,
     state: {
-        activeForm: 'login',
         isLoggedIn: !!localStorage.getItem('token'),
         token: localStorage.getItem('token'),
         userRole: localStorage.getItem('userRole') || null,
         userId: localStorage.getItem('userId') || null,
     },
     mutations: {
-        setActiveForm(state, formName) {
-            state.activeForm = formName;
-        },
+
         setLoggedIn(state, value) {
             state.isLoggedIn = value;
         },
@@ -36,9 +33,6 @@ export default {
         },
     },
     actions: {
-        switchForm({ commit }, formName) {
-            commit('setActiveForm', formName);
-        },
         login({ commit }, { token, role, id }) {
             commit('setToken', token);
             commit('setUserRole', role);

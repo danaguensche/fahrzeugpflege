@@ -3,6 +3,8 @@
 Eine Webanwendung zur Verwaltung von Kunden, Fahrzeugen, Aufträgen und Fotos für unseren Fahrzeugpflegebetrieb.  
 Entwickelt mit **Laravel 11**, **Vue.js** und **Vuetify**.
 
+ **Mehr Details gibt’s im [Wiki](https://dac-gitea01.bbw-hof.de/dana.guensche/fahrzeugpflege-laravel-vue/wiki).**
+
 ## Funktionen
 
 - **Kundenverwaltung** (Anlegen, Bearbeiten, Löschen, Detailansicht)  
@@ -45,7 +47,7 @@ php artisan serve
 npm run dev
 ```
 
-**Genauere Anleitung und Informationen befinden sich im Wiki des Repositorys.**  
+**Genauere Anleitung und Informationen befinden sich im [Wiki](https://dac-gitea01.bbw-hof.de/dana.guensche/fahrzeugpflege-laravel-vue/wiki). des Repositorys.**  
 
 ## Server  
 

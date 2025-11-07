@@ -1,8 +1,8 @@
 <!-- CustomerAddDialog.vue -->
 <template>
   <v-dialog v-model="dialog" max-width="700px">
-    <v-card class="rounded-lg elevation-5">
-
+    <v-card class="pa-2">
+      
       <v-card-title class="headline primary white--text py-5">
         <v-icon left large color="white">mdi-account-search</v-icon>
         <span class="text-h5">Kundenauswahl</span>
@@ -12,12 +12,17 @@
 
         <!-- Schritt: Vorhandenen Kunden suchen -->
         <v-card-text class="pa-7">
+          
           <v-row>
             <v-col cols="12">
               <v-form ref="existingCustomerForm" v-model="existingFormValid">
-                <v-text-field v-model="existingCustomerSearch" label="Suchen Sie nach einem Kunden"
-                  :rules="[v => !!v || 'Suchbegriff ist erforderlich']" @keyup.enter="searchCustomer"
-                  prepend-icon="mdi-magnify" clearable outlined class="rounded-lg">
+                <v-text-field   v-model="existingCustomerSearch" 
+                                label="Suchen Sie nach einem Kunden"
+                                :rules="[v => !!v || 'Suchbegriff ist erforderlich']" 
+                                @keyup.enter="searchCustomer"
+                                prepend-icon="mdi-magnify" 
+                                clearable outlined 
+                                class="rounded-lg">
                 </v-text-field>
               </v-form>
             </v-col>
@@ -25,23 +30,23 @@
 
           <!-- Suchergebnisse -->
           <v-card v-if="searchResults.length > 0" class="mt-4" style="max-height: 500px; overflow-y: auto;">
+            
             <v-card-title>
               <v-icon left class="mr-4" color="primary">mdi-format-list-bulleted</v-icon>
               <span class="ga-10"></span>
               Gefundene Kunden ({{ searchResults.length }})
             </v-card-title>
+
             <v-list two-line>
               <v-list-item v-for="customer in searchResults" :key="customer.id"
                 @click="selectExistingCustomer(customer)" class="list-item-hover">
 
-                <!-- Исправлено: используем template v-slot:prepend для avatar -->
                 <template v-slot:prepend>
                   <v-avatar>
                     <v-icon color="primary">mdi-account</v-icon>
                   </v-avatar>
                 </template>
 
-                <!-- Исправлено: убрали v-list-item-content, используем напрямую -->
                 <v-list-item-title class="font-weight-bold">
                   {{ customer.firstname }} {{ customer.lastname }}
                 </v-list-item-title>
@@ -49,7 +54,6 @@
                   {{ customer.email }} - {{ customer.phonenumber }}
                 </v-list-item-subtitle>
 
-                <!-- Исправлено: используем template v-slot:append для action -->
                 <template v-slot:append>
                   <v-btn icon variant="plain" @click.stop="selectExistingCustomer(customer)">
                     <v-icon color="primary">mdi-plus-circle</v-icon>
@@ -60,7 +64,9 @@
           </v-card>
 
           <!-- Keine Suchergebnisse -->
-          <v-alert v-if="showNoResultsMessage" type="info" text class="mt-4 rounded-lg">
+          <v-alert  v-if="showNoResultsMessage" 
+                    type="info" 
+                    text class="mt-4 rounded-lg">
             <div class="text-center">
               <v-icon large color="info" class="mb-2">mdi-account-off-outline</v-icon>
               <p class="mb-2">Kein Kunde gefunden.</p>
@@ -74,16 +80,23 @@
           </v-snackbar>
         </v-card-text>
 
+
+        <!-- Buttons zum Kunden hinzufügen, suchen, oder Dialog schließen -->
         <v-card-actions class="pa-4 grey lighten-4">
-          <v-btn color="green lighten-4" @click="openAddCustomerDialog" prepend-icon="mdi-plus" size="small"
-            class="mb-2">
+          <v-btn  color="green lighten-4"
+                  @click="openAddCustomerDialog" 
+                  prepend-icon="mdi-plus" 
+                  size="small"
+                  class="mb-2">
             Kunden hinzufügen
           </v-btn>
           <v-spacer></v-spacer>
+
           <v-btn color="grey darken-1" text @click="closeDialog">
             <v-icon left>mdi-close</v-icon>
             Abbrechen
           </v-btn>
+
           <v-btn color="primary" @click="searchCustomer" :disabled="!existingFormValid" :loading="isSearching">
             <v-icon left>mdi-magnify</v-icon>
             Kunde suchen

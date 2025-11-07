@@ -24,6 +24,8 @@ class JobController extends Controller
                 'customer_id' => 'required|exists:customers,id',
                 'user_id' => 'nullable|exists:users,id',
                 'status' => 'required|string',
+                'cleaning_start' => 'nullable|date',
+                'cleaning_end' => 'nullable|date',
                 'scheduled_at' => 'nullable|date',
                 'service_ids' => 'required|array',
                 'service_ids.*' => 'exists:services,id',
@@ -272,6 +274,8 @@ class JobController extends Controller
                     'trainee_id' => 'nullable|exists:users,id',
                     'car_id' => 'sometimes|required|exists:cars,id',
                     'customer_id' => 'sometimes|required|exists:customers,id',
+                    'cleaning_start' => 'nullable|date',
+                    'cleaning_end' => 'nullable|date|after_or_equal:cleaning_start',
                     'status' => 'sometimes|required|string',
                     'scheduled_at' => 'nullable|date',
                     'services' => 'nullable|array',
@@ -372,16 +376,17 @@ class JobController extends Controller
 
     public function destroyMultiple(Request $request)
     {
-        try {
+        try {         
             $validated = $request->validate([
                 'ids' => 'required|array',
-                'ids.*' => 'integer|exists:jobs,id' // Fixed: should be jobs, not customers
+                'ids.*' => 'integer'
             ]);
-
+    
             DB::beginTransaction();
-
+    
+            // Get jobs with images
             $jobs = Job::whereIn('id', $validated['ids'])->with('images')->get();
-
+           
             if ($jobs->isEmpty()) {
                 DB::rollBack();
                 return response()->json([
@@ -389,9 +394,9 @@ class JobController extends Controller
                     'message' => 'Keine Jobs gefunden.'
                 ], 404);
             }
-
+    
+            // Delete all associated images from storage and database
             foreach ($jobs as $job) {
-                // Delete all associated images from storage and database
                 foreach ($job->images as $image) {
                     $imagePath = str_replace('storage/', '', $image->path);
                     if (Storage::disk('public')->exists($imagePath)) {
@@ -399,11 +404,12 @@ class JobController extends Controller
                     }
                     $image->delete();
                 }
-                $job->delete();
             }
-
+    
+            Job::destroy($validated['ids']);
+    
             DB::commit();
-
+    
             activity()
                 ->causedBy(auth()->user())
                 ->withProperties([
@@ -411,11 +417,12 @@ class JobController extends Controller
                     'count' => count($jobs),
                 ])
                 ->log('Mehrere Aufträge gelöscht: ' . count($jobs) . ' Jobs von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
-
+    
             return response()->json([
                 'success' => true,
                 'message' => count($jobs) . ' Jobs wurden erfolgreich gelöscht.'
             ], 200);
+    
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             return response()->json([
@@ -432,7 +439,6 @@ class JobController extends Controller
             ], 500);
         }
     }
-
     /**
      * Delete a single image from a job
      */
@@ -602,17 +608,16 @@ class JobController extends Controller
                 'error' => 'Fehler beim Abrufen verfügbarer Fahrzeuge'
             ], 500);
         }
-    }
+    } 
 
     public function getCarsForCustomer($customerId)
     {
         $customer = Customer::with('cars')->findOrFail($customerId);
 
-        if ($customer->cars()->exists()) {
-            $cars = $customer->cars()->get();
-        } else {
-            $cars = Car::whereNull('customer_id')->get();
-        }
+        $cars = Car::where(function($query) use ($customerId) {
+            $query->where('customer_id', $customerId)
+                  ->orWhereNull('customer_id');
+        })->get();
 
         return response()->json([
             'cars' => $cars

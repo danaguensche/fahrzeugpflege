@@ -1,23 +1,32 @@
 <template>
     <v-sheet class="section-block">
+
         <DefaultHeader :title="'Kommentare'"></DefaultHeader>
+
         <v-list dense class="comment-list">
+            
             <v-list-item v-for="comment in comments" :key="comment.id" class="comment-item">
                 <v-list-item-content>
                     <div class="d-flex justify-space-between align-center">
-                        <v-list-item-title class="comment-author">{{ comment.user.firstname }} {{ comment.user.lastname
-                        }}</v-list-item-title>
+                        <v-list-item-title class="comment-author">
+                            {{ comment.user.firstname }} {{ comment.user.lastname}}
+                        </v-list-item-title>
+
                         <v-btn v-if="userRole === 'admin' || userRole === 'trainer'" icon @click="confirmDeleteItem(comment.id)" variant="text"
                             color="error" size="small">
                             <v-icon>mdi-delete</v-icon>
                         </v-btn>
-
                     </div>
-                    <v-list-item-subtitle class="comment-date">{{ formatDate(comment.created_at)
-                    }}</v-list-item-subtitle>
-                    <v-list-item-text class="comment-text">{{ comment.comment_text }}</v-list-item-text>
+                    <v-list-item-subtitle class="comment-date">
+                        {{ formatDate(comment.created_at)}}
+                    </v-list-item-subtitle>
+
+                    <v-list-item-text class="comment-text">
+                        {{ comment.comment_text }}
+                    </v-list-item-text>
                 </v-list-item-content>
             </v-list-item>
+
             <v-list-item v-if="comments.length === 0">
                 <v-list-item-content>
                     <v-list-item-text class="text-grey">Noch keine Kommentare vorhanden.</v-list-item-text>
@@ -25,16 +34,28 @@
             </v-list-item>
         </v-list>
 
-        <VuetifyAlert v-model="isAlertVisible" maxWidth="500" alertTypeClass="alertTypeConfirmation"
-            :alertHeading="alertHeading" :alertParagraph="alertParagraph" :alertOkayButton="alertOkayButton"
-            alertCloseButton="Abbrechen" @confirmation="handleConfirmation">
+        <VuetifyAlert   v-model="isAlertVisible"
+                        maxWidth="500" 
+                        alertTypeClass="alertTypeConfirmation"
+                        :alertHeading="alertHeading" 
+                        :alertParagraph="alertParagraph" 
+                        :alertOkayButton="alertOkayButton"
+                        alertCloseButton="Abbrechen" 
+                        @confirmation="handleConfirmation">
         </VuetifyAlert>
 
         <v-form @submit.prevent="addComment" class="comment-form">
-            <v-textarea v-model="newCommentText" label="Neuer Kommentar" variant="outlined" rows="3" clearable
-                hide-details="auto" class="mb-4"></v-textarea>
+            <v-textarea v-model="newCommentText" 
+                        label="Neuer Kommentar" 
+                        variant="outlined" 
+                        rows="3" 
+                        clearable
+                        hide-details="auto"
+                        class="mb-4">
+            </v-textarea>
             <v-btn type="submit" color="primary" :loading="loading">Kommentar hinzufügen</v-btn>
         </v-form>
+        
     </v-sheet>
 </template>
 

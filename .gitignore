@@ -20,3 +20,7 @@ yarn-error.log
 /.idea
 /.vscode
 *.log
+.vite.config.js
+/public/web.config
+/config/cors.php
+vue.config.js

@@ -3,18 +3,22 @@
         <v-card class="pa-2">
             <v-card-title class="headline pa-6 pb-4">
                 <v-icon class="mr-3" color="primary">mdi-briefcase-plus</v-icon>
-                Neue Aufgabe hinzufügen
+                Neuen Auftrag hinzufügen
             </v-card-title>
 
             <v-divider></v-divider>
 
+            <!-- Formular Felder mit Validierung -->
+
             <v-card-text class="pa-6">
                 <v-form ref="form" v-model="valid" lazy-validation>
+
                     <v-row>
                         <v-col cols="12">
                             <v-text-field v-model="job.title" label="Titel"
                                 :rules="[v => !!v || 'Titel ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-format-title" class="mb-3"></v-text-field>
+                                density="comfortable" prepend-inner-icon="mdi-format-title" class="mb-3">
+                            </v-text-field>
                         </v-col>
 
                         <v-col cols="12">
@@ -24,15 +28,28 @@
 
                         <!-- Kunde zuerst auswählen -->
                         <v-col cols="12" sm="6">
-                            <v-autocomplete v-model="job.customer" :items="customers" item-title="full_name"
-                                item-value="id" label="Kunde" placeholder="Kunde auswählen"
-                                prepend-inner-icon="mdi-account" variant="outlined" density="comfortable" clearable
-                                :loading="customersLoading" return-object
-                                :rules="[v => !!v || 'Kunde ist erforderlich']" required class="mb-3"
-                                @update:model-value="onCustomerChange">
+                            <v-autocomplete v-model="job.customer" 
+                                            :items="customers" 
+                                            item-title="full_name"
+                                            item-value="id" 
+                                            label="Kunde" 
+                                            placeholder="Kunde auswählen"
+                                            prepend-inner-icon="mdi-account" 
+                                            variant="outlined" 
+                                            density="comfortable" 
+                                            clearable
+                                            :loading="customersLoading" 
+                                            return-object
+                                            :rules="[v => !!v || 'Kunde ist erforderlich']" 
+                                            required class="mb-3"
+                                            @update:model-value="onCustomerChange">
+
                                 <template v-slot:item="{ props, item }">
-                                    <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                        :subtitle="item.raw.email" class="pa-3"></v-list-item>
+                                    <v-list-item v-bind="props" 
+                                                :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                                :subtitle="item.raw.email" 
+                                                class="pa-3">
+                                    </v-list-item>
                                 </template>
                                 <template v-slot:selection="{ item }">
                                     {{ item.raw.firstname }} {{ item.raw.lastname }}
@@ -40,19 +57,32 @@
                             </v-autocomplete>
                         </v-col>
 
-                        <!-- Fahrzeuge basierend auf Kundenauswahl -->
+                        <!-- Fahrzeuge basierend auf Kundenauswahl (Es werden die Fahrzeuge angezeigt die zum Kunden gehören/noch nicht zugewiesen wurden)-->
                         <v-col cols="12" sm="6">
-                            <v-autocomplete v-model="job.car" :items="availableCars" item-title="Kennzeichen"
-                                item-value="id" label="Fahrzeug"
-                                :placeholder="job.customer ? 'Fahrzeug für Kunde auswählen' : 'Zuerst Kunde auswählen'"
-                                prepend-inner-icon="mdi-car" variant="outlined" density="comfortable" clearable
-                                :loading="carsLoading" return-object :disabled="!job.customer"
-                                :rules="[v => !!v || 'Fahrzeug ist erforderlich']" required class="mb-3">
+                            <v-autocomplete v-model="job.car" 
+                                            :items="availableCars" 
+                                            item-title="Kennzeichen"
+                                            item-value="id" 
+                                            label="Fahrzeug"
+                                            :placeholder="job.customer ? 'Fahrzeug für Kunde auswählen' : 'Zuerst Kunde auswählen'"
+                                            prepend-inner-icon="mdi-car" 
+                                            variant="outlined" 
+                                            density="comfortable" 
+                                            clearable
+                                            :loading="carsLoading" 
+                                            return-object 
+                                            :disabled="!job.customer"
+                                            :rules="[v => !!v || 'Fahrzeug ist erforderlich']" 
+                                            required 
+                                            class="mb-3">
+
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
-                                        :subtitle="`${item.raw.Automarke} ${getCarOwnershipLabel(item.raw)}`"
-                                        class="pa-3"></v-list-item>
+                                                                :subtitle="`${item.raw.Automarke} ${getCarOwnershipLabel(item.raw)}`"
+                                                                class="pa-3">
+                                    </v-list-item>
                                 </template>
+
                                 <template v-slot:selection="{ item }">
                                     {{ item.raw.Kennzeichen }}
                                 </template>
@@ -60,15 +90,24 @@
                         </v-col>
 
                         <v-col cols="12">
-                            <v-autocomplete v-model="job.services" :items="services" item-title="name" item-value="id"
-                                label="Dienstleistungen" placeholder="Dienstleistungen auswählen"
-                                prepend-inner-icon="mdi-briefcase" variant="outlined" density="comfortable" multiple
-                                chips clearable :loading="servicesLoading" return-object
-                                :rules="[v => v && v.length > 0 || 'Mindestens eine Dienstleistung ist erforderlich']"
-                                required class="mb-3">
+                            <v-autocomplete v-model="job.services" 
+                                            :items="services" 
+                                            item-title="name" 
+                                            item-value="id"
+                                            label="Dienstleistungen" 
+                                            placeholder="Dienstleistungen auswählen"
+                                            prepend-inner-icon="mdi-briefcase" 
+                                            variant="outlined" density="comfortable" 
+                                            multiple chips clearable 
+                                            :loading="servicesLoading" 
+                                            return-object
+                                            :rules="[v => v && v.length > 0 || 'Mindestens eine Dienstleistung ist erforderlich']"
+                                            required class="mb-3">
+
                                 <template v-slot:chip="{ props, item }">
                                     <v-chip v-bind="props" :text="item.raw.name"></v-chip>
                                 </template>
+
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item v-bind="props" :title="item.raw.name" class="pa-3"></v-list-item>
                                 </template>
@@ -76,27 +115,33 @@
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-select v-model="job.status" :items="jobStatuses" label="Status"
-                                :rules="[v => !!v || 'Status ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-information" class="mb-3"></v-select>
-                        </v-col>
-
-                        <v-col cols="12" sm="6">
-                            <v-text-field v-model="job.scheduled_at" label="Abholtermin" type="datetime-local"
-                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-calendar-clock"
-                                class="mb-3"></v-text-field>
+                            <v-select   v-model="job.status" 
+                                        :items="jobStatuses" 
+                                        label="Status"
+                                        :rules="[v => !!v || 'Status ist erforderlich']" required variant="outlined"
+                                        density="comfortable" prepend-inner-icon="mdi-information" class="mb-3">
+                            </v-select>
                         </v-col>
 
                         <template v-if="!isTrainee">
                             <v-col cols="12" sm="6">
-                                <v-autocomplete v-model="job.trainee" :items="trainees" item-title="full_name"
-                                    item-value="id" label="Auszubildender" placeholder="Auszubildenden auswählen"
-                                    prepend-inner-icon="mdi-account-school" variant="outlined" density="comfortable"
-                                    clearable :loading="traineesLoading" return-object class="mb-3">
+                                <v-autocomplete v-model="job.trainee" 
+                                                :items="trainees" 
+                                                item-title="full_name"
+                                                item-value="id" 
+                                                label="Auszubildender" 
+                                                placeholder="Auszubildenden auswählen"
+                                                prepend-inner-icon="mdi-account-school" 
+                                                variant="outlined" 
+                                                density="comfortable"
+                                                clearable 
+                                                :loading="traineesLoading" 
+                                                return-object class="mb-3">
                                     <template v-slot:item="{ props, item }">
                                         <v-list-item v-bind="props"
                                             :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                            :subtitle="item.raw.email" class="pa-3"></v-list-item>
+                                            :subtitle="item.raw.email" class="pa-3">
+                                        </v-list-item>
                                     </template>
                                     <template v-slot:selection="{ item }">
                                         {{ item.raw.firstname }} {{ item.raw.lastname }}
@@ -105,7 +150,95 @@
                             </v-col>
                         </template>
 
-                        <!-- Car Assignment Option -->
+                        <v-col cols="12" sm="6">
+                            <v-row dense>
+                                <v-col sm="8">
+                                    <v-text-field   v-model="cleaning_start_date" 
+                                                    label="Startdatum Reinigung" 
+                                                    type="date"
+                                                    variant="outlined" 
+                                                    density="comfortable"
+                                                    class="mb-3"
+                                                    :rules="[v => !!v || 'Startdatum ist erforderlich']"
+                                                    required>
+                                    </v-text-field>
+                                </v-col>
+
+                                <v-col sm="4">
+                                    <v-text-field   v-model="cleaning_start_time" 
+                                                    label="Uhrzeit" 
+                                                    type="time"
+                                                    variant="outlined" 
+                                                    density="comfortable"
+                                                    class="mb-3"
+                                                    :rules="[v => !!v || 'Startzeit ist erforderlich']"
+                                                    required>
+                                    </v-text-field>
+                                </v-col>
+                            </v-row>
+                        </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <v-row dense>
+                                <v-col sm="8">
+                                    <v-text-field   v-model="cleaning_end_date" 
+                                                    label="Enddatum Reinigung" 
+                                                    type="date"
+                                                    variant="outlined" 
+                                                    density="comfortable"
+                                                    class="mb-3"
+                                                    :rules="[v => !!v || 'Enddatum ist erforderlich']"
+                                                    required>
+                                    </v-text-field>
+                                </v-col>
+
+                                <v-col sm="4">
+                                    <v-text-field   v-model="cleaning_end_time" 
+                                                    label="Uhrzeit" 
+                                                    type="time"
+                                                    variant="outlined" 
+                                                    density="comfortable"
+                                                    class="mb-3"
+                                                    :rules="[v => !!v || 'Endzeit ist erforderlich']"
+                                                    required>
+                                    </v-text-field>
+                                </v-col>
+                            </v-row>
+                        </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <v-row dense>
+                                <v-col sm="8">
+                                    <v-text-field   v-model="scheduled_at_date" 
+                                                    label="Abholtermin" 
+                                                    type="date"
+                                                    variant="outlined" 
+                                                    density="comfortable"
+                                                    class="mb-3"
+                                                    :rules="[v => !!v || 'Abholtermin ist erforderlich']"
+                                                    required>
+                                    </v-text-field>
+                                </v-col>
+
+                                <v-col sm="4">
+                                    <v-text-field   v-model="scheduled_at_time" 
+                                                    label="Uhrzeit" 
+                                                    type="time"
+                                                    variant="outlined" 
+                                                    density="comfortable"
+                                                    class="mb-3"
+                                                    :rules="[v => !!v || 'Abholzeit ist erforderlich']"
+                                                    required>
+                                    </v-text-field>
+                                </v-col>
+                            </v-row>
+                        </v-col>
+
+                        <!-- Zuweisung eines Auszubildenden/Mitarbeiter nur für Admins und Mitarbeiter -->
+
+                        
+
+                        <!-- Fahrzeug zum Kunden zufügen falls das noch nicht gemacht wurde -->
                         <v-col cols="12" v-if="job.car && job.customer && !isCarOwnedByCustomer">
                             <v-alert type="info" variant="tonal" class="mb-3">
                                 <v-icon start>mdi-information</v-icon>
@@ -119,6 +252,7 @@
 
             <v-divider></v-divider>
 
+            <!-- Aktions Buttons zum Abbrechen oder Speichern -->
             <v-card-actions class="pa-6 pt-4">
                 <v-spacer></v-spacer>
                 <v-btn variant="outlined" color="grey" @click="closeDialog" class="mr-3">
@@ -159,9 +293,17 @@ export default {
                 customer: null,
                 services: [],
                 status: 'ausstehend',
+                cleaning_start: null,
+                cleaning_end: null,
                 scheduled_at: null,
                 trainee: null,
             },
+            cleaning_start_date: null,
+            cleaning_start_time: null,
+            cleaning_end_date: null,
+            cleaning_end_time: null,
+            scheduled_at_date: null,
+            scheduled_at_time: null,
             trainees: [],
             customers: [],
             availableCars: [], // Fahrzeuge für den ausgewählten Kunden
@@ -224,6 +366,12 @@ export default {
             this.resetForm();
         },
 
+        combineDateTime(date, time) {
+            if (!date) return null;
+            if (!time) return `${date}T00:00:00`;
+            return `${date}T${time}:00`;
+        },
+
         async saveJob() {
             const { valid } = await this.$refs.form.validate();
             if (valid) {
@@ -235,7 +383,10 @@ export default {
                         customer_id: this.job.customer ? this.job.customer.id : null,
                         service_ids: this.job.services ? this.job.services.map(s => s.id) : [],
                         trainee_id: this.isTrainee ? this.$store.state.auth.userId : (this.job.trainee ? this.job.trainee.id : null),
-                        assign_car_to_customer: true // Automatische Zuweisung aktivieren
+                        assign_car_to_customer: true,
+                        cleaning_start: this.combineDateTime(this.cleaning_start_date, this.cleaning_start_time),
+                        cleaning_end: this.combineDateTime(this.cleaning_end_date, this.cleaning_end_time),
+                        scheduled_at: this.combineDateTime(this.scheduled_at_date, this.scheduled_at_time),
                     };
                     delete jobData.car;
                     delete jobData.customer;
@@ -371,9 +522,17 @@ export default {
                 customer: null,
                 services: [],
                 status: 'ausstehend',
+                cleaning_start: null,
+                cleaning_end: null,
                 scheduled_at: null,
                 trainee: null,
             };
+            this.cleaning_start_date = null;
+            this.cleaning_start_time = null;
+            this.cleaning_end_date = null;
+            this.cleaning_end_time = null;
+            this.scheduled_at_date = null;
+            this.scheduled_at_time = null;
             this.availableCars = [];
         },
 

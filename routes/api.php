@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users/search', [UserController::class, 'search']);
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::get('/users/trainees', [UserController::class, 'getTrainees']);
+        Route::post('/users', [UserController::class, 'store']);
     });
 
     //Dashboard Routes
@@ -91,6 +92,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('customer/{customerId}/car/{carId}', [CustomerController::class, 'removeCarFromCustomer']);
     });
 
+    //Car Groups Routes
+
+    Route::get('/cargroups', [App\Http\Controllers\CarGroupController::class, 'index']);
+    Route::get('/cargroups/search', [App\Http\Controllers\CarGroupController::class, 'search']);
+
     // Jobs Routes
 
     Route::middleware(CheckRole::class . ':trainer,admin,trainee')->group(function () {
@@ -104,7 +110,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('jobs/{job}/images', [JobController::class, 'addImages']);
         Route::post('images/assign-to-car', [ImageController::class, 'assignToCar']);
 
-
         Route::get('/jobs/cars-for-customer/{customerId}', [JobController::class, 'getCarsForCustomer']);
         Route::post('/jobs', [JobController::class, 'store']);
         Route::put('/jobs/{id}', [JobController::class, 'update']);
@@ -114,6 +119,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //User Routes
     Route::get('/users/search', [UserController::class, 'search']);
     Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::post('/users/change-password', [UserController::class, 'changePassword']);
 
     // Comment Routes
     Route::get('/orders/{order}/comments', [App\Http\Controllers\CommentController::class, 'index']);

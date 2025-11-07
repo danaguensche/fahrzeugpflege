@@ -61,7 +61,7 @@ export default {
             this.loading = true;
             try {
                 const response = await axios.get('/api/activities');
-                this.activities = response.data.slice(0, 5); // Limit to last 5 activities
+                this.activities = response.data.slice(0, 10); // Limit to last 10 activities
             } catch (error) {
                 console.error('Error fetching activities:', error);
                 this.$toast?.error('Fehler beim Laden der Aktivitäten');
@@ -107,5 +107,24 @@ export default {
 .v-card-title {
     font-size: 1.1rem;
     font-weight: 600;
+}
+
+@media (min-width:1900px) {
+    .widget-content {
+        height: 700px;
+    }
+}
+@media (max-width: 1024px) {
+    .widget-content {
+        padding: 5px;
+    }
+
+    .widget-header h3 {
+        font-size: 1em;
+    }
+
+    .widget-content {
+        height: 200px;
+    }
 }
 </style>

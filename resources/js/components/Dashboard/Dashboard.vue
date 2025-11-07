@@ -2,7 +2,7 @@
     <div class="dashboard-page" :class="{ 'dashboard-page-sidebar-opened': isSidebarOpen }">
         <v-container class="dashboard-container" fluid>
 
-            <v-row class="mb-6">
+            <v-row>
                 <v-col cols="12">
                     <v-card elevation="2" class="widgets-card">
                         <v-card-text class="pt-4">
@@ -51,8 +51,7 @@
                             <v-icon class="mr-2" color="primary">mdi-lightning-bolt</v-icon>
                             Schnellaktionen
                         </v-card-title>
-                        <v-divider></v-divider>
-                        <v-card-text class="pt-4">
+                        <v-card-text>
                             <v-row dense>
                                 <v-col cols="12" sm="6" md="4">
                                     <v-btn block color="blue lighten-4" @click="openAddJobDialog"
@@ -157,7 +156,7 @@ export default {
     transition: margin-left 0.3s ease;
     font-family: var(--font-family);
     margin-left: 150px;
-    /* min-height: 100vh; */
+    height: 100vh;
     /* background-color: #f5f5f5; */
     border-radius: 12px;
 }

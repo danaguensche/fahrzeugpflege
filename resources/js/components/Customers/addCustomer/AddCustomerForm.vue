@@ -1,6 +1,7 @@
 <template>
     <v-dialog v-model="showDialogLocal" persistent max-width="700px">
         <v-card class="pa-2">
+
             <v-card-title class="headline pa-6 pb-4">
                 <v-icon class="mr-3" color="primary">mdi-account-plus</v-icon>
                 Neuen Kunden hinzufügen
@@ -9,8 +10,12 @@
             <v-divider></v-divider>
 
             <v-card-text class="pa-6">
+
+                <!-- Formular Felder  -->
+
                 <v-form ref="form" v-model="valid" lazy-validation>
                     <v-row>
+
                         <v-col cols="12">
                             <v-text-field v-model="customer.company" label="Firma" variant="outlined"
                                 density="comfortable" prepend-inner-icon="mdi-office-building"
@@ -30,16 +35,17 @@
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="customer.email" label="E-Mail"
-                                :rules="[v => !!v || 'E-Mail ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-email" type="email"
-                                class="mb-3"></v-text-field>
+                            <v-text-field v-model="customer.email" label="E-Mail" :rules="[v => !!v || 'E-Mail ist erforderlich',
+                            v => /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
+                            ]" required variant="outlined" density="comfortable" prepend-inner-icon="mdi-email"
+                                type="email" class="mb-3"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="customer.phonenumber" label="Telefonnummer" variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-phone" type="tel"
-                                class="mb-3"></v-text-field>
+                            <v-text-field v-model="customer.phonenumber"
+                                :rules="[v => !v || /^[0-9+\-\s()]{6,}$/.test(v) || 'Ungültige Telefonnummer']"
+                                label="Telefonnummer" variant="outlined" density="comfortable"
+                                prepend-inner-icon="mdi-phone" type="tel" class="mb-3"></v-text-field>
                         </v-col>
 
                         <v-col cols="12">
@@ -49,7 +55,8 @@
                         </v-col>
 
                         <v-col cols="12" sm="4">
-                            <v-text-field v-model="customer.postalcode" label="Postleitzahl" variant="outlined"
+                            <v-text-field v-model="customer.postalcode" :rules="[
+                                v => !v || /^[0-9]{5}$/.test(v) || 'Ungültige Postleitzahl']" variant="outlined"
                                 density="comfortable" prepend-inner-icon="mdi-mailbox" class="mb-3"></v-text-field>
                         </v-col>
 
@@ -58,16 +65,21 @@
                                 prepend-inner-icon="mdi-city" class="mb-3"></v-text-field>
                         </v-col>
 
+                        <!-- Fahrzeug hinzufügen (mit Suche und Autovervollständigung) -->
                         <v-col cols="12" v-if="showCarField">
                             <v-autocomplete v-model="customer.car" :items="cars" item-title="Kennzeichen"
                                 item-value="id" label="Fahrzeug" placeholder="Fahrzeug auswählen oder suchen"
                                 prepend-inner-icon="mdi-car" variant="outlined" density="comfortable" clearable
                                 :loading="carsLoading" @update:search="searchCars" return-object class="mb-3"
                                 @update:modelValue="(val) => val && loadFullCarDetails(val.Kennzeichen)">
+
+                                <!-- Anzeige des Fahrzeuges im Feld (Kennzeichen + Automarke) -->
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
-                                        :subtitle="item.raw.Automarke" class="pa-3"></v-list-item>
+                                        :subtitle="item.raw.Automarke" class="pa-3">
+                                    </v-list-item>
                                 </template>
+
                                 <template v-slot:selection="{ item }">
                                     {{ item.raw.Kennzeichen }}
                                 </template>
@@ -79,6 +91,7 @@
 
             <v-divider></v-divider>
 
+            <!-- Aktionen (Speichern und Abbrechen) -->
             <v-card-actions class="pa-6 pt-4">
                 <v-spacer></v-spacer>
                 <v-btn variant="outlined" color="grey" @click="closeDialog" class="mr-3">
@@ -107,6 +120,10 @@ export default {
     },
     props: {
         modelValue: Boolean,
+        showCarField: {
+            type: Boolean,
+            default: true,
+        },
     },
     data() {
         return {
@@ -132,12 +149,6 @@ export default {
                 color: 'success',
             },
         };
-    },
-    props: {
-        showCarField: {
-            type: Boolean,
-            default: true,
-        },
     },
     computed: {
         showDialogLocal: {
@@ -175,7 +186,7 @@ export default {
                     lastname: this.customer.lastname,
                     email: this.customer.email || '',
                     phonenumber: this.customer.phonenumber || '',
-                    adressline: this.customer.adressline || '',
+                    addressline: this.customer.addressline || '',
                     postalcode: this.customer.postalcode || '',
                     city: this.customer.city || '',
                 };
@@ -205,6 +216,7 @@ export default {
             this.carsLoading = true;
             try {
                 const response = await axios.get(`/api/cars/search?query=${query}`);
+                console.log('API Antwort:', response.data); // <--- HIER
                 this.cars = response.data.data.map(car => ({
                     id: car.id,
                     Kennzeichen: car.Kennzeichen,

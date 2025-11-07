@@ -1,84 +1,79 @@
-<!-- CarAddDialog.vue -->
+<!-- CarAddDialog.vue - Korrigierte Version -->
 <template>
     <v-dialog v-model="dialog" max-width="700px">
-        <v-card class="rounded-lg elevation-5">
+        <v-card class="pa-2">
             <template v-if="step === 'checkExisting'">
-                <v-card-title class="headline primary white--text py-5">
-                    <v-icon left large color="white">mdi-car-search</v-icon>
-                    <span class="text-h5">Fahrzeugauswahl</span>
+                <v-card-title class="headline pa-6 pb-4">
+                    <v-icon class="mr-3" color="primary">mdi-car-search</v-icon>
+                    Fahrzeugauswahl
                 </v-card-title>
-                <v-card-text class="pa-7">
-                    <v-row>
-                        <v-col cols="12">
-                            <v-form ref="existingCarForm" v-model="existingFormValid">
-                                <v-text-field v-model="existingCarSearch"
-                                    label="Fahrzeug-Kennzeichen oder -Marke eingeben"
-                                    :rules="[v => !!v || 'Suchbegriff ist erforderlich']" @keyup.enter="searchCar"
-                                    prepend-icon="mdi-magnify" clearable outlined class="rounded-lg"></v-text-field>
-                            </v-form>
-                        </v-col>
-                    </v-row>
 
-                    <!-- Suchergebnisse -->
-                    <v-card v-if="searchResults.length > 0" class="mt-4" style="max-height: 500px; overflow-y: auto;">
-                        <v-card-title>
-                            <v-icon left class="mr-4" color="primary">mdi-format-list-bulleted</v-icon>
-                            <span class="ga-10"></span>
-                            Gefundene Fahrzeuge ({{ searchResults.length }})
-                        </v-card-title>
-                        <v-list lines="two">
-                            <v-list-item v-for="car in searchResults" :key="car.Kennzeichen" @click="selectExistingCar(car)" class="list-item-hover"
-                                :title="car.Kennzeichen"
-                                :subtitle="`${car.Automarke} ${car.Typ} | ${car.Farbe || 'Keine Farbangabe'}`"
-                            >
-                                <template v-slot:prepend>
-                                    <v-avatar>
-                                        <v-icon color="primary">mdi-car</v-icon>
-                                    </v-avatar>
-                                </template>
-                                <template v-slot:append>
-                                    <v-btn icon variant="plain" @click="selectExistingCar(car)">
-                                        <v-icon color="primary">mdi-plus-circle</v-icon>
-                                    </v-btn>
-                                </template>
+                <v-divider></v-divider>
+
+                <v-col cols="12">
+                    <v-autocomplete 
+                        v-model="selectedCar" 
+                        :items="cars" 
+                        item-title="Kennzeichen" 
+                        item-value="id"
+                        label="Fahrzeug" 
+                        placeholder="Fahrzeug auswählen oder suchen" 
+                        prepend-inner-icon="mdi-car"
+                        variant="outlined" 
+                        density="comfortable" 
+                        clearable 
+                        :loading="carsLoading"
+                        @update:search="searchCars" 
+                        return-object 
+                        class="mb-3"
+                        @update:modelValue="handleCarSelection">
+                        
+                        <template v-slot:item="{ props, item }">
+                            <v-list-item 
+                                v-bind="props" 
+                                :title="item.raw.Kennzeichen" 
+                                :subtitle="item.raw.Automarke"
+                                class="pa-3">
                             </v-list-item>
-                        </v-list>
-                    </v-card>
+                        </template>
+                        
+                        <template v-slot:selection="{ item }">
+                            {{ item.raw.Kennzeichen }}
+                        </template>
+                        
+                        <template v-slot:no-data>
+                            <v-list-item>
+                                <v-list-item-title>
+                                    {{ carsLoading ? 'Suche läuft...' : 'Keine Fahrzeuge gefunden' }}
+                                </v-list-item-title>
+                            </v-list-item>
+                        </template>
+                    </v-autocomplete>
+                </v-col>
 
-                    <!-- Keine Suchergebnisse -->
-                    <v-alert v-if="showNoResultsMessage" type="info" text class="mt-4 rounded-lg">
-                        <div class="text-center">
-                            <v-icon large color="info" class="mb-2">mdi-car-off</v-icon>
-                            <p class="mb-2">Keine Fahrzeuge gefunden.</p>
-                        </div>
-                    </v-alert>
+                <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+                    {{ snackbar.text }}
+                </v-snackbar>
 
-                    <!-- Erfolgsmeldung -->
-                    <v-snackbar v-model="showSuccessMessage" color="success" timeout="3000" top>
-                        <v-icon left>mdi-check-circle</v-icon>
-                        {{ successMessage }}
-                    </v-snackbar>
-                </v-card-text>
                 <v-card-actions class="pa-4 grey lighten-4">
-                    <v-btn color="green lighten-4" @click="openAddCarDialog" prepend-icon="mdi-plus"
-                                        size="small" class="mb-2">
-                                        Fahrzeug hinzufügen
-                                    </v-btn>
+                    <v-btn color="green lighten-4" @click="openAddCarDialog" prepend-icon="mdi-plus" size="small"
+                        class="mb-2">
+                        Fahrzeug hinzufügen
+                    </v-btn>
                     <v-spacer></v-spacer>
-                    <v-btn color="grey darken-1" text @click="closeDialog">
+                    <v-btn color="primary" @click="selectExistingCar(selectedCar)" :disabled="!selectedCar" size="small" class="mb-2">
+                        <v-icon left>mdi-check</v-icon>
+                        hinzufügen
+                    </v-btn>
+                    <v-btn color="grey darken-1" text @click="closeDialog" size="small" class="mb-2">
                         <v-icon left>mdi-close</v-icon>
                         Abbrechen
-                    </v-btn>
-                    <v-btn color="primary" @click="searchCar" :disabled="!existingFormValid" :loading="isSearching">
-                        <v-icon left>mdi-magnify</v-icon>
-                        Suchen
                     </v-btn>
                 </v-card-actions>
 
                 <AddCarForm v-model="showAddCarDialog" @car-added="handleCarAdded" :addCustomerField="false" />
 
             </template>
-
         </v-card>
     </v-dialog>
 </template>
@@ -101,42 +96,53 @@ export default {
 
     data() {
         return {
-            showAddCarDialog: false,
             dialog: false,
+            showAddCarDialog: false,
             step: 'checkExisting',
-            valid: false,
-            existingFormValid: false,
-            existingCarSearch: '',
-            searchResults: [],
-            showNoResultsMessage: false,
-            isSearching: false,
-            isSaving: false,
-            showSuccessMessage: false,
-            successMessage: '',
-            newCar: {
-                Kennzeichen: '',
-                Fahrzeugklasse: '',
-                Automarke: '',
-                Typ: '',
-                Farbe: '',
-                Sonstiges: '',
+            selectedCar: null,
+            cars: [],
+            carsLoading: false,
+            carSearchTimeout: null,
+            showDebug: false,
+            
+            snackbar: {
+                show: false,
+                text: '',
+                color: 'success',
             },
+            
+            customer: {
+                car: null
+            }
         };
     },
 
-    methods: {
+    mounted() {
+        this.fetchCars();
+    },
 
+    methods: {
         openAddCarDialog() {
             this.showAddCarDialog = true;
         },
-        handleCarAdded() {
+
+        handleCarAdded(newCar) {
             this.showAddCarDialog = false;
+            if (newCar) {
+                this.cars.unshift({
+                    id: newCar.id,
+                    Kennzeichen: newCar.Kennzeichen,
+                    Automarke: newCar.Automarke,
+                });
+                this.selectedCar = this.cars[0];
+            }
         },
 
         open() {
             this.dialog = true;
             this.step = 'checkExisting';
             this.resetForm();
+            this.fetchCars();
         },
 
         closeDialog() {
@@ -145,80 +151,131 @@ export default {
         },
 
         resetForm() {
-            this.newCar = {
-                Kennzeichen: '',
-                Fahrzeugklasse: '',
-                Automarke: '',
-                Typ: '',
-                Farbe: '',
-                Sonstiges: '',
-            };
-            this.existingCarSearch = '';
-            this.searchResults = [];
-            this.showNoResultsMessage = false;
-            this.showSuccessMessage = false;
-
-            this.$nextTick(() => {
-                if (this.$refs.carForm) {
-                    this.$refs.carForm.resetValidation();
-                }
-                if (this.$refs.existingCarForm) {
-                    this.$refs.existingCarForm.resetValidation();
-                }
-            });
+            this.selectedCar = null;
+            this.customer.car = null;
+            this.cars = [];
         },
 
-        async searchCar() {
-            if (this.$refs.existingCarForm && !this.$refs.existingCarForm.validate()) {
-                return;
-            }
-            this.isSearching = true;
-
+        async fetchCars(query = '') {
+            this.carsLoading = true;
             try {
-                console.log('Suche nach:', this.existingCarSearch);
-                const response = await axios.get('/api/cars/search', {
-                    params: { query: this.existingCarSearch }
-                });
-
-                if (response.data && Array.isArray(response.data.data)) {
-                    this.searchResults = response.data.data;
+                console.log('Fetching cars with query:', query);
+                
+                const response = await axios.get(`/api/cars/search?query=${encodeURIComponent(query)}`);
+                
+                console.log('API Response:', response.data);
+                
+                let carsData;
+                if (response.data.data) {
+                    carsData = response.data.data;
+                } else if (Array.isArray(response.data)) {
+                    carsData = response.data;
                 } else {
-                    this.searchResults = [];
+                    carsData = [];
                 }
-
-                console.log('Verarbeitete Suchergebnisse:', this.searchResults);
-                this.showNoResultsMessage = this.searchResults.length === 0;
+                
+                this.cars = carsData.map(car => ({
+                    id: car.id,
+                    Kennzeichen: car.Kennzeichen || car.kennzeichen || '',
+                    Automarke: car.Automarke || car.automarke || '',
+                }));
+                
+                console.log('Processed cars:', this.cars);
+                
+                if (this.cars.length === 0 && query) {
+                    this.showSnackbar('Keine Fahrzeuge gefunden', 'info');
+                }
+                
             } catch (error) {
-                console.error('Fehler bei der Fahrzeugsuche:', error);
-                this.$emit('error', error.response?.data?.message || 'Fehler bei der Fahrzeugsuche');
-                this.searchResults = [];
-                this.showNoResultsMessage = true;
+                console.error('Error fetching cars:', error);
+                this.showSnackbar('Fehler beim Laden der Fahrzeuge: ' + error.message, 'error');
+                this.cars = [];
             } finally {
-                this.isSearching = false;
+                this.carsLoading = false;
             }
+        },
+
+        searchCars(query) {
+            console.log('Search triggered with:', query); 
+            
+            if (this.carSearchTimeout) {
+                clearTimeout(this.carSearchTimeout);
+            }
+            
+            this.carSearchTimeout = setTimeout(() => {
+                this.fetchCars(query);
+            }, 300);
+        },
+
+        handleCarSelection(selectedCar) {
+            if (selectedCar) {
+                console.log('Car selected:', selectedCar);
+                this.loadFullCarDetails(selectedCar.Kennzeichen);
+            }
+        },
+
+        async loadFullCarDetails(kennzeichen) {
+            try {
+                const response = await axios.get(`/api/cars/${encodeURIComponent(kennzeichen)}`);
+                this.customer.car = response.data.data || response.data;
+                console.log('Full car details loaded:', this.customer.car);
+            } catch (error) {
+                console.error('Fehler beim Laden der Fahrzeugdetails:', error);
+                this.showSnackbar('Fahrzeugdetails konnten nicht geladen werden', 'error');
+            }
+        },
+
+        showSnackbar(text, color = 'info') {
+            this.snackbar.text = text;
+            this.snackbar.color = color;
+            this.snackbar.show = true;
         },
 
         async selectExistingCar(car) {
-            try {
-                this.isSaving = true;
-                await this.assignCarToCustomer(car);
+            if (!car) {
+                this.showSnackbar('Bitte wählen Sie ein Fahrzeug aus', 'warning');
+                return;
+            }
 
-                this.successMessage = `Fahrzeug ${car.Kennzeichen} wurde dem Kunden zugeordnet!`;
-                this.showSuccessMessage = true;
+            try {
+                const fullCarData = this.customer.car || await this.getFullCarData(car.Kennzeichen);
+                
+                await this.assignCarToCustomer(fullCarData || car);
+                
+                this.showSnackbar(`Fahrzeug ${car.Kennzeichen} wurde dem Kunden zugeordnet!`, 'success');
+                
                 setTimeout(() => {
-                    this.$emit('car-selected', car);
+                    this.$emit('car-selected', fullCarData || car);
                     this.closeDialog();
                 }, 1500);
             } catch (error) {
                 console.error('Fehler bei der Auswahl des Fahrzeugs:', error);
-                this.$emit('error', 'Fehler bei der Auswahl des Fahrzeugs');
-                this.isSaving = false;
+                this.showSnackbar('Fehler bei der Auswahl des Fahrzeugs', 'error');
+            }
+        },
+
+        async getFullCarData(kennzeichen) {
+            try {
+                const response = await axios.get(`/api/cars/${encodeURIComponent(kennzeichen)}`);
+                return response.data.data || response.data;
+            } catch (error) {
+                console.error('Fehler beim Laden der vollständigen Fahrzeugdaten:', error);
+                return null;
             }
         },
 
         async assignCarToCustomer(car) {
             try {
-                const customerId = this.$route.params.id;
+                const customerId = this.customerId || this.$route.params.id;
+                
+                if (!customerId) {
+                    throw new Error('Keine Kunden-ID verfügbar');
+                }
+
+                if (!car || !car.Kennzeichen) {
+                    throw new Error('Ungültige Fahrzeugdaten');
+                }
+
                 const requestPayload = {
                     customer_id: customerId,
                     Kennzeichen: car.Kennzeichen,
@@ -228,8 +285,11 @@ export default {
                     Farbe: car.Farbe || null,
                     Sonstiges: car.Sonstiges || null
                 };
-                await axios.put(`/api/cars/cardetails/${car.Kennzeichen}`, requestPayload);
 
+                console.log('Assigning car to customer:', requestPayload); // Debug
+                
+                await axios.put(`/api/cars/cardetails/${encodeURIComponent(car.Kennzeichen)}`, requestPayload);
+                
                 this.$emit('car-assigned', {
                     car: car,
                     customerId: customerId
@@ -237,43 +297,6 @@ export default {
             } catch (error) {
                 console.error('Error assigning car:', error);
                 throw error;
-            }
-        },
-
-        async saveCar() {
-            if (this.$refs.carForm && !this.$refs.carForm.validate()) {
-                return;
-            }
-
-            this.isSaving = true;
-
-            try {
-                console.log('Neues Fahrzeug:', this.newCar);
-                const response = await axios.post('/api/cars', this.newCar);
-
-                if (response.data) {
-                    const newCar = response.data;
-                    if (this.customerId) {
-                        await this.assignCarToCustomer(newCar);
-
-                        this.successMessage = `Neues Fahrzeug ${newCar.Kennzeichen} wurde erstellt und dem Kunden zugeordnet!`;
-                        this.showSuccessMessage = true;
-                        setTimeout(() => {
-                            this.$emit('car-added', newCar);
-                            this.closeDialog();
-                        }, 1500);
-                    } else {
-                        this.$emit('car-added', newCar);
-                        this.closeDialog();
-                    }
-                } else {
-                    throw new Error('Keine Daten vom Server erhalten');
-                }
-            } catch (error) {
-                console.error('Fehler beim Hinzufügen des Fahrzeuges:', error);
-                const errorMessage = error.response?.data?.message || 'Fehler beim Hinzufügen des Fahrzeuges';
-                this.$emit('error', errorMessage);
-                this.isSaving = false;
             }
         }
     }

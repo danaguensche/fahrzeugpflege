@@ -8,6 +8,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 
 class AuthController extends Controller
@@ -35,19 +37,20 @@ class AuthController extends Controller
     {
         $request->validated($request->all());
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (!Auth::attempt($request->only('username', 'password'))) {
             return response()->json(['message' => 'Ungültige Anmeldedaten'], 401);
         }
 
-        $user = User::where('email', $request->email)->firstOrFail();
+        $user = User::where('username', $request->username)->firstOrFail();
         $token = $user->createToken('authToken')->plainTextToken;
 
         return response()->json([
             'success' => true,
             'user' => [
                 'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
+                'firstname' => $user->firstname,
+                'lastname' => $user->lastname,
+                'username' => $user->username,
                 'role' => $user->role,
             ],
             'token' => $token,
@@ -59,30 +62,43 @@ class AuthController extends Controller
     public function signupPost(Request $request)
     {
         $request->validate([
-            "firstname" => "required|string|max:30",
-            "lastname" => "required|string|max:30",
-            "email" => "required|string|email|max:255|unique:users",
-            "password" => "required|string|min:8|confirmed",
+            "firstname"   => "required|string|max:30",
+            "lastname"    => "required|string|max:30",
+            "username"    => "required|string|max:255|unique:users,username|exists:allowed_usernames,username",
+            "password"    => "required|string|min:8|confirmed",
             "phoneNumber" => "nullable|string|max:20",
             "addressLine" => "nullable|string|max:255",
             "postalCode"  => "nullable|string|max:10",
-            "city"        => "nullable|string|max:255"
-
+            "city"        => "nullable|string|max:255",
         ]);
-
-        $user = new User();
-        $user->firstname = $request->firstname;
-        $user->lastname = $request->lastname;
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->save();
-
+    
+        $allowed = DB::table('allowed_usernames')
+            ->where('username', $request->username)
+            ->where('claimed', false)
+            ->first();
+    
+        if (! $allowed) {
+            return response()->json(['message' => 'Dieser Benutzername ist nicht freigegeben oder wurde bereits verwendet.'], 403);
+        }
+    
+        // User anlegen
+        $user = User::create([
+            'firstname' => $request->firstname,
+            'lastname'  => $request->lastname,
+            'username'  => $request->username,
+            'password'  => Hash::make($request->password),
+            'role'      => $allowed->role,
+        ]);
+    
+        // markiere den Username als verbraucht
+        DB::table('allowed_usernames')->where('username', $request->username)->update(['claimed' => true]);
+    
         $token = $user->createToken('authToken')->plainTextToken;
-
+    
         return response()->json([
             'success' => true,
-            'user' => $user,
-            'token' => $token,
+            'user'    => $user,
+            'token'   => $token,
         ]);
     }
 }

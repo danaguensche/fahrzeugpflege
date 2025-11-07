@@ -9,17 +9,21 @@
             <v-card class="card">
                 <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon"></Header>
 
+                <!-- Fotos -->
                 <ImageGallery :images="images" :editMode="editMode" :canEdit="isAdminOrTrainer"
-                    :uploadUrl="`/api/jobs/${$route.params.id}/images`" :deleteUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`"
-                    :replaceUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`" :entityId="$route.params.id" :apiHeaders="apiHeaders"
-                    uploadDialogTitle="Auftragsbilder hochladen" @images-uploaded="handleImagesUploaded"
-                    @image-deleted="handleImageDeleted" @image-replaced="handleImageReplaced"
-                    @success="showSuccessMessage" @error="showErrorMessage" @loading="setImageLoading">
+                    :uploadUrl="`/api/jobs/${$route.params.id}/images`"
+                    :deleteUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`"
+                    :replaceUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`" :entityId="$route.params.id"
+                    :apiHeaders="apiHeaders" uploadDialogTitle="Auftragsbilder hochladen"
+                    @images-uploaded="handleImagesUploaded" @image-deleted="handleImageDeleted"
+                    @image-replaced="handleImageReplaced" @success="showSuccessMessage" @error="showErrorMessage"
+                    @loading="setImageLoading">
                 </ImageGallery>
 
                 <!-- Job information -->
                 <v-card-text class="px-4 pt-4 pb-0">
                     <v-sheet>
+
                         <InformationHeader :title="'Jobinformationen'" :editMode="editMode"
                             :getIconForField="getIconForField">
                         </InformationHeader>
@@ -27,30 +31,58 @@
                         <!-- Ansichtsmodus -->
                         <InfoList v-if="!editMode" :details="displayedJobDetails" :labels="labels"
                             :infoKeys="jobInfoKeys" :getIconForField="getIconForField">
-
                         </InfoList>
+
                         <!-- Bearbeitungsmodus -->
                         <div v-else>
                             <InfoListEditMode
-                                :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin' && k !== 'trainee_id')"
+                                :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin' && k !== 'trainee_id' && k !== 'cleaning_start' && k !== 'cleaning_end')"
                                 :labels="labels" :editedData="editedJobData" @update:editedData="editedJobData = $event"
                                 :getIconForField="getIconForField" class="job-information-fields"
                                 :disabled="userRole === 'trainee'">
                             </InfoListEditMode>
-                            <v-text-field v-model="formattedAbholterminForEdit" type="datetime-local"
+
+                            <!-- Cleaning Start -->
+                            <v-text-field :model-value="formatDateTimeForInput(editedJobData.cleaning_start)"
+                                @update:model-value="editedJobData.cleaning_start = $event" type="datetime-local"
+                                :label="labels.cleaning_start" variant="outlined" density="comfortable"
+                                hide-details="auto" class="mt-4 w-50 ms-4"
+                                :prepend-inner-icon="getIconForField('cleaning_start')"
+                                :disabled="userRole === 'trainee'">
+                            </v-text-field>
+
+                            <!-- Cleaning End -->
+                            <v-text-field :model-value="formatDateTimeForInput(editedJobData.cleaning_end)"
+                                @update:model-value="editedJobData.cleaning_end = $event" type="datetime-local"
+                                :label="labels.cleaning_end" variant="outlined" density="comfortable"
+                                hide-details="auto" class="mt-4 w-50 ms-4"
+                                :prepend-inner-icon="getIconForField('cleaning_end')"
+                                :disabled="userRole === 'trainee'">
+                            </v-text-field>
+
+                            <!-- Abholtermin -->
+                            <v-text-field :model-value="formatDateTimeForInput(editedJobData.Abholtermin)"
+                                @update:model-value="editedJobData.Abholtermin = $event" type="datetime-local"
                                 :label="labels.Abholtermin" variant="outlined" density="comfortable" hide-details="auto"
                                 class="mt-4 w-50 ms-4" :prepend-inner-icon="getIconForField('Abholtermin')"
-                                :disabled="userRole === 'trainee'"></v-text-field>
+                                :disabled="userRole === 'trainee'">
+                            </v-text-field>
+
                             <v-select v-model="editedJobData.Status" :items="statuses" item-title="title"
                                 item-value="value" label="Status" variant="outlined" density="comfortable"
                                 hide-details="auto" class="mt-4 w-50 ms-4"
-                                :prepend-inner-icon="getIconForField('Status')"></v-select>
+                                :prepend-inner-icon="getIconForField('Status')">
+                            </v-select>
+
+
+                            <!-- Mitarbeiter zum Auftrag hinzufügen/ändern -->
                             <v-autocomplete v-model="editedJobData.trainee" class="mt-4 w-50 ms-4" :items="trainees"
                                 item-title="full_name" item-value="id" label="Mitarbeiter"
                                 placeholder="Mitarbeiter auswählen oder suchen" prepend-inner-icon="mdi-toolbox"
                                 variant="outlined" density="comfortable" hide-details="auto" clearable
                                 :loading="traineesLoading" :search-input.sync="traineeSearch"
                                 @update:search-input="searchTrainees" return-object :disabled="userRole === 'trainee'">
+
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
                                         :subtitle="item.raw.email"></v-list-item>
@@ -75,6 +107,7 @@
                             variant="outlined" density="comfortable" hide-details="auto" clearable
                             :loading="customersLoading" :search-input.sync="customerSearch"
                             @update:search-input="searchCustomers" return-object :disabled="userRole === 'trainee'">
+
                             <template v-slot:item="{ props, item }">
                                 <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
                                     :subtitle="item.raw.email"></v-list-item>
@@ -85,56 +118,58 @@
                         </v-autocomplete>
                     </v-sheet>
 
-                    <!-- Car information -->
+                    <!-- Fahrzeuginformationen (Wenn Fahrzeug zum Auftrag zugewiesen wurde)-->
                     <v-sheet class="section-block">
+
                         <DefaultHeader :title="'Fahrzeuginformationen'"></DefaultHeader>
+
                         <template v-if="!editMode">
-                            <template v-if="!editMode">
-                                <template v-if="jobDetails.data.car && jobDetails.data.car.Kennzeichen">
-                                    <v-list class="bg-transparent">
-                                        <template v-for="key in carInfoKeys" :key="key">
-                                            <v-list-item
-                                                v-if="jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
-                                                <template v-slot:prepend>
-                                                    <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
-                                                    </v-icon>
-                                                </template>
+                            <template v-if="jobDetails.data.car && jobDetails.data.car.Kennzeichen">
+                                <v-list class="bg-transparent">
+                                    <template v-for="key in carInfoKeys" :key="key">
+                                        <v-list-item
+                                            v-if="jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
 
-                                                <v-list-item-title class="font-weight-medium">
-                                                    {{ labels[key] || key }}
-                                                </v-list-item-title>
-
-                                                <v-list-item-subtitle class="mt-1 text-body-1">
-                                                    <template v-if="key === 'Kennzeichen'">
-                                                        <router-link
-                                                            :to="`/fahrzeuge/fahrzeugdetails/${jobDetails.data.car.Kennzeichen}`"
-                                                            class="text-decoration-none text-primary">
-                                                            {{ jobDetails.data.car.Kennzeichen }}
-                                                        </router-link>
-                                                    </template>
-                                                    <template v-else>
-                                                        {{ jobDetails.data.car[key] }}
-                                                    </template>
-                                                </v-list-item-subtitle>
-                                            </v-list-item>
-                                            <v-divider
-                                                v-if="key !== carInfoKeys[carInfoKeys.length - 1] && jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
-                                            </v-divider>
-                                        </template>
-                                    </v-list>
-                                </template>
-                                <template v-else>
-                                    <v-list-item>
-                                        <v-list-item-subtitle class="text-grey">
-                                            <div class="d-flex align-center justify-center pa-4">
-                                                <v-icon icon="mdi-car-off" color="grey-lighten-1" size="32"
-                                                    class="mr-2">
+                                            <template v-slot:prepend>
+                                                <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
                                                 </v-icon>
-                                                <span>Kein Fahrzeug zugeordnet</span>
-                                            </div>
-                                        </v-list-item-subtitle>
-                                    </v-list-item>
-                                </template>
+                                            </template>
+
+                                            <v-list-item-title class="font-weight-medium">
+                                                {{ labels[key] || key }}
+                                            </v-list-item-title>
+
+                                            <v-list-item-subtitle class="mt-1 text-body-1">
+                                                <template v-if="key === 'Kennzeichen'">
+                                                    <router-link
+                                                        :to="`/fahrzeuge/fahrzeugdetails/${jobDetails.data.car.Kennzeichen}`"
+                                                        class="text-decoration-none text-primary">
+                                                        {{ jobDetails.data.car.Kennzeichen }}
+                                                    </router-link>
+                                                </template>
+                                                <template v-else>
+                                                    {{ jobDetails.data.car[key] }}
+                                                </template>
+                                            </v-list-item-subtitle>
+                                        </v-list-item>
+                                        <v-divider
+                                            v-if="key !== carInfoKeys[carInfoKeys.length - 1] && jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
+                                        </v-divider>
+                                    </template>
+                                </v-list>
+                            </template>
+
+                            <!-- Wenn kein Fahrzeug zugeordnet ist -->
+                            <template v-else>
+                                <v-list-item>
+                                    <v-list-item-subtitle class="text-grey">
+                                        <div class="d-flex align-center justify-center pa-4">
+                                            <v-icon icon="mdi-car-off" color="grey-lighten-1" size="32" class="mr-2">
+                                            </v-icon>
+                                            <span>Kein Fahrzeug zugeordnet</span>
+                                        </div>
+                                    </v-list-item-subtitle>
+                                </v-list-item>
                             </template>
                         </template>
 
@@ -144,19 +179,22 @@
                             density="comfortable" hide-details="auto" clearable :loading="carsLoading"
                             :search-input.sync="carSearch" @update:search-input="searchCars" return-object
                             :disabled="userRole === 'trainee'">
+
                             <template v-slot:item="{ props, item }">
                                 <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
                                     :subtitle="item.raw.Automarke"></v-list-item>
                             </template>
+
                             <template v-slot:selection="{ item }">
                                 {{ item.raw.Kennzeichen }}
                             </template>
                         </v-autocomplete>
                     </v-sheet>
 
-                    <!-- Services information -->
+                    <!-- Dienstleistungen Anzeige -->
                     <v-sheet class="section-block">
                         <DefaultHeader :title="'Dienstleistungen'"></DefaultHeader>
+
                         <div v-if="!editMode" class="d-flex flex-wrap align-center">
                             <v-chip v-for="service in jobDetails.data.services" :key="service.id" class="ma-1"
                                 color="primary" label>
@@ -172,12 +210,15 @@
                             placeholder="Dienstleistungen auswählen" prepend-inner-icon="mdi-briefcase"
                             variant="outlined" density="comfortable" hide-details="auto" multiple chips clearable
                             :loading="servicesLoading" return-object :disabled="userRole === 'trainee'">
+
                             <template v-slot:chip="{ props, item }">
                                 <v-chip v-bind="props" :text="item.raw.name"></v-chip>
                             </template>
+
                             <template v-slot:item="{ props, item }">
                                 <v-list-item v-bind="props" :title="item.raw.name"></v-list-item>
                             </template>
+
                         </v-autocomplete>
                     </v-sheet>
 
@@ -271,6 +312,8 @@ export default {
                 id: "ID",
                 Title: "Titel",
                 Beschreibung: "Beschreibung",
+                cleaning_start: "Startzeitpunkt Reinigung",
+                cleaning_end: "Endezeitpunkt Reinigung",
                 Abholtermin: "Abholtermin",
                 Status: "Status",
                 trainee_id: "Mitarbeiter",
@@ -338,7 +381,7 @@ export default {
                 if (image && image.id) {
                     return {
                         id: image.id,
-                        path: image.path, // Keep path for consistency if needed
+                        path: image.path,
                         url: image.url
                     };
                 }
@@ -352,9 +395,18 @@ export default {
             const singleImage = mapImage(img);
             return singleImage ? [singleImage] : [];
         },
+        formattedCleaningStart() {
+            return this.formatDateTimeForInput(this.editedJobData.cleaning_start);
+        },
+        formattedCleaningEnd() {
+            return this.formatDateTimeForInput(this.editedJobData.cleaning_end);
+        },
+        formattedAbholtermin() {
+            return this.formatDateTimeForInput(this.editedJobData.Abholtermin);
+        },
         ...mapState('auth', ['userRole']),
         jobInfoKeys() {
-            return ['id', 'Title', 'Beschreibung', 'Abholtermin', 'Status', 'trainee_id'];
+            return ['id', 'Title', 'Beschreibung', 'cleaning_start', 'cleaning_end', 'Abholtermin', 'Status', 'trainee_id'];
         },
         carInfoKeys() {
             return ['Kennzeichen', 'Automarke', 'Typ', 'Farbe', 'Sonstiges'];
@@ -370,17 +422,30 @@ export default {
             if (!this.jobDetails.data) return {};
             const displayedData = { ...this.jobDetails.data };
 
-            // Status formatieren
+            // Status anzeigen (Titel statt Wert)
             if (displayedData.Status) {
                 const foundStatus = this.statuses.find(s => s.value === displayedData.Status);
                 displayedData.Status = foundStatus ? foundStatus.title : displayedData.Status;
             }
 
-            // Abholtermin formatieren
+            // Datumsfelder formatieren
             if (displayedData.Abholtermin) {
                 displayedData.Abholtermin = this.formatDate(displayedData.Abholtermin);
             }
 
+            if (displayedData.cleaning_start) {
+                displayedData.cleaning_start = this.formatDate(displayedData.cleaning_start);
+            } else {
+                displayedData.cleaning_start = 'Nicht definiert';
+            }
+
+            if (displayedData.cleaning_end) {
+                displayedData.cleaning_end = this.formatDate(displayedData.cleaning_end);
+            } else {
+                displayedData.cleaning_end = 'Nicht definiert';
+            }
+
+            // Trainee anzeigen
             if (this.jobDetails.data.trainee) {
                 displayedData.trainee_id = `${this.jobDetails.data.trainee.firstname} ${this.jobDetails.data.trainee.lastname}`;
             } else if (displayedData.trainee_id) {
@@ -391,31 +456,8 @@ export default {
 
             return displayedData;
         },
-        formattedAbholterminForEdit: {
-            get() {
-                if (!this.editedJobData.Abholtermin) return '';
-                const date = new Date(this.editedJobData.Abholtermin);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                return `${year}-${month}-${day}T${hours}:${minutes}`;
-            },
-            set(newValue) {
-                if (newValue) {
-                    try {
-                        const date = new Date(newValue);
-                        this.editedJobData.Abholtermin = date.toISOString();
-                    } catch {
-                        this.editedJobData.Abholtermin = null;
-                    }
-                } else {
-                    this.editedJobData.Abholtermin = null;
-                }
-            }
-        }
     },
+
     async mounted() {
         try {
             await this.getJob();
@@ -432,19 +474,35 @@ export default {
     },
     methods: {
 
-        // Image Gallery Event Handlers
+        formatDateTimeForInput(dateString) {
+            if (!dateString) return '';
+
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return '';
+
+                // Lokale Zeitzone verwenden
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            } catch {
+                return '';
+            }
+        },
+
         async handleImagesUploaded(response) {
-            // Reload car details to get updated images
             await this.getJob();
         },
 
         async handleImageDeleted(imageId) {
-            // Reload car details to get updated images
             await this.getJob();
         },
 
         async handleImageReplaced(data) {
-            // Reload car details to get updated images
             await this.getJob();
         },
 
@@ -495,7 +553,6 @@ export default {
                 this.editedJobData = { ...this.jobDetails.data };
                 this.jobDetails.data.id = this.$route.params.id;
 
-                // Map status to its value for the dropdown
                 if (this.jobDetails.data.Status) {
                     const foundStatus = this.statuses.find(s => s.title === this.jobDetails.data.Status);
                     this.editedJobData.Status = foundStatus ? foundStatus.value : this.jobDetails.data.Status;
@@ -505,7 +562,6 @@ export default {
                 console.log('JobDetails component received car data:', this.jobDetails.data.car);
                 console.log('JobDetails component received trainee data:', this.jobDetails.data.trainee);
 
-                // Set customer for autocomplete
                 if (this.jobDetails.data.customer) {
                     this.editedJobData.customer = {
                         id: this.jobDetails.data.customer.id,
@@ -516,7 +572,6 @@ export default {
                     this.editedJobData.customer = null;
                 }
 
-                // Set car for autocomplete
                 if (this.jobDetails.data.car) {
                     this.editedJobData.car = {
                         id: this.jobDetails.data.car.id,
@@ -527,7 +582,6 @@ export default {
                     this.editedJobData.car = null;
                 }
 
-                // Set trainee for autocomplete
                 if (this.jobDetails.data.trainee) {
                     this.editedJobData.trainee = {
                         id: this.jobDetails.data.trainee.id,
@@ -540,7 +594,6 @@ export default {
                     this.editedJobData.trainee = null;
                 }
 
-                // Set services for autocomplete
                 if (this.jobDetails.data.services) {
                     this.editedJobData.services = this.jobDetails.data.services.map(service => ({
                         id: service.id,
@@ -680,6 +733,39 @@ export default {
 
                     dataToSubmit.scheduled_at = dataToSubmit.Abholtermin || null;
                     delete dataToSubmit.Abholtermin;
+
+                    // Datumsfelder in ISO Format konvertieren falls vorhanden
+                    // Datumsfelder formatieren - als lokale Zeit behandeln ohne UTC-Konvertierung
+                    const formatDateForBackend = (dateString) => {
+                        if (!dateString) return null;
+                        try {
+                            // Wenn es bereits ein ISO-Format mit Zeitzone ist, direkt verwenden
+                            if (dateString.includes('T') && !dateString.includes('Z') && dateString.length === 16) {
+                                // Format: "YYYY-MM-DDTHH:mm" - Sekunden hinzufügen
+                                return dateString + ':00';
+                            }
+                            // Andernfalls als lokale Zeit parsen
+                            const date = new Date(dateString);
+                            if (!isNaN(date.getTime())) {
+                                // Als lokale Zeit im Format "YYYY-MM-DD HH:mm:ss" zurückgeben
+                                const year = date.getFullYear();
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                const hours = String(date.getHours()).padStart(2, '0');
+                                const minutes = String(date.getMinutes()).padStart(2, '0');
+                                const seconds = String(date.getSeconds()).padStart(2, '0');
+                                return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                            }
+                            return null;
+                        } catch (e) {
+                            console.error('Invalid date:', dateString, e);
+                            return null;
+                        }
+                    };
+
+                    dataToSubmit.cleaning_start = formatDateForBackend(dataToSubmit.cleaning_start);
+                    dataToSubmit.cleaning_end = formatDateForBackend(dataToSubmit.cleaning_end);
+                    dataToSubmit.scheduled_at = formatDateForBackend(dataToSubmit.scheduled_at);
                 }
 
                 console.log('Submitting job data:', dataToSubmit);
@@ -735,6 +821,8 @@ export default {
                 id: "mdi-identifier",
                 Title: "mdi-format-title",
                 Beschreibung: "mdi-text-box-outline",
+                cleaning_start: "mdi-clock-time-eight-outline",
+                cleaning_end: "mdi-clock-check-outline",
                 Abholtermin: "mdi-calendar",
                 Status: "mdi-check-circle-outline",
                 trainee_id: "mdi-toolbox",
@@ -756,22 +844,6 @@ export default {
             };
 
             return iconMap[key] || iconMap.default;
-        },
-        formatDateTimeForInput(dateString) {
-            if (!dateString) return '';
-
-            try {
-                const date = new Date(dateString);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-
-                return `${year}-${month}-${day}T${hours}:${minutes}`;
-            } catch {
-                return '';
-            }
         },
 
         async fetchCustomers(query = '') {
@@ -878,8 +950,9 @@ export default {
 <style scoped>
 .card-container {
     width: 100%;
-    height: calc(100vh - 40px);
-    padding: 20px;
+    height: 99vh;
+    margin-left: 110px;
+    /* padding: 20px; */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -917,19 +990,19 @@ export default {
 
 @media (min-width: 768px) and (max-width: 991.98px) {
     .card-container {
-        max-width: calc(100% - 80px);
+        max-width: calc(100% - 50px);
     }
 }
 
 @media (min-width: 992px) and (max-width: 1199.98px) {
     .card-container {
-        max-width: calc(100% - 250px);
+        max-width: calc(100% - 150px);
     }
 }
 
 @media (min-width: 1200px) {
     .card-container {
-        max-width: calc(100% - 280px);
+        max-width: calc(100% - 180px);
     }
 }
 

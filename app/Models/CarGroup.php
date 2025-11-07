@@ -14,18 +14,10 @@ class CarGroup extends Model
         'title',
     ];
 
-    /*
+    
     public function cars()
     {
         return $this->hasMany(Car::class);
     }
-        */
-    public function carGroupSubgroup()
-    {
-        return $this->hasMany(CarGroupSubgroup::class);
-    }
-    public function servicePricing()
-    {
-        return $this->hasMany(ServicePricing::class);
-    }
+        
 }

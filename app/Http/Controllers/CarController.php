@@ -18,7 +18,7 @@ class CarController extends Controller
         try {
             $validatedData = $request->validate([
                 'Kennzeichen' => 'required|string|unique:cars',
-                'Fahrzeugklasse' => 'nullable|integer',
+                'Fahrzeugklasse' => 'nullable|string',
                 'Automarke' => 'nullable|string',
                 'Typ' => 'nullable|string',
                 'Farbe' => 'nullable|string',
@@ -116,12 +116,7 @@ class CarController extends Controller
                     ->orWhere('Farbe', 'like', $searchTerm)
                     ->orWhere('Sonstiges', 'like', $searchTerm);
 
-                // Search by ID if the query is numeric
-                if (is_numeric($query)) {
-                    $q->orWhere('id', '=', (int)$query);
-                    // Search by Fahrzeugklasse if the query is numeric
-                    $q->orWhere('Fahrzeugklasse', '=', (int)$query);
-                }
+
             });
 
             // Applying sorting
@@ -241,7 +236,7 @@ class CarController extends Controller
 
             $validatedData = $request->validate([
                 'Kennzeichen' => 'required|string',
-                'Fahrzeugklasse' => 'nullable|integer',
+                'Fahrzeugklasse' => 'nullable|string',
                 'Automarke' => 'nullable|string',
                 'Typ' => 'nullable|string',
                 'Farbe' => 'nullable|string',

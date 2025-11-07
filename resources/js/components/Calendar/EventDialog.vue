@@ -189,37 +189,22 @@ export default {
         },
 
         formatDateTime(dateString) {
-            if (!dateString) return '';
+        if (!dateString) return 'Unbekannt';
 
-            try {
-                if (dateString.format) {
-                    return dateString.format('DD.MM.YYYY HH:mm');
-                }
-
-                let date;
-                if (typeof dateString === 'string') {
-                    // Format: "2024-01-15 14:30" -> "2024-01-15T14:30"
-                    date = new Date(dateString.replace(' ', 'T'));
-                } else {
-                    date = new Date(dateString);
-                }
-
-                if (isNaN(date.getTime())) {
-                    return dateString;
-                }
-
-                return date.toLocaleDateString('de-DE', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            } catch (error) {
-                console.error('Error formatting date:', error);
-                return dateString;
-            }
+        try {
+            return new Intl.DateTimeFormat("de-DE", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+            }).format(new Date(dateString));
+        } catch {
+            return "Ungültiges Datum";
         }
+    },
+
+
     }
 }
 </script>

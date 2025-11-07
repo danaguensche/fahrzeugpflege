@@ -66,6 +66,8 @@ class JobDetailsController extends Controller
                 $validationRules = [
                     'title' => 'required|string|max:255',
                     'description' => 'nullable|string',
+                    'cleaning_start' => 'nullable|date',
+                    'cleaning_end' => 'nullable|date',
                     'scheduled_at' => 'nullable|date',
                     'status' => 'required|string|max:255',
                     'trainee_id' => 'nullable|exists:users,id',

@@ -54,9 +54,9 @@
                         <span class="font-weight-medium">{{ labels[key] }}</span>
                       </div>
                       <v-text-field v-model="editedUserData[key]" variant="outlined" density="comfortable"
-                        hide-details="auto" :readonly="key === 'email'" :disabled="key === 'email'"
-                        :hint="key === 'email' ? 'E-Mail kann nicht geändert werden' : ''"
-                        :persistent-hint="key === 'email'"></v-text-field>
+                        hide-details="auto" :readonly="key === 'username'" :disabled="key === 'username'"
+                        :hint="key === 'username' ? 'Benutzername kann nicht geändert werden.' : ''"
+                        :persistent-hint="key === 'username'"></v-text-field>
                     </v-col>
                   </v-row>
                 </template>
@@ -242,7 +242,7 @@ export default {
         firstname: "Vorname",
         lastname: "Nachname",
         phonenumber: "Telefonnummer",
-        email: "E-Mail",
+        username: "Benutzername",
         addressline: "Straße und Hausnummer",
         postalcode: "PLZ",
         city: "Ort"
@@ -268,7 +268,7 @@ export default {
 
   computed: {
     personalInfoKeys() {
-      return ['firstname', 'lastname', 'phonenumber', 'email'];
+      return ['firstname', 'lastname', 'phonenumber', 'username'];
     },
     addressInfoKeys() {
       return ['addressline', 'postalcode', 'city'];
@@ -307,7 +307,7 @@ export default {
           firstname: response.data.data.firstname || "",
           lastname: response.data.data.lastname || "",
           phonenumber: response.data.data.phonenumber || "",
-          email: response.data.data.email || "",
+          username: response.data.data.username || "",
           addressline: response.data.data.addressline || "",
           postalcode: response.data.data.postalcode || "",
           city: response.data.data.city || ""
@@ -324,7 +324,7 @@ export default {
       const iconMap = {
         firstname: "mdi-account",
         lastname: "mdi-account-details",
-        email: "mdi-email",
+        username: "mdi-account",
         phonenumber: "mdi-phone",
         addressline: "mdi-map-marker",
         postalcode: "mdi-mail",
@@ -360,7 +360,6 @@ export default {
           addressline: this.editedUserData.addressline,
           postalcode: this.editedUserData.postalcode,
           city: this.editedUserData.city
-          // Email wird absichtlich nicht mitgeschickt
         };
 
         await axios.put("/api/users/me", dataToSend, {
@@ -432,81 +431,76 @@ export default {
 
 <style scoped>
 .card-container {
-  width: 100%;
-  height: calc(100vh - 40px);
-  padding: 20px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
+    width: 100%;
+    height: 99vh;
+    margin-left:110px;
+    /* padding: 20px; */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 .card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
 @media (max-width: 575.98px) {
-  .card-container {
-    padding: 10px;
-    height: calc(100vh - 20px);
+    .card-container {
+        padding: 10px;
+        height: calc(100vh - 20px);
+    }
 
-  }
-
-  .card {
-    font-size: 14px;
-  }
+    .card {
+        font-size: 14px;
+    }
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
-  .card-container {
-    padding: 15px;
-    height: calc(100vh - 30px);
-  }
+    .card-container {
+        padding: 15px;
+        height: calc(100vh - 30px);
+    }
 }
 
 @media (min-width: 768px) and (max-width: 991.98px) {
-  .card-container {
-    max-width: calc(100% - 80px);
-  }
+    .card-container {
+        max-width: calc(100% - 50px);
+    }
 }
 
 @media (min-width: 992px) and (max-width: 1199.98px) {
-  .card-container {
-    max-width: calc(100% - 250px);
-  }
+    .card-container {
+        max-width: calc(100% - 150px);
+    }
 }
 
 @media (min-width: 1200px) {
-  .card-container {
-    max-width: calc(100% - 280px);
-  }
-}
-
-.v-card-text {
-  flex: 1;
-  overflow-y: auto;
+    .card-container {
+        max-width: calc(100% - 180px);
+    }
 }
 
 @media (max-width: 767.98px) {
-  .v-card-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    .v-card-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-  .v-card-actions button {
-    margin-bottom: 8px;
-    width: 100%;
-  }
+    .v-card-actions button {
+        margin-bottom: 8px;
+        width: 100%;
+    }
 
-  .v-spacer {
-    display: none;
-  }
+    .v-spacer {
+        display: none;
+    }
 }
 </style>

@@ -14,7 +14,7 @@ export default {
     data() {
         return {
             numberOfCustomersOneMonth: 0,
-        };
+        }; 
     },
     mounted() {
         this.getNumberOfCustomers();

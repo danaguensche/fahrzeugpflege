@@ -3,13 +3,16 @@
         <div class="search-wrapper">
             <div class="search-input-container">
                 <Search :context="searchContext" v-model="searchText" @clearSearch="clearSearch" />
+
                 <div class="search-buttons">
                     <v-btn :icon="true" :prepend-icon="'mdi-magnify'" class="search-button" variant="text"
                         @click="searchCustomers">
                         <v-icon>mdi-magnify</v-icon>
                     </v-btn>
+
                     <CloseButton :isVisible="searchText.length > 0" class="close-button" @close="clearSearch">
                     </CloseButton>
+
                 </div>
             </div>
         </div>
@@ -18,9 +21,13 @@
             <DefaultButton @click="openAddCustomerDialog">Kunde hinzufügen</DefaultButton>
         </div>
 
+        <!-- Kundendaten Tabelle -->
         <DataTable :searchString="searchText" :isSearchActive="isSearchActive" endpoint="customers"
-            :headers="customerHeaders" :fields="customerFields" itemKey="id" detailsPage="kundendetails"
-            detailsUrlBasePath="kunden" @itemsDeleted="handleItemsDeleted" @show-error="handleError" />
+            :headers="customerHeaders" :fields="customerFields" :fieldRules="fieldRules[field] || []" itemKey="id"
+            detailsPage="kundendetails" detailsUrlBasePath="kunden" @itemsDeleted="handleItemsDeleted"
+            @show-error="handleError" />
+
+
         <AddCustomerForm v-model="showAddCustomerDialog" @customer-added="handleCustomerAdded" />
 
     </div>
@@ -52,6 +59,19 @@ export default {
             searchText: '',
             isSearchActive: false,
             searchDebounceTimer: null,
+            fieldRules: {
+                email: [
+                    v => !!v || 'E-Mail ist erforderlich',
+                    v => /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
+                ],
+                phonenumber: [
+                    v => !!v || 'Telefonnummer ist erforderlich',
+                    v => /^[0-9+\-\s()]{6,}$/.test(v) || 'Ungültige Telefonnummer'
+                ],
+                postalcode: [
+                    v => /^[0-9]{5}$/.test(v) || 'Ungültige PLZ'
+                ]
+            },
             customerHeaders: [
                 { title: 'Auswählen', key: 'select', sortable: false, width: '60px' },
                 { title: 'ID', key: 'id', sortable: true, align: 'start' },
