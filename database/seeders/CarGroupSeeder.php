@@ -15,7 +15,7 @@ class CarGroupSeeder extends Seeder
     {
         $COUNT_WHEN_NO_FILE = 10;
 
-        $seeding_values = Storage::disk('local')->get('/db_import_data/data_car_group.txt');
+        $seeding_values = Storage::disk('local')->get('/db_imported_data/data_car_group.txt');
 
         if ($seeding_values == null) {
             CarGroup::factory()->count($COUNT_WHEN_NO_FILE)->create();

@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\Job;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -14,15 +16,16 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            CarGroupSeeder::class,
-            ServiceSeeder::class,
-            PriceConditionSeeder::class,
-            ServicePricingSeeder::class,
-            ExtraChargeSeeder::class,
+            // CarGroupSeeder::class,
+            // ServiceSeeder::class,
+            // PriceConditionSeeder::class,
+            // ServicePricingSeeder::class,
+            // ExtraChargeSeeder::class,
             CarSeeder::class,
             CustomerSeeder::class,
-            OrderSeeder::class,
-            OrderExtraChargeSeeder::class
+            JobSeeder::class,
+            // OrderSeeder::class,
+            // OrderExtraChargeSeeder::class
         ]);
     }
 }
