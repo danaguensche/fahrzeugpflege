@@ -17,12 +17,8 @@
             </div>
         </div>
 
-        <div class="content-container">
-            <DefaultButton @click="openAddCustomerDialog">Kunde hinzufügen</DefaultButton>
-        </div>
-
         <!-- Kundendaten Tabelle -->
-        <DataTable :searchString="searchText" :isSearchActive="isSearchActive" endpoint="customers"
+        <DataTable :buttonFunction="openAddCustomerDialog" addButtonLabel="Kunde Hinzufügen" :searchString="searchText" :isSearchActive="isSearchActive" endpoint="customers"
             :headers="customerHeaders" :fields="customerFields" :fieldRules="fieldRules[field] || []" itemKey="id"
             detailsPage="kundendetails" detailsUrlBasePath="kunden" @itemsDeleted="handleItemsDeleted"
             @show-error="handleError" />

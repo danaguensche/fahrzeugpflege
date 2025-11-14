@@ -3,15 +3,20 @@
         <!-- Header with control buttons -->
         <div class="header">
             <!-- Data Update Button -->
-            <RefreshButton class="refresh-button" @refresh="loadItems" :loading="isRefreshing"></RefreshButton>
-            <div class="spacer"></div>
+            <DefaultButton @click="buttonFunction">{{ addButtonLabel }}</DefaultButton>
+            <div class="small-spacer"></div>
 
+
+            <RefreshButton class="refresh-button" @refresh="loadItems" :loading="isRefreshing"></RefreshButton>
+
+            <div class="spacer"></div>
             <!-- Button group for vehicle operations -->
             <div class="button-group" v-if="isAdminOrTrainer || canEditStatusOnly">
                 <ConfirmButton class="confirm-button" @click="confirmEditItem" :disabled="!editItemId">
                     Bestätigen
                 </ConfirmButton>
-                <CancelButton class="cancel-button" :disabled="editItemId === null" @click="cancelEdit">Abbrechen</CancelButton>
+                <CancelButton class="cancel-button" :disabled="editItemId === null" @click="cancelEdit">Abbrechen
+                </CancelButton>
                 <DeleteButton class="delete-button" :disabled="selectedItems.length === 0"
                     @click="confirmDeleteSelectedItems" v-if="isAdminOrTrainer">
                     Löschen
@@ -59,12 +64,14 @@
                                         <template v-if="getHeader(field).type === 'select'">
                                             <v-select v-model="editItem[field]" :items="getHeader(field).options"
                                                 item-title="title" item-value="value" :rules="fieldRules"
-                                                :error-messages="fieldErrors[field]" density="compact" variant="outlined"
+                                                :error-messages="fieldErrors[field]" density="compact"
+                                                variant="outlined"
                                                 :disabled="canEditStatusOnly && field !== 'status'"></v-select>
                                         </template>
                                         <template v-else>
                                             <v-text-field v-model="editItem[field]" :rules="fieldRules" align="center"
-                                                :error-messages="fieldErrors[field]" density="compact" variant="outlined"
+                                                :error-messages="fieldErrors[field]" density="compact"
+                                                variant="outlined"
                                                 :type="field === 'scheduled_at' ? 'datetime-local' : 'text'"
                                                 :disabled="canEditStatusOnly && field !== 'status'" class="mt-5">
                                             </v-text-field>
@@ -149,6 +156,7 @@ import DeleteButton from '../CommonSlots/DeleteButton.vue';
 import Pagination from '../CommonSlots/Pagination.vue';
 import { data } from 'autoprefixer';
 import { fi } from 'vuetify/locale';
+import DefaultButton from '../CommonSlots/DefaultButton.vue';
 
 export default {
     name: "DataTable",
@@ -158,6 +166,15 @@ export default {
             type: Object,
             default: () => ({})
         },
+        addButtonLabel: {
+            type: String,
+            default: 'Hinzufügen'
+        },
+        buttonFunction: {
+            type: Function,
+            default: null
+        },
+
         endpoint: {
             type: String,
             required: true
@@ -212,7 +229,8 @@ export default {
         DeleteButton,
         RefreshButton,
         VuetifyAlert,
-        Pagination
+        Pagination,
+        DefaultButton
     },
 
     data() {
@@ -657,6 +675,10 @@ export default {
     margin-bottom: 16px;
     padding: 8px 0;
     margin-right: 20px;
+}
+
+.small-spacer {
+    width: 12px;
 }
 
 .spacer {

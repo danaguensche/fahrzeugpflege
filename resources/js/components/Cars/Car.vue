@@ -14,12 +14,10 @@
             </div>
         </div>
 
-        <div class="content-container" :class="{ 'content-container--trainee': !isAdminOrTrainer }">
-            <DefaultButton @click="openAddCarDialog" v-if="isAdminOrTrainer">Fahrzeug hinzufügen</DefaultButton>
-        </div>
-
         <div class="table-container">
             <DataTable
+                :buttonFunction="openAddCarDialog"
+                addButtonLabel="Fahrzeug Hinzufügen"
                 :searchString="searchText"
                 :isSearchActive="isSearchActive"
                 endpoint="cars"

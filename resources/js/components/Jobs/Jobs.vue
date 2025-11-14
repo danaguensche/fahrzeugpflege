@@ -15,14 +15,11 @@
             </div>
         </div>
 
-        <div class="content-container">
-            <DefaultButton @click="openAddJobDialog">Auftrag hinzufügen</DefaultButton>
-        </div>
-
-
         <!-- Auftragsdaten Tabelle -->
 
         <DataTable  ref="jobDataTable" 
+                    :buttonFunction="openAddJobDialog"
+                    addButtonLabel="Auftrag Hinzufügen"
                     :searchString="searchText" 
                     :isSearchActive="isSearchActive" 
                     endpoint="jobs"

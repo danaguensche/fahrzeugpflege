@@ -14,12 +14,8 @@
             </div>
         </div>
 
-        <div class="content-container">
-            <DefaultButton @click="openAddUserDialog">Benutzer hinzufügen</DefaultButton>
-        </div>
-
         <div class="table-container">
-            <DataTable :searchString="searchText" :isSearchActive="isSearchActive" endpoint="users"
+            <DataTable :buttonFunction="openAddUserDialog" addButtonLabel="Benutzer hinzufügen" :searchString="searchText" :isSearchActive="isSearchActive" endpoint="users"
                 :headers="userHeaders" :fields="userFields" itemKey="id" detailsPage="userdetails"
                 detailsUrlBasePath="user" deleteKey="id" @itemsDeleted="handleItemsDeleted" @show-error="handleError" :dataCleaner="cleanUserData" />
         </div>

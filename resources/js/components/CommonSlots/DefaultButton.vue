@@ -1,5 +1,5 @@
 <template>
-    <v-btn class="mt-10 mb-2 button bg-blue-grey-darken-3"  @click="handleClick" variant="tonal" color="white">
+    <v-btn class="bg-blue-grey-darken-3 border-0"  @click="handleClick" variant="outlined" color="white">
         <slot></slot>
         </v-btn>
 </template>
