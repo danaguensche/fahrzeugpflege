@@ -18,51 +18,56 @@
 
                         <v-col cols="12">
                             <v-text-field v-model="customer.company" label="Firma" variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-office-building"
-                                class="mb-3"></v-text-field>
+                                density="comfortable" prepend-inner-icon="mdi-office-building" class="mb-3"
+                                :maxlength="50" :counter="50"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
                             <v-text-field v-model="customer.firstname" label="Vorname *"
                                 :rules="[v => !!v || 'Vorname ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-account" class="mb-3"></v-text-field>
+                                density="comfortable" prepend-inner-icon="mdi-account" class="mb-3" :maxlength="50"
+                                :counter="50"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
                             <v-text-field v-model="customer.lastname" label="Nachname *"
                                 :rules="[v => !!v || 'Nachname ist erforderlich']" required variant="outlined"
-                                density="comfortable" class="mb-3"></v-text-field>
+                                density="comfortable" class="mb-3" :maxlength="50" :counter="50"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
                             <v-text-field v-model="customer.email" label="E-Mail *" :rules="[v => !!v || 'E-Mail ist erforderlich',
                             v => /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
                             ]" required variant="outlined" density="comfortable" prepend-inner-icon="mdi-email"
-                                type="email" class="mb-3"></v-text-field>
+                                type="email" class="mb-3" :maxlength="60" :counter="60"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
                             <v-text-field v-model="customer.phonenumber"
                                 :rules="[v => !v || /^[0-9+\-\s()]{6,}$/.test(v) || 'Ungültige Telefonnummer']"
                                 label="Telefonnummer" variant="outlined" density="comfortable"
-                                prepend-inner-icon="mdi-phone" type="tel" class="mb-3"></v-text-field>
+                                prepend-inner-icon="mdi-phone" type="tel" class="mb-3" :maxlength="16"
+                                :counter="16"></v-text-field>
                         </v-col>
 
                         <v-col cols="12">
                             <v-text-field v-model="customer.addressline" label="Straße und Hausnummer"
                                 variant="outlined" density="comfortable" prepend-inner-icon="mdi-home"
-                                class="mb-3"></v-text-field>
+                                class="mb-3" :maxlength="50"
+                                :counter="50"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="4">
                             <v-text-field v-model="customer.postalcode" label="Postleitzahl" :rules="[
                                 v => !v || /^[0-9]{5}$/.test(v) || 'Ungültige Postleitzahl']" variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-mailbox" class="mb-3"></v-text-field>
+                                density="comfortable" prepend-inner-icon="mdi-mailbox" class="mb-3" :maxlength="5"
+                                :counter="5"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="8">
                             <v-text-field v-model="customer.city" label="Stadt" variant="outlined" density="comfortable"
-                                prepend-inner-icon="mdi-city" class="mb-3"></v-text-field>
+                                prepend-inner-icon="mdi-city" class="mb-3" :maxlength="50"
+                                :counter="50"></v-text-field>
                         </v-col>
 
                         <!-- Fahrzeug hinzufügen (mit Suche und Autovervollständigung) -->

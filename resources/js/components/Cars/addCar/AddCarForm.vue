@@ -21,6 +21,8 @@
                                 density="comfortable"
                                 prepend-inner-icon="mdi-car-info"
                                 class="mb-3"
+                                :maxlength="10"
+                                :counter="10"
                             ></v-text-field>
                         </v-col>
 
@@ -51,6 +53,8 @@
                                 density="comfortable"
                                 prepend-inner-icon="mdi-car"
                                 class="mb-3"
+                                :maxlength="24"
+                                :counter="24"
                             ></v-text-field>
                         </v-col>
 
@@ -62,6 +66,8 @@
                                 density="comfortable"
                                 prepend-inner-icon="mdi-car-info"
                                 class="mb-3"
+                                :maxlength="24"
+                                :counter="24"
                             ></v-text-field>
                         </v-col>
 
@@ -74,6 +80,8 @@
                                 density="comfortable"
                                 prepend-inner-icon="mdi-palette"
                                 class="mb-3"
+                                :maxlength="24"
+                                :counter="24"
                             ></v-text-field>
                         </v-col>
 
@@ -118,7 +126,9 @@
                                 density="comfortable"
                                 prepend-inner-icon="mdi-note-text"
                                 rows="3"
-                                class="mb-3">
+                                class="mb-3"
+                                :maxlength="65000"
+                                :counter="65000">
                             </v-textarea>
                         </v-col>
                     </v-row>

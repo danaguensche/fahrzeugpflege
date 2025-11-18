@@ -17,13 +17,13 @@
                         <v-col cols="12">
                             <v-text-field v-model="job.title" label="Titel *"
                                 :rules="[v => !!v || 'Titel ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-format-title" class="mb-3">
+                                density="comfortable" prepend-inner-icon="mdi-format-title" class="mb-3" :maxlength="100" :counter="100">
                             </v-text-field>
                         </v-col>
 
                         <v-col cols="12">
                             <v-textarea v-model="job.description" label="Beschreibung" variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-text" class="mb-3"></v-textarea>
+                                density="comfortable" prepend-inner-icon="mdi-text" class="mb-3" :maxlength="65000" :counter="65000"></v-textarea>
                         </v-col>
 
                         <!-- Kunde zuerst auswählen -->
