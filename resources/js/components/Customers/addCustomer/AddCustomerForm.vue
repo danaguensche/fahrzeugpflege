@@ -23,19 +23,19 @@
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="customer.firstname" label="Vorname"
+                            <v-text-field v-model="customer.firstname" label="Vorname *"
                                 :rules="[v => !!v || 'Vorname ist erforderlich']" required variant="outlined"
                                 density="comfortable" prepend-inner-icon="mdi-account" class="mb-3"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="customer.lastname" label="Nachname"
+                            <v-text-field v-model="customer.lastname" label="Nachname *"
                                 :rules="[v => !!v || 'Nachname ist erforderlich']" required variant="outlined"
                                 density="comfortable" class="mb-3"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="customer.email" label="E-Mail" :rules="[v => !!v || 'E-Mail ist erforderlich',
+                            <v-text-field v-model="customer.email" label="E-Mail *" :rules="[v => !!v || 'E-Mail ist erforderlich',
                             v => /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
                             ]" required variant="outlined" density="comfortable" prepend-inner-icon="mdi-email"
                                 type="email" class="mb-3"></v-text-field>

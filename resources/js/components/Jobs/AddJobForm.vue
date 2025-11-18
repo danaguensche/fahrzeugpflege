@@ -15,7 +15,7 @@
 
                     <v-row>
                         <v-col cols="12">
-                            <v-text-field v-model="job.title" label="Titel"
+                            <v-text-field v-model="job.title" label="Titel *"
                                 :rules="[v => !!v || 'Titel ist erforderlich']" required variant="outlined"
                                 density="comfortable" prepend-inner-icon="mdi-format-title" class="mb-3">
                             </v-text-field>
@@ -32,7 +32,7 @@
                                             :items="customers" 
                                             item-title="full_name"
                                             item-value="id" 
-                                            label="Kunde" 
+                                            label="Kunde *" 
                                             placeholder="Kunde auswählen"
                                             prepend-inner-icon="mdi-account" 
                                             variant="outlined" 
@@ -63,7 +63,7 @@
                                             :items="availableCars" 
                                             item-title="Kennzeichen"
                                             item-value="id" 
-                                            label="Fahrzeug"
+                                            label="Fahrzeug *"
                                             :placeholder="job.customer ? 'Fahrzeug für Kunde auswählen' : 'Zuerst Kunde auswählen'"
                                             prepend-inner-icon="mdi-car" 
                                             variant="outlined" 
@@ -94,7 +94,7 @@
                                             :items="services" 
                                             item-title="name" 
                                             item-value="id"
-                                            label="Dienstleistungen" 
+                                            label="Dienstleistungen *" 
                                             placeholder="Dienstleistungen auswählen"
                                             prepend-inner-icon="mdi-briefcase" 
                                             variant="outlined" density="comfortable" 
@@ -154,7 +154,7 @@
                             <v-row dense>
                                 <v-col sm="8">
                                     <v-text-field   v-model="cleaning_start_date" 
-                                                    label="Startdatum Reinigung" 
+                                                    label="Startdatum Reinigung *" 
                                                     type="date"
                                                     variant="outlined" 
                                                     density="comfortable"
@@ -166,7 +166,7 @@
 
                                 <v-col sm="4">
                                     <v-text-field   v-model="cleaning_start_time" 
-                                                    label="Uhrzeit" 
+                                                    label="Uhrzeit *" 
                                                     type="time"
                                                     variant="outlined" 
                                                     density="comfortable"
@@ -182,7 +182,7 @@
                             <v-row dense>
                                 <v-col sm="8">
                                     <v-text-field   v-model="cleaning_end_date" 
-                                                    label="Enddatum Reinigung" 
+                                                    label="Enddatum Reinigung *" 
                                                     type="date"
                                                     variant="outlined" 
                                                     density="comfortable"
@@ -194,7 +194,7 @@
 
                                 <v-col sm="4">
                                     <v-text-field   v-model="cleaning_end_time" 
-                                                    label="Uhrzeit" 
+                                                    label="Uhrzeit *" 
                                                     type="time"
                                                     variant="outlined" 
                                                     density="comfortable"
@@ -210,7 +210,7 @@
                             <v-row dense>
                                 <v-col sm="8">
                                     <v-text-field   v-model="scheduled_at_date" 
-                                                    label="Abholtermin" 
+                                                    label="Abholtermin *" 
                                                     type="date"
                                                     variant="outlined" 
                                                     density="comfortable"
@@ -222,7 +222,7 @@
 
                                 <v-col sm="4">
                                     <v-text-field   v-model="scheduled_at_time" 
-                                                    label="Uhrzeit" 
+                                                    label="Uhrzeit *" 
                                                     type="time"
                                                     variant="outlined" 
                                                     density="comfortable"

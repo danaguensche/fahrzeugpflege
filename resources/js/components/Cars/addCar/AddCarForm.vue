@@ -14,7 +14,7 @@
                         <v-col cols="12" sm="6">
                             <v-text-field
                                 v-model="car.Kennzeichen"
-                                label="Kennzeichen"
+                                label="Kennzeichen *"
                                 :rules="[v => !!v || 'Kennzeichen ist erforderlich']"
                                 required
                                 variant="outlined"
@@ -30,11 +30,12 @@
                                 :items="carGroups"
                                 item-title="title"
                                 item-value="title"
-                                label="Fahrzeugklasse"
+                                label="Fahrzeugklasse *"
                                 placeholder="Fahrzeugklasse auswählen oder suchen"
                                 prepend-inner-icon="mdi-car-multiple"
                                 variant="outlined"
                                 density="comfortable"
+                                required
                                 clearable
                                 :loading="carGroupsLoading"
                                 @update:search="searchCarGroups"

@@ -28,7 +28,7 @@
                                 <v-row>
                                     <v-col cols="12" md="6">
                                         <v-slide-x-transition>
-                                            <v-text-field v-model="formData.firstname" label="Vorname"
+                                            <v-text-field v-model="formData.firstname" label="Vorname *"
                                                 :rules="nameRules" required variant="outlined" density="comfortable"
                                                 prepend-inner-icon="mdi-account" :disabled="loading">
                                             </v-text-field>
@@ -37,7 +37,7 @@
 
                                     <v-col cols="12" md="6">
                                         <v-slide-x-reverse-transition>
-                                            <v-text-field v-model="formData.lastname" label="Nachname"
+                                            <v-text-field v-model="formData.lastname" label="Nachname *"
                                                 :rules="nameRules" required variant="outlined" density="comfortable"
                                                 prepend-inner-icon="mdi-account" :disabled="loading">
                                             </v-text-field>
@@ -45,7 +45,7 @@
                                     </v-col>
 
                                     <v-col cols="12">
-                                        <v-text-field v-model="formData.username" label="Benutzername"
+                                        <v-text-field v-model="formData.username" label="Benutzername *"
                                             required variant="outlined" density="comfortable"
                                             prepend-inner-icon="mdi-account-circle" class="mb-6" type="text"
                                             autocomplete="username" :disabled="loading">
@@ -79,7 +79,7 @@
                                 <v-row>
                                     <v-col cols="6">
                                         <v-slide-x-transition>
-                                            <v-text-field v-model="formData.password" label="Passwort"
+                                            <v-text-field v-model="formData.password" label="Passwort *"
                                                 :rules="passwordRules" required variant="outlined" density="comfortable"
                                                 prepend-inner-icon="mdi-lock" class="mb-3"
                                                 :type="showPassword ? 'text' : 'password'"
@@ -93,7 +93,7 @@
                                     <v-col cols="6">
                                         <v-slide-x-reverse-transition>
                                             <v-text-field v-model="formData.passwordConfirm"
-                                                label="Passwort wiederholen" :rules="passwordConfirmRules" required
+                                                label="Passwort wiederholen *" :rules="passwordConfirmRules" required
                                                 variant="outlined" density="comfortable" prepend-inner-icon="mdi-lock"
                                                 :type="showPasswordConfirm ? 'text' : 'password'"
                                                 :append-inner-icon="showPasswordConfirm ? 'mdi-eye' : 'mdi-eye-off'"
