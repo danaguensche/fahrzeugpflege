@@ -11,6 +11,9 @@
 
             <div class="spacer"></div>
             <!-- Button group for vehicle operations -->
+
+            <FilterButton v-if="isFilterable" v-model="statusFilters" @filter-change="handleStatusFilterChange" />
+            <div class="small-spacer"></div>
             <div class="button-group" v-if="isAdminOrTrainer || canEditStatusOnly">
                 <ConfirmButton class="confirm-button" @click="confirmEditItem" :disabled="!editItemId">
                     Bestätigen
@@ -121,7 +124,7 @@
                                 <v-btn variant="plain" icon
                                     @click="editItemId === item[itemKey] ? saveItem() : editItemDetails(item)">
                                     <v-icon>{{ editItemId === item[itemKey] ? 'mdi-content-save' : 'mdi-pencil'
-                                    }}</v-icon>
+                                        }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
@@ -157,11 +160,16 @@ import Pagination from '../CommonSlots/Pagination.vue';
 import { data } from 'autoprefixer';
 import { fi } from 'vuetify/locale';
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
+import FilterButton from './FilterButton.vue';
 
 export default {
     name: "DataTable",
 
     props: {
+        isFilterable: {
+            type: Boolean,
+            default: false
+        },
         fieldRules: {
             type: Object,
             default: () => ({})
@@ -230,11 +238,13 @@ export default {
         RefreshButton,
         VuetifyAlert,
         Pagination,
-        DefaultButton
+        DefaultButton,
+        FilterButton
     },
 
     data() {
         return {
+            statusFilters: [],
             isRefreshing: false,
             items: [],
             selectedItems: [],
@@ -271,6 +281,12 @@ export default {
         },
         pageItems() {
             return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        },
+        filteredItems() {
+            if (this.statusFilters.length === 0) {
+                return this.items;
+            }
+            return this.items.filter(item => this.statusFilters.includes(item.status));
         }
     },
 
@@ -299,6 +315,15 @@ export default {
     },
 
     methods: {
+
+        handleStatusFilterChange(selectedStatuses) {
+            this.statusFilters = selectedStatuses;
+            this.options.page = 1;
+
+
+            this.loadItems();
+
+        },
         handleSearchChange(searchValue) {
             if (this.searchDebounceTimer) {
                 clearTimeout(this.searchDebounceTimer);
@@ -333,6 +358,11 @@ export default {
                     sortDesc: this.options.sortBy.length > 0 ? this.options.sortBy[0].order === 'desc' : true
                 };
 
+                // NEU: Status-Filter zur Suche hinzufügen
+                if (this.statusFilters.length > 0) {
+                    params.status = this.statusFilters.join(',');
+                }
+
                 const response = await axios.get(`/api/${this.endpoint}/search`, { params });
                 let items = [];
                 let total = 0;
@@ -355,15 +385,6 @@ export default {
 
             } catch (error) {
                 console.error(`[DataTable] Error during search for ${this.endpoint}:`, error);
-                if (error.response) {
-                    console.error('Response data:', error.response.data);
-                    console.error('Response status:', error.response.status);
-                    console.error('Response headers:', error.response.headers);
-                } else if (error.request) {
-                    console.error('Request data:', error.request);
-                } else {
-                    console.error('Error message:', error.message);
-                }
                 this.items = [];
                 this.totalItems = 0;
                 this.$emit('show-error', `Error when searching for ${this.endpoint}`);
@@ -606,21 +627,17 @@ export default {
                     params.sortDesc = true;
                 }
 
+                // Status-Filter hinzufügen
+                if (this.statusFilters.length > 0) {
+                    params['status[]'] = this.statusFilters
+                }
+
                 const response = await axios.get(`/api/${this.endpoint}`, { params });
                 this.items = response.data.items || response.data || [];
                 this.totalItems = response.data.total || response.data.totalItems || this.items.length;
                 console.log(`[DataTable] Data loaded successfully for ${this.endpoint}. Total items: ${this.totalItems}`);
             } catch (error) {
                 console.error(`[DataTable] Error during data loading for ${this.endpoint}:`, error);
-                if (error.response) {
-                    console.error('Response data:', error.response.data);
-                    console.error('Response status:', error.response.status);
-                    console.error('Response headers:', error.response.headers);
-                } else if (error.request) {
-                    console.error('Request data:', error.request);
-                } else {
-                    console.error('Error message:', error.message);
-                }
                 this.items = [];
                 this.totalItems = 0;
                 this.$emit('show-error', `Error during data loading for ${this.endpoint}`);

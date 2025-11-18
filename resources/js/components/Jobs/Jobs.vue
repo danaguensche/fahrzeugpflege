@@ -18,6 +18,7 @@
         <!-- Auftragsdaten Tabelle -->
 
         <DataTable  ref="jobDataTable" 
+                    :isFilterable="true"
                     :buttonFunction="openAddJobDialog"
                     addButtonLabel="Auftrag Hinzufügen"
                     :searchString="searchText" 

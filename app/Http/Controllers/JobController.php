@@ -110,7 +110,7 @@ class JobController extends Controller
         $allowedSortFields = ['id', 'title', 'description', 'scheduled_at', 'status'];
 
         $query = Job::with(['customer', 'car', 'services', 'trainer', 'trainee', 'images']);
-
+    
         // Filter by user role
         /** @var \App\Models\User|null $user */
         $user = auth()->user();
@@ -118,9 +118,20 @@ class JobController extends Controller
             $query->where('trainee_id', $user->id);
         }
 
-        // Filtering by status
-        if ($request->has('status') && $request->input('status') !== '') {
-            $query->where('status', $request->input('status'));
+        // Filtering by status - MULTIPLE VALUES SUPPORT
+        if ($request->has('status')) {
+            $statusInput = $request->input('status');
+
+            // Handle both array and comma-separated string
+            if (is_array($statusInput)) {
+                $statuses = $statusInput;
+            } else {
+                $statuses = array_filter(explode(',', $statusInput));
+            }
+
+            if (!empty($statuses)) {
+                $query->whereIn('status', $statuses);
+            }
         }
 
         // Filtering by car_id
@@ -195,6 +206,22 @@ class JobController extends Controller
                     $q->orWhere('id', '=', (int)$searchQuery);
                 }
             });
+
+            // Filtering by status
+            if ($request->has('status')) {
+                $statusInput = $request->input('status');
+
+                // Handle both array and comma-separated string
+                if (is_array($statusInput)) {
+                    $statuses = $statusInput;
+                } else {
+                    $statuses = array_filter(explode(',', $statusInput));
+                }
+
+                if (!empty($statuses)) {
+                    $query->whereIn('status', $statuses);
+                }
+            }
 
             // Apply sorting
             if (in_array($sortBy, $allowedSortFields)) {
@@ -376,17 +403,17 @@ class JobController extends Controller
 
     public function destroyMultiple(Request $request)
     {
-        try {         
+        try {
             $validated = $request->validate([
                 'ids' => 'required|array',
                 'ids.*' => 'integer'
             ]);
-    
+
             DB::beginTransaction();
-    
+
             // Get jobs with images
             $jobs = Job::whereIn('id', $validated['ids'])->with('images')->get();
-           
+
             if ($jobs->isEmpty()) {
                 DB::rollBack();
                 return response()->json([
@@ -394,7 +421,7 @@ class JobController extends Controller
                     'message' => 'Keine Jobs gefunden.'
                 ], 404);
             }
-    
+
             // Delete all associated images from storage and database
             foreach ($jobs as $job) {
                 foreach ($job->images as $image) {
@@ -405,11 +432,11 @@ class JobController extends Controller
                     $image->delete();
                 }
             }
-    
+
             Job::destroy($validated['ids']);
-    
+
             DB::commit();
-    
+
             activity()
                 ->causedBy(auth()->user())
                 ->withProperties([
@@ -417,12 +444,11 @@ class JobController extends Controller
                     'count' => count($jobs),
                 ])
                 ->log('Mehrere Aufträge gelöscht: ' . count($jobs) . ' Jobs von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
-    
+
             return response()->json([
                 'success' => true,
                 'message' => count($jobs) . ' Jobs wurden erfolgreich gelöscht.'
             ], 200);
-    
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             return response()->json([
@@ -608,15 +634,15 @@ class JobController extends Controller
                 'error' => 'Fehler beim Abrufen verfügbarer Fahrzeuge'
             ], 500);
         }
-    } 
+    }
 
     public function getCarsForCustomer($customerId)
     {
         $customer = Customer::with('cars')->findOrFail($customerId);
 
-        $cars = Car::where(function($query) use ($customerId) {
+        $cars = Car::where(function ($query) use ($customerId) {
             $query->where('customer_id', $customerId)
-                  ->orWhereNull('customer_id');
+                ->orWhereNull('customer_id');
         })->get();
 
         return response()->json([
