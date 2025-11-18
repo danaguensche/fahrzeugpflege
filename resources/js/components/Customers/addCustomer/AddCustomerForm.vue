@@ -110,19 +110,25 @@
             </v-card-actions>
         </v-card>
 
-        <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false" />
+        <!-- Snackbar außerhalb der v-card platzieren -->
     </v-dialog>
+    
+    <!-- Vuetify Snackbar direkt verwenden -->
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" location="bottom" :timeout="5000">
+        {{ snackbar.text }}
+        <template v-slot:actions>
+            <v-btn color="white" variant="text" @click="snackbar.show = false">
+                Schließen
+            </v-btn>
+        </template>
+    </v-snackbar>
 </template>
 
 <script>
 import axios from 'axios';
-import SnackBar from '../../Details/SnackBar.vue';
 
 export default {
     name: 'AddCustomerForm',
-    components: {
-        SnackBar,
-    },
     props: {
         modelValue: Boolean,
         showCarField: {
@@ -209,19 +215,44 @@ export default {
                 this.showSnackbar('Kunde erfolgreich hinzugefügt', 'success');
                 this.closeDialog();
             } catch (error) {
-                console.error('Fehler beim Speichern:', error.response?.data?.errors || error);
-                this.showSnackbar(error.response?.data?.message || 'Fehler beim Speichern des Kunden', 'error');
+                console.error('Fehler beim Speichern:', error.response?.data || error);
+                
+                let errorMessage = 'Fehler beim Speichern des Kunden';
+                
+                if (error.response && error.response.data) {
+                    const data = error.response.data;
+                    
+                    if (data.errors) {
+                        console.log('Errors gefunden:', data.errors);
+                        
+                        if (data.errors.email) {
+                            const emailError = data.errors.email;
+                            errorMessage = Array.isArray(emailError) ? emailError[0] : emailError;
+                            console.log('Email-Fehler:', errorMessage);
+                        } else {
+                            // Ersten verfügbaren Fehler nehmen
+                            const firstErrorKey = Object.keys(data.errors)[0];
+                            const firstError = data.errors[firstErrorKey];
+                            errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
+                        }
+                    } 
+                    // Alternativ nach message suchen
+                    else if (data.message) {
+                        errorMessage = data.message;
+                    }
+                }
+                
+                console.log('Finale Fehlermeldung:', errorMessage);
+                this.showSnackbar(errorMessage, 'error');
             } finally {
                 this.customersLoading = false;
             }
         },
 
-
         async fetchCars(query = '') {
             this.carsLoading = true;
             try {
                 const response = await axios.get(`/api/cars/search?query=${query}`);
-                console.log('API Antwort:', response.data); // <--- HIER
                 this.cars = response.data.data.map(car => ({
                     id: car.id,
                     Kennzeichen: car.Kennzeichen,
@@ -267,11 +298,13 @@ export default {
         },
 
         showSnackbar(text, color = 'success') {
+            console.log('showSnackbar aufgerufen:', text, color);
             this.snackbar = {
                 show: true,
                 text,
                 color,
             };
+            console.log('Snackbar state:', this.snackbar);
         },
 
         async assignCarToCustomer(car, customerId) {
@@ -307,9 +340,6 @@ export default {
                 this.showSnackbar('Fahrzeugdetails konnten nicht geladen werden', 'error');
             }
         }
-
-
-
     },
 };
 </script>
