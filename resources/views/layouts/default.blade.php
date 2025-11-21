@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     @vite(['resources/css/main.css', 'resources/js/app.js'])
-    <title>@yield("title", "My Demo App")</title>
+    <title>@yield("title", "Fahrzeugpflege")</title>
 
 </head>
 
