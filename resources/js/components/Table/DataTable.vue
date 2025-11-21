@@ -66,13 +66,15 @@
                                     <template v-else>
                                         <template v-if="getHeader(field).type === 'select'">
                                             <v-select v-model="editItem[field]" :items="getHeader(field).options"
-                                                item-title="title" item-value="value" :rules="fieldRules"
+                                                item-title="title" item-value="value"
+                                                :rules="Array.isArray(fieldRules) ? fieldRules : []"
                                                 :error-messages="fieldErrors[field]" density="compact"
                                                 variant="outlined"
                                                 :disabled="canEditStatusOnly && field !== 'status'"></v-select>
                                         </template>
                                         <template v-else>
-                                            <v-text-field v-model="editItem[field]" :rules="fieldRules" align="center"
+                                            <v-text-field v-model="editItem[field]"
+                                                :rules="Array.isArray(fieldRules) ? fieldRules : []"
                                                 :error-messages="fieldErrors[field]" density="compact"
                                                 variant="outlined"
                                                 :type="field === 'scheduled_at' ? 'datetime-local' : 'text'"
@@ -589,6 +591,10 @@ export default {
                     payload = this.dataCleaner(payload);
                 }
 
+                if (payload.scheduled_at) {
+                    payload.scheduled_at = this.formatDateForBackend(payload.scheduled_at);
+                }
+
                 await axios.put(`/api/${this.endpoint}/${this.editItemId}`, payload);
                 this.cancelEdit();
 
@@ -599,6 +605,30 @@ export default {
                 }
             } catch (error) {
                 this.$emit('show-error', `Error when saving item`);
+            }
+        },
+
+        //Funktion aus JobDetails
+        formatDateForBackend (dateString) {
+            if (!dateString) return null;
+            try {
+                if (dateString.includes('T') && !dateString.includes('Z') && dateString.length === 16) {
+                    return dateString + ':00';
+                }
+                const date = new Date(dateString);
+                if (!isNaN(date.getTime())) {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    const seconds = String(date.getSeconds()).padStart(2, '0');
+                    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                }
+                return null;
+            } catch (e) {
+                console.error('Invalid date:', dateString, e);
+                return null;
             }
         },
 
