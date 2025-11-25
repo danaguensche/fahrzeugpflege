@@ -24,3 +24,4 @@ yarn-error.log
 /public/web.config
 /config/cors.php
 vue.config.js
+public/web.config
