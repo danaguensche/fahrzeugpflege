@@ -55,6 +55,7 @@ npm run dev
   
 Windows Server 2022 Standard  
 Webserver: IIS  
-IP: 172.17.100.242
-URL: http:172.17.100.242:80/login  
+IP: 172.17.100.5
+URL: https://poliplan.bbw-hof.de/dashboard
+TEST-URL: https://poliplan-test.bbw-hof.de/dashboard  
 
