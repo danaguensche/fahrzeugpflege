@@ -42,6 +42,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customers/customerscurrentmonth', [CustomerController::class, 'getCurrentMonthCustomers']);
     Route::get('/jobs/countjobstoday', [JobController::class, 'getTodayJobsCount']);
     Route::get('/jobs/openjobs', [JobController::class, 'getOpenJobsCount']);
+
+    //Kalender Events Route
+    Route::get('/jobs/calendar-events', [JobController::class, 'getCalendarEvents']);
+    
     //Activity Log Routes
 
     Route::get('/activities', function () {

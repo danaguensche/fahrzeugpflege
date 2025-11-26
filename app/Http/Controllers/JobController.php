@@ -649,4 +649,47 @@ class JobController extends Controller
             'cars' => $cars
         ]);
     }
+
+    //Kalender Events abrufen -> problem war, dass immer nur 20 events abgerufen wurden wegen pagination
+    public function getCalendarEvents(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            if (!$user) {
+                abort(401, 'Unauthenticated.');
+            }
+
+            $query = Job::with(['customer', 'car', 'services', 'trainer', 'trainee']);
+
+            // Filter by user role
+            if ($user->role === 'trainee') {
+                $query->where('trainee_id', $user->id);
+            }
+
+            if ($request->has('start') && $request->has('end')) {
+                $start = Carbon::parse($request->input('start'));
+                $end = Carbon::parse($request->input('end'));
+
+                $query->where(function ($q) use ($start, $end) {
+                    $q->whereBetween('scheduled_at', [$start, $end])
+                        ->orWhereBetween('cleaning_start', [$start, $end])
+                        ->orWhereBetween('cleaning_end', [$start, $end]);
+                });
+            }
+
+            $jobs = $query->orderBy('scheduled_at', 'asc')->get();
+
+            return response()->json([
+                'items' => $jobs,
+                'total' => $jobs->count(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Abrufen der Kalender-Events: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Fehler beim Abrufen der Kalender-Events',
+                'items' => [],
+                'total' => 0
+            ], 500);
+        }
+    }
 }
