@@ -1,5 +1,5 @@
 @extends("layouts.default")
-@section("title", "Fahrzeugpflege")
+@section("title", "Poliplan")
 @section("content")
 <div id="app">
     <app></app>
