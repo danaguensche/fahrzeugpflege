@@ -121,7 +121,7 @@ export default {
             const endOfDay = new Date(this.today);
             endOfDay.setHours(23, 59, 59, 999);
 
-            axios.get('/api/jobs', {
+            axios.get('/api/jobs/calendar-events', {
                 params: {
                     start: startOfDay.toISOString().slice(0, 10) + ' 00:00:00',
                     end: endOfDay.toISOString().slice(0, 10) + ' 23:59:59',

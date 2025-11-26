@@ -91,7 +91,7 @@ export default {
     };
   },
   mounted() {
-    // this.fetchEvents(); // Will be called by @ready event
+    this.fetchEvents(); // Will be called by @ready event
   },
   computed: {
     ...mapState(['isSidebarOpen']),
@@ -101,7 +101,7 @@ export default {
   },
   methods: {
     fetchEvents(startDate, endDate) {
-      axios.get('/api/jobs', {
+      axios.get('/api/jobs/calendar-events', {
         
       })
         .then(response => {
