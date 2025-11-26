@@ -25,3 +25,4 @@ yarn-error.log
 /config/cors.php
 vue.config.js
 public/web.config
+vite.config.js

@@ -96,26 +96,37 @@ class UserController extends Controller
             if ($id) {
                 // An admin or trainer is updating a specific user.
                 $user = User::findOrFail($id);
+                $validatedData = $request->validate([
+                    'firstname' => 'sometimes|string|max:255',
+                    'lastname' => 'sometimes|string|max:255',
+                    'phonenumber' => 'nullable|string|max:255',
+                    'addressline' => 'nullable|string|max:255',
+                    'postalcode' => 'nullable|string|max:255',
+                    'city' => 'nullable|string|max:255',
+                    'role' => 'required|string|in:admin,trainer,trainee',
+                    'password' => 'nullable|string|min:8',
+                    
+                ]);
             } else {
                 // A user is updating their own profile.
                 $user = Auth::user();
+                $validatedData = $request->validate([
+                    'firstname' => 'sometimes|string|max:255',
+                    'lastname' => 'sometimes|string|max:255',
+                    'phonenumber' => 'nullable|string|max:255',
+                    'addressline' => 'nullable|string|max:255',
+                    'postalcode' => 'nullable|string|max:255',
+                    'city' => 'nullable|string|max:255',
+                    'password' => 'nullable|string|min:8',
+                    
+                ]);
             }
 
             if (!$user) {
                 return response()->json(['message' => 'Benutzer nicht gefunden'], 404);
             }
 
-            $validatedData = $request->validate([
-                'firstname' => 'sometimes|string|max:255',
-                'lastname' => 'sometimes|string|max:255',
-                'phonenumber' => 'nullable|string|max:255',
-                'addressline' => 'nullable|string|max:255',
-                'postalcode' => 'nullable|string|max:255',
-                'city' => 'nullable|string|max:255',
-                'role' => 'required|string|in:admin,trainer,trainee',
-                'password' => 'nullable|string|min:8',
-                
-            ]);
+            
 
             if (isset($validatedData['password'])) {
                 $validatedData['password'] = Hash::make($validatedData['password']);

@@ -56,7 +56,8 @@
                       <v-text-field v-model="editedUserData[key]" variant="outlined" density="comfortable"
                         hide-details="auto" :readonly="key === 'username'" :disabled="key === 'username'"
                         :hint="key === 'username' ? 'Benutzername kann nicht geändert werden.' : ''"
-                        :persistent-hint="key === 'username'"></v-text-field>
+                        :rules="fieldRules[key]" :maxlength="key === 'phonenumber' ? 16 : key === 'postalcode' ? 5 : 50" :counter="key === 'phonenumber' ? 16 : key === 'postalcode' ? 5 : 50"
+                        class="w-50" :persistent-hint="key === 'username'"></v-text-field>
                     </v-col>
                   </v-row>
                 </template>
@@ -115,7 +116,7 @@
                         </span>
                       </div>
                       <v-text-field v-model="editedUserData[key]" variant="outlined" density="comfortable"
-                        hide-details="auto" class="w-50">
+                        hide-details="auto" class="w-50" :rules="fieldRules[key]">
                       </v-text-field>
                     </v-col>
                   </v-row>
@@ -156,7 +157,7 @@
                     <v-text-field v-model="passwordData.currentPassword"
                       :append-icon="showCurrentPassword ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showCurrentPassword ? 'text' : 'password'" label="Aktuelles Passwort" variant="outlined"
-                      density="comfortable" :rules="[rules.required]"
+                      density="comfortable" :rules="[passwordRules.required]"
                       @click:append="showCurrentPassword = !showCurrentPassword">
                     </v-text-field>
                   </v-col>
@@ -164,7 +165,7 @@
                     <v-text-field v-model="passwordData.newPassword"
                       :append-icon="showNewPassword ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showNewPassword ? 'text' : 'password'" label="Neues Passwort" variant="outlined"
-                      density="comfortable" :rules="[rules.required, rules.min]"
+                      density="comfortable" :rules="[passwordRules.required, passwordRules.min]"
                       @click:append="showNewPassword = !showNewPassword">
                     </v-text-field>
                   </v-col>
@@ -172,7 +173,8 @@
                     <v-text-field v-model="passwordData.confirmPassword"
                       :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showConfirmPassword ? 'text' : 'password'" label="Neues Passwort bestätigen"
-                      variant="outlined" density="comfortable" :rules="[rules.required, rules.passwordMatch]"
+                      variant="outlined" density="comfortable"
+                      :rules="[passwordRules.required, passwordRules.passwordMatch]"
                       @click:append="showConfirmPassword = !showConfirmPassword">
                     </v-text-field>
                   </v-col>
@@ -238,6 +240,24 @@ export default {
       editedUserData: {},
       editMode: false,
       saveLoading: false,
+      fieldRules: {
+        firstname: [
+          v => !v || v === 'Nicht verfügbar' || /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(v) || 'Bitte einen gültigen Vornamen eingeben'
+        ],
+        lastname: [
+          v => !v || v === 'Nicht verfügbar' || /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(v) || 'Bitte einen gültigen Nachnamen eingeben'
+        ],
+        postalcode: [
+          v => !v || v === 'Nicht verfügbar' || /^\d{5}$/.test(v) || 'Bitte eine gültige PLZ eingeben'
+        ],
+        phonenumber: [
+          v => !v || v === 'Nicht verfügbar' || /^\+?[0-9\s\-()]{7,15}$/.test(v) || 'Bitte eine gültige Telefonnummer eingeben'
+        ],
+        city: [
+          v => !v || v === 'Nicht verfügbar' || /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(v) || 'Bitte einen gültigen Ort eingeben'
+        ],
+        addressline: []
+      },
       labels: {
         firstname: "Vorname",
         lastname: "Nachname",
@@ -273,7 +293,7 @@ export default {
     addressInfoKeys() {
       return ['addressline', 'postalcode', 'city'];
     },
-    rules() {
+    passwordRules() {
       return {
         required: v => !!v || 'Dieses Feld ist erforderlich',
         min: v => v.length >= 8 || 'Mindestens 8 Zeichen erforderlich',
@@ -346,6 +366,15 @@ export default {
     },
 
     async saveUserData() {
+      // Validiere beide Formulare
+      const personalValid = await this.$refs.personalInfoForm.validate();
+      const addressValid = await this.$refs.addressInfoForm.validate();
+
+      if (!personalValid.valid || !addressValid.valid) {
+        this.showSnackbar('Bitte fülle alle Felder korrekt aus.', 'error');
+        return;
+      }
+
       this.saveLoading = true;
       this.error = null;
 
@@ -362,6 +391,7 @@ export default {
           city: this.editedUserData.city
         };
 
+        console.log("Daten zum Senden:", dataToSend);
         await axios.put("/api/users/me", dataToSend, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -431,76 +461,76 @@ export default {
 
 <style scoped>
 .card-container {
-    width: 100%;
-    height: 99vh;
-    margin-left:110px;
-    /* padding: 20px; */
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+  width: 100%;
+  height: 99vh;
+  margin-left: 110px;
+  /* padding: 20px; */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .card {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 @media (max-width: 575.98px) {
-    .card-container {
-        padding: 10px;
-        height: calc(100vh - 20px);
-    }
+  .card-container {
+    padding: 10px;
+    height: calc(100vh - 20px);
+  }
 
-    .card {
-        font-size: 14px;
-    }
+  .card {
+    font-size: 14px;
+  }
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
-    .card-container {
-        padding: 15px;
-        height: calc(100vh - 30px);
-    }
+  .card-container {
+    padding: 15px;
+    height: calc(100vh - 30px);
+  }
 }
 
 @media (min-width: 768px) and (max-width: 991.98px) {
-    .card-container {
-        max-width: calc(100% - 50px);
-    }
+  .card-container {
+    max-width: calc(100% - 50px);
+  }
 }
 
 @media (min-width: 992px) and (max-width: 1199.98px) {
-    .card-container {
-        max-width: calc(100% - 150px);
-    }
+  .card-container {
+    max-width: calc(100% - 150px);
+  }
 }
 
 @media (min-width: 1200px) {
-    .card-container {
-        max-width: calc(100% - 180px);
-    }
+  .card-container {
+    max-width: calc(100% - 180px);
+  }
 }
 
 @media (max-width: 767.98px) {
-    .v-card-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
+  .v-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-    .v-card-actions button {
-        margin-bottom: 8px;
-        width: 100%;
-    }
+  .v-card-actions button {
+    margin-bottom: 8px;
+    width: 100%;
+  }
 
-    .v-spacer {
-        display: none;
-    }
+  .v-spacer {
+    display: none;
+  }
 }
 </style>
