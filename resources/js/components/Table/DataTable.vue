@@ -105,7 +105,8 @@
                                     <span v-else-if="field === 'status'">
                                         {{ getStatusTitle(item[field]) }}
                                     </span>
-                                    <span v-else-if="field === 'scheduled_at'">
+                                    
+                                    <span v-else-if="field === 'scheduled_at' || field === 'cleaning_start'">
                                         {{ formatDateTime(item[field]) }}
                                     </span>
                                     <span v-else>{{ item[field] || '' }}</span>
@@ -593,6 +594,9 @@ export default {
 
                 if (payload.scheduled_at) {
                     payload.scheduled_at = this.formatDateForBackend(payload.scheduled_at);
+                }
+                if (payload.cleaning_start) {
+                    payload.cleaning_start = this.formatDateForBackend(payload.cleaning_start  );
                 }
 
                 await axios.put(`/api/${this.endpoint}/${this.editItemId}`, payload);

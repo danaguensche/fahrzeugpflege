@@ -68,7 +68,7 @@ export default {
                 { title: 'Auswählen', key: 'select', sortable: false, width: '60px' },
                 { title: 'id', key: 'id', sortable: true, align: 'start' },
                 { title: 'Titel', key: 'title', sortable: true },
-                { title: 'Beschreibung', key: 'description', sortable: true },
+                { title: 'Reinigungsstart', key: 'cleaning_start', sortable: true },
                 { title: 'Abholtermin', key: 'scheduled_at', sortable: true },
                 {
                     title: 'Status', key: 'status', sortable: true, editable: true, type: 'select', options: [
@@ -82,7 +82,7 @@ export default {
                 { title: 'Löschen', key: 'delete', sortable: false },
                 { title: 'Bearbeiten', key: 'edit', sortable: false }
             ],
-            jobFields: ["id", "title", "description", "scheduled_at", "status", "services"],
+            jobFields: ["id", "title", "cleaning_start", "scheduled_at", "status", "services"],
             showAddJobDialog: false,
             selectedStatus: null,
             selectedCustomer: null,
