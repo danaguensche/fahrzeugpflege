@@ -77,7 +77,7 @@
                                                 :rules="Array.isArray(fieldRules) ? fieldRules : []"
                                                 :error-messages="fieldErrors[field]" density="compact"
                                                 variant="outlined"
-                                                :type="field === 'scheduled_at' ? 'datetime-local' : 'text'"
+                                                :type="['scheduled_at', 'cleaning_start'].includes(field) ? 'datetime-local' : 'text'"
                                                 :disabled="canEditStatusOnly && field !== 'status'" class="mt-5">
                                             </v-text-field>
                                         </template>
@@ -105,7 +105,7 @@
                                     <span v-else-if="field === 'status'">
                                         {{ getStatusTitle(item[field]) }}
                                     </span>
-                                    
+
                                     <span v-else-if="field === 'scheduled_at' || field === 'cleaning_start'">
                                         {{ formatDateTime(item[field]) }}
                                     </span>
@@ -127,7 +127,7 @@
                                 <v-btn variant="plain" icon
                                     @click="editItemId === item[itemKey] ? saveItem() : editItemDetails(item)">
                                     <v-icon>{{ editItemId === item[itemKey] ? 'mdi-content-save' : 'mdi-pencil'
-                                        }}</v-icon>
+                                    }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
@@ -596,7 +596,7 @@ export default {
                     payload.scheduled_at = this.formatDateForBackend(payload.scheduled_at);
                 }
                 if (payload.cleaning_start) {
-                    payload.cleaning_start = this.formatDateForBackend(payload.cleaning_start  );
+                    payload.cleaning_start = this.formatDateForBackend(payload.cleaning_start);
                 }
 
                 await axios.put(`/api/${this.endpoint}/${this.editItemId}`, payload);
@@ -613,7 +613,7 @@ export default {
         },
 
         //Funktion aus JobDetails
-        formatDateForBackend (dateString) {
+        formatDateForBackend(dateString) {
             if (!dateString) return null;
             try {
                 if (dateString.includes('T') && !dateString.includes('Z') && dateString.length === 16) {
