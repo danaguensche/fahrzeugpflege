@@ -35,12 +35,32 @@
 
                         <!-- Bearbeitungsmodus -->
                         <div v-else>
-                            <InfoListEditMode
-                                :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin' && k !== 'trainee_id' && k !== 'cleaning_start' && k !== 'cleaning_end')"
-                                :labels="labels" :editedData="editedJobData" @update:editedData="editedJobData = $event"
-                                :getIconForField="getIconForField" class="job-information-fields"
-                                :disabled="userRole === 'trainee'">
-                            </InfoListEditMode>
+                            <v-row no-gutters class="mb-4">
+                                <v-col cols="12">
+                                    <div class="pa-4">
+                                        <InfoListEditMode
+                                            :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin' && k !== 'trainee_id' && k !== 'cleaning_start' && k !== 'cleaning_end' && k !== 'Beschreibung')"
+                                            :labels="labels" :editedData="editedJobData"
+                                            @update:editedData="editedJobData = $event"
+                                            :getIconForField="getIconForField" :disabled="userRole === 'trainee'">
+                                        </InfoListEditMode>
+
+                                        <v-row no-gutters class="mb-4 ml-4">
+                                            <v-col cols="12">
+                                                <div class="d-flex align-center mb-1">
+                                                    <v-icon :icon="getIconForField('Beschreibung')" color="primary"
+                                                        class="mr-2"></v-icon>
+                                                    <span class="font-weight-medium scrollable">{{ labels['Beschreibung'] }}</span>
+                                                </div>
+                                                <v-textarea class="w-50 scrollable" v-model="editedJobData['Beschreibung']"
+                                                    variant="outlined" density="comfortable" auto-grow
+                                                    :disabled="userRole === 'trainee'">
+                                                </v-textarea>
+                                            </v-col>
+                                        </v-row>
+                                    </div>
+                                </v-col>
+                            </v-row>
 
                             <!-- Cleaning Start -->
                             <v-text-field :model-value="formatDateTimeForInput(editedJobData.cleaning_start)"
@@ -948,6 +968,13 @@ export default {
 </script>
 
 <style scoped>
+
+.scrollable {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    max-height: 450px;
+    overflow-y: auto;
+}
 .card-container {
     width: 100%;
     height: 99vh;

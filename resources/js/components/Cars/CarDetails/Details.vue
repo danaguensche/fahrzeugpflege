@@ -37,48 +37,42 @@
                             <v-row class="pa-4">
                                 <!-- Standard Felder (außer Fahrzeugklasse) -->
                                 <template v-for="key in vehicleInfoKeys.filter(k => k !== 'Fahrzeugklasse')" :key="key">
-                                    <v-col cols="12" sm="6">
-                                        <v-text-field
-                                            v-model="editedCarData[key]"
-                                            :label="labels[key]"
-                                            :prepend-inner-icon="getIconForField(key)"
-                                            variant="outlined"
-                                            density="comfortable"
-                                            hide-details="auto"
-                                            :readonly="key === 'id'"
-                                        ></v-text-field>
+                                    <v-col cols="12" sm="8">
+                                        <v-text-field v-if="key !== 'Sonstiges' && key !== 'Beschreibung'"
+                                            v-model="editedCarData[key]" :label="labels[key]"
+                                            :prepend-inner-icon="getIconForField(key)" variant="outlined"
+                                            density="comfortable" hide-details="auto"
+                                            :readonly="key === 'id'"></v-text-field>
+                                        <v-textarea v-if="key === 'Sonstiges' || key === 'Beschreibung'" class="w-100"
+                                            v-model="editedCarData[key]" variant="outlined" density="comfortable"
+                                            :height="150" :disabled="disabled">
+                                        </v-textarea>
                                     </v-col>
                                 </template>
-                                
+
                                 <!-- Fahrzeugklasse Dropdown -->
-                                <v-col cols="12" sm="6">
-                                    <v-autocomplete
-                                        v-model="editedCarData.Fahrzeugklasse"
-                                        :items="carGroups"
-                                        item-title="title"
-                                        item-value="title"
-                                        label="Fahrzeugklasse"
+                                <v-col cols="12" sm="8">
+                                    <v-autocomplete v-model="editedCarData.Fahrzeugklasse" :items="carGroups"
+                                        item-title="title" item-value="title" label="Fahrzeugklasse"
                                         placeholder="Fahrzeugklasse auswählen oder suchen"
-                                        prepend-inner-icon="mdi-car-multiple"
-                                        variant="outlined"
-                                        density="comfortable"
-                                        hide-details="auto"
-                                        clearable
-                                        :loading="carGroupsLoading"
-                                        @update:search="searchCarGroups"
-                                    ></v-autocomplete>
+                                        prepend-inner-icon="mdi-car-multiple" variant="outlined" density="comfortable"
+                                        hide-details="auto" clearable :loading="carGroupsLoading"
+                                        @update:search="searchCarGroups"></v-autocomplete>
                                 </v-col>
                             </v-row>
                         </template>
                     </v-sheet>
 
                     <!-- Customer information -->
+                    
                     <v-sheet>
+                        <v-col cols="12" sm="8">
                         <DefaultHeader :title="'Kundeninformation'"></DefaultHeader>
                         <CustomerInfoList v-if="!editMode" :customer="carDetails.data.customer"
                             :customerId="carDetails.data.customer_id" :labels="labels">
                         </CustomerInfoList>
 
+                        
                         <v-autocomplete v-else-if="isAdminOrTrainer" v-model="editedCarData.customer" :items="customers"
                             item-title="full_name" item-value="id" label="Kunde"
                             placeholder="Kunde auswählen oder suchen" prepend-inner-icon="mdi-account"
@@ -93,6 +87,7 @@
                                 {{ item.raw.email }}
                             </template>
                         </v-autocomplete>
+                    </v-col>
 
                         <!-- Button wird nur angezeigt wenn noch kein Kunde eingetragen wurde -->
                         <v-btn class="mt-4" color="primary"
@@ -576,7 +571,7 @@ export default {
 .card-container {
     width: 100%;
     height: 99vh;
-    margin-left:110px;
+    margin-left: 110px;
     /* padding: 20px; */
     box-sizing: border-box;
     display: flex;

@@ -12,7 +12,7 @@
                             </span>
                         </div>
                         <v-text-field 
-                            v-if="key !== 'Sonstiges' && key !== 'Beschreibung'" 
+                            v-if="key !== 'Sonstiges'" 
                             class="w-50" 
                             v-model="editedData[key]"
                             variant="outlined" 
@@ -25,12 +25,12 @@
                         </v-text-field>
 
                         <v-textarea 
-                            v-if="key === 'Sonstiges' || key === 'Beschreibung'" 
+                            v-if="key === 'Sonstiges'" 
                             class="w-50" 
                             v-model="editedData[key]" 
                             variant="outlined" 
                             density="comfortable" 
-                            auto-grow
+                            :height="150"
                             :disabled="disabled">
                         </v-textarea>
                     </v-col>

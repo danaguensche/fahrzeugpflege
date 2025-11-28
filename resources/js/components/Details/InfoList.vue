@@ -79,7 +79,7 @@ export default {
 .scrollable {
     margin-top: 10px;
     margin-bottom: 10px;
-    max-width: 50%;
+    max-width: 90%;
     max-height: 150px;
     overflow-y: auto;
 }
