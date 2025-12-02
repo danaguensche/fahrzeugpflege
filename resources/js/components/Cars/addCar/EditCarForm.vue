@@ -3,7 +3,7 @@
         <v-card class="pa-2">
             <v-card-title class="headline pa-6 pb-4">
                 <v-icon class="mr-3" color="primary">mdi-car</v-icon>
-                Fahrzeug bearbeiten
+                {{ car.Kennzeichen }} bearbeiten 
             </v-card-title>
 
             <v-divider></v-divider>
@@ -11,12 +11,6 @@
             <v-card-text class="pa-6">
                 <v-form ref="form" v-model="valid" lazy-validation>
                     <v-row>
-                        <v-col cols="12" sm="6">
-                            <v-text-field v-model="car.Kennzeichen" label="Kennzeichen *"
-                                :rules="[v => !!v || 'Kennzeichen ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-car-info" class="mb-3" :maxlength="10"
-                                :counter="10" disabled></v-text-field>
-                        </v-col>
 
                         <v-col cols="12" sm="6" v-if="addCarGroupField">
                             <v-autocomplete v-model="car.Fahrzeugklasse" :items="carGroups" item-title="title"
@@ -46,22 +40,7 @@
                                 class="mb-3" :maxlength="24" :counter="24"></v-text-field>
                         </v-col>
 
-                        <!-- Kunde hinzufügen (mit Suche und Autovervollständigung) -->
-                        <v-col cols="12" sm="6" v-if="addCustomerField">
-                            <v-autocomplete v-model="car.customer" :items="customers" item-title="full_name"
-                                item-value="id" label="Kunde" placeholder="Kunde auswählen oder suchen"
-                                prepend-inner-icon="mdi-account" variant="outlined" density="comfortable" clearable
-                                :loading="customersLoading" @update:search="searchCustomers" return-object class="mb-3">
-
-                                <template v-slot:item="{ props, item }">
-                                    <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                        :subtitle="item.raw.email" class="pa-3"></v-list-item>
-                                </template>
-                                <template v-slot:selection="{ item }">
-                                    {{ item.raw.firstname }} {{ item.raw.lastname }}
-                                </template>
-                            </v-autocomplete>
-                        </v-col>
+                        
 
                         <v-col cols="12">
                             <v-textarea v-model="car.Sonstiges" label="Sonstiges" variant="outlined"
