@@ -54,7 +54,7 @@
                                                 </div>
                                                 <v-textarea class="w-50 scrollable" v-model="editedJobData['Beschreibung']"
                                                     variant="outlined" density="comfortable" auto-grow
-                                                    :disabled="userRole === 'trainee'">
+                                                    :disabled="userRole === 'trainee'" maxlength="65000" :counter="65000">
                                                 </v-textarea>
                                             </v-col>
                                         </v-row>

@@ -38,14 +38,14 @@
                                 <!-- Standard Felder (außer Fahrzeugklasse) -->
                                 <template v-for="key in vehicleInfoKeys.filter(k => k !== 'Fahrzeugklasse')" :key="key">
                                     <v-col cols="12" sm="8">
-                                        <v-text-field v-if="key !== 'Sonstiges' && key !== 'Beschreibung'"
+                                        <v-text-field v-if="key !== 'Sonstiges'"
                                             v-model="editedCarData[key]" :label="labels[key]"
                                             :prepend-inner-icon="getIconForField(key)" variant="outlined"
                                             density="comfortable" hide-details="auto"
                                             :readonly="key === 'id'"></v-text-field>
-                                        <v-textarea v-if="key === 'Sonstiges' || key === 'Beschreibung'" class="w-100"
+                                        <v-textarea v-if="key === 'Sonstiges'" class="w-100"
                                             v-model="editedCarData[key]" variant="outlined" density="comfortable"
-                                            :height="150" :disabled="disabled">
+                                            :height="150" :disabled="disabled" maxlength="65000" :counter="65000">
                                         </v-textarea>
                                     </v-col>
                                 </template>

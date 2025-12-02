@@ -12,7 +12,7 @@
                             </span>
                         </div>
                         <v-text-field 
-                            v-if="key !== 'Sonstiges'" 
+                            v-if="key !== 'Beschreibung' && key !== 'notes'" 
                             class="w-50" 
                             v-model="editedData[key]"
                             variant="outlined" 
@@ -21,17 +21,19 @@
                             :readonly="key === 'id'"
                             :disabled="key === 'id' || disabled"
                             :hint="key === 'id' ? `${labels[key]} kann nicht bearbeitet werden` : ''"
-                            :persistent-hint="key === 'id'">
+                            :persistent-hint="key === 'id'"
+                            >
                         </v-text-field>
 
                         <v-textarea 
-                            v-if="key === 'Sonstiges'" 
+                            v-if="key === 'Beschreibung' || key === 'notes'" 
                             class="w-50" 
                             v-model="editedData[key]" 
                             variant="outlined" 
                             density="comfortable" 
                             :height="150"
-                            :disabled="disabled">
+                            :disabled="disabled"
+                            maxlength="65000" :counter="65000">
                         </v-textarea>
                     </v-col>
 
