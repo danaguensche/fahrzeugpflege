@@ -6,7 +6,6 @@
             <DefaultButton @click="buttonFunction">{{ addButtonLabel }}</DefaultButton>
             <div class="small-spacer"></div>
 
-
             <RefreshButton class="refresh-button" @refresh="loadItems" :loading="isRefreshing"></RefreshButton>
 
             <div class="spacer"></div>
@@ -48,8 +47,8 @@
 
                             <!-- Vehicle Data Fields -->
                             <td v-for="field in fields" :key="field" class="fixed-width">
-                                <!-- Edit Mode -->
-                                <template v-if="editItemId === item[itemKey]">
+                                <!-- Edit Mode (nur wenn NICHT useExternalEdit) -->
+                                <template v-if="editItemId === item[itemKey] && !useExternalEdit">
                                     <!-- Kennzeichen - link only, not editable -->
                                     <template v-if="field === itemKey">
                                         <router-link
@@ -124,10 +123,9 @@
                             <!-- Edit/Save button -->
                             <td class="table-icon fixed-width"
                                 v-if="isAdminOrTrainer || (canEditStatusOnly && item.status)">
-                                <v-btn variant="plain" icon
-                                    @click="editItemId === item[itemKey] ? saveItem() : editItemDetails(item)">
-                                    <v-icon>{{ editItemId === item[itemKey] ? 'mdi-content-save' : 'mdi-pencil'
-                                    }}</v-icon>
+                                <v-btn variant="plain" icon @click="handleEditClick(item)">
+                                    <v-icon>{{ editItemId === item[itemKey] && !useExternalEdit ? 'mdi-content-save' :
+                                        'mdi-pencil' }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
@@ -232,7 +230,13 @@ export default {
             default: null
         },
 
+        useExternalEdit: {
+            type: Boolean,
+            default: false
+        }
     },
+
+    emits: ['itemsDeleted', 'show-error', 'edit-item'],
 
     components: {
         ConfirmButton,
@@ -319,14 +323,29 @@ export default {
 
     methods: {
 
+        handleEditClick(item) {
+            if (this.useExternalEdit) {
+                this.$emit('edit-item', { ...item });
+            } else {
+                if (this.editItemId === item[this.itemKey]) {
+                    this.saveItem();
+                } else {
+                    this.editItemDetails(item);
+                }
+            }
+        },
+
+        refresh() {
+            this.loadItems();
+        },
+
         handleStatusFilterChange(selectedStatuses) {
             this.statusFilters = selectedStatuses;
             this.options.page = 1;
 
-
             this.loadItems();
-
         },
+
         handleSearchChange(searchValue) {
             if (this.searchDebounceTimer) {
                 clearTimeout(this.searchDebounceTimer);
@@ -361,7 +380,6 @@ export default {
                     sortDesc: this.options.sortBy.length > 0 ? this.options.sortBy[0].order === 'desc' : true
                 };
 
-                // NEU: Status-Filter zur Suche hinzufügen
                 if (this.statusFilters.length > 0) {
                     params.status = this.statusFilters.join(',');
                 }
@@ -549,6 +567,11 @@ export default {
         },
 
         async confirmEditItem() {
+            // Bei externem Editing: nichts tun (wird vom Parent gehandelt)
+            if (this.useExternalEdit) {
+                return;
+            }
+
             try {
                 let payload = {};
                 if (this.canEditStatusOnly) {
@@ -712,6 +735,7 @@ export default {
     }
 }
 </script>
+
 <style scoped>
 .button-group {
     display: flex;

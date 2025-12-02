@@ -15,24 +15,15 @@
         </div>
 
         <div class="table-container">
-            <DataTable
-                :buttonFunction="openAddCarDialog"
-                addButtonLabel="Fahrzeug Hinzufügen"
-                :searchString="searchText"
-                :isSearchActive="isSearchActive"
-                endpoint="cars"
-                :headers="filteredCarHeaders"
-                :fields="carFields"
-                itemKey="Kennzeichen"
-                detailsPage="fahrzeugdetails"
-                detailsUrlBasePath="fahrzeuge"
-                deleteKey="kennzeichen"
-                @itemsDeleted="handleItemsDeleted"
-                @show-error="handleError"
-            />
+            <DataTable :buttonFunction="openAddCarDialog" addButtonLabel="Fahrzeug Hinzufügen"
+                :searchString="searchText" :isSearchActive="isSearchActive" endpoint="cars"
+                :headers="filteredCarHeaders" :fields="carFields" itemKey="Kennzeichen" detailsPage="fahrzeugdetails"
+                detailsUrlBasePath="fahrzeuge" deleteKey="kennzeichen" :useExternalEdit="true"
+                @itemsDeleted="handleItemsDeleted" @show-error="handleError" @edit-item="handleEditItem" />
         </div>
-        
+
         <AddCarForm v-model="showAddCarDialog" @car-added="handleCarAdded" />
+        <EditCarForm v-model="showEditCarDialog" :carData="selectedCar" @car-edited="handleCarEdited" />
     </div>
 </template>
 
@@ -43,6 +34,7 @@ import DefaultButton from '../CommonSlots/DefaultButton.vue';
 import DataTable from '../Table/DataTable.vue';
 import CloseButton from '../CommonSlots/CloseButton.vue';
 import AddCarForm from './addCar/AddCarForm.vue';
+import EditCarForm from './addCar/EditCarForm.vue';
 
 export default {
     name: 'Car',
@@ -52,13 +44,15 @@ export default {
         DefaultButton,
         DataTable,
         CloseButton,
-        AddCarForm
+        AddCarForm,
+        EditCarForm
     },
 
     data() {
         return {
-            //Search
             showAddCarDialog: false,
+            showEditCarDialog: false,
+            selectedCar: null,
             searchContext: "Suchen Sie nach einem Fahrzeug...",
             searchText: '',
             isSearchActive: false,
@@ -99,9 +93,18 @@ export default {
     },
 
     methods: {
-        // UI Actions
         handleCarAdded() {
             this.showAddCarDialog = false;
+        },
+
+        handleCarEdited() {
+            this.showEditCarDialog = false;
+            this.selectedCar = null;
+        },
+
+        handleEditItem(item) {
+            this.selectedCar = item;
+            this.showEditCarDialog = true;
         },
 
         openAddCarDialog() {
@@ -109,16 +112,13 @@ export default {
         },
 
         handleItemsDeleted() {
-            // Wird von DataTable emittiert nach erfolgreichem Löschen
             console.log('Cars deleted, table will refresh automatically');
         },
 
         handleError(message) {
             console.error('Error from DataTable:', message);
-            // Hier können Sie eine Toast-Nachricht oder ähnliches anzeigen
         },
 
-        //Search Handling
         clearSearch() {
             this.searchText = '';
             this.isSearchActive = false;
@@ -135,7 +135,6 @@ export default {
                 return;
             }
 
-            // Debounce für 300ms
             this.searchDebounceTimer = setTimeout(() => {
                 this.isSearchActive = true;
             }, 300);
@@ -178,7 +177,6 @@ export default {
     justify-content: space-between;
     width: 100%;
     margin-top: -80px;
-    /* z-index: 5; */
     position: relative;
 }
 
@@ -252,8 +250,6 @@ export default {
     background-color: rgba(0, 0, 0, 0.04);
 }
 
-
-
 .table-container {
     width: 100%;
 }
@@ -263,7 +259,6 @@ export default {
     transition: margin-left 0.3s ease;
 }
 
-/* Tablet Styles */
 @media only screen and (max-width: 1024px) {
     .car-page {
         margin-left: 120px;
@@ -271,7 +266,6 @@ export default {
     }
 }
 
-/* Mobile Styles */
 @media only screen and (max-width: 768px) {
     .car-page {
         margin-left: 160px;

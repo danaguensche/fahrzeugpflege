@@ -426,9 +426,8 @@ export default {
         },
 
 
-        // Neue Methode: Wird aufgerufen wenn ein Kunde ausgewählt wird
         async onCustomerChange(customer) {
-            this.job.car = null; // Auto-Auswahl zurücksetzen
+            this.job.car = null;
             this.availableCars = [];
 
             if (customer) {
@@ -456,7 +455,6 @@ export default {
         },
 
 
-        // Hilfsmethode für Auto-Besitz Label
         getCarOwnershipLabel(car) {
             if (!car.customer_id) {
                 return '(verfügbar)';
@@ -502,7 +500,7 @@ export default {
         },
 
         async fetchInitialData() {
-            this.fetchCustomers(); // Jetzt verfügbare Kunden laden
+            this.fetchCustomers(); 
             this.fetchServices();
 
             if (this.isAdmin || this.isTrainer) {
