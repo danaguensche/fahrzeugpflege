@@ -316,24 +316,18 @@ export default {
             const data = fullJobData || this.jobData;
 
             console.log('Full job data:', data);
-
-            // Basis-Daten setzen
             this.job.id = data.id;
             this.job.title = data.title || '';
             this.job.description = data.description || '';
             this.job.status = data.status || 'ausstehend';
 
             this.parseDateTimeFields(data);
-
-            // Customer setzen
-            await this.setCustomer(data);
-
-            await this.setCar(data);
-
             this.setServices(data);
-
+            await this.setCustomer(data);
+            await this.setCar(data);
             await this.setTrainee(data);
         },
+
 
         parseDateTimeFields(data) {
             // cleaning_start
@@ -382,51 +376,47 @@ export default {
             let customerObj = null;
 
             if (data.customer && typeof data.customer === 'object') {
-                // Customer ist bereits ein Objekt
                 customerObj = data.customer;
                 customerId = customerObj.id;
             } else if (data.customer_id) {
-                // Nur ID vorhanden
                 customerId = data.customer_id;
             }
 
-            if (customerId) {
-                // Prüfe ob Customer bereits in der Liste ist
-                let existingCustomer = this.customers.find(c => c.id === customerId);
+            if (!customerId) return;
 
-                if (!existingCustomer && customerObj) {
-                    // Customer-Objekt zur Liste hinzufügen
+            // Prüfe ob Customer bereits in der Liste ist
+            let existingCustomer = this.customers.find(c => c.id === customerId);
+
+            if (!existingCustomer && customerObj) {
+                existingCustomer = {
+                    id: customerObj.id,
+                    firstname: customerObj.firstname,
+                    lastname: customerObj.lastname,
+                    full_name: `${customerObj.firstname} ${customerObj.lastname}`,
+                    email: customerObj.email,
+                };
+                this.customers.push(existingCustomer);
+            } else if (!existingCustomer) {
+                try {
+                    const response = await axios.get(`/api/customers/${customerId}`);
+                    const customer = response.data.data || response.data;
                     existingCustomer = {
-                        id: customerObj.id,
-                        firstname: customerObj.firstname,
-                        lastname: customerObj.lastname,
-                        full_name: `${customerObj.firstname} ${customerObj.lastname}`,
-                        email: customerObj.email,
+                        id: customer.id,
+                        firstname: customer.firstname,
+                        lastname: customer.lastname,
+                        full_name: `${customer.firstname} ${customer.lastname}`,
+                        email: customer.email,
                     };
                     this.customers.push(existingCustomer);
-                } else if (!existingCustomer) {
-                    // Customer vom Backend laden
-                    try {
-                        const response = await axios.get(`/api/customers/${customerId}`);
-                        const customer = response.data.data || response.data;
-                        existingCustomer = {
-                            id: customer.id,
-                            firstname: customer.firstname,
-                            lastname: customer.lastname,
-                            full_name: `${customer.firstname} ${customer.lastname}`,
-                            email: customer.email,
-                        };
-                        this.customers.push(existingCustomer);
-                    } catch (error) {
-                        console.error('Error loading customer:', error);
-                    }
+                } catch (error) {
+                    console.error('Error loading customer:', error);
+                    return;
                 }
+            }
 
-                if (existingCustomer) {
-                    this.job.customer = existingCustomer;
-                    // Fahrzeuge für diesen Kunden laden
-                    await this.fetchCarsForCustomer(customerId);
-                }
+            if (existingCustomer) {
+                this.job.customer = existingCustomer;
+                await this.fetchCarsForCustomer(customerId);
             }
         },
 
@@ -441,39 +431,52 @@ export default {
                 carId = data.car_id;
             }
 
-            if (carId) {
-                // Prüfe ob Car bereits in availableCars ist
-                let existingCar = this.availableCars.find(c => c.id === carId);
+            if (!carId) return;
 
-                if (!existingCar && carObj) {
+            console.log('Setting car with ID:', carId);
+            console.log('Available cars before:', this.availableCars);
+
+            // Prüfe ob Car bereits in availableCars ist
+            let existingCar = this.availableCars.find(c => c.id === carId);
+
+            if (!existingCar) {
+                if (carObj) {
                     existingCar = {
                         id: carObj.id,
-                        Kennzeichen: carObj.Kennzeichen || carObj.license_plate,
-                        Automarke: carObj.Automarke || carObj.brand,
+                        Kennzeichen: carObj.Kennzeichen || carObj.license_plate || '',
+                        Automarke: carObj.Automarke || carObj.brand || '',
                         customer_id: carObj.customer_id,
                     };
-                    this.availableCars.push(existingCar);
-                } else if (!existingCar) {
-                    // Car vom Backend laden
+                } else {
                     try {
-                        const response = await axios.get(`/api/cars/${carId}`);
+                        let response;
+                        try {
+                            response = await axios.get(`/api/cars/${carId}`);
+                        } catch (e) {
+                            console.error('Could not load car by ID:', carId);
+                            return;
+                        }
+
                         const car = response.data.data || response.data;
                         existingCar = {
                             id: car.id,
-                            Kennzeichen: car.Kennzeichen,
-                            Automarke: car.Automarke,
+                            Kennzeichen: car.Kennzeichen || '',
+                            Automarke: car.Automarke || '',
                             customer_id: car.customer_id,
                         };
-                        this.availableCars.push(existingCar);
                     } catch (error) {
                         console.error('Error loading car:', error);
+                        return;
                     }
                 }
-
-                if (existingCar) {
-                    this.job.car = existingCar;
-                }
+                this.availableCars.push(existingCar);
+                console.log('Added car to availableCars:', existingCar);
             }
+
+            // Car im Formular setzen
+            this.job.car = existingCar;
+            console.log('Car set:', this.job.car);
+            console.log('Available cars after:', this.availableCars);
         },
 
         setServices(data) {
@@ -598,14 +601,28 @@ export default {
             this.carsLoading = true;
             try {
                 const response = await axios.get(`/api/jobs/cars-for-customer/${customerId}`);
-                this.availableCars = response.data.cars.map(car => ({
+                const cars = response.data.cars || response.data.data || response.data || [];
+
+                const fetchedCars = cars.map(car => ({
                     id: car.id,
-                    Kennzeichen: car.Kennzeichen || car.license_plate,
-                    Automarke: car.Automarke || car.brand,
+                    Kennzeichen: car.Kennzeichen || car.license_plate || '',
+                    Automarke: car.Automarke || car.brand || '',
                     customer_id: car.customer_id,
                 }));
+
+                // WICHTIG: Aktuelles Fahrzeug beibehalten falls es nicht in der Liste ist
+                if (this.job.car && !fetchedCars.find(c => c.id === this.job.car.id)) {
+                    fetchedCars.unshift(this.job.car);
+                }
+
+                this.availableCars = fetchedCars;
+                console.log('Fetched cars for customer:', this.availableCars);
             } catch (error) {
                 console.error('Error fetching cars:', error);
+                // Falls bereits ein Car gesetzt ist, dieses behalten
+                if (this.job.car) {
+                    this.availableCars = [this.job.car];
+                }
             } finally {
                 this.carsLoading = false;
             }
