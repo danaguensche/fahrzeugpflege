@@ -70,7 +70,7 @@
                         <v-col cols="12" sm="6">
                             <v-text-field
                                 v-model="customer.phonenumber"
-                                label="Telefonnummer *"
+                                label="Telefonnummer"
                                 :rules="phoneRules"
                                 required
                                 variant="outlined"
@@ -194,7 +194,7 @@ export default {
                 v => /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
             ],
             phoneRules: [
-                v => /^[0-9+\-\s()]{6,}$/.test(v) || 'Ungültige Telefonnummer'
+                v => !v || /^[0-9+\-\s()]{6,}$/.test(v) || 'Ungültige Telefonnummer'
             ],
             postalCodeRules: [
                 v => !v || /^[0-9]{5}$/.test(v) || 'PLZ muss 5 Ziffern haben'
