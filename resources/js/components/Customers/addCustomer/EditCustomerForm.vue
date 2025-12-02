@@ -194,7 +194,6 @@ export default {
                 v => /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
             ],
             phoneRules: [
-                v => !!v || 'Telefonnummer ist erforderlich',
                 v => /^[0-9+\-\s()]{6,}$/.test(v) || 'Ungültige Telefonnummer'
             ],
             postalCodeRules: [
