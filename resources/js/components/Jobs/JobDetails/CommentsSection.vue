@@ -51,7 +51,8 @@
                         rows="3" 
                         clearable
                         hide-details="auto"
-                        class="mb-4">
+                        class="mb-4"
+                        maxLength="65000" :counter="65000">
             </v-textarea>
             <v-btn type="submit" color="primary" :loading="loading">Kommentar hinzufügen</v-btn>
         </v-form>
