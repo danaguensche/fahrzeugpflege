@@ -10,30 +10,22 @@
 
       <!-- Header der Karte -->
       <v-card class="card">
-        <Header :title="headerTitle" 
-                :switchEditMode="switchEditMode" 
-                :icon="headerIcon">
+        <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon">
         </Header>
 
         <!-- Persönliche Informationen -->
         <v-card-text class="px-4 pt-4 pb-0">
           <v-sheet>
-            <InformationHeader :title="'Persönliche Informationen'" 
-                               :editMode="editMode" 
-                               :icon="headerIcon"
-                               :getIconForField="getIconForField">
+            <InformationHeader :title="'Persönliche Informationen'" :editMode="editMode" :icon="headerIcon"
+              :getIconForField="getIconForField">
             </InformationHeader>
             <!-- Ansichtsmodus -->
-            <InfoList v-if="!editMode"  :details="customerDetails" 
-                                        :labels="labels" 
-                                        :infoKeys="personalInfoKeys"
-                                        :getIconForField="getIconForField">
+            <InfoList v-if="!editMode" :details="customerDetails" :labels="labels" :infoKeys="personalInfoKeys"
+              :getIconForField="getIconForField">
             </InfoList>
             <!-- Bearbeitungsmodus -->
-            <InfoListEditMode v-else  :personalInfoKeys="personalInfoKeys" 
-                                      :labels="labels"
-                                      :editedData="editedCustomerData" 
-                                      :getIconForField="getIconForField">
+            <InfoListEditMode v-else :personalInfoKeys="personalInfoKeys" :labels="labels"
+              :editedData="editedCustomerData" :getIconForField="getIconForField">
             </InfoListEditMode>
           </v-sheet>
 
@@ -93,9 +85,7 @@
           <v-sheet>
             <HeaderWithChip :customerDetails="customerDetails"></HeaderWithChip>
             <CarList v-if="customerDetails.data.cars && customerDetails.data.cars.length > 0"
-              :cars="customerDetails.data.cars" 
-              :edit-mode="editMode" 
-              @delete-car="deleteCar">
+              :cars="customerDetails.data.cars" :edit-mode="editMode" @delete-car="deleteCar">
             </CarList>
 
             <!-- Wenn keine Fahrzeuge vorhanden sind -->
@@ -110,7 +100,7 @@
               </v-list-item>
             </template>
 
-            
+
             <!-- Fahrzeug hinzufügen Button -->
             <v-btn class="mt-4" color="primary" @click="openCarAddDialog">
               Fahrzeug hinzufügen
@@ -118,10 +108,8 @@
           </v-sheet>
 
           <!-- Fahrzeug hinzufügen Dialog -->
-          <CarAddDialog ref="carAddDialog"  :kundeId="$route.params.id" 
-                                            @car-added="handleNewCar"
-                                            @car-assigned="handleCarAssigned" 
-                                            @error="handleCarAddError">
+          <CarAddDialog ref="carAddDialog" :kundeId="$route.params.id" @car-added="handleNewCar"
+            @car-assigned="handleCarAssigned" @error="handleCarAddError">
           </CarAddDialog>
 
           <!-- Auftragsinformationen -->
@@ -193,7 +181,8 @@
           </div>
 
           <!-- Metadaten -->
-          <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt" :formattedUpdatedAt="formattedUpdatedAt"></MetaData>
+          <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt" :formattedUpdatedAt="formattedUpdatedAt">
+          </MetaData>
         </v-card-text>
 
         <v-card-actions class="pa-4">
@@ -214,8 +203,18 @@
       </v-card>
     </template>
 
+    <VuetifyAlert v-model="showDeleteAlert"
+      :alertHeading="carToDelete ? `Fahrzeug ${carToDelete.Kennzeichen} entfernen` : 'Fahrzeug entfernen'"
+      alertParagraph="Möchten Sie das Fahrzeug wirklich vom Kunden entfernen? Das Fahrzeug wird dabei nicht gelöscht."
+      alertCloseButton="Abbrechen" alertOkayButton="Fahrzeug entfernen" alertTypeClass="alertTypeConfirmation"
+      @confirmation="confirmDeleteCar" @close="cancelDeleteCar">
+    </VuetifyAlert>
+
+
+
     <!-- Snackbar für Benachrichtigungen -->
-    <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false"></SnackBar>
+    <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false">
+    </SnackBar>
   </v-container>
 </template>
 
@@ -237,6 +236,7 @@ import DefaultHeader from "../../Details/DefaultHeader.vue";
 import HeaderWithChip from "../../Details/HeaderWithChip.vue";
 import CarList from "../../Details/CarList.vue";
 import CarAddDialog from "./CarAddDialog.vue";
+import VuetifyAlert from "../../Alerts/VuetifyAlert.vue";
 
 export default {
   name: "Details",
@@ -257,9 +257,12 @@ export default {
     HeaderWithChip,
     CarList,
     CarAddDialog,
+    VuetifyAlert
   },
   data() {
     return {
+      showDeleteAlert: false,
+      carToDelete: null,
       headerTitle: "Kundendetails",
       headerIcon: "mdi-account",
       editMode: false,
@@ -610,94 +613,111 @@ export default {
       }
     },
 
-    async deleteCar(car) {
-      if (confirm(`Möchten Sie das Fahrzeug ${car.Kennzeichen} wirklich von diesem Kunden entfernen?`)) {
-        try {
-          await axios.delete(`/api/customer/${this.$route.params.id}/car/${car.id}`);
-          this.showSnackbar('Fahrzeug erfolgreich vom Kunden entfernt', 'success');
-          await this.getCustomer(); // Refresh customer details
-        } catch (error) {
-          const errorMessage = error.response?.data?.message || "Fehler beim Entfernen des Fahrzeugs";
-          this.showSnackbar(errorMessage, 'error');
-        }
+    deleteCar(car) {
+      // Speichere das zu löschende Fahrzeug und öffne den Alert
+      this.carToDelete = car;
+      this.showDeleteAlert = true;
+    },
+
+    async confirmDeleteCar() {
+      if (!this.carToDelete) return;
+
+      try {
+        await axios.delete(`/api/customer/${this.$route.params.id}/car/${this.carToDelete.id}`);
+        this.showSnackbar('Fahrzeug erfolgreich vom Kunden entfernt', 'success');
+        await this.getCustomer(this.page);
+      } catch (error) {
+        const errorMessage = error.response?.data?.message || "Fehler beim Entfernen des Fahrzeugs";
+        this.showSnackbar(errorMessage, 'error');
+      } finally {
+        this.showDeleteAlert = false;
+        this.carToDelete = null;
       }
+    },
+
+    cancelDeleteCar() {
+      // Schließe den Alert ohne zu löschen
+      this.showDeleteAlert = false;
+      this.carToDelete = null;
     }
+
+
   }
 }
 </script>
 
 <style scoped>
 .card-container {
-    width: 100%;
-    height: 99vh;
-    margin-left:110px;
-    /* padding: 20px; */
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+  width: 100%;
+  height: 99vh;
+  margin-left: 110px;
+  /* padding: 20px; */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .card {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 @media (max-width: 575.98px) {
-    .card-container {
-        padding: 10px;
-        height: calc(100vh - 20px);
-    }
+  .card-container {
+    padding: 10px;
+    height: calc(100vh - 20px);
+  }
 
-    .card {
-        font-size: 14px;
-    }
+  .card {
+    font-size: 14px;
+  }
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
-    .card-container {
-        padding: 15px;
-        height: calc(100vh - 30px);
-    }
+  .card-container {
+    padding: 15px;
+    height: calc(100vh - 30px);
+  }
 }
 
 @media (min-width: 768px) and (max-width: 991.98px) {
-    .card-container {
-        max-width: calc(100% - 50px);
-    }
+  .card-container {
+    max-width: calc(100% - 50px);
+  }
 }
 
 @media (min-width: 992px) and (max-width: 1199.98px) {
-    .card-container {
-        max-width: calc(100% - 150px);
-    }
+  .card-container {
+    max-width: calc(100% - 150px);
+  }
 }
 
 @media (min-width: 1200px) {
-    .card-container {
-        max-width: calc(100% - 180px);
-    }
+  .card-container {
+    max-width: calc(100% - 180px);
+  }
 }
 
 @media (max-width: 767.98px) {
-    .v-card-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
+  .v-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-    .v-card-actions button {
-        margin-bottom: 8px;
-        width: 100%;
-    }
+  .v-card-actions button {
+    margin-bottom: 8px;
+    width: 100%;
+  }
 
-    .v-spacer {
-        display: none;
-    }
+  .v-spacer {
+    display: none;
+  }
 }
 </style>

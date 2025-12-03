@@ -159,8 +159,7 @@
                       :append-icon="showCurrentPassword ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showCurrentPassword ? 'text' : 'password'" label="Aktuelles Passwort" variant="outlined"
                       density="comfortable" :rules="[passwordRules.required]"
-                      @click:append="showCurrentPassword = !showCurrentPassword"
-                      autocomplete="off">
+                      @click:append="showCurrentPassword = !showCurrentPassword" autocomplete="off">
                     </v-text-field>
                   </v-col>
                   <v-col cols="12" md="6">
