@@ -62,7 +62,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Cars Routes (View only for trainee, full access for trainer/admin)
     Route::get('/cars/search', [CarSearchController::class, 'search']);
+    Route::get('/cars/search-available', [CarController::class, 'searchAvailableCars']);
     Route::get('cars', [CarController::class, 'index']);
+    Route::get('cars/available', [CarController::class, 'availableCars']);
     Route::get('cars/{kennzeichen}', [CarController::class, 'show']);
     Route::get('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'details']);
     Route::post('cars', [CarController::class, 'store']);

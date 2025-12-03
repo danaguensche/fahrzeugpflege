@@ -115,8 +115,6 @@ class CarController extends Controller
                     ->orWhere('Typ', 'like', $searchTerm)
                     ->orWhere('Farbe', 'like', $searchTerm)
                     ->orWhere('Sonstiges', 'like', $searchTerm);
-
-
             });
 
             // Applying sorting
@@ -140,6 +138,41 @@ class CarController extends Controller
             ], 500);
         }
     }
+
+    public function searchAvailableCars(Request $request)
+    {
+        try {
+            $query = $request->input('query', '');
+
+            if (empty(trim($query))) {
+                $cars = Car::whereNull('customer_id')
+                    ->select('id', 'Kennzeichen', 'Automarke', 'Typ')
+                    ->take(10)
+                    ->get();
+
+                return response()->json($cars);
+            }
+
+            // Suche nach verfügbaren Fahrzeugen
+            $cars = Car::whereNull('customer_id')
+                ->where(function ($q) use ($query) {
+                    $searchTerm = '%' . $query . '%';
+                    $q->where('Kennzeichen', 'like', $searchTerm)
+                        ->orWhere('Automarke', 'like', $searchTerm)
+                        ->orWhere('Typ', 'like', $searchTerm);
+                })
+                ->select('id', 'Kennzeichen', 'Automarke', 'Typ')
+                ->take(10)
+                ->get();
+
+            return response()->json($cars);
+        } catch (\Exception $e) {
+            Log::error('Fehler bei der Suche verfügbarer Fahrzeuge: ' . $e->getMessage());
+            return response()->json([], 500);
+        }
+    }
+
+
 
     public function show($kennzeichen)
     {
@@ -167,7 +200,7 @@ class CarController extends Controller
                 ->withProperties(['Kennzeichen' => $car->Kennzeichen])
                 ->log('Fahrzeug gelöscht: ' . $car->Kennzeichen . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
 
-            
+
             return response()->json(['success' => true, 'message' => 'Fahrzeug und Bilder wurden gelöscht.']);
         } else {
             return response()->json(['success' => false, 'message' => 'Fahrzeug nicht gefunden.'], 404);
@@ -281,6 +314,16 @@ class CarController extends Controller
         } catch (\Exception $e) {
             Log::error('Fehler beim Zählen der Fahrzeuge: ' . $e->getMessage());
             return response()->json(['error' => 'Fehler beim Zählen der Fahrzeuge'], 500);
+        }
+    }
+
+    public function availableCars()
+    {
+        try {
+            $cars = Car::where('customer_id', null)->get();
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Abrufen der verfügbaren Fahrzeuge: ' . $e->getMessage());
+            return response()->json(['error' => 'Fehler beim Abrufen der verfügbaren Fahrzeuge'], 500);
         }
     }
 }

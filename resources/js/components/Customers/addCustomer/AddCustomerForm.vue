@@ -252,8 +252,8 @@ export default {
         async fetchCars(query = '') {
             this.carsLoading = true;
             try {
-                const response = await axios.get(`/api/cars/search?query=${query}`);
-                this.cars = response.data.data.map(car => ({
+                const response = await axios.get(`/api/cars/search-available?query=${query}`);
+                this.cars = response.data.map(car => ({
                     id: car.id,
                     Kennzeichen: car.Kennzeichen,
                     Automarke: car.Automarke,

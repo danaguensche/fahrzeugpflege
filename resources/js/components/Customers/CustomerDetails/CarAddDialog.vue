@@ -161,7 +161,7 @@ export default {
             try {
                 console.log('Fetching cars with query:', query);
                 
-                const response = await axios.get(`/api/cars/search?query=${encodeURIComponent(query)}`);
+                const response = await axios.get(`/api/cars/search-available?query=${encodeURIComponent(query)}`);
                 
                 console.log('API Response:', response.data);
                 
