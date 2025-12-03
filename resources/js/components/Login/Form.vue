@@ -65,7 +65,7 @@
 
                         <v-slide-y-transition mode="out-in">
                             <v-col v-if="isRegistered" key="login-password" cols="12">
-                                <v-text-field v-model="formData.password" label="Passwort" :rules="passwordRules"
+                                <v-text-field v-model="formData.password" label="Passwort"
                                     required variant="outlined" density="comfortable" prepend-inner-icon="mdi-lock"
                                     class="mb-3" :type="showPassword ? 'text' : 'password'"
                                     :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"

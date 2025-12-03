@@ -42,18 +42,6 @@ class User extends Authenticatable implements CanResetPassword
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'password' => 'hashed',
-        ];
-    }
-
     public function toSearchableArray()
     {
         return [

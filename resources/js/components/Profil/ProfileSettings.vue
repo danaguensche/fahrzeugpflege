@@ -56,8 +56,9 @@
                       <v-text-field v-model="editedUserData[key]" variant="outlined" density="comfortable"
                         hide-details="auto" :readonly="key === 'username'" :disabled="key === 'username'"
                         :hint="key === 'username' ? 'Benutzername kann nicht geändert werden.' : ''"
-                        :rules="fieldRules[key]" :maxlength="key === 'phonenumber' ? 16 : key === 'postalcode' ? 5 : 50" :counter="key === 'phonenumber' ? 16 : key === 'postalcode' ? 5 : 50"
-                        class="w-50" :persistent-hint="key === 'username'"></v-text-field>
+                        :rules="fieldRules[key]" :maxlength="key === 'phonenumber' ? 16 : key === 'postalcode' ? 5 : 50"
+                        :counter="key === 'phonenumber' ? 16 : key === 'postalcode' ? 5 : 50" class="w-50"
+                        :persistent-hint="key === 'username'"></v-text-field>
                     </v-col>
                   </v-row>
                 </template>
@@ -158,7 +159,8 @@
                       :append-icon="showCurrentPassword ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showCurrentPassword ? 'text' : 'password'" label="Aktuelles Passwort" variant="outlined"
                       density="comfortable" :rules="[passwordRules.required]"
-                      @click:append="showCurrentPassword = !showCurrentPassword">
+                      @click:append="showCurrentPassword = !showCurrentPassword"
+                      autocomplete="off">
                     </v-text-field>
                   </v-col>
                   <v-col cols="12" md="6">
@@ -422,8 +424,9 @@ export default {
         if (!token) throw new Error("Kein Authentifizierungs-Token gefunden");
 
         await axios.post("/api/users/change-password", {
-          currentPassword: this.passwordData.currentPassword,
-          newPassword: this.passwordData.newPassword
+          current_password: this.passwordData.currentPassword,
+          new_password: this.passwordData.newPassword,
+          new_password_confirmation: this.passwordData.confirmPassword
         }, {
           headers: { Authorization: `Bearer ${token}` }
         });
