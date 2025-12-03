@@ -3,7 +3,7 @@
         <!-- Header with control buttons -->
         <div class="header">
             <!-- Data Update Button -->
-            <DefaultButton @click="buttonFunction">{{ addButtonLabel }}</DefaultButton>
+            <DefaultButton @click="buttonFunction" v-if="isAdminOrTrainer">{{ addButtonLabel }}</DefaultButton>
             <div class="small-spacer"></div>
 
             <RefreshButton class="refresh-button" @refresh="loadItems" :loading="isRefreshing"></RefreshButton>

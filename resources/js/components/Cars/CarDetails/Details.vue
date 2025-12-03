@@ -10,14 +10,21 @@
                 <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon">
                 </Header>
 
-                <!-- Image Gallery with Upload functionality -->
-                <ImageGallery :apiHeaders="apiHeaders" :images="images" :editMode="editMode"
+                <!-- Image Gallery with Upload functionality (IMMER editierbar, für alle) -->
+                <ImageGallery
+                    :apiHeaders="apiHeaders"
+                    :images="images"
+                    :editMode="true"
                     :uploadUrl="`/api/cars/cardetails/${$route.params.kennzeichen}/images`"
                     :deleteUrlTemplate="'/api/cars/images/{imageId}'"
                     :replaceUrlTemplate="`/api/cars/${$route.params.kennzeichen}/images/{imageId}`"
-                    :entityId="$route.params.kennzeichen" uploadDialogTitle="Fahrzeugbilder hochladen"
-                    @images-uploaded="handleImagesUploaded" @image-deleted="handleImageDeleted"
-                    @image-replaced="handleImageReplaced" @success="showSuccessMessage" @error="showErrorMessage"
+                    :entityId="$route.params.kennzeichen"
+                    uploadDialogTitle="Fahrzeugbilder hochladen"
+                    @images-uploaded="handleImagesUploaded"
+                    @image-deleted="handleImageDeleted"
+                    @image-replaced="handleImageReplaced"
+                    @success="showSuccessMessage"
+                    @error="showErrorMessage"
                     @loading="setImageLoading">
                 </ImageGallery>
 
@@ -28,7 +35,11 @@
                         </InformationHeader>
 
                         <!-- Ansichtsmodus -->
-                        <InfoList v-if="!editMode" :details="carDetails" :labels="labels" :infoKeys="vehicleInfoKeys"
+                        <InfoList
+                            v-if="!editMode"
+                            :details="carDetails"
+                            :labels="labels"
+                            :infoKeys="vehicleInfoKeys"
                             :getIconForField="getIconForField">
                         </InfoList>
 
@@ -36,69 +47,116 @@
                         <template v-else>
                             <v-row class="pa-4">
                                 <!-- Standard Felder (außer Fahrzeugklasse) -->
-                                <template v-for="key in vehicleInfoKeys.filter(k => k !== 'Fahrzeugklasse')" :key="key">
+                                <template
+                                    v-for="key in vehicleInfoKeys.filter(k => k !== 'Fahrzeugklasse')"
+                                    :key="key"
+                                >
                                     <v-col cols="12" sm="8">
-                                        <v-text-field v-if="key !== 'Sonstiges'"
-                                            v-model="editedCarData[key]" :label="labels[key]"
-                                            :prepend-inner-icon="getIconForField(key)" variant="outlined"
-                                            density="comfortable" hide-details="auto"
-                                            :readonly="key === 'id'"></v-text-field>
-                                        <v-textarea v-if="key === 'Sonstiges'" class="w-100"
-                                            v-model="editedCarData[key]" variant="outlined" density="comfortable"
-                                            :height="150" :disabled="disabled" maxlength="65000" :counter="65000">
+                                        <v-text-field
+                                            v-if="key !== 'Sonstiges'"
+                                            v-model="editedCarData[key]"
+                                            :label="labels[key]"
+                                            :prepend-inner-icon="getIconForField(key)"
+                                            variant="outlined"
+                                            density="comfortable"
+                                            hide-details="auto"
+                                            :readonly="key === 'id' || !isAdminOrTrainer"
+                                            :disabled="!isAdminOrTrainer"
+                                        ></v-text-field>
+                                        <v-textarea
+                                            v-if="key === 'Sonstiges'"
+                                            class="w-100"
+                                            v-model="editedCarData[key]"
+                                            variant="outlined"
+                                            density="comfortable"
+                                            :height="150"
+                                            maxlength="65000"
+                                            :counter="65000"
+                                            :disabled="!isAdminOrTrainer"
+                                        >
                                         </v-textarea>
                                     </v-col>
                                 </template>
 
                                 <!-- Fahrzeugklasse Dropdown -->
                                 <v-col cols="12" sm="8">
-                                    <v-autocomplete v-model="editedCarData.Fahrzeugklasse" :items="carGroups"
-                                        item-title="title" item-value="title" label="Fahrzeugklasse"
+                                    <v-autocomplete
+                                        v-model="editedCarData.Fahrzeugklasse"
+                                        :items="carGroups"
+                                        item-title="title"
+                                        item-value="title"
+                                        label="Fahrzeugklasse"
                                         placeholder="Fahrzeugklasse auswählen oder suchen"
-                                        prepend-inner-icon="mdi-car-multiple" variant="outlined" density="comfortable"
-                                        hide-details="auto" clearable :loading="carGroupsLoading"
-                                        @update:search="searchCarGroups"></v-autocomplete>
+                                        prepend-inner-icon="mdi-car-multiple"
+                                        variant="outlined"
+                                        density="comfortable"
+                                        hide-details="auto"
+                                        clearable
+                                        :loading="carGroupsLoading"
+                                        :disabled="!isAdminOrTrainer"
+                                        @update:search="searchCarGroups"
+                                    ></v-autocomplete>
                                 </v-col>
                             </v-row>
                         </template>
                     </v-sheet>
 
                     <!-- Customer information -->
-                    
                     <v-sheet>
                         <v-col cols="12" sm="8">
-                        <DefaultHeader :title="'Kundeninformation'"></DefaultHeader>
-                        <CustomerInfoList v-if="!editMode" :customer="carDetails.data.customer"
-                            :customerId="carDetails.data.customer_id" :labels="labels">
-                        </CustomerInfoList>
+                            <DefaultHeader :title="'Kundeninformation'"></DefaultHeader>
 
-                        
-                        <v-autocomplete v-else-if="isAdminOrTrainer" v-model="editedCarData.customer" :items="customers"
-                            item-title="full_name" item-value="id" label="Kunde"
-                            placeholder="Kunde auswählen oder suchen" prepend-inner-icon="mdi-account"
-                            variant="outlined" density="comfortable" hide-details="auto" clearable
-                            :loading="customersLoading" :search-input.sync="customerSearch"
-                            @update:search-input="searchCustomers" return-object>
-                            <template v-slot:item="{ props, item }">
-                                <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                    :subtitle="item.raw.email"></v-list-item>
-                            </template>
-                            <template v-slot:selection="{ item }">
-                                {{ item.raw.email }}
-                            </template>
-                        </v-autocomplete>
-                    </v-col>
+                            <CustomerInfoList
+                                v-if="!editMode"
+                                :customer="carDetails.data.customer"
+                                :customerId="carDetails.data.customer_id"
+                                :labels="labels">
+                            </CustomerInfoList>
 
-                        <!-- Button wird nur angezeigt wenn noch kein Kunde eingetragen wurde -->
-                        <v-btn class="mt-4" color="primary"
-                            v-if="(!carDetails.data.customer || carDetails.data.customer === 0)"
+                            <!-- Kunde auswählen nur für Admin/Trainer -->
+                            <v-autocomplete
+                                v-else-if="isAdminOrTrainer"
+                                v-model="editedCarData.customer"
+                                :items="customers"
+                                item-title="full_name"
+                                item-value="id"
+                                label="Kunde"
+                                placeholder="Kunde auswählen oder suchen"
+                                prepend-inner-icon="mdi-account"
+                                variant="outlined"
+                                density="comfortable"
+                                hide-details="auto"
+                                clearable
+                                :loading="customersLoading"
+                                :search-input.sync="customerSearch"
+                                @update:search-input="searchCustomers"
+                                return-object>
+                                <template v-slot:item="{ props, item }">
+                                    <v-list-item
+                                        v-bind="props"
+                                        :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                        :subtitle="item.raw.email">
+                                    </v-list-item>
+                                </template>
+                                <template v-slot:selection="{ item }">
+                                    {{ item.raw.email }}
+                                </template>
+                            </v-autocomplete>
+                        </v-col>
+
+                        <v-btn
+                            class="mt-4"
+                            color="primary"
+                            v-if="isAdminOrTrainer && (!carDetails.data.customer || carDetails.data.customer === 0)"
                             @click="openCustomerAddDialog">
                             Kunde hinzufügen
                         </v-btn>
                     </v-sheet>
 
                     <!-- Metadaten -->
-                    <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt"
+                    <MetaData
+                        :labels="labels"
+                        :formattedCreatedAt="formattedCreatedAt"
                         :formattedUpdatedAt="formattedUpdatedAt">
                     </MetaData>
                 </v-card-text>
@@ -110,24 +168,35 @@
                     <!-- Bearbeitungsmodus Aktionen -->
                     <template v-if="editMode">
                         <CancelButton :cancelEdit="cancelEdit"></CancelButton>
-                        <SaveButton :saveData="saveCarData"></SaveButton>
+                        <SaveButton v-if="isAdminOrTrainer" :saveData="saveCarData"></SaveButton>
                     </template>
 
                     <!-- Ansichtsmodus Aktionen -->
                     <template v-else>
-                        <EditButton :switchEditMode="switchEditMode"></EditButton>
+                        <!-- EditButton nur für Admin/Trainer -->
+                        <EditButton
+                            v-if="isAdminOrTrainer"
+                            :switchEditMode="switchEditMode">
+                        </EditButton>
                     </template>
                 </v-card-actions>
             </v-card>
         </template>
 
-        <!-- Kunde hinzufügen Dialog -->
-        <CustomerAddDialog ref="customerAddDialog" @customer-added="handleCustomerAdded"
-            @customer-selected="handleCustomerSelected" @error="handleCustomerAddError">
+        <!-- Kunde hinzufügen Dialog (nur geöffnet, wenn Admin/Trainer) -->
+        <CustomerAddDialog
+            ref="customerAddDialog"
+            @customer-added="handleCustomerAdded"
+            @customer-selected="handleCustomerSelected"
+            @error="handleCustomerAddError">
         </CustomerAddDialog>
 
         <!-- Snackbar für Benachrichtigungen -->
-        <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false">
+        <SnackBar
+            v-if="snackbar.show"
+            :text="snackbar.text"
+            :color="snackbar.color"
+            @close="snackbar.show = false">
         </SnackBar>
     </v-container>
 </template>
@@ -218,7 +287,6 @@ export default {
         };
     },
     computed: {
-
         apiHeaders() {
             const token = localStorage.getItem('api_token') || this.$store.state.auth.token;
             return token ? {
@@ -229,7 +297,6 @@ export default {
         vehicleInfoKeys() {
             return ['id', 'Kennzeichen', 'Fahrzeugklasse', 'Automarke', 'Typ', 'Farbe', 'Sonstiges'];
         },
-        // Add this computed property to safely handle customer display
         customerDisplay() {
             const customer = this.carDetails.data?.customer;
             if (!customer || customer.id === 0) {
@@ -237,8 +304,6 @@ export default {
             }
             return `${customer.firstname} ${customer.lastname}`;
         },
-
-        // Add this to safely handle customer ID
         customerIdDisplay() {
             const customerId = this.carDetails.data?.customer_id;
             if (!customerId || customerId === 0) {
@@ -258,7 +323,7 @@ export default {
                 if (image && image.id) {
                     return {
                         id: image.id,
-                        path: image.path, // Keep path for consistency if needed
+                        path: image.path,
                         url: image.url
                     };
                 }
@@ -342,10 +407,21 @@ export default {
         },
 
         switchEditMode() {
+            if (!this.isAdminOrTrainer) {
+                this.showSnackbar('Sie haben keine Berechtigung, Daten zu bearbeiten', 'error');
+                return;
+            }
             this.editMode = !this.editMode;
 
             if (this.editMode) {
                 this.editedCarData = { ...this.carDetails.data };
+                if (this.carDetails.data.customer) {
+                    this.editedCarData.customer = {
+                        id: this.carDetails.data.customer.id,
+                        full_name: `${this.carDetails.data.customer.firstname} ${this.carDetails.data.customer.lastname}`,
+                        email: this.carDetails.data.customer.email
+                    };
+                }
             }
         },
 
@@ -369,14 +445,17 @@ export default {
         },
 
         async saveCarData() {
+            if (!this.isAdminOrTrainer) {
+                this.showSnackbar('Sie haben keine Berechtigung, Änderungen zu speichern', 'error');
+                return;
+            }
+
             this.saveLoading = true;
             this.error = null;
 
             try {
-                // Prepare data for submission
                 const dataToSubmit = { ...this.editedCarData };
 
-                // Handle customer_id - convert empty/null values to null
                 if (dataToSubmit.customer) {
                     dataToSubmit.customer_id = dataToSubmit.customer.id;
                 } else {
@@ -390,7 +469,6 @@ export default {
                     dataToSubmit
                 );
 
-                // Reload the car details
                 const { data } = await axios.get(
                     `/api/cars/cardetails/${this.$route.params.kennzeichen}`
                 );
@@ -407,7 +485,6 @@ export default {
                 if (error.response?.data?.message) {
                     errorMessage = error.response.data.message;
                 } else if (error.response?.data?.errors) {
-                    // Handle validation errors
                     const validationErrors = Object.values(error.response.data.errors).flat();
                     errorMessage = validationErrors.join(', ');
                 }
@@ -428,17 +505,14 @@ export default {
 
         // Image Gallery Event Handlers
         async handleImagesUploaded(response) {
-            // Reload car details to get updated images
             await this.getCar();
         },
 
         async handleImageDeleted(imageId) {
-            // Reload car details to get updated images
             await this.getCar();
         },
 
         async handleImageReplaced(data) {
-            // Reload car details to get updated images
             await this.getCar();
         },
 
@@ -456,6 +530,10 @@ export default {
 
         // Customer Dialog Methods
         openCustomerAddDialog() {
+            if (!this.isAdminOrTrainer) {
+                this.showSnackbar('Sie haben keine Berechtigung, einen Kunden hinzuzufügen', 'error');
+                return;
+            }
             if (this.$refs.customerAddDialog) {
                 this.$refs.customerAddDialog.open();
             }
@@ -529,7 +607,6 @@ export default {
         },
 
         searchCustomers(query) {
-            // Debounce the search to avoid too many API calls
             if (this.customerSearchTimeout) {
                 clearTimeout(this.customerSearchTimeout);
             }
@@ -572,7 +649,6 @@ export default {
     width: 100%;
     height: 99vh;
     margin-left: 110px;
-    /* padding: 20px; */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
