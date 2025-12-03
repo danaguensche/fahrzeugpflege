@@ -17,14 +17,18 @@ class CarController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'Kennzeichen' => 'required|string|unique:cars',
-                'Fahrzeugklasse' => 'nullable|string',
-                'Automarke' => 'nullable|string',
-                'Typ' => 'nullable|string',
-                'Farbe' => 'nullable|string',
-                'Sonstiges' => 'nullable|string',
+                'Kennzeichen' => 'required|string|max:10|unique:cars,Kennzeichen',
+                'Fahrzeugklasse' => 'nullable|string|max:24',
+                'Automarke' => 'nullable|string|max:24',
+                'Typ' => 'nullable|string|max:24',
+                'Farbe' => 'nullable|string|max:24',
+                'Sonstiges' => 'nullable|string|max:65000',
+                'customer_id' => 'nullable|exists:customers,id',
                 'images' => 'nullable|array',
                 'images.*' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
+            ], [
+                'Kennzeichen.unique' => 'Fahrzeug existiert bereits.',
+                'Kennzeichen.required' => 'Kennzeichen ist erforderlich.',
             ]);
 
             $car = Car::create($validatedData);
@@ -32,12 +36,10 @@ class CarController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $path = $image->store('cars', 'public');
-
-                    $car->images()->create([
-                        'path' => $path,
-                    ]);
+                    $car->images()->create(['path' => $path]);
                 }
             }
+
             $car->load('images');
 
             activity()
@@ -50,12 +52,18 @@ class CarController extends Controller
                 'car' => new CarResource($car),
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['error' => $e->errors()], 422);
+            return response()->json([
+                'message' => 'Die eingegebenen Daten sind ungültig.',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             Log::error('Fehler beim Speichern des Fahrzeugs: ' . $e->getMessage());
-            return response()->json(['error' => 'Fehler beim Speichern des Fahrzeugs'], 500);
+            return response()->json([
+                'message' => 'Fehler beim Speichern des Fahrzeugs'
+            ], 500);
         }
     }
+
 
     public function index()
     {
@@ -268,14 +276,22 @@ class CarController extends Controller
             $car = Car::where('Kennzeichen', $kennzeichen)->firstOrFail();
 
             $validatedData = $request->validate([
-                'Kennzeichen' => 'required|string',
-                'Fahrzeugklasse' => 'nullable|string',
-                'Automarke' => 'nullable|string',
-                'Typ' => 'nullable|string',
-                'Farbe' => 'nullable|string',
-                'Sonstiges' => 'nullable|string',
+                'Kennzeichen' => [
+                    'required',
+                    'string',
+                    'max:10',
+                    Rule::unique('cars', 'Kennzeichen')->ignore($car->id)
+                ],
+                'Fahrzeugklasse' => 'nullable|string|max:24',
+                'Automarke' => 'nullable|string|max:24',
+                'Typ' => 'nullable|string|max:24',
+                'Farbe' => 'nullable|string|max:24',
+                'Sonstiges' => 'nullable|string|max:65000',
                 'images' => 'nullable|array',
                 'images.*' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
+            ], [
+                'Kennzeichen.unique' => 'Dieses Kennzeichen existiert bereits.',
+                'Kennzeichen.required' => 'Kennzeichen ist erforderlich.',
             ]);
 
             $car->update($validatedData);
@@ -299,12 +315,13 @@ class CarController extends Controller
                 'car' => new CarResource($car)
             ], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['error' => $e->errors()], 422);
+            return response()->json(['errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             Log::error('Fehler beim Aktualisieren des Fahrzeugs: ' . $e->getMessage());
-            return response()->json(['error' => 'Fehler beim Aktualisieren des Fahrzeugs'], 500);
+            return response()->json(['message' => 'Fehler beim Aktualisieren des Fahrzeugs'], 500);
         }
     }
+
 
     public function countCars()
     {
