@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Car;
 
 class JobDetailsController extends Controller
 {
@@ -61,7 +62,6 @@ class JobDetailsController extends Controller
                     'message' => 'Jobdaten erfolgreich aktualisiert',
                     'data' => new JobResource($job->fresh(['customer', 'car', 'services', 'trainee', 'images']))
                 ]);
-
             } else { // Admin or Trainer
                 $validationRules = [
                     'title' => 'required|string|max:255',
@@ -79,6 +79,22 @@ class JobDetailsController extends Controller
 
                 $validatedData = $request->validate($validationRules);
 
+                // Fahrzeug dem Kunden zuweisen, falls es noch keinen Kunden hat
+                if (isset($validatedData['car_id']) && isset($validatedData['customer_id'])) {
+                    $car = Car::find($validatedData['car_id']);
+
+                    if ($car && !$car->customer_id) {
+                        $car->customer_id = $validatedData['customer_id'];
+                        $car->save();
+
+                        Log::info('Car assigned to customer during job update', [
+                            'car_id' => $car->id,
+                            'customer_id' => $validatedData['customer_id'],
+                            'job_id' => $id
+                        ]);
+                    }
+                }
+
                 $job->update($validatedData);
 
                 Log::info('Job trainee_id after update', ['trainee_id' => $job->trainee_id]);
@@ -95,7 +111,6 @@ class JobDetailsController extends Controller
                     'data' => new JobResource($job->fresh(['customer', 'car', 'services', 'trainee', 'images']))
                 ]);
             }
-
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             Log::error('Job not found for update', [
                 'id' => $id,
@@ -176,7 +191,6 @@ class JobDetailsController extends Controller
                 'message' => 'Bild erfolgreich gelöscht',
                 'success' => true
             ]);
-
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             Log::error("Image not found for deletion", [
                 'imageId' => $imageId,
@@ -199,7 +213,7 @@ class JobDetailsController extends Controller
     {
         try {
             $id = str_replace('+', ' ', $id);
-            
+
             Log::info("Attempting to replace image", [
                 'id' => $id,
                 'imageId' => $imageId,
@@ -219,7 +233,7 @@ class JobDetailsController extends Controller
             }
 
             $job = Job::where('id', $id)->firstOrFail();
-            
+
             // Log all images for debugging
             Log::info("Job images", [
                 'job_id' => $job->id,
@@ -260,7 +274,7 @@ class JobDetailsController extends Controller
                 // Store new file
                 $newPath = $request->file('image')->store('jobs', 'public');
                 $image->update(['path' => $newPath]);
-                
+
                 Log::info("New file stored", ['new_path' => $newPath]);
             }
 
@@ -271,7 +285,6 @@ class JobDetailsController extends Controller
                 'job' => new JobResource($job),
                 'success' => true
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error("Validation error during image replacement", [
                 'errors' => $e->errors(),

@@ -100,6 +100,9 @@ export default {
         handleCarEdited() {
             this.showEditCarDialog = false;
             this.selectedCar = null;
+            if (this.$refs.DataTable) {
+                this.$refs.DataTable.refresh();
+            }
         },
 
         handleEditItem(item) {

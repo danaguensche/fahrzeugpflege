@@ -273,7 +273,6 @@ export default {
     },
 
     mounted() {
-        console.log('Jobs.vue mounted. userRole:', this.userRole);
         this.fetchCustomers();
         this.fetchCars();
         if (this.userRole !== 'trainee') {

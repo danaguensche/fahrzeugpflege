@@ -50,11 +50,13 @@
                                                 <div class="d-flex align-center mb-1">
                                                     <v-icon :icon="getIconForField('Beschreibung')" color="primary"
                                                         class="mr-2"></v-icon>
-                                                    <span class="font-weight-medium scrollable">{{ labels['Beschreibung'] }}</span>
+                                                    <span class="font-weight-medium scrollable">{{
+                                                        labels['Beschreibung'] }}</span>
                                                 </div>
-                                                <v-textarea class="w-50 scrollable" v-model="editedJobData['Beschreibung']"
-                                                    variant="outlined" density="comfortable" auto-grow
-                                                    :disabled="userRole === 'trainee'" maxlength="65000" :counter="65000">
+                                                <v-textarea class="w-50 scrollable"
+                                                    v-model="editedJobData['Beschreibung']" variant="outlined"
+                                                    density="comfortable" auto-grow :disabled="userRole === 'trainee'"
+                                                    maxlength="65000" :counter="65000">
                                                 </v-textarea>
                                             </v-col>
                                         </v-row>
@@ -126,16 +128,21 @@
                             placeholder="Kunde auswählen oder suchen" prepend-inner-icon="mdi-account"
                             variant="outlined" density="comfortable" hide-details="auto" clearable
                             :loading="customersLoading" :search-input.sync="customerSearch"
-                            @update:search-input="searchCustomers" return-object :disabled="userRole === 'trainee'">
+                            @update:search-input="searchCustomers" @update:model-value="onCustomerChange" return-object
+                            :disabled="userRole === 'trainee'">
 
                             <template v-slot:item="{ props, item }">
                                 <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                    :subtitle="item.raw.email"></v-list-item>
+                                    :subtitle="item.raw.email">
+                                </v-list-item>
                             </template>
+
                             <template v-slot:selection="{ item }">
-                                {{ item.raw.email }}
+                                {{ item.raw.full_name }}
                             </template>
                         </v-autocomplete>
+
+
                     </v-sheet>
 
                     <!-- Fahrzeuginformationen (Wenn Fahrzeug zum Auftrag zugewiesen wurde)-->
@@ -193,22 +200,31 @@
                             </template>
                         </template>
 
-                        <v-autocomplete v-else class="w-50 ms-4" v-model="editedJobData.car" :items="cars"
+                        <v-autocomplete v-else class="w-50 ms-4" v-model="editedJobData.car" :items="availableCars"
                             item-title="Kennzeichen" item-value="id" label="Fahrzeug"
-                            placeholder="Fahrzeug auswählen oder suchen" prepend-inner-icon="mdi-car" variant="outlined"
-                            density="comfortable" hide-details="auto" clearable :loading="carsLoading"
-                            :search-input.sync="carSearch" @update:search-input="searchCars" return-object
-                            :disabled="userRole === 'trainee'">
+                            :placeholder="editedJobData.customer ? 'Fahrzeug für Kunde auswählen' : 'Zuerst Kunde auswählen'"
+                            prepend-inner-icon="mdi-car" variant="outlined" density="comfortable" hide-details="auto"
+                            clearable :loading="carsLoading" return-object
+                            :disabled="userRole === 'trainee' || !editedJobData.customer">
 
                             <template v-slot:item="{ props, item }">
                                 <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
-                                    :subtitle="item.raw.Automarke"></v-list-item>
+                                    :subtitle="`${item.raw.Automarke} ${getCarOwnershipLabel(item.raw)}`">
+                                </v-list-item>
                             </template>
 
                             <template v-slot:selection="{ item }">
                                 {{ item.raw.Kennzeichen }}
                             </template>
                         </v-autocomplete>
+
+                        <!-- Hinweis wenn Fahrzeug dem Kunden zugewiesen wird -->
+                        <v-alert v-if="editMode && editedJobData.car && editedJobData.customer && !isCarOwnedByCustomer"
+                            type="info" variant="tonal" class="mt-3 w-50 ms-4">
+                            <v-icon start>mdi-information</v-icon>
+                            Das ausgewählte Fahrzeug wird automatisch dem Kunden zugewiesen.
+                        </v-alert>
+
                     </v-sheet>
 
                     <!-- Dienstleistungen Anzeige -->
@@ -325,6 +341,8 @@ export default {
                     trainee: null,
                 }
             },
+            //für Fahrzeugdropdown
+            availableCars: [],
             editedJobData: {},
             headerTitle: "Jobdetails",
             headerIcon: "mdi-briefcase",
@@ -389,6 +407,13 @@ export default {
                 'Authorization': `Bearer ${token}`
             } : {};
         },
+
+        isCarOwnedByCustomer() {
+            if (!this.editedJobData.car || !this.editedJobData.customer) return false;
+            return this.editedJobData.car.customer_id === this.editedJobData.customer.id;
+        },
+
+
         images() {
             const img = this.jobDetails.data?.images;
             console.log("Raw images data:", img);
@@ -493,6 +518,15 @@ export default {
         }
     },
     methods: {
+
+        async onCustomerChange(customer) {
+            this.editedJobData.car = null;
+            this.availableCars = [];
+
+            if (customer) {
+                await this.fetchCarsForCustomer(customer.id);
+            }
+        },
 
         formatDateTimeForInput(dateString) {
             if (!dateString) return '';
@@ -637,10 +671,36 @@ export default {
             if (this.editMode) {
                 this.editedJobData = { ...this.jobDetails.data };
                 console.log('Entering edit mode. editedJobData:', this.editedJobData);
+
                 // Map status to its value for the dropdown
                 if (this.jobDetails.data.Status) {
                     const foundStatus = this.statuses.find(s => s.title === this.jobDetails.data.Status);
                     this.editedJobData.Status = foundStatus ? foundStatus.value : this.jobDetails.data.Status;
+                }
+
+                // Ensure customer is mapped correctly for the autocomplete
+                if (this.jobDetails.data.customer) {
+                    this.editedJobData.customer = {
+                        id: this.jobDetails.data.customer.id,
+                        firstname: this.jobDetails.data.customer.firstname,
+                        lastname: this.jobDetails.data.customer.lastname,
+                        full_name: `${this.jobDetails.data.customer.firstname} ${this.jobDetails.data.customer.lastname}`,
+                        email: this.jobDetails.data.customer.email
+                    };
+                } else {
+                    this.editedJobData.customer = null;
+                }
+
+                // Ensure car is mapped correctly
+                if (this.jobDetails.data.car) {
+                    this.editedJobData.car = {
+                        id: this.jobDetails.data.car.id,
+                        Kennzeichen: this.jobDetails.data.car.Kennzeichen,
+                        Automarke: this.jobDetails.data.car.Automarke,
+                        customer_id: this.jobDetails.data.car.customer_id
+                    };
+                } else {
+                    this.editedJobData.car = null;
                 }
 
                 // Ensure services are mapped correctly for the autocomplete
@@ -665,8 +725,14 @@ export default {
                 } else {
                     this.editedJobData.trainee = null;
                 }
+
+                // Fahrzeuge für den aktuellen Kunden laden
+                if (this.editedJobData.customer) {
+                    this.fetchCarsForCustomer(this.editedJobData.customer.id);
+                }
             }
         },
+
 
         cancelEdit() {
             this.editMode = false;
@@ -911,70 +977,98 @@ export default {
             }
         },
 
-        searchCars(query) {
-            if (this.carSearchTimeout) {
-                clearTimeout(this.carSearchTimeout);
-            }
-            this.carSearchTimeout = setTimeout(() => {
-                this.fetchCars(query);
-            }, 300);
-        },
-
-        async fetchServices() {
-            this.servicesLoading = true;
+        async fetchCarsForCustomer(customerId) {
+            this.carsLoading = true;
             try {
-                const response = await axios.get(`/api/services`);
-                this.services = response.data.data.map(service => ({
-                    id: service.id,
-                    name: service.name
+                const response = await axios.get(`/api/jobs/cars-for-customer/${customerId}`);
+                this.availableCars = response.data.cars.map(car => ({
+                    id: car.id,
+                    Kennzeichen: car.Kennzeichen || car.license_plate,
+                    Automarke: car.Automarke || car.brand,
+                    customer_id: car.customer_id
                 }));
             } catch (error) {
-                console.error('Error fetching services:', error.response || error);
-                this.showSnackbar('Fehler beim Laden der Dienstleistungen', 'error');
+                console.error('Error fetching cars for customer:', error);
+                this.showSnackbar('Fehler beim Laden der Fahrzeuge', 'error');
             } finally {
-                this.servicesLoading = false;
+                this.carsLoading = false;
             }
         },
 
-        async fetchTrainees(query = '') {
-            this.traineesLoading = true;
-            try {
-                const response = await axios.get(`/api/users/search?query=${query}`);
-                this.trainees = response.data.data.map(trainee => ({
-                    id: trainee.id,
-                    firstname: trainee.firstname,
-                    lastname: trainee.lastname,
-                    full_name: `${trainee.firstname} ${trainee.lastname}`,
-                    email: trainee.email
-                }));
-            } catch (error) {
-                console.error('Error fetching trainees:', error.response || error);
-                this.showSnackbar('Fehler beim Laden der Mitarbeiter', 'error');
-            } finally {
-                this.traineesLoading = false;
+        getCarOwnershipLabel(car) {
+            if (!car.customer_id) {
+                return '(verfügbar)';
+            } else if (this.editedJobData.customer && car.customer_id === this.editedJobData.customer.id) {
+                return '(bereits zugewiesen)';
             }
+            return '';
         },
+    },
 
-        searchTrainees(query) {
-            if (this.traineeSearchTimeout) {
-                clearTimeout(this.traineeSearchTimeout);
-            }
-            this.traineeSearchTimeout = setTimeout(() => {
-                this.fetchTrainees(query);
-            }, 300);
-        },
-    }
-};
+    searchCars(query) {
+        if (this.carSearchTimeout) {
+            clearTimeout(this.carSearchTimeout);
+        }
+        this.carSearchTimeout = setTimeout(() => {
+            this.fetchCars(query);
+        }, 300);
+    },
+
+    async fetchServices() {
+        this.servicesLoading = true;
+        try {
+            const response = await axios.get(`/api/services`);
+            this.services = response.data.data.map(service => ({
+                id: service.id,
+                name: service.name
+            }));
+        } catch (error) {
+            console.error('Error fetching services:', error.response || error);
+            this.showSnackbar('Fehler beim Laden der Dienstleistungen', 'error');
+        } finally {
+            this.servicesLoading = false;
+        }
+    },
+
+    async fetchTrainees(query = '') {
+        this.traineesLoading = true;
+        try {
+            const response = await axios.get(`/api/users/search?query=${query}`);
+            this.trainees = response.data.data.map(trainee => ({
+                id: trainee.id,
+                firstname: trainee.firstname,
+                lastname: trainee.lastname,
+                full_name: `${trainee.firstname} ${trainee.lastname}`,
+                email: trainee.email
+            }));
+        } catch (error) {
+            console.error('Error fetching trainees:', error.response || error);
+            this.showSnackbar('Fehler beim Laden der Mitarbeiter', 'error');
+        } finally {
+            this.traineesLoading = false;
+        }
+    },
+
+    searchTrainees(query) {
+        if (this.traineeSearchTimeout) {
+            clearTimeout(this.traineeSearchTimeout);
+        }
+        this.traineeSearchTimeout = setTimeout(() => {
+            this.fetchTrainees(query);
+        }, 300);
+    },
+}
+
 </script>
 
 <style scoped>
-
 .scrollable {
     margin-top: 10px;
     margin-bottom: 10px;
     max-height: 450px;
     overflow-y: auto;
 }
+
 .card-container {
     width: 100%;
     height: 99vh;
