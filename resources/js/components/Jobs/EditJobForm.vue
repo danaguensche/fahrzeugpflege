@@ -33,45 +33,8 @@
                             </v-textarea>
                         </v-col>
 
-                        <!-- Kunde -->
-                        <v-col cols="12" sm="6">
-                            <v-autocomplete v-model="job.customer" :items="customers" item-title="full_name"
-                                item-value="id" label="Kunde *" placeholder="Kunde auswählen"
-                                prepend-inner-icon="mdi-account" variant="outlined" density="comfortable" clearable
-                                :loading="customersLoading" return-object
-                                :rules="[v => !!v || 'Kunde ist erforderlich']" required class="mb-3"
-                                @update:model-value="onCustomerChange">
 
-                                <template v-slot:item="{ props, item }">
-                                    <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                        :subtitle="item.raw.email" class="pa-3">
-                                    </v-list-item>
-                                </template>
-                                <template v-slot:selection="{ item }">
-                                    {{ item.raw.firstname }} {{ item.raw.lastname }}
-                                </template>
-                            </v-autocomplete>
-                        </v-col>
 
-                        <!-- Fahrzeug -->
-                        <v-col cols="12" sm="6">
-                            <v-autocomplete v-model="job.car" :items="availableCars" item-title="Kennzeichen"
-                                item-value="id" label="Fahrzeug *"
-                                :placeholder="job.customer ? 'Fahrzeug auswählen' : 'Zuerst Kunde auswählen'"
-                                prepend-inner-icon="mdi-car" variant="outlined" density="comfortable" clearable
-                                :loading="carsLoading" return-object :disabled="!job.customer"
-                                :rules="[v => !!v || 'Fahrzeug ist erforderlich']" required class="mb-3">
-
-                                <template v-slot:item="{ props, item }">
-                                    <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
-                                        :subtitle="item.raw.Automarke" class="pa-3">
-                                    </v-list-item>
-                                </template>
-                                <template v-slot:selection="{ item }">
-                                    {{ item.raw.Kennzeichen }}
-                                </template>
-                            </v-autocomplete>
-                        </v-col>
 
                         <!-- Services -->
                         <v-col cols="12">
@@ -227,8 +190,6 @@ export default {
                 id: null,
                 title: '',
                 description: '',
-                car: null,
-                customer: null,
                 services: [],
                 status: 'ausstehend',
                 trainee: null,
@@ -242,8 +203,6 @@ export default {
             scheduled_at_time: null,
             // Dropdown-Daten
             trainees: [],
-            customers: [],
-            availableCars: [],
             services: [],
             jobStatuses: [
                 { title: 'Ausstehend', value: 'ausstehend' },
@@ -252,8 +211,6 @@ export default {
                 { title: 'Abgeschlossen', value: 'abgeschlossen' },
             ],
             // Loading-States
-            carsLoading: false,
-            customersLoading: false,
             servicesLoading: false,
             traineesLoading: false,
             // Snackbar
@@ -323,8 +280,6 @@ export default {
 
             this.parseDateTimeFields(data);
             this.setServices(data);
-            await this.setCustomer(data);
-            await this.setCar(data);
             await this.setTrainee(data);
         },
 
@@ -368,115 +323,6 @@ export default {
                     console.error('Error parsing scheduled_at:', e);
                 }
             }
-        },
-
-        async setCustomer(data) {
-            // Prüfe ob customer als Objekt oder nur als ID vorhanden ist
-            let customerId = null;
-            let customerObj = null;
-
-            if (data.customer && typeof data.customer === 'object') {
-                customerObj = data.customer;
-                customerId = customerObj.id;
-            } else if (data.customer_id) {
-                customerId = data.customer_id;
-            }
-
-            if (!customerId) return;
-
-            // Prüfe ob Customer bereits in der Liste ist
-            let existingCustomer = this.customers.find(c => c.id === customerId);
-
-            if (!existingCustomer && customerObj) {
-                existingCustomer = {
-                    id: customerObj.id,
-                    firstname: customerObj.firstname,
-                    lastname: customerObj.lastname,
-                    full_name: `${customerObj.firstname} ${customerObj.lastname}`,
-                    email: customerObj.email,
-                };
-                this.customers.push(existingCustomer);
-            } else if (!existingCustomer) {
-                try {
-                    const response = await axios.get(`/api/customers/${customerId}`);
-                    const customer = response.data.data || response.data;
-                    existingCustomer = {
-                        id: customer.id,
-                        firstname: customer.firstname,
-                        lastname: customer.lastname,
-                        full_name: `${customer.firstname} ${customer.lastname}`,
-                        email: customer.email,
-                    };
-                    this.customers.push(existingCustomer);
-                } catch (error) {
-                    console.error('Error loading customer:', error);
-                    return;
-                }
-            }
-
-            if (existingCustomer) {
-                this.job.customer = existingCustomer;
-                await this.fetchCarsForCustomer(customerId);
-            }
-        },
-
-        async setCar(data) {
-            let carId = null;
-            let carObj = null;
-
-            if (data.car && typeof data.car === 'object') {
-                carObj = data.car;
-                carId = carObj.id;
-            } else if (data.car_id) {
-                carId = data.car_id;
-            }
-
-            if (!carId) return;
-
-            console.log('Setting car with ID:', carId);
-            console.log('Available cars before:', this.availableCars);
-
-            // Prüfe ob Car bereits in availableCars ist
-            let existingCar = this.availableCars.find(c => c.id === carId);
-
-            if (!existingCar) {
-                if (carObj) {
-                    existingCar = {
-                        id: carObj.id,
-                        Kennzeichen: carObj.Kennzeichen || carObj.license_plate || '',
-                        Automarke: carObj.Automarke || carObj.brand || '',
-                        customer_id: carObj.customer_id,
-                    };
-                } else {
-                    try {
-                        let response;
-                        try {
-                            response = await axios.get(`/api/cars/${carId}`);
-                        } catch (e) {
-                            console.error('Could not load car by ID:', carId);
-                            return;
-                        }
-
-                        const car = response.data.data || response.data;
-                        existingCar = {
-                            id: car.id,
-                            Kennzeichen: car.Kennzeichen || '',
-                            Automarke: car.Automarke || '',
-                            customer_id: car.customer_id,
-                        };
-                    } catch (error) {
-                        console.error('Error loading car:', error);
-                        return;
-                    }
-                }
-                this.availableCars.push(existingCar);
-                console.log('Added car to availableCars:', existingCar);
-            }
-
-            // Car im Formular setzen
-            this.job.car = existingCar;
-            console.log('Car set:', this.job.car);
-            console.log('Available cars after:', this.availableCars);
         },
 
         setServices(data) {
@@ -565,8 +411,6 @@ export default {
                     title: this.job.title,
                     description: this.job.description,
                     status: this.job.status,
-                    car_id: this.job.car ? this.job.car.id : null,
-                    customer_id: this.job.customer ? this.job.customer.id : null,
                     service_ids: this.job.services ? this.job.services.map(s => s.id) : [],
                     trainee_id: this.job.trainee ? this.job.trainee.id : null,
                     cleaning_start: this.combineDateTime(this.cleaning_start_date, this.cleaning_start_time),
@@ -586,63 +430,6 @@ export default {
                 );
             } finally {
                 this.loading = false;
-            }
-        },
-
-        async onCustomerChange(customer) {
-            this.job.car = null;
-            this.availableCars = [];
-            if (customer) {
-                await this.fetchCarsForCustomer(customer.id);
-            }
-        },
-
-        async fetchCarsForCustomer(customerId) {
-            this.carsLoading = true;
-            try {
-                const response = await axios.get(`/api/jobs/cars-for-customer/${customerId}`);
-                const cars = response.data.cars || response.data.data || response.data || [];
-
-                const fetchedCars = cars.map(car => ({
-                    id: car.id,
-                    Kennzeichen: car.Kennzeichen || car.license_plate || '',
-                    Automarke: car.Automarke || car.brand || '',
-                    customer_id: car.customer_id,
-                }));
-
-                // WICHTIG: Aktuelles Fahrzeug beibehalten falls es nicht in der Liste ist
-                if (this.job.car && !fetchedCars.find(c => c.id === this.job.car.id)) {
-                    fetchedCars.unshift(this.job.car);
-                }
-
-                this.availableCars = fetchedCars;
-                console.log('Fetched cars for customer:', this.availableCars);
-            } catch (error) {
-                console.error('Error fetching cars:', error);
-                // Falls bereits ein Car gesetzt ist, dieses behalten
-                if (this.job.car) {
-                    this.availableCars = [this.job.car];
-                }
-            } finally {
-                this.carsLoading = false;
-            }
-        },
-
-        async fetchCustomers() {
-            this.customersLoading = true;
-            try {
-                const response = await axios.get('/api/customers/search?query=');
-                this.customers = response.data.data.map(customer => ({
-                    id: customer.id,
-                    firstname: customer.firstname,
-                    lastname: customer.lastname,
-                    full_name: `${customer.firstname} ${customer.lastname}`,
-                    email: customer.email,
-                }));
-            } catch (error) {
-                console.error('Error fetching customers:', error);
-            } finally {
-                this.customersLoading = false;
             }
         },
 
@@ -683,7 +470,6 @@ export default {
 
         async fetchInitialData() {
             await Promise.all([
-                this.fetchCustomers(),
                 this.fetchServices(),
                 this.fetchTrainees(),
             ]);
@@ -698,8 +484,6 @@ export default {
                 id: null,
                 title: '',
                 description: '',
-                car: null,
-                customer: null,
                 services: [],
                 status: 'ausstehend',
                 trainee: null,
@@ -710,7 +494,6 @@ export default {
             this.cleaning_end_time = null;
             this.scheduled_at_date = null;
             this.scheduled_at_time = null;
-            this.availableCars = [];
             this.originalId = null;
         },
 
