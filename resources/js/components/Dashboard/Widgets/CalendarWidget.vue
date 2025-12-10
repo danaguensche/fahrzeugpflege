@@ -242,9 +242,17 @@ export default {
 }
 
 .fixed-height {
-    height: 400px;
+    height: 100%;
+    max-height: calc(100vh - 300px);
     overflow: hidden;
 }
+
+.events-list {
+    height: calc(100% - 150px);
+    overflow-y: auto;
+}
+
+
 
 .widget-header {
     display: flex;
@@ -277,8 +285,9 @@ export default {
 }
 
 .widget-content {
-    margin-bottom: 20px;
     flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .no-events {
@@ -299,10 +308,7 @@ export default {
 }
 
 .events-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    height: 250px;
+    height: 100%;
     overflow-y: auto;
 }
 
@@ -472,42 +478,5 @@ export default {
 
 .legend-dot.pickup {
     background: #9c27b0;
-}
-
-
-@media (min-width: 1900px) {
-    .today-widget {
-        padding: 25px;
-    }
-
-    .fixed-height {
-        min-height: 850px;
-    }
-
-    .widget-header h3 {
-        font-size: 1.4em;
-    }
-
-    .events-list {
-        height: 700px;
-    }
-}
-
-@media (max-width: 1024px) {
-    .today-widget {
-        padding: 15px;
-    }
-
-    .fixed-height {
-        height: 300px;
-    }
-
-    .widget-header h3 {
-        font-size: 1em;
-    }
-
-    .events-list {
-        max-height: 250px;
-    }
 }
 </style>

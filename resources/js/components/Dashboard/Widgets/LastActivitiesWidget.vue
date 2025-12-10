@@ -74,10 +74,9 @@ export default {
 </script>
 
 <style scoped>
-
 .widget-content {
- height: 300px;
- overflow-y: auto;
+    height: min(400px, 40vh);
+    overflow-y: auto;
 }
 
 .activity-item {
@@ -107,24 +106,5 @@ export default {
 .v-card-title {
     font-size: 1.1rem;
     font-weight: 600;
-}
-
-@media (min-width:1900px) {
-    .widget-content {
-        height: 700px;
-    }
-}
-@media (max-width: 1024px) {
-    .widget-content {
-        padding: 5px;
-    }
-
-    .widget-header h3 {
-        font-size: 1em;
-    }
-
-    .widget-content {
-        height: 200px;
-    }
 }
 </style>

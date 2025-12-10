@@ -2,7 +2,8 @@
     <div class="dashboard-page" :class="{ 'dashboard-page-sidebar-opened': isSidebarOpen }">
         <v-container class="dashboard-container" fluid>
 
-            <v-row>
+            <!-- Row 1 Widgets -->
+            <v-row class="widgets-row">
                 <v-col cols="12">
                     <v-card elevation="2" class="widgets-card">
                         <v-card-text class="pt-4">
@@ -25,26 +26,28 @@
                 </v-col>
             </v-row>
 
-            <v-row>
-                <v-col cols="12" md="6">
+            <!-- Row 2 Calendar & Activities -->
+            <div class="content-row">
+                <div class="v-col">
                     <CalendarWidget />
-                </v-col>
+                </div>
 
-                <v-col cols="12" md="6">
+                <div class="v-col">
                     <v-card elevation="2" class="h-100">
                         <v-card-title class="text-h6 pb-2">
                             <v-icon left color="primary">mdi-timeline</v-icon>
-                             |   Letzte Aktivitäten
+                            | Letzte Aktivitäten
                         </v-card-title>
                         <v-divider></v-divider>
                         <v-card-text class="pt-4">
                             <LastActivitiesWidget />
                         </v-card-text>
                     </v-card>
-                </v-col>
-            </v-row>
+                </div>
+            </div>
 
-            <v-row>
+            <!-- Row 3 Actions -->
+            <v-row class="actions-row">
                 <v-col cols="12">
                     <v-card elevation="2" class="actions-card">
                         <v-card-title class="text-h6 pb-2">
@@ -60,8 +63,8 @@
                                     </v-btn>
                                 </v-col>
                                 <v-col cols="12" sm="6" md="4">
-                                    <v-btn block color="green lighten-4" @click="openAddCarDialog" prepend-icon="mdi-plus"
-                                        size="large" class="mb-2">
+                                    <v-btn block color="green lighten-4" @click="openAddCarDialog"
+                                        prepend-icon="mdi-plus" size="large" class="mb-2">
                                         Fahrzeug hinzufügen
                                     </v-btn>
                                 </v-col>
@@ -76,7 +79,7 @@
                     </v-card>
                 </v-col>
             </v-row>
-            
+
             <AddCarForm v-model="showAddCarDialog" @car-added="handleCarAdded" />
             <AddCustomerForm v-model="showAddCustomerDialog" @customer-added="handleCustomerAdded" />
             <AddJobForm v-model="showAddJobDialog" @job-added="handleJobAdded" />
@@ -84,6 +87,7 @@
         </v-container>
     </div>
 </template>
+
 
 <script>
 import AddCarForm from '../Cars/addCar/AddCarForm.vue';
@@ -153,12 +157,12 @@ export default {
 <style scoped>
 .dashboard-page {
     display: flex;
+    flex-direction: column;
     transition: margin-left 0.3s ease;
     font-family: var(--font-family);
     margin-left: 150px;
     height: 100vh;
-    /* background-color: #f5f5f5; */
-    border-radius: 12px;
+    overflow: hidden;
 }
 
 .dashboard-page-sidebar-opened {
@@ -166,10 +170,16 @@ export default {
 }
 
 .dashboard-container {
-    align-self: flex-start;
-    margin: 0 auto;
-    padding: 32px 32px;
-    border-radius: 12px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100vh;
+    padding: 16px;
+    gap: 16px;
+    overflow: hidden;
+}
+
+.widgets-row {
+    min-height: 0;
 }
 
 .widgets-card {
@@ -178,55 +188,69 @@ export default {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
+.content-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    min-height: 0;
+    height: 100%;
+}
+
+.content-row .v-col {
+    height: 100%;
+    min-height: 0;
+}
+
+.h-100 {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.h-100 .v-card-text {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.actions-row {
+    min-height: 0;
+    margin-bottom: 20px;
+}
+
 .actions-card {
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     border-radius: 12px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
-.h-100 {
-    height: 100%;
-    width: 100%;
-}
-
 .v-card {
     border-radius: 12px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    height: 100%;
 }
 
-.v-card-title {
-    font-weight: 600;
-    color: #2c3e50;
-}
-
-.v-btn {
-    border-radius: 8px !important;
-    font-weight: 500;
-    text-transform: none;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-}
-
-.v-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-}
-
-/* Tablet Styles */
+/* Tablet */
 @media only screen and (max-width: 1024px) {
     .dashboard-page-sidebar-opened {
         margin-left: 150px;
     }
 
+    .content-row {
+        grid-template-columns: 1fr;
+    }
+
     .dashboard-container {
-        padding: 24px 16px;
+        padding: 12px;
+        gap: 12px;
     }
 }
 
-/* Mobile Styles */
+/* Mobile */
 @media only screen and (max-width: 768px) {
     .dashboard-page {
         margin-left: 0;
+        height: 100dvh;
     }
 
     .dashboard-page-sidebar-opened {
@@ -234,18 +258,17 @@ export default {
     }
 
     .dashboard-container {
-        padding: 16px 12px;
+        height: 100dvh;
+        padding: 8px;
+        gap: 8px;
+        overflow-y: auto;
+        grid-template-rows: auto auto auto;
     }
 
-    .v-btn {
-        margin-bottom: 8px;
-    }
-}
-
-/* Small mobile adjustments */
-@media only screen and (max-width: 480px) {
-    .dashboard-container {
-        padding: 12px 8px;
+    .content-row {
+        display: flex;
+        flex-direction: column;
+        height: auto;
     }
 }
 </style>
