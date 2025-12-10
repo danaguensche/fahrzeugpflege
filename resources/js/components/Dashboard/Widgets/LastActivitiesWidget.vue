@@ -75,7 +75,7 @@ export default {
 
 <style scoped>
 .widget-content {
-    height: min(400px, 40vh);
+    height: 95%;
     overflow-y: auto;
 }
 
