@@ -1,8 +1,10 @@
 <template>
     <div class="sidebar container" :class="{ 'sidebar-container closed': !isSidebarOpen }">
         <div class="sidebar-buttons-wrapper" :class="{ 'sidebar-buttons-wrapper closed': !isSidebarOpen }">
+            
             <MenuItemsOpened v-if="isSidebarOpen"></MenuItemsOpened>
             <MenuItemsClosed v-if="!isSidebarOpen"></MenuItemsClosed>
+
         </div>
     </div>
 </template>

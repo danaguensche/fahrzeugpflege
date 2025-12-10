@@ -4,6 +4,7 @@
     'sidebar-closed': !isSidebarOpen
   }">
     <SidebarState></SidebarState>
+
     <ReduceButton v-if="isSidebarOpen" @click="toggleSidebar" class="reduce-button">
       <img class="arrow" src="../../../img/sidebar-img/arrow-icon.png" alt="Close">
     </ReduceButton>

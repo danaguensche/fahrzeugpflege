@@ -2,6 +2,9 @@
 
 <template>
     <div class="sidebar-container-closed">
+        <div class="sidebar-logo">
+            <img src="../../../img/sidebar-img/Logo_poliplan_stacklogo.png" class="logo-image" alt="PoliPlan Logo">
+        </div>
         <div v-for="(menuitem, index) in filteredMenuItems" :key="menuitem.id"
             :class="['sidebar-button closed', { 'profile-spacing closed': menuitem.name === 'Profil' }]">
             <div class="sidebar-buttons-wrapper" @click="redirectToView(menuitem)">
@@ -49,7 +52,7 @@ export default {
             menuitems: [
                 { id: 1, name: 'Dashboard', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/dashboard-icon.png', import.meta.url).href },
                 { id: 2, name: 'Kalender', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/calendar-icon.png', import.meta.url).href },
-                { id: 3, name: 'Fahrzeuge', roles: ['trainee','trainer', 'admin'], icon: new URL('@/img/sidebar-img/cars-icon.png', import.meta.url).href },
+                { id: 3, name: 'Fahrzeuge', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/cars-icon.png', import.meta.url).href },
                 { id: 4, name: 'Kunden', roles: ['trainer', 'admin'], icon: new URL('@/img/sidebar-img/customer-icon.png', import.meta.url).href },
                 { id: 5, name: 'Aufträge', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/jobs-icon.png', import.meta.url).href },
                 // { id: 6, name: 'Berichte', roles: ['trainee', 'trainer', 'admin'], icon: new URL('@/img/sidebar-img/reports-icon.png', import.meta.url).href },
@@ -115,6 +118,19 @@ export default {
 }
 </script>
 <style scoped>
+.sidebar-logo {
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo-image {
+    width: 60px;
+    height: auto;
+    user-select: none;
+}
+
 .sidebar-container-closed {
     width: 110px;
     height: 100vh;
