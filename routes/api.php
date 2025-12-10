@@ -67,9 +67,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('cars/available', [CarController::class, 'availableCars']);
     Route::get('cars/{kennzeichen}', [CarController::class, 'show']);
     Route::get('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'details']);
+    Route::get('cars/{kennzeichen}/all-images', [CarController::class, 'getAllImages']); 
     Route::post('cars', [CarController::class, 'store']);
     Route::post('cars/cardetails/{kennzeichen}/images', [CarDetailsController::class, 'uploadImages']);
     Route::put('cars/cardetails/{kennzeichen}', [CarDetailsController::class, 'update']);
+
+    
+    Route::delete('images/{imageId}', [ImageController::class, 'destroy']);
 
 
 
@@ -114,7 +118,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
         Route::delete('jobs/{job}/images/{imageId}', [JobController::class, 'deleteImage']);
         Route::post('jobs/{job}/images', [JobController::class, 'addImages']);
-        Route::post('images/assign-to-car', [ImageController::class, 'assignToCar']);
+        Route::post('jobs/{job}/assign-to-car', [JobController::class, 'assignToCar']);
 
         Route::get('/jobs/cars-for-customer/{customerId}', [JobController::class, 'getCarsForCustomer']);
         Route::post('/jobs', [JobController::class, 'store']);
@@ -136,7 +140,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Image Report Routes
     Route::get('/tasks/{taskId}/images', [ImageReportController::class, 'index']);
     Route::post('/tasks/{taskId}/images', [ImageReportController::class, 'upload']);
-    Route::delete('/images/{imageId}', [ImageReportController::class, 'destroy']);
 
     Route::get('/services', [ServiceController::class, 'index']); // Added route for services
 

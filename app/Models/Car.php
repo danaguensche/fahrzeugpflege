@@ -38,6 +38,11 @@ class Car extends Model
         return 'Kennzeichen';
     }
     
+    public function reportImages()
+    {
+        return $this->hasMany(ImageReport::class);
+    }
+
     public function orders()
     {
         return $this->hasMany(Order::class); 

@@ -11,35 +11,24 @@
                 </Header>
 
                 <!-- Image Gallery with Upload functionality (IMMER editierbar, für alle) -->
-                <ImageGallery
-                    :apiHeaders="apiHeaders"
-                    :images="images"
-                    :editMode="true"
+                <ImageGallery :apiHeaders="apiHeaders" :images="carImages" :editMode="true"
                     :uploadUrl="`/api/cars/cardetails/${$route.params.kennzeichen}/images`"
-                    :deleteUrlTemplate="'/api/cars/images/{imageId}'"
+                    :deleteUrlTemplate="'/api/images/{imageId}'"
                     :replaceUrlTemplate="`/api/cars/${$route.params.kennzeichen}/images/{imageId}`"
-                    :entityId="$route.params.kennzeichen"
-                    uploadDialogTitle="Fahrzeugbilder hochladen"
-                    @images-uploaded="handleImagesUploaded"
-                    @image-deleted="handleImageDeleted"
-                    @image-replaced="handleImageReplaced"
-                    @success="showSuccessMessage"
-                    @error="showErrorMessage"
+                    :entityId="$route.params.kennzeichen" uploadDialogTitle="Fahrzeugbilder hochladen"
+                    @images-uploaded="handleImagesUploaded" @image-deleted="handleImageDeleted"
+                    @image-replaced="handleImageReplaced" @success="showSuccessMessage" @error="showErrorMessage"
                     @loading="setImageLoading">
                 </ImageGallery>
 
-                <!-- Fahrzeug information -->
+                <!-- Fahrzeug informationen -->
                 <v-card-text class="px-4 pt-4 pb-0">
                     <v-sheet>
                         <InformationHeader :title="'Fahrzeuginformationen'" :editMode="editMode">
                         </InformationHeader>
 
                         <!-- Ansichtsmodus -->
-                        <InfoList
-                            v-if="!editMode"
-                            :details="carDetails"
-                            :labels="labels"
-                            :infoKeys="vehicleInfoKeys"
+                        <InfoList v-if="!editMode" :details="carDetails" :labels="labels" :infoKeys="vehicleInfoKeys"
                             :getIconForField="getIconForField">
                         </InfoList>
 
@@ -47,55 +36,29 @@
                         <template v-else>
                             <v-row class="pa-4">
                                 <!-- Standard Felder (außer Fahrzeugklasse) -->
-                                <template
-                                    v-for="key in vehicleInfoKeys.filter(k => k !== 'Fahrzeugklasse')"
-                                    :key="key"
-                                >
+                                <template v-for="key in vehicleInfoKeys.filter(k => k !== 'Fahrzeugklasse')" :key="key">
                                     <v-col cols="12" sm="8">
-                                        <v-text-field
-                                            v-if="key !== 'Sonstiges'"
-                                            v-model="editedCarData[key]"
-                                            :label="labels[key]"
-                                            :prepend-inner-icon="getIconForField(key)"
-                                            variant="outlined"
-                                            density="comfortable"
-                                            hide-details="auto"
+                                        <v-text-field v-if="key !== 'Sonstiges'" v-model="editedCarData[key]"
+                                            :label="labels[key]" :prepend-inner-icon="getIconForField(key)"
+                                            variant="outlined" density="comfortable" hide-details="auto"
                                             :readonly="key === 'id' || !isAdminOrTrainer"
-                                            :disabled="!isAdminOrTrainer"
-                                        ></v-text-field>
-                                        <v-textarea
-                                            v-if="key === 'Sonstiges'"
-                                            class="w-100"
-                                            v-model="editedCarData[key]"
-                                            variant="outlined"
-                                            density="comfortable"
-                                            :height="150"
-                                            maxlength="65000"
-                                            :counter="65000"
-                                            :disabled="!isAdminOrTrainer"
-                                        >
+                                            :disabled="!isAdminOrTrainer"></v-text-field>
+                                        <v-textarea v-if="key === 'Sonstiges'" class="w-100"
+                                            v-model="editedCarData[key]" variant="outlined" density="comfortable"
+                                            :height="150" maxlength="65000" :counter="65000"
+                                            :disabled="!isAdminOrTrainer">
                                         </v-textarea>
                                     </v-col>
                                 </template>
 
                                 <!-- Fahrzeugklasse Dropdown -->
                                 <v-col cols="12" sm="8">
-                                    <v-autocomplete
-                                        v-model="editedCarData.Fahrzeugklasse"
-                                        :items="carGroups"
-                                        item-title="title"
-                                        item-value="title"
-                                        label="Fahrzeugklasse"
+                                    <v-autocomplete v-model="editedCarData.Fahrzeugklasse" :items="carGroups"
+                                        item-title="title" item-value="title" label="Fahrzeugklasse"
                                         placeholder="Fahrzeugklasse auswählen oder suchen"
-                                        prepend-inner-icon="mdi-car-multiple"
-                                        variant="outlined"
-                                        density="comfortable"
-                                        hide-details="auto"
-                                        clearable
-                                        :loading="carGroupsLoading"
-                                        :disabled="!isAdminOrTrainer"
-                                        @update:search="searchCarGroups"
-                                    ></v-autocomplete>
+                                        prepend-inner-icon="mdi-car-multiple" variant="outlined" density="comfortable"
+                                        hide-details="auto" clearable :loading="carGroupsLoading"
+                                        :disabled="!isAdminOrTrainer" @update:search="searchCarGroups"></v-autocomplete>
                                 </v-col>
                             </v-row>
                         </template>
@@ -106,35 +69,19 @@
                         <v-col cols="12" sm="8">
                             <DefaultHeader :title="'Kundeninformation'"></DefaultHeader>
 
-                            <CustomerInfoList
-                                v-if="!editMode"
-                                :customer="carDetails.data.customer"
-                                :customerId="carDetails.data.customer_id"
-                                :labels="labels">
+                            <CustomerInfoList v-if="!editMode" :customer="carDetails.data.customer"
+                                :customerId="carDetails.data.customer_id" :labels="labels">
                             </CustomerInfoList>
 
                             <!-- Kunde auswählen nur für Admin/Trainer -->
-                            <v-autocomplete
-                                v-else-if="isAdminOrTrainer"
-                                v-model="editedCarData.customer"
-                                :items="customers"
-                                item-title="full_name"
-                                item-value="id"
-                                label="Kunde"
-                                placeholder="Kunde auswählen oder suchen"
-                                prepend-inner-icon="mdi-account"
-                                variant="outlined"
-                                density="comfortable"
-                                hide-details="auto"
-                                clearable
-                                :loading="customersLoading"
-                                :search-input.sync="customerSearch"
-                                @update:search-input="searchCustomers"
-                                return-object>
+                            <v-autocomplete v-else-if="isAdminOrTrainer" v-model="editedCarData.customer"
+                                :items="customers" item-title="full_name" item-value="id" label="Kunde"
+                                placeholder="Kunde auswählen oder suchen" prepend-inner-icon="mdi-account"
+                                variant="outlined" density="comfortable" hide-details="auto" clearable
+                                :loading="customersLoading" :search-input.sync="customerSearch"
+                                @update:search-input="searchCustomers" return-object>
                                 <template v-slot:item="{ props, item }">
-                                    <v-list-item
-                                        v-bind="props"
-                                        :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                    <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
                                         :subtitle="item.raw.email">
                                     </v-list-item>
                                 </template>
@@ -144,9 +91,7 @@
                             </v-autocomplete>
                         </v-col>
 
-                        <v-btn
-                            class="mt-4"
-                            color="primary"
+                        <v-btn class="mt-4" color="primary"
                             v-if="isAdminOrTrainer && (!carDetails.data.customer || carDetails.data.customer === 0)"
                             @click="openCustomerAddDialog">
                             Kunde hinzufügen
@@ -154,9 +99,7 @@
                     </v-sheet>
 
                     <!-- Metadaten -->
-                    <MetaData
-                        :labels="labels"
-                        :formattedCreatedAt="formattedCreatedAt"
+                    <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt"
                         :formattedUpdatedAt="formattedUpdatedAt">
                     </MetaData>
                 </v-card-text>
@@ -174,9 +117,7 @@
                     <!-- Ansichtsmodus Aktionen -->
                     <template v-else>
                         <!-- EditButton nur für Admin/Trainer -->
-                        <EditButton
-                            v-if="isAdminOrTrainer"
-                            :switchEditMode="switchEditMode">
+                        <EditButton v-if="isAdminOrTrainer" :switchEditMode="switchEditMode">
                         </EditButton>
                     </template>
                 </v-card-actions>
@@ -184,19 +125,12 @@
         </template>
 
         <!-- Kunde hinzufügen Dialog (nur geöffnet, wenn Admin/Trainer) -->
-        <CustomerAddDialog
-            ref="customerAddDialog"
-            @customer-added="handleCustomerAdded"
-            @customer-selected="handleCustomerSelected"
-            @error="handleCustomerAddError">
+        <CustomerAddDialog ref="customerAddDialog" @customer-added="handleCustomerAdded"
+            @customer-selected="handleCustomerSelected" @error="handleCustomerAddError">
         </CustomerAddDialog>
 
         <!-- Snackbar für Benachrichtigungen -->
-        <SnackBar
-            v-if="snackbar.show"
-            :text="snackbar.text"
-            :color="snackbar.color"
-            @close="snackbar.show = false">
+        <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false">
         </SnackBar>
     </v-container>
 </template>
@@ -251,6 +185,7 @@ export default {
                     },
                 }
             },
+            carImages: [],
             editedCarData: {},
             headerTitle: "Fahrzeugdetails",
             headerIcon: "mdi-car",
@@ -311,32 +246,7 @@ export default {
             }
             return customerId;
         },
-        images() {
-            const img = this.carDetails.data?.images;
-            console.log("Raw images data:", img);
 
-            if (!img) {
-                return [];
-            }
-
-            const mapImage = (image) => {
-                if (image && image.id) {
-                    return {
-                        id: image.id,
-                        path: image.path,
-                        url: image.url
-                    };
-                }
-                return null;
-            };
-
-            if (Array.isArray(img)) {
-                return img.filter(Boolean).map(mapImage).filter(Boolean);
-            }
-
-            const singleImage = mapImage(img);
-            return singleImage ? [singleImage] : [];
-        },
         formattedCreatedAt() {
             return this.formatDate(this.carDetails.data?.created_at);
         },
@@ -349,6 +259,7 @@ export default {
             await this.getCar();
             await this.fetchCustomers();
             await this.fetchCarGroups();
+            await this.loadAllImages();
         } catch (error) {
             this.error = error.message;
             this.showSnackbar(error.message, 'error');
@@ -357,6 +268,24 @@ export default {
         }
     },
     methods: {
+
+        async loadAllImages() {
+            try {
+
+                const response = await axios.get(
+                    `/api/cars/${this.$route.params.kennzeichen}/all-images`
+                );
+
+                console.table(response.data.images); 
+                // Setze die Bilder
+                this.carImages = response.data.images || [];
+
+            } catch (error) {
+                console.error('Error loading all images:', error);
+                console.error('Error response:', error.response?.data);
+            }
+        },
+
         formatDate(dateString) {
             if (!dateString) return 'Unbekannt';
 
@@ -462,8 +391,6 @@ export default {
                     dataToSubmit.customer_id = null;
                 }
 
-                console.log('Submitting car data:', dataToSubmit);
-
                 await axios.put(
                     `/api/cars/cardetails/${this.$route.params.kennzeichen}`,
                     dataToSubmit
@@ -505,14 +432,17 @@ export default {
 
         // Image Gallery Event Handlers
         async handleImagesUploaded(response) {
-            await this.getCar();
+            await this.loadAllImages();
         },
 
+
         async handleImageDeleted(imageId) {
+            this.loadAllImages();
             await this.getCar();
         },
 
         async handleImageReplaced(data) {
+            this.loadAllImages();
             await this.getCar();
         },
 
@@ -586,10 +516,8 @@ export default {
         // Customer Search Methods
         async fetchCustomers(query = '') {
             this.customersLoading = true;
-            console.log('Fetching customers with query:', query);
             try {
                 const response = await axios.get(`/api/customers/search?query=${query}`);
-                console.log('Customer API response:', response.data);
                 this.customers = response.data.data.map(customer => ({
                     id: customer.id,
                     firstname: customer.firstname,
@@ -597,7 +525,6 @@ export default {
                     full_name: `${customer.firstname} ${customer.lastname}`,
                     email: customer.email
                 }));
-                console.log('Mapped customers:', this.customers);
             } catch (error) {
                 console.error('Error fetching customers:', error.response || error);
                 this.showSnackbar('Fehler beim Laden der Kunden', 'error');

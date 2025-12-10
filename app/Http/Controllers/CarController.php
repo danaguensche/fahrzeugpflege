@@ -343,4 +343,68 @@ class CarController extends Controller
             return response()->json(['error' => 'Fehler beim Abrufen der verfügbaren Fahrzeuge'], 500);
         }
     }
+
+    public function getAllImages($kennzeichen)
+    {
+        try {
+            $car = Car::where('Kennzeichen', $kennzeichen)->firstOrFail();
+            Log::info('Car found:', ['id' => $car->id]);
+
+            $carImages = $car->images()->get()->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'path' => 'storage/' . $image->path,
+                    'file_name' => $image->file_name ?? null,
+                    'type' => 'car_image',
+                    'source' => 'Fahrzeug',
+                    'created_at' => $image->created_at,
+                ];
+            });
+
+            $jobImages = DB::table('image_reports')
+                ->where('car_id', $car->id)
+                ->get()
+                ->map(function ($image) {
+                    return [
+                        'id' => $image->id,
+                        'path' => 'storage/' . $image->path,
+                        'file_name' => $image->file_name ?? null,
+                        'type' => 'job_image',
+                        'source' => 'Auftrag #' . $image->job_id,
+                        'job_id' => $image->job_id,
+                        'created_at' => $image->created_at,
+                    ];
+                });
+
+            $allImages = $carImages->concat($jobImages)
+                ->sortByDesc('created_at')
+                ->values();
+
+            Log::info('Images loaded:', [
+                'car_images' => $carImages->count(),
+                'job_images' => $jobImages->count(),
+                'total' => $allImages->count()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'images' => $allImages,
+                'car_images_count' => $carImages->count(),
+                'job_images_count' => $jobImages->count(),
+                'total_count' => $allImages->count(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in getAllImages:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler beim Laden der Bilder',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

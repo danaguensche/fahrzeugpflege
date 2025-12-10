@@ -17,7 +17,10 @@
                     :apiHeaders="apiHeaders" uploadDialogTitle="Auftragsbilder hochladen"
                     @images-uploaded="handleImagesUploaded" @image-deleted="handleImageDeleted"
                     @image-replaced="handleImageReplaced" @success="showSuccessMessage" @error="showErrorMessage"
-                    @loading="setImageLoading">
+                    @loading="setImageLoading"
+                    isJobImage="true"
+                    :jobId="jobId"
+                    :carId="jobDetails.data.car ? jobDetails.data.car.id : null">
                 </ImageGallery>
 
                 <!-- Job information -->
@@ -341,6 +344,7 @@ export default {
                     trainee: null,
                 }
             },
+            jobId: this.$route.params.id,
             //für Fahrzeugdropdown
             availableCars: [],
             editedJobData: {},
@@ -612,10 +616,6 @@ export default {
                     this.editedJobData.Status = foundStatus ? foundStatus.value : this.jobDetails.data.Status;
                 }
 
-                console.log('JobDetails component received jobDetails:', this.jobDetails);
-                console.log('JobDetails component received car data:', this.jobDetails.data.car);
-                console.log('JobDetails component received trainee data:', this.jobDetails.data.trainee);
-
                 if (this.jobDetails.data.customer) {
                     this.editedJobData.customer = {
                         id: this.jobDetails.data.customer.id,
@@ -670,8 +670,6 @@ export default {
 
             if (this.editMode) {
                 this.editedJobData = { ...this.jobDetails.data };
-                console.log('Entering edit mode. editedJobData:', this.editedJobData);
-
                 // Map status to its value for the dropdown
                 if (this.jobDetails.data.Status) {
                     const foundStatus = this.statuses.find(s => s.title === this.jobDetails.data.Status);
@@ -854,8 +852,6 @@ export default {
                     dataToSubmit.scheduled_at = formatDateForBackend(dataToSubmit.scheduled_at);
                 }
 
-                console.log('Submitting job data:', dataToSubmit);
-
                 if (!dataToSubmit.images || !Array.isArray(dataToSubmit.images) || dataToSubmit.images.length === 0) {
                     delete dataToSubmit.images;
                 } else {
@@ -874,7 +870,6 @@ export default {
                 await this.getJob();
                 this.editMode = false;
                 this.showSnackbar("Jobdaten erfolgreich gespeichert", 'success');
-                console.log('Job data saved successfully:', dataToSubmit);
             } catch (error) {
                 console.error('Error saving job data:', error);
                 console.error('Error response:', error.response?.data);

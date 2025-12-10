@@ -273,21 +273,21 @@ class JobController extends Controller
                     'status' => 'required|string',
                 ]);
 
-                                // Fahrzeug dem Kunden zuweisen, falls es noch keinen Kunden hat
-                                if (isset($validatedData['car_id']) && isset($validatedData['customer_id'])) {
-                                    $car = Car::find($validatedData['car_id']);
-                
-                                    if ($car && !$car->customer_id) {
-                                        $car->customer_id = $validatedData['customer_id'];
-                                        $car->save();
-                
-                                        Log::info('Car assigned to customer during job update', [
-                                            'car_id' => $car->id,
-                                            'customer_id' => $validatedData['customer_id'],
-                                            'job_id' => $id
-                                        ]);
-                                    }
-                                }
+                // Fahrzeug dem Kunden zuweisen, falls es noch keinen Kunden hat
+                if (isset($validatedData['car_id']) && isset($validatedData['customer_id'])) {
+                    $car = Car::find($validatedData['car_id']);
+
+                    if ($car && !$car->customer_id) {
+                        $car->customer_id = $validatedData['customer_id'];
+                        $car->save();
+
+                        Log::info('Car assigned to customer during job update', [
+                            'car_id' => $car->id,
+                            'customer_id' => $validatedData['customer_id'],
+                            'job_id' => $id
+                        ]);
+                    }
+                }
 
                 $job->update($validatedData);
 
@@ -306,11 +306,11 @@ class JobController extends Controller
                 ]);
             } else { // Admin oder Trainer
                 DB::beginTransaction();
-            
+
                 if ($request->has('scheduled_at') && $request->input('scheduled_at') === '') {
                     $request->merge(['scheduled_at' => null]);
                 }
-            
+
                 $validatedData = $request->validate([
                     'title' => 'sometimes|required|string|max:255',
                     'description' => 'nullable|string',
@@ -326,15 +326,15 @@ class JobController extends Controller
                     'images' => 'nullable|array',
                     'images.*' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
                 ]);
-            
+
                 // Fahrzeug dem Kunden zuweisen, falls es noch keinen Kunden hat
                 if (isset($validatedData['car_id']) && isset($validatedData['customer_id'])) {
                     $car = Car::find($validatedData['car_id']);
-                    
+
                     if ($car && is_null($car->customer_id)) {
                         $car->customer_id = $validatedData['customer_id'];
                         $saved = $car->save();
-                        
+
                         Log::info('Car assigned to customer during job update', [
                             'car_id' => $car->id,
                             'customer_id' => $validatedData['customer_id'],
@@ -351,15 +351,15 @@ class JobController extends Controller
                         ]);
                     }
                 }
-            
+
                 $job->update($validatedData);
-            
+
                 // Services aktualisieren
                 if ($request->has('services')) {
                     $serviceIds = collect($request->input('services'))->pluck('id')->toArray();
                     $job->services()->sync($serviceIds);
                 }
-            
+
                 // Neue Bilder hochladen
                 if ($request->hasFile('images')) {
                     foreach ($request->file('images') as $image) {
@@ -370,15 +370,14 @@ class JobController extends Controller
                         ]);
                     }
                 }
-            
+
                 DB::commit();
-            
+
                 return response()->json([
                     'message' => 'Job erfolgreich aktualisiert',
                     'job' => $job->load(['services', 'images', 'customer', 'car', 'trainee'])
                 ]);
             }
-            
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             return response()->json(['error' => $e->errors()], 422);
@@ -719,5 +718,32 @@ class JobController extends Controller
                 'total' => 0
             ], 500);
         }
+    }
+
+    public function assignToCar(Request $request, $jobId)
+    {
+        \Log::info('=== ASSIGN TO CAR ===');
+        \Log::info('Job ID:', ['job_id' => $jobId]);
+        \Log::info('Request all:', $request->all());
+
+        $validated = $request->validate([
+            'image_ids' => 'required|array',
+            'image_ids.*' => 'exists:image_reports,id',
+            'car_id' => 'required|exists:cars,id'
+        ]);
+
+        $job = Job::findOrFail($jobId);
+
+        // Nur Bilder updaten, die zum Job gehören
+        $updatedCount = $job->images()  // Assuming Job has images() relation to images_reports
+            ->whereIn('id', $validated['image_ids'])
+            ->update(['car_id' => $validated['car_id']]);
+
+        \Log::info('Updated count:', ['count' => $updatedCount]);
+
+        return response()->json([
+            'message' => 'Bilder erfolgreich dem Fahrzeug zugewiesen',
+            'updated_count' => $updatedCount
+        ]);
     }
 }

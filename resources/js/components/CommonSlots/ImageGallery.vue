@@ -1,13 +1,8 @@
 <template>
     <div class="image-gallery-wrapper">
         <!-- Image Carousel -->
-        <ImageCarousel 
-            :images="images" 
-            :editMode="editMode"
-            @upload-image="openImageUploadDialog"
-            @delete-image="handleImageDelete"
-            @replace-image="handleImageReplace"
-            :canEdit="canEdit">
+        <ImageCarousel :images="images" :editMode="editMode" @upload-image="openImageUploadDialog"
+            @delete-image="handleImageDelete" @replace-image="handleImageReplace" :canEdit="canEdit">
         </ImageCarousel>
 
         <!-- Image Upload Dialog -->
@@ -23,32 +18,24 @@
                         <v-row>
                             <!-- Drag & Drop Zone -->
                             <v-col cols="12">
-                                <div
-                                    class="drag-drop-zone"
+                                <div class="drag-drop-zone"
                                     :class="{ 'drag-over': imageUploadDialog.isDragOver, 'disabled': imageUploadDialog.uploading }"
-                                    @dragover.prevent="handleDragOver"
-                                    @dragleave.prevent="handleDragLeave"
-                                    @drop.prevent="handleDrop"
-                                    @click="triggerFileInput"
-                                >
-                                    <input
-                                        ref="fileInput"
-                                        type="file"
-                                        multiple
-                                        accept="image/*"
-                                        style="display: none;"
-                                        @change="handleFileSelect"
-                                    />
+                                    @dragover.prevent="handleDragOver" @dragleave.prevent="handleDragLeave"
+                                    @drop.prevent="handleDrop" @click="triggerFileInput">
+                                    <input ref="fileInput" type="file" multiple accept="image/*" style="display: none;"
+                                        @change="handleFileSelect" />
 
                                     <div class="drag-drop-content">
-                                        <v-icon size="48" :color="imageUploadDialog.isDragOver ? 'primary' : 'grey lighten-1'">
-                                            {{ imageUploadDialog.isDragOver ? 'mdi-cloud-upload' : 'mdi-cloud-upload-outline' }}
+                                        <v-icon size="48"
+                                            :color="imageUploadDialog.isDragOver ? 'primary' : 'grey lighten-1'">
+                                            {{ imageUploadDialog.isDragOver ? 'mdi-cloud-upload' :
+                                            'mdi-cloud-upload-outline' }}
                                         </v-icon>
-                                        
+
                                         <h3 class="mt-4 mb-2">
                                             {{ imageUploadDialog.isDragOver ? 'Dateien hier ablegen' : 'Bilder hochladen' }}
                                         </h3>
-                                        
+
                                         <p class="grey--text">
                                             Ziehen Sie Bilder hierher oder klicken Sie zum Auswählen
                                         </p>
@@ -84,14 +71,10 @@
                                         Vorschau:
                                     </v-card-subtitle>
                                     <v-row dense class="pa-2">
-                                        <v-col v-for="(preview, index) in imageUploadDialog.imagePreviews" :key="index" cols="12" sm="6" md="4">
+                                        <v-col v-for="(preview, index) in imageUploadDialog.imagePreviews" :key="index"
+                                            cols="12" sm="6" md="4">
                                             <v-card outlined>
-                                                <v-img
-                                                    :src="preview.src"
-                                                    height="150"
-                                                    contain
-                                                    class="ma-2"
-                                                ></v-img>
+                                                <v-img :src="preview.src" height="150" contain class="ma-2"></v-img>
                                                 <v-card-text class="pt-0">
                                                     <v-chip small color="primary" outlined class="mr-2">
                                                         {{ formatFileSize(preview.size) }}
@@ -108,12 +91,8 @@
 
                             <!-- Upload Progress -->
                             <v-col cols="12" v-if="imageUploadDialog.uploading">
-                                <v-progress-linear
-                                    :value="imageUploadDialog.uploadProgress"
-                                    color="primary"
-                                    height="25"
-                                    rounded
-                                >
+                                <v-progress-linear :value="imageUploadDialog.uploadProgress" color="primary" height="25"
+                                    rounded>
                                     <template v-slot:default="{ value }">
                                         <strong>{{ Math.ceil(value) }}%</strong>
                                     </template>
@@ -125,11 +104,7 @@
 
                             <!-- Error Message -->
                             <v-col cols="12" v-if="imageUploadDialog.errorMessage">
-                                <v-alert
-                                    type="error"
-                                    dismissible
-                                    @input="imageUploadDialog.errorMessage = ''"
-                                >
+                                <v-alert type="error" dismissible @input="imageUploadDialog.errorMessage = ''">
                                     {{ imageUploadDialog.errorMessage }}
                                 </v-alert>
                             </v-col>
@@ -139,20 +114,13 @@
 
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn
-                        color="grey darken-1"
-                        text
-                        @click="closeImageUploadDialog"
-                        :disabled="imageUploadDialog.uploading"
-                    >
+                    <v-btn color="grey darken-1" text @click="closeImageUploadDialog"
+                        :disabled="imageUploadDialog.uploading">
                         Abbrechen
                     </v-btn>
-                    <v-btn
-                        color="primary"
-                        @click="uploadImages"
+                    <v-btn color="primary" @click="uploadImages"
                         :disabled="imageUploadDialog.selectedFiles.length === 0 || imageUploadDialog.uploading"
-                        :loading="imageUploadDialog.uploading"
-                    >
+                        :loading="imageUploadDialog.uploading">
                         <v-icon left>mdi-upload</v-icon>
                         Hochladen
                     </v-btn>
@@ -215,6 +183,21 @@ export default {
         apiHeaders: {
             type: Object,
             default: () => ({})
+        },
+
+        isJobImage: {
+            type: Boolean,
+            default: false
+        },
+
+        carId: {
+            type: Number,
+            default: null
+        },
+
+        jobId: {
+            type: Number,
+            default: null
         }
     },
     data() {
@@ -351,10 +334,10 @@ export default {
             for (const file of files) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    this.imageUploadDialog.imagePreviews.push({ 
-                        src: e.target.result, 
-                        name: file.name, 
-                        size: file.size 
+                    this.imageUploadDialog.imagePreviews.push({
+                        src: e.target.result,
+                        name: file.name,
+                        size: file.size
                     });
                 };
                 reader.readAsDataURL(file);
@@ -377,40 +360,65 @@ export default {
             }
 
             try {
-                const response = await axios.post(
-                    this.uploadUrl,
-                    formData,
-                    {
-                        headers: { 
-                            'Content-Type': 'multipart/form-data',
-                            ...this.defaultHeaders
-                        },
-                        onUploadProgress: progressEvent => {
-                            if (progressEvent.lengthComputable) {
-                                this.imageUploadDialog.uploadProgress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                            }
-                        }
-                    }
-                );
-
-                this.imageUploadDialog.uploadProgress = 100;
-                this.$emit('images-uploaded', response.data);
-                this.$emit('success', 'Bilder erfolgreich hochgeladen');
-                
-                setTimeout(() => this.closeImageUploadDialog(), 500);
-
-            } catch (error) {
-                const errorMessage = error.response?.data?.message || 'Fehler beim Hochladen der Bilder';
-                this.handleImageUploadError(errorMessage);
-                this.$emit('error', errorMessage);
-            } finally {
-                this.imageUploadDialog.uploading = false;
+    const uploadResponse = await axios.post(
+        this.uploadUrl,
+        formData,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                ...this.defaultHeaders
+            },
+            onUploadProgress: progressEvent => {
+                if (progressEvent.lengthComputable) {
+                    this.imageUploadDialog.uploadProgress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                }
             }
+        }
+    );
+
+    this.imageUploadDialog.uploadProgress = 100;
+    
+        if (this.isJobImage && this.carId) {
+        let uploadedImageIds = [];
+        
+        if (uploadResponse.data.images) {
+            uploadedImageIds = uploadResponse.data.images.map(img => img.id);
+        } else if (uploadResponse.data.data) {
+            uploadedImageIds = uploadResponse.data.data.map(img => img.id);
+        } else if (Array.isArray(uploadResponse.data)) {
+            uploadedImageIds = uploadResponse.data.map(img => img.id);
+        } else if (uploadResponse.data.image) {
+            uploadedImageIds = [uploadResponse.data.image.id];
+        }
+        
+        if (uploadedImageIds.length > 0) {
+            const assignData = {
+                image_ids: uploadedImageIds,
+                car_id: this.carId
+            };            
+            await axios.post(`/api/jobs/${this.jobId}/assign-to-car`, assignData);
+        }
+    }
+
+    this.$emit('images-uploaded', uploadResponse.data);
+    this.$emit('success', 'Bilder erfolgreich hochgeladen');
+
+    setTimeout(() => this.closeImageUploadDialog(), 500);
+
+} catch (error) {
+    console.log('Error uploading/assigning images:', error);
+    console.log('Error response:', error.response?.data);
+    const errorMessage = error.response?.data?.message || 'Fehler beim Hochladen der Bilder';
+    this.handleImageUploadError(errorMessage);
+    this.$emit('error', errorMessage);
+} finally {
+    this.imageUploadDialog.uploading = false;
+}
+
         },
 
         handleImageDelete(imageId) {
             try {
-                console.log('Attempting to delete image with ID:', imageId);
                 if (imageId) {
                     this.deleteImageFromServer(imageId);
                 } else {
@@ -426,9 +434,9 @@ export default {
         async deleteImageFromServer(imageId) {
             try {
                 this.$emit('loading', true);
-                
+
                 const deleteUrl = this.deleteUrlTemplate.replace('{imageId}', imageId);
-                
+
                 const response = await fetch(deleteUrl, {
                     method: 'DELETE',
                     headers: {
@@ -458,7 +466,7 @@ export default {
             }
 
             this.$emit('loading', true);
-            
+
             try {
                 const image = this.images[imageIndex];
                 if (!image) {
@@ -469,9 +477,6 @@ export default {
                 if (!imageId) {
                     throw new Error('Bild-ID nicht gefunden');
                 }
-
-                console.log('Replacing image with ID:', imageId);
-
                 const formData = new FormData();
                 formData.append('image', newImageFile);
 
@@ -492,7 +497,7 @@ export default {
 
                 this.$emit('image-replaced', { imageIndex, imageId, newImageFile });
                 this.$emit('success', 'Bild erfolgreich ersetzt');
-                
+
             } catch (error) {
                 console.error('Error replacing image:', error);
                 const errorMessage = error.response?.data?.error || error.message || 'Fehler beim Ersetzen des Bildes';

@@ -273,7 +273,6 @@ export default {
                     role: user?.role || 'trainee',
                     id: user?.id || ''
                 });
-                console.log('Store updated - userRole:', this.$store.state.auth.userRole); // Debug
             } catch (error) {
                 console.error('Store update failed:', error);
             }
