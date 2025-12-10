@@ -17,9 +17,7 @@
                     :apiHeaders="apiHeaders" uploadDialogTitle="Auftragsbilder hochladen"
                     @images-uploaded="handleImagesUploaded" @image-deleted="handleImageDeleted"
                     @image-replaced="handleImageReplaced" @success="showSuccessMessage" @error="showErrorMessage"
-                    @loading="setImageLoading"
-                    isJobImage="true"
-                    :jobId="jobId"
+                    @loading="setImageLoading" isJobImage="true" :jobId="jobId"
                     :carId="jobDetails.data.car ? jobDetails.data.car.id : null">
                 </ImageGallery>
 
@@ -998,60 +996,62 @@ export default {
             }
             return '';
         },
-    },
 
-    searchCars(query) {
-        if (this.carSearchTimeout) {
-            clearTimeout(this.carSearchTimeout);
-        }
-        this.carSearchTimeout = setTimeout(() => {
-            this.fetchCars(query);
-        }, 300);
-    },
+        searchCars(query) {
+            if (this.carSearchTimeout) {
+                clearTimeout(this.carSearchTimeout);
+            }
+            this.carSearchTimeout = setTimeout(() => {
+                this.fetchCars(query);
+            }, 300);
+        },
 
-    async fetchServices() {
-        this.servicesLoading = true;
-        try {
-            const response = await axios.get(`/api/services`);
-            this.services = response.data.data.map(service => ({
-                id: service.id,
-                name: service.name
-            }));
-        } catch (error) {
-            console.error('Error fetching services:', error.response || error);
-            this.showSnackbar('Fehler beim Laden der Dienstleistungen', 'error');
-        } finally {
-            this.servicesLoading = false;
-        }
-    },
+        async fetchServices() {
+            this.servicesLoading = true;
+            try {
+                const response = await axios.get(`/api/services`);
+                this.services = response.data.data.map(service => ({
+                    id: service.id,
+                    name: service.name
+                }));
+            } catch (error) {
+                console.error('Error fetching services:', error.response || error);
+                this.showSnackbar('Fehler beim Laden der Dienstleistungen', 'error');
+            } finally {
+                this.servicesLoading = false;
+            }
+        },
 
-    async fetchTrainees(query = '') {
-        this.traineesLoading = true;
-        try {
-            const response = await axios.get(`/api/users/search?query=${query}`);
-            this.trainees = response.data.data.map(trainee => ({
-                id: trainee.id,
-                firstname: trainee.firstname,
-                lastname: trainee.lastname,
-                full_name: `${trainee.firstname} ${trainee.lastname}`,
-                email: trainee.email
-            }));
-        } catch (error) {
-            console.error('Error fetching trainees:', error.response || error);
-            this.showSnackbar('Fehler beim Laden der Mitarbeiter', 'error');
-        } finally {
-            this.traineesLoading = false;
-        }
-    },
+        async fetchTrainees(query = '') {
+            this.traineesLoading = true;
+            console.log('fetchTrainees called with query:', query);
+            try {
+                const response = await axios.get(`/api/users/search?query=${query}`);
+                console.log('Response:', response.data);
+                this.trainees = response.data.data.map(trainee => ({
+                    id: trainee.id,
+                    firstname: trainee.firstname,
+                    lastname: trainee.lastname,
+                    full_name: `${trainee.firstname} ${trainee.lastname}`,
+                    email: trainee.email
+                }));
+            } catch (error) {
+                console.error('Error fetching trainees:', error.response || error);
+                this.showSnackbar('Fehler beim Laden der Mitarbeiter', 'error');
+            } finally {
+                this.traineesLoading = false;
+            }
+        },
 
-    searchTrainees(query) {
-        if (this.traineeSearchTimeout) {
-            clearTimeout(this.traineeSearchTimeout);
-        }
-        this.traineeSearchTimeout = setTimeout(() => {
-            this.fetchTrainees(query);
-        }, 300);
-    },
+        searchTrainees(query) {
+            if (this.traineeSearchTimeout) {
+                clearTimeout(this.traineeSearchTimeout);
+            }
+            this.traineeSearchTimeout = setTimeout(() => {
+                this.fetchTrainees(query);
+            }, 300);
+        },
+    }
 }
 
 </script>
