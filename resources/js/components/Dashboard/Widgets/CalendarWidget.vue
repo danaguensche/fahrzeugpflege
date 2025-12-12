@@ -103,10 +103,10 @@ export default {
     },
     mounted() {
         this.fetchTodayEvents();
-        // Aktualisiere alle 5 Minuten
+        // Aktualisiere alle 30 Sekunden
         this.refreshInterval = setInterval(() => {
             this.fetchTodayEvents();
-        }, 5 * 60 * 1000);
+        },  30 * 1000);
     },
     beforeDestroy() {
         if (this.refreshInterval) {

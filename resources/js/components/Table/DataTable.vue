@@ -47,8 +47,8 @@
 
                             <!-- Vehicle Data Fields -->
                             <td v-for="field in fields" :key="field" class="fixed-width">
-                                <!-- Edit Mode (nur wenn NICHT useExternalEdit) -->
-                                <template v-if="editItemId === item[itemKey] && !useExternalEdit">
+                                <!-- Edit Mode -->
+                                <template v-if="editItemId === item[itemKey]">
                                     <!-- Kennzeichen - link only, not editable -->
                                     <template v-if="field === itemKey">
                                         <router-link
@@ -61,15 +61,22 @@
                                         <span v-for="(service, index) in item[field]" :key="service.id">
                                             {{ service.title }}{{ index < item[field].length - 1 ? ', ' : '' }} </span>
                                     </template>
-                                    <!-- The rest of the fields are editable -->
-                                    <template v-else>
+                                    <!-- Status field - always editable with dropdown -->
+                                    <template v-else-if="field === 'status'">
+                                        <v-select v-model="editItem[field]" :items="getHeader(field).options"
+                                            item-title="title" item-value="value"
+                                            :rules="Array.isArray(fieldRules) ? fieldRules : []"
+                                            :error-messages="fieldErrors[field]" density="compact"
+                                            variant="outlined"></v-select>
+                                    </template>
+                                    <!-- The rest of the fields - only editable for admin/trainer -->
+                                    <template v-else-if="!canEditStatusOnly">
                                         <template v-if="getHeader(field).type === 'select'">
                                             <v-select v-model="editItem[field]" :items="getHeader(field).options"
                                                 item-title="title" item-value="value"
                                                 :rules="Array.isArray(fieldRules) ? fieldRules : []"
                                                 :error-messages="fieldErrors[field]" density="compact"
-                                                variant="outlined"
-                                                :disabled="canEditStatusOnly && field !== 'status'"></v-select>
+                                                variant="outlined"></v-select>
                                         </template>
                                         <template v-else>
                                             <v-text-field v-model="editItem[field]"
@@ -77,9 +84,16 @@
                                                 :error-messages="fieldErrors[field]" density="compact"
                                                 variant="outlined"
                                                 :type="['scheduled_at', 'cleaning_start'].includes(field) ? 'datetime-local' : 'text'"
-                                                :disabled="canEditStatusOnly && field !== 'status'" class="mt-5">
+                                                class="mt-5">
                                             </v-text-field>
                                         </template>
+                                    </template>
+                                    <!-- For trainees: show read-only text for non-status fields -->
+                                    <template v-else>
+                                        <span v-if="field === 'scheduled_at' || field === 'cleaning_start'">
+                                            {{ formatDateTime(item[field]) }}
+                                        </span>
+                                        <span v-else>{{ item[field] || '' }}</span>
                                     </template>
                                 </template>
 
@@ -124,8 +138,8 @@
                             <td class="table-icon fixed-width"
                                 v-if="isAdminOrTrainer || (canEditStatusOnly && item.status)">
                                 <v-btn variant="plain" icon @click="handleEditClick(item)">
-                                    <v-icon>{{ editItemId === item[itemKey] && !useExternalEdit ? 'mdi-content-save' :
-                                        'mdi-pencil' }}</v-icon>
+                                    <v-icon>{{ editItemId === item[itemKey] ? 'mdi-content-save' : 'mdi-pencil'
+                                    }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
@@ -253,6 +267,7 @@ export default {
         return {
             statusFilters: [],
             isRefreshing: false,
+            refreshInterval: null,
             items: [],
             selectedItems: [],
             itemToDelete: null,
@@ -317,16 +332,28 @@ export default {
     },
 
     mounted() {
-        console.log('DataTable.vue mounted');
         this.loadItems();
+
+        // Auto-Refresh alle 10 Sekunden starten
+        this.autoRefreshInterval = setInterval(() => {
+            if (!this.isEditing) {  // Nur refreshen wenn nicht gerade editiert wird
+                if (this.isSearchActive && this.searchString && this.searchString.trim()) {
+                    this.searchItems(this.searchString, this.options.page);
+                } else {
+                    this.loadItems();
+                }
+            }
+        }, 10000);  // 10000 ms = 10 Sekunden
     },
 
     methods: {
 
         handleEditClick(item) {
-            if (this.useExternalEdit) {
+            // Bei externem Editing nur für Admin/Trainer
+            if (this.useExternalEdit && !this.canEditStatusOnly) {
                 this.$emit('edit-item', { ...item });
             } else {
+                // Inline-Editing für alle (Trainees nur Status)
                 if (this.editItemId === item[this.itemKey]) {
                     this.saveItem();
                 } else {
@@ -567,16 +594,13 @@ export default {
         },
 
         async confirmEditItem() {
-            // Bei externem Editing: nichts tun (wird vom Parent gehandelt)
-            if (this.useExternalEdit) {
-                return;
-            }
-
             try {
                 let payload = {};
                 if (this.canEditStatusOnly) {
+                    // Trainees senden nur den Status
                     payload = { status: this.editItem.status };
                 } else {
+                    // Admin/Trainer senden alle Felder
                     this.fields.forEach(field => {
                         payload[field] = this.editItem[field];
                     });
@@ -604,8 +628,10 @@ export default {
             try {
                 let payload = {};
                 if (this.canEditStatusOnly) {
+                    // Trainees senden nur den Status
                     payload = { status: this.editItem.status };
                 } else {
+                    // Admin/Trainer senden alle Felder
                     this.fields.forEach(field => {
                         payload[field] = this.editItem[field];
                     });
@@ -732,7 +758,12 @@ export default {
         if (this.searchDebounceTimer) {
             clearTimeout(this.searchDebounceTimer);
         }
+        // Auto-Refresh stoppen
+        if (this.autoRefreshInterval) {
+            clearInterval(this.autoRefreshInterval);
+        }
     }
+
 }
 </script>
 

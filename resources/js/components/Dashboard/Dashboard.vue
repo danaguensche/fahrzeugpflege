@@ -194,6 +194,7 @@ export default {
     gap: 16px;
     min-height: 0;
     height: 100%;
+    margin: 0 -12px;
 }
 
 .content-row .v-col {
