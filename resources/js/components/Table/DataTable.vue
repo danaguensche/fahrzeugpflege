@@ -343,7 +343,7 @@ export default {
                     this.loadItems();
                 }
             }
-        }, 10000);  // 10000 ms = 10 Sekunden
+        }, 60000);  // 60000 ms = 60 Sekunden
     },
 
     methods: {
