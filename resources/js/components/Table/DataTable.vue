@@ -267,7 +267,6 @@ export default {
         return {
             statusFilters: [],
             isRefreshing: false,
-            refreshInterval: null,
             items: [],
             selectedItems: [],
             itemToDelete: null,
@@ -333,17 +332,6 @@ export default {
 
     mounted() {
         this.loadItems();
-
-        // Auto-Refresh alle 10 Sekunden starten
-        this.autoRefreshInterval = setInterval(() => {
-            if (!this.isEditing) {  // Nur refreshen wenn nicht gerade editiert wird
-                if (this.isSearchActive && this.searchString && this.searchString.trim()) {
-                    this.searchItems(this.searchString, this.options.page);
-                } else {
-                    this.loadItems();
-                }
-            }
-        }, 60000);  // 60000 ms = 60 Sekunden
     },
 
     methods: {
@@ -758,10 +746,7 @@ export default {
         if (this.searchDebounceTimer) {
             clearTimeout(this.searchDebounceTimer);
         }
-        // Auto-Refresh stoppen
-        if (this.autoRefreshInterval) {
-            clearInterval(this.autoRefreshInterval);
-        }
+
     }
 
 }
