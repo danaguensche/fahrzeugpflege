@@ -78,7 +78,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::middleware(CheckRole::class . ':trainer,admin')->group(function () {
-        Route::post('cars', [CarController::class, 'store']);
         Route::put('cars/{kennzeichen}', [CarController::class, 'update']);
         Route::delete('cars/{kennzeichen}', [CarController::class, 'destroy']);
         Route::delete('cars', [CarController::class, 'destroyMultiple']);
