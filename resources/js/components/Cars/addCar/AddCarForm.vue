@@ -182,7 +182,7 @@ export default {
                 try {
                     const carData = {
                         Kennzeichen: this.car.Kennzeichen,
-                        Fahrzeugklasse: this.car.Fahrzeugklasse || null,
+                        Fahrzeugklasse: this.car.Fahrzeugklasse,
                         Automarke: this.car.Automarke,
                         Typ: this.car.Typ,
                         Farbe: this.car.Farbe,
@@ -190,6 +190,10 @@ export default {
                         customer_id: this.car.customer ? this.car.customer.id : null,
                         service_ids: this.car.services ? this.car.services.map(s => s.id) : [],
                     };
+
+                    if(carData.Fahrzeugklasse === '' || carData.Fahrzeugklasse === null){ 
+                        this.showSnackbar('Bitte wählen Sie eine Fahrzeugklasse aus', 'error');
+                    }
 
                     await axios.post('/api/cars', carData);
                     this.$emit('car-added');
