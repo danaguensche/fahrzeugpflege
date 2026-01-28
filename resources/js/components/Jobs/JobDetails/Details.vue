@@ -10,7 +10,7 @@
                 <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon"></Header>
 
                 <!-- Fotos -->
-                <ImageGallery :images="images" :editMode="editMode" :canEdit="isAdminOrTrainer"
+                <ImageGallery :images="images" :editMode="editMode" 
                     :uploadUrl="`/api/jobs/${$route.params.id}/images`"
                     :deleteUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`"
                     :replaceUrlTemplate="`/api/jobs/${$route.params.id}/images/{imageId}`" :entityId="$route.params.id"
@@ -210,7 +210,7 @@
                         </v-autocomplete>
 
                         <!-- Hinweis wenn Fahrzeug dem Kunden zugewiesen wird -->
-                        <v-alert v-if="editMode && editedJobData.car && editedJobData.customer && !isCarOwnedByCustomer"
+                        <v-alert v-if="editMode && editedJobData.car && editedJobData.customer && !isCarOwnedByCustomer && isAdminOrTrainer"
                             type="info" variant="tonal" class="mt-3 w-50 ms-4">
                             <v-icon start>mdi-information</v-icon>
                             Das ausgewählte Fahrzeug wird automatisch dem Kunden zugewiesen.
