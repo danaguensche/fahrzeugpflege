@@ -24,8 +24,7 @@ class JobController extends Controller
                 'customer_id' => 'required|exists:customers,id',
                 'user_id' => 'nullable|exists:users,id',
                 'status' => 'required|string',
-                'cleaning_start' => 'nullable|date',
-                'cleaning_end' => 'nullable|date',
+                'cleaning_time' => 'nullable|numeric|min:0',
                 'scheduled_at' => 'nullable|date',
                 'service_ids' => 'required|array',
                 'service_ids.*' => 'exists:services,id',
@@ -261,7 +260,7 @@ class JobController extends Controller
                     abort(403, 'Unauthorized action. You can only update your own jobs.');
                 }
 
-                $allowedFields = ['status'];
+                $allowedFields = ['status', 'cleaning_time'];
                 $requestFields = array_keys($request->all());
                 $diff = array_diff($requestFields, $allowedFields);
 
@@ -271,6 +270,7 @@ class JobController extends Controller
 
                 $validatedData = $request->validate([
                     'status' => 'required|string',
+                    'cleaning_time' => 'nullable|numeric|min:0|max:99',
                 ]);
 
                 // Fahrzeug dem Kunden zuweisen, falls es noch keinen Kunden hat
@@ -317,9 +317,8 @@ class JobController extends Controller
                     'trainee_id' => 'nullable|exists:users,id',
                     'car_id' => 'sometimes|required|exists:cars,id',
                     'customer_id' => 'sometimes|required|exists:customers,id',
-                    'cleaning_start' => 'nullable|date',
-                    'cleaning_end' => 'nullable|date|after_or_equal:cleaning_start',
                     'status' => 'sometimes|required|string',
+                    'cleaning_time' => 'nullable|numeric|min:0',
                     'scheduled_at' => 'nullable|date',
                     'services' => 'nullable|array',
                     'services.*.id' => 'required|exists:services,id',
@@ -698,9 +697,7 @@ class JobController extends Controller
                 $end = Carbon::parse($request->input('end'));
 
                 $query->where(function ($q) use ($start, $end) {
-                    $q->whereBetween('scheduled_at', [$start, $end])
-                        ->orWhereBetween('cleaning_start', [$start, $end])
-                        ->orWhereBetween('cleaning_end', [$start, $end]);
+                    $q->whereBetween('scheduled_at', [$start, $end]);
                 });
             }
 

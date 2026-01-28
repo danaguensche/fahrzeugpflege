@@ -5,28 +5,23 @@
             <div class="event-count-badge">{{ todayEvents.length }}</div>
         </div>
 
+
         <div class="widget-content">
             <div v-if="todayEvents.length === 0" class="no-events">
                 <div class="no-events-icon">📅</div>
                 <p>Keine Termine heute</p>
             </div>
 
+
             <div v-else class="events-list">
                 <div v-for="event in todayEvents" :key="event.id" class="event-item"
-                    :class="[event.status.replace(/_/g, '-'), event.type]" @click="onEventClick(event)">
+                    :class="event.status.replace(/_/g, '-')" @click="onEventClick(event)">
                     <div class="event-time">
-                        <div v-if="event.type === 'cleaning'">
-                            {{ formatTime(event.start) }} - {{ formatTime(event.end) }}
-                        </div>
-                        <div v-else>
-                            {{ formatTime(event.start) }}
-                        </div>
+                        {{ formatTime(event.start) }} - {{ formatTime(event.end) }}
                     </div>
                     <div class="event-details">
                         <div class="event-title">
                             {{ event.title }}
-                            <span v-if="event.type === 'cleaning'" class="event-type-badge cleaning">Reinigung</span>
-                            <span v-else class="event-type-badge pickup">Abholung</span>
                         </div>
                         <div class="event-customer">
                             {{ event.customer_firstname }} {{ event.customer_lastname }}
@@ -41,6 +36,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Kompakte Legende -->
         <div class="widget-legend">
@@ -60,16 +56,14 @@
                 <span class="legend-dot im-rueckblick"></span>
                 <span>Rückblick</span>
             </div>
-            <div class="legend-item">
-                <span class="legend-dot pickup"></span>
-                <span>Abholung</span>
-            </div>
         </div>
+
 
         <!-- Event Dialog -->
         <EventDialog :event="selectedEvent" :visible="eventDialog" @close="closeEventDialog" />
     </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -106,7 +100,7 @@ export default {
         // Aktualisiere alle 30 Sekunden
         this.refreshInterval = setInterval(() => {
             this.fetchTodayEvents();
-        },  30 * 1000);
+        }, 30 * 1000);
     },
     beforeDestroy() {
         if (this.refreshInterval) {
@@ -118,8 +112,10 @@ export default {
             const startOfDay = new Date(this.today);
             startOfDay.setHours(0, 0, 0, 0);
 
+
             const endOfDay = new Date(this.today);
             endOfDay.setHours(23, 59, 59, 999);
+
 
             axios.get('/api/jobs/calendar-events', {
                 params: {
@@ -130,35 +126,12 @@ export default {
                 .then(response => {
                     this.events = [];
 
+
                     response.data.items.forEach(job => {
-                        if (job.cleaning_start && job.cleaning_end) {
-                            const cleaningStart = new Date(job.cleaning_start);
-                            const cleaningEnd = new Date(job.cleaning_end);
-
-                            this.events.push({
-                                id: `${job.id}-cleaning`,
-                                start: cleaningStart.toISOString(),
-                                end: cleaningEnd.toISOString(),
-                                title: job.title,
-                                content: job.description,
-                                status: job.status,
-                                type: 'cleaning',
-                                email: job.customer ? job.customer.email : 'N/A',
-                                customer_firstname: job.customer ? job.customer.firstname : 'N/A',
-                                customer_lastname: job.customer ? job.customer.lastname : 'N/A',
-                                customer_id: job.customer ? job.customer.id : null,
-                                car_kennzeichen: job.car ? job.car.Kennzeichen : 'N/A',
-                                car_make: job.car ? job.car.make : 'N/A',
-                                car_model: job.car ? job.car.model : 'N/A',
-                                services_list: job.services ? job.services.map(service => service.title) : [],
-                                job_id: job.id,
-                                class: job.status.replace(/_/g, '-'),
-                            });
-                        }
-
                         if (job.scheduled_at) {
                             const scheduledAt = new Date(job.scheduled_at);
                             const scheduledEnd = new Date(scheduledAt.getTime() + 30 * 60 * 1000); // 30 Minuten später
+
 
                             this.events.push({
                                 id: `${job.id}-pickup`,
@@ -187,15 +160,18 @@ export default {
                 });
         },
 
+
         onEventClick(event) {
             this.selectedEvent = event;
             this.eventDialog = true;
         },
 
+
         closeEventDialog() {
             this.eventDialog = false;
             this.selectedEvent = null;
         },
+
 
         formatDate(date) {
             if (!date) return 'Unbekannt';
@@ -209,6 +185,7 @@ export default {
                 return 'Ungültiges Datum';
             }
         },
+
 
         formatTime(dateTimeString) {
             if (!dateTimeString) return 'Unbekannt';
@@ -224,9 +201,12 @@ export default {
         },
     },
 
+
 }
 
+
 </script>
+
 
 <style scoped>
 .today-widget {
@@ -239,7 +219,9 @@ export default {
     flex-direction: column;
     height: 100%;
 
+
 }
+
 
 .fixed-height {
     height: 100%;
@@ -247,10 +229,12 @@ export default {
     overflow: hidden;
 }
 
+
 .events-list {
     height: calc(100% - 150px);
     overflow-y: auto;
 }
+
 
 
 
@@ -263,12 +247,14 @@ export default {
     border-bottom: 2px solid #f8f9fa;
 }
 
+
 .widget-header h3 {
     margin: 0;
     color: #212529;
     font-size: 1.2em;
     font-weight: 600;
 }
+
 
 .event-count-badge {
     background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
@@ -284,11 +270,13 @@ export default {
     box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
 }
 
+
 .widget-content {
     flex: 1;
     min-height: 0;
     overflow: hidden;
 }
+
 
 .no-events {
     text-align: center;
@@ -296,10 +284,12 @@ export default {
     color: #6c757d;
 }
 
+
 .no-events-icon {
     font-size: 3em;
     margin-bottom: 15px;
 }
+
 
 .no-events p {
     margin: 0;
@@ -307,10 +297,12 @@ export default {
     font-weight: 500;
 }
 
+
 .events-list {
     height: 100%;
     overflow-y: auto;
 }
+
 
 .event-item {
     display: flex;
@@ -321,78 +313,62 @@ export default {
     cursor: pointer;
     transition: all 0.2s ease;
     border-left: 4px solid transparent;
+    margin-bottom: 10px;
 }
+
 
 .event-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
+
 .event-item.ausstehend {
     background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
     border-left-color: #ff9800;
 }
+
 
 .event-item.in-bearbeitung {
     background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
     border-left-color: #00bcd4;
 }
 
+
 .event-item.abgeschlossen {
     background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
     border-left-color: #4caf50;
 }
+
 
 .event-item.im-rueckblick {
     background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
     border-left-color: #e9c455;
 }
 
-.event-item.pickup {
-    border-left: 4px solid #9c27b0;
-    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
-}
 
 .event-time {
     font-weight: 700;
-    font-size: 1.1em;
+    font-size: 1em;
     color: #212529;
-    min-width: 80px;
+    min-width: 100px;
     text-align: center;
 }
+
 
 .event-details {
     flex: 1;
     z-index: 1;
 }
 
+
 .event-title {
     font-weight: 600;
     font-size: 1em;
     color: #212529;
     margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
-.event-type-badge {
-    font-size: 0.7em;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.event-type-badge.cleaning {
-    background-color: #e3f2fd;
-    color: #1976d2;
-}
-
-.event-type-badge.pickup {
-    background-color: #f3e5f5;
-    color: #7b1fa2;
-}
 
 .event-customer {
     font-size: 0.9em;
@@ -400,16 +376,19 @@ export default {
     margin-bottom: 2px;
 }
 
+
 .event-car {
     font-size: 0.8em;
     color: #6c757d;
     font-style: italic;
 }
 
+
 .event-status {
     display: flex;
     align-items: center;
 }
+
 
 .status-dot {
     width: 12px;
@@ -418,32 +397,38 @@ export default {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
+
 .status-dot.ausstehend {
     background: #ff9800;
 }
+
 
 .status-dot.in-bearbeitung {
     background: #00bcd4;
 }
 
+
 .status-dot.abgeschlossen {
     background: #4caf50;
 }
 
+
 .status-dot.im-rueckblick {
     background: #e9c455;
 }
+
 
 .widget-legend {
     display: flex;
     justify-content: flex-start;
     flex-wrap: wrap;
     gap: 15px;
-    padding: 5px;
+    padding: 15px;
     background-color: #f8f9fa;
     border-radius: 8px;
     margin-top: auto;
 }
+
 
 .legend-item {
     display: flex;
@@ -453,6 +438,7 @@ export default {
     color: #495057;
 }
 
+
 .legend-dot {
     width: 8px;
     height: 8px;
@@ -460,23 +446,23 @@ export default {
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+
 .legend-dot.ausstehend {
     background: #ff9800;
 }
+
 
 .legend-dot.in-bearbeitung {
     background: #00bcd4;
 }
 
+
 .legend-dot.abgeschlossen {
     background: #4caf50;
 }
 
+
 .legend-dot.im-rueckblick {
     background: #e9c455;
-}
-
-.legend-dot.pickup {
-    background: #9c27b0;
 }
 </style>

@@ -83,40 +83,11 @@
                             </v-col>
                         </template>
 
-                        <!-- Reinigungsstart -->
                         <v-col cols="12" sm="6">
-                            <v-row dense>
-                                <v-col sm="8">
-                                    <v-text-field v-model="cleaning_start_date" label="Startdatum Reinigung *"
-                                        type="date" variant="outlined" density="comfortable" class="mb-3"
-                                        :rules="[v => !!v || 'Startdatum ist erforderlich']" required>
-                                    </v-text-field>
-                                </v-col>
-                                <v-col sm="4">
-                                    <v-text-field v-model="cleaning_start_time" label="Uhrzeit *" type="time"
-                                        variant="outlined" density="comfortable" class="mb-3"
-                                        :rules="[v => !!v || 'Startzeit ist erforderlich']" required>
-                                    </v-text-field>
-                                </v-col>
-                            </v-row>
-                        </v-col>
-
-                        <!-- Reinigungsende -->
-                        <v-col cols="12" sm="6">
-                            <v-row dense>
-                                <v-col sm="8">
-                                    <v-text-field v-model="cleaning_end_date" label="Enddatum Reinigung *" type="date"
-                                        variant="outlined" density="comfortable" class="mb-3"
-                                        :rules="[v => !!v || 'Enddatum ist erforderlich']" required>
-                                    </v-text-field>
-                                </v-col>
-                                <v-col sm="4">
-                                    <v-text-field v-model="cleaning_end_time" label="Uhrzeit *" type="time"
-                                        variant="outlined" density="comfortable" class="mb-3"
-                                        :rules="[v => !!v || 'Endzeit ist erforderlich']" required>
-                                    </v-text-field>
-                                </v-col>
-                            </v-row>
+                            <v-number-input v-model="job.cleaning_time" :max="99" :min="0" :step="0.25" :precision="2"
+                                label="Arbeitszeit (Stunden)" density="comfortable" variant="outlined"
+                                control-variant="split" class="mb-3">
+                            </v-number-input>
                         </v-col>
 
                         <!-- Abholtermin -->
@@ -193,12 +164,9 @@ export default {
                 services: [],
                 status: 'ausstehend',
                 trainee: null,
+                cleaning_time: null,
             },
             // Datum&Zeit-Felder
-            cleaning_start_date: null,
-            cleaning_start_time: null,
-            cleaning_end_date: null,
-            cleaning_end_time: null,
             scheduled_at_date: null,
             scheduled_at_time: null,
             // Dropdown-Daten
@@ -277,6 +245,7 @@ export default {
             this.job.title = data.title || '';
             this.job.description = data.description || '';
             this.job.status = data.status || 'ausstehend';
+            this.job.cleaning_time = data.cleaning_time || null;
 
             this.parseDateTimeFields(data);
             this.setServices(data);
@@ -285,32 +254,6 @@ export default {
 
 
         parseDateTimeFields(data) {
-            // cleaning_start
-            if (data.cleaning_start) {
-                try {
-                    const cleaningStart = new Date(data.cleaning_start);
-                    if (!isNaN(cleaningStart.getTime())) {
-                        this.cleaning_start_date = cleaningStart.toISOString().split('T')[0];
-                        this.cleaning_start_time = cleaningStart.toTimeString().slice(0, 5);
-                    }
-                } catch (e) {
-                    console.error('Error parsing cleaning_start:', e);
-                }
-            }
-
-            // cleaning_end
-            if (data.cleaning_end) {
-                try {
-                    const cleaningEnd = new Date(data.cleaning_end);
-                    if (!isNaN(cleaningEnd.getTime())) {
-                        this.cleaning_end_date = cleaningEnd.toISOString().split('T')[0];
-                        this.cleaning_end_time = cleaningEnd.toTimeString().slice(0, 5);
-                    }
-                } catch (e) {
-                    console.error('Error parsing cleaning_end:', e);
-                }
-            }
-
             // scheduled_at
             if (data.scheduled_at) {
                 try {
@@ -413,8 +356,7 @@ export default {
                     status: this.job.status,
                     service_ids: this.job.services ? this.job.services.map(s => s.id) : [],
                     trainee_id: this.job.trainee ? this.job.trainee.id : null,
-                    cleaning_start: this.combineDateTime(this.cleaning_start_date, this.cleaning_start_time),
-                    cleaning_end: this.combineDateTime(this.cleaning_end_date, this.cleaning_end_time),
+                    cleaning_time: this.job.cleaning_time,
                     scheduled_at: this.combineDateTime(this.scheduled_at_date, this.scheduled_at_time),
                 };
 
@@ -487,11 +429,8 @@ export default {
                 services: [],
                 status: 'ausstehend',
                 trainee: null,
+                cleaning_time: null,
             };
-            this.cleaning_start_date = null;
-            this.cleaning_start_time = null;
-            this.cleaning_end_date = null;
-            this.cleaning_end_time = null;
             this.scheduled_at_date = null;
             this.scheduled_at_time = null;
             this.originalId = null;

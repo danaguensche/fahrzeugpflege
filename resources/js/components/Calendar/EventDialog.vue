@@ -6,6 +6,7 @@
                 <v-spacer></v-spacer>
             </v-card-title>
 
+
             <v-card-text class="pa-0">
                 <v-list class="bg-transparent">
                     <v-list-item>
@@ -20,7 +21,9 @@
                         </v-list-item-subtitle>
                     </v-list-item>
 
+
                     <v-divider></v-divider>
+
 
                     <!-- Beschreibung -->
                     <v-list-item v-if="event.content">
@@ -33,7 +36,9 @@
                         </v-list-item-subtitle>
                     </v-list-item>
 
+
                     <v-divider v-if="event.content"></v-divider>
+
 
                     <!-- Kunde -->
                     <v-list-item v-if="event.customer_id">
@@ -49,7 +54,9 @@
                         </v-list-item-subtitle>
                     </v-list-item>
 
+
                     <v-divider v-if="event.customer_id"></v-divider>
+
 
                     <!-- E-Mail -->
                     <v-list-item v-if="event.email && event.email !== 'N/A'">
@@ -64,7 +71,9 @@
                         </v-list-item-subtitle>
                     </v-list-item>
 
+
                     <v-divider v-if="event.email && event.email !== 'N/A'"></v-divider>
+
 
                     <!-- Fahrzeug -->
                     <v-list-item v-if="event.car_kennzeichen && event.car_kennzeichen !== 'N/A'">
@@ -83,7 +92,9 @@
                         </v-list-item-subtitle>
                     </v-list-item>
 
+
                     <v-divider v-if="event.car_kennzeichen && event.car_kennzeichen !== 'N/A'"></v-divider>
+
 
                     <!-- Services -->
                     <v-list-item v-if="event.services_list && event.services_list.length > 0">
@@ -102,7 +113,9 @@
                         </v-list-item-subtitle>
                     </v-list-item>
 
+
                     <v-divider v-if="event.services_list && event.services_list.length > 0"></v-divider>
+
 
                     <!-- Zeitraum -->
                     <v-list-item>
@@ -126,6 +139,7 @@
                 </v-list>
             </v-card-text>
 
+
             <v-card-actions class="pa-6 pt-4">
                 <v-btn color="primary" :to="'/auftraege/jobdetails/' + event.job_id" class="mr-2" variant="outlined">
                     <v-icon left>mdi-open-in-new</v-icon>
@@ -139,6 +153,7 @@
         </v-card>
     </v-dialog>
 </template>
+
 
 <script>
 export default {
@@ -170,47 +185,50 @@ export default {
             this.$emit('close');
         },
 
+
         getStatusChipClass(status) {
             const statusClasses = {
                 'ausstehend': 'orange',
                 'in-bearbeitung': 'cyan',
-                'abgeschlossen': 'green'
+                'abgeschlossen': 'green',
+                'im-rueckblick': 'yellow'
             };
             return statusClasses[status] || 'grey';
         },
+
 
         getStatusText(status) {
             const statusTexts = {
                 'ausstehend': 'Ausstehend',
                 'in-bearbeitung': 'In Bearbeitung',
-                'abgeschlossen': 'Abgeschlossen'
+                'abgeschlossen': 'Abgeschlossen',
+                'im-rueckblick': 'Im Rückblick'
             };
             return statusTexts[status] || status;
         },
 
+
         formatDateTime(dateString) {
-        if (!dateString) return 'Unbekannt';
+            if (!dateString) return 'Unbekannt';
 
-        try {
-            return new Intl.DateTimeFormat("de-DE", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-            }).format(new Date(dateString));
-        } catch {
-            return "Ungültiges Datum";
-        }
-    },
-
-
+            try {
+                return new Intl.DateTimeFormat("de-DE", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                }).format(new Date(dateString));
+            } catch {
+                return "Ungültiges Datum";
+            }
+        },
     }
 }
 </script>
 
+
 <style scoped>
-/* Event Details Styles */
 
 .event-details {
     padding: 30px;
@@ -218,9 +236,11 @@ export default {
     overflow: hidden;
 }
 
+
 .event-details .v-card__title {
     background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
 }
+
 
 .v-list-item {
     min-height: 60px;
@@ -228,13 +248,16 @@ export default {
     transition: background-color 0.2s ease;
 }
 
+
 .v-list-item:hover {
     background-color: #f5f5f5;
 }
 
+
 .v-list-item__icon {
     margin-right: 16px;
 }
+
 
 .v-list-item__title {
     color: #2c3e50;
@@ -242,53 +265,64 @@ export default {
     font-size: 0.95rem;
 }
 
+
 .v-list-item__subtitle {
     color: #546e7a;
     line-height: 1.4;
 }
+
 
 .text-wrap {
     white-space: normal !important;
     word-wrap: break-word;
 }
 
+
 .v-chip {
     font-weight: 500;
     transition: all 0.2s ease;
 }
+
 
 .v-chip:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
+
 .v-divider {
     margin: 0 24px;
     opacity: 0.3;
 }
+
 
 .v-card__actions {
     background-color: #fafafa;
     border-top: 1px solid #e0e0e0;
 }
 
+
 .v-btn {
     transition: all 0.2s ease;
 }
+
 
 .v-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+
 /* Link Styles */
 a {
     transition: all 0.2s ease;
 }
 
+
 a:hover {
     text-decoration: underline !important;
 }
+
 
 /* Responsive Design */
 @media (max-width: 600px) {
@@ -299,14 +333,17 @@ a:hover {
         overflow-y: auto;
     }
 
+
     .v-list-item {
         padding: 8px 16px;
         min-height: 48px;
     }
 
+
     .v-card__title {
         padding: 16px !important;
     }
+
 
     .v-card__actions {
         padding: 16px !important;
@@ -314,14 +351,17 @@ a:hover {
         gap: 8px;
     }
 
+
     .v-card__actions .v-btn {
         width: 100%;
     }
+
 
     .d-flex.align-center {
         flex-direction: column;
         align-items: flex-start !important;
     }
+
 
     .d-flex.align-center .mr-4 {
         margin-right: 0 !important;
@@ -329,14 +369,17 @@ a:hover {
     }
 }
 
+
 @media (max-width: 400px) {
     .v-card__title .text-h5 {
         font-size: 1.1rem !important;
     }
 
+
     .v-list-item__title {
         font-size: 0.9rem;
     }
+
 
     .v-list-item__subtitle {
         font-size: 0.8rem;

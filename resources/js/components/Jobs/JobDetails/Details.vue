@@ -40,7 +40,7 @@
                                 <v-col cols="12">
                                     <div class="pa-4">
                                         <InfoListEditMode
-                                            :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin' && k !== 'trainee_id' && k !== 'cleaning_start' && k !== 'cleaning_end' && k !== 'Beschreibung')"
+                                            :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin' && k !== 'trainee_id' && k !== 'Beschreibung')"
                                             :labels="labels" :editedData="editedJobData"
                                             @update:editedData="editedJobData = $event"
                                             :getIconForField="getIconForField" :disabled="userRole === 'trainee'">
@@ -65,22 +65,12 @@
                                 </v-col>
                             </v-row>
 
-                            <!-- Cleaning Start -->
-                            <v-text-field :model-value="formatDateTimeForInput(editedJobData.cleaning_start)"
-                                @update:model-value="editedJobData.cleaning_start = $event" type="datetime-local"
-                                :label="labels.cleaning_start" variant="outlined" density="comfortable"
+                            <!-- cleaning time -->
+                            <v-text-field v-model="editedJobData.cleaning_time" type="number"
+                                :label="labels.cleaning_time" variant="outlined" density="comfortable"
                                 hide-details="auto" class="mt-4 w-50 ms-4"
-                                :prepend-inner-icon="getIconForField('cleaning_start')"
-                                :disabled="userRole === 'trainee'">
-                            </v-text-field>
-
-                            <!-- Cleaning End -->
-                            <v-text-field :model-value="formatDateTimeForInput(editedJobData.cleaning_end)"
-                                @update:model-value="editedJobData.cleaning_end = $event" type="datetime-local"
-                                :label="labels.cleaning_end" variant="outlined" density="comfortable"
-                                hide-details="auto" class="mt-4 w-50 ms-4"
-                                :prepend-inner-icon="getIconForField('cleaning_end')"
-                                :disabled="userRole === 'trainee'">
+                                :prepend-inner-icon="getIconForField('cleaning_time')"
+                                >
                             </v-text-field>
 
                             <!-- Abholtermin -->
@@ -352,8 +342,7 @@ export default {
                 id: "ID",
                 Title: "Titel",
                 Beschreibung: "Beschreibung",
-                cleaning_start: "Startzeitpunkt Reinigung",
-                cleaning_end: "Endezeitpunkt Reinigung",
+                cleaning_time: "Arbeitszeit (Stunden)",
                 Abholtermin: "Abholtermin",
                 Status: "Status",
                 trainee_id: "Mitarbeiter",
@@ -442,18 +431,12 @@ export default {
             const singleImage = mapImage(img);
             return singleImage ? [singleImage] : [];
         },
-        formattedCleaningStart() {
-            return this.formatDateTimeForInput(this.editedJobData.cleaning_start);
-        },
-        formattedCleaningEnd() {
-            return this.formatDateTimeForInput(this.editedJobData.cleaning_end);
-        },
         formattedAbholtermin() {
             return this.formatDateTimeForInput(this.editedJobData.Abholtermin);
         },
         ...mapState('auth', ['userRole']),
         jobInfoKeys() {
-            return ['id', 'Title', 'Beschreibung', 'cleaning_start', 'cleaning_end', 'Abholtermin', 'Status', 'trainee_id'];
+            return ['id', 'Title', 'Beschreibung', 'cleaning_time', 'Abholtermin', 'Status', 'trainee_id'];
         },
         carInfoKeys() {
             return ['Kennzeichen', 'Automarke', 'Typ', 'Farbe', 'Sonstiges'];
@@ -480,18 +463,6 @@ export default {
                 displayedData.Abholtermin = this.formatDate(displayedData.Abholtermin);
             }
 
-            if (displayedData.cleaning_start) {
-                displayedData.cleaning_start = this.formatDate(displayedData.cleaning_start);
-            } else {
-                displayedData.cleaning_start = 'Nicht definiert';
-            }
-
-            if (displayedData.cleaning_end) {
-                displayedData.cleaning_end = this.formatDate(displayedData.cleaning_end);
-            } else {
-                displayedData.cleaning_end = 'Nicht definiert';
-            }
-
             // Trainee anzeigen
             if (this.jobDetails.data.trainee) {
                 displayedData.trainee_id = `${this.jobDetails.data.trainee.firstname} ${this.jobDetails.data.trainee.lastname}`;
@@ -499,6 +470,10 @@ export default {
                 displayedData.trainee_id = 'Mitarbeiter nicht gefunden';
             } else {
                 displayedData.trainee_id = 'Kein Mitarbeiter zugewiesen';
+            }
+
+            if (displayedData.cleaningtime !== undefined && displayedData.cleaningtime !== null) {
+                displayedData.cleaningtime = `${displayedData.cleaningtime} Stunden`;
             }
 
             return displayedData;
@@ -770,6 +745,7 @@ export default {
 
                 if (this.userRole === 'trainee') {
                     dataToSubmit = {
+                        cleaning_time: this.editedJobData.cleaning_time,
                         status: this.editedJobData.Status,
                     };
                 } else {
@@ -844,9 +820,6 @@ export default {
                             return null;
                         }
                     };
-
-                    dataToSubmit.cleaning_start = formatDateForBackend(dataToSubmit.cleaning_start);
-                    dataToSubmit.cleaning_end = formatDateForBackend(dataToSubmit.cleaning_end);
                     dataToSubmit.scheduled_at = formatDateForBackend(dataToSubmit.scheduled_at);
                 }
 
@@ -900,8 +873,7 @@ export default {
                 id: "mdi-identifier",
                 Title: "mdi-format-title",
                 Beschreibung: "mdi-text-box-outline",
-                cleaning_start: "mdi-clock-time-eight-outline",
-                cleaning_end: "mdi-clock-check-outline",
+                cleaning_time: "mdi-timer-sand",
                 Abholtermin: "mdi-calendar",
                 Status: "mdi-check-circle-outline",
                 trainee_id: "mdi-toolbox",

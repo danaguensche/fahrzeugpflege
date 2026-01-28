@@ -61,6 +61,19 @@
                                         <span v-for="(service, index) in item[field]" :key="service.id">
                                             {{ service.title }}{{ index < item[field].length - 1 ? ', ' : '' }} </span>
                                     </template>
+                                    <!-- cleaning_time - editierbar für alle -->
+                                    <template v-else-if="field === 'cleaning_time'">
+                                        <v-text-field v-model.number="editItem[field]" :rules="[
+                                            v => v === null || v === '' || v >= 0 || 'Arbeitszeit muss positiv sein',
+                                            v => v === null || v === '' || v <= 99 || 'Maximal 99 Stunden',
+                                            v => v === null || v === '' || /^\d+(\.\d{1,2})?$/.test(v) || 'Max. 2 Dezimalstellen'
+                                        ]" density="compact" variant="outlined" type="number" step="0.25" min="0"
+                                            max="99" suffix="Std." class="mt-5">
+                                        </v-text-field>
+
+                                    </template>
+
+
                                     <!-- Status field - always editable with dropdown -->
                                     <template v-else-if="field === 'status'">
                                         <v-select v-model="editItem[field]" :items="getHeader(field).options"
@@ -83,14 +96,14 @@
                                                 :rules="Array.isArray(fieldRules) ? fieldRules : []"
                                                 :error-messages="fieldErrors[field]" density="compact"
                                                 variant="outlined"
-                                                :type="['scheduled_at', 'cleaning_start'].includes(field) ? 'datetime-local' : 'text'"
+                                                :type="['scheduled_at', 'created_at'].includes(field) ? 'datetime-local' : 'text'"
                                                 class="mt-5">
                                             </v-text-field>
                                         </template>
                                     </template>
                                     <!-- For trainees: show read-only text for non-status fields -->
                                     <template v-else>
-                                        <span v-if="field === 'scheduled_at' || field === 'cleaning_start'">
+                                        <span v-if="field === 'scheduled_at' || field === 'created_at'">
                                             {{ formatDateTime(item[field]) }}
                                         </span>
                                         <span v-else>{{ item[field] || '' }}</span>
@@ -119,7 +132,7 @@
                                         {{ getStatusTitle(item[field]) }}
                                     </span>
 
-                                    <span v-else-if="field === 'scheduled_at' || field === 'cleaning_start'">
+                                    <span v-else-if="field === 'scheduled_at' || field === 'created_at'">
                                         {{ formatDateTime(item[field]) }}
                                     </span>
                                     <span v-else>{{ item[field] || '' }}</span>
@@ -135,8 +148,7 @@
                             </td>
 
                             <!-- Edit/Save button -->
-                            <td class="table-icon fixed-width"
-                                v-if="isAdminOrTrainer || (canEditStatusOnly && item.status)">
+                            <td class="table-icon fixed-width" v-if="isAdminOrTrainer || canEditStatusOnly">
                                 <v-btn variant="plain" icon @click="handleEditClick(item)">
                                     <v-icon>{{ editItemId === item[itemKey] ? 'mdi-content-save' : 'mdi-pencil'
                                     }}</v-icon>
@@ -585,9 +597,14 @@ export default {
             try {
                 let payload = {};
                 if (this.canEditStatusOnly) {
-                    // Trainees senden nur den Status
-                    payload = { status: this.editItem.status };
-                } else {
+                    payload = {
+                        status: this.editItem.status,
+                        cleaning_time: this.editItem.cleaning_time === '' || this.editItem.cleaning_time === undefined
+                            ? null
+                            : this.editItem.cleaning_time
+                    };
+                }
+                else {
                     // Admin/Trainer senden alle Felder
                     this.fields.forEach(field => {
                         payload[field] = this.editItem[field];
@@ -616,9 +633,12 @@ export default {
             try {
                 let payload = {};
                 if (this.canEditStatusOnly) {
-                    // Trainees senden nur den Status
-                    payload = { status: this.editItem.status };
-                } else {
+                    payload = {
+                        status: this.editItem.status,
+                        cleaning_time: this.editItem.cleaning_time
+                    };
+                }
+                else {
                     // Admin/Trainer senden alle Felder
                     this.fields.forEach(field => {
                         payload[field] = this.editItem[field];
@@ -632,10 +652,6 @@ export default {
                 if (payload.scheduled_at) {
                     payload.scheduled_at = this.formatDateForBackend(payload.scheduled_at);
                 }
-                if (payload.cleaning_start) {
-                    payload.cleaning_start = this.formatDateForBackend(payload.cleaning_start);
-                }
-
                 await axios.put(`/api/${this.endpoint}/${this.editItemId}`, payload);
                 this.cancelEdit();
 

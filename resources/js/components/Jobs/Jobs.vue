@@ -20,7 +20,8 @@
             addButtonLabel="Auftrag Hinzufügen" :searchString="searchText" :isSearchActive="isSearchActive"
             endpoint="jobs" :headers="filteredJobHeaders" :fields="jobFields" itemKey="id" detailsPage="jobdetails"
             detailsUrlBasePath="auftraege" deleteKey="ids" :useExternalEdit="true" @itemsDeleted="handleJobsDeleted"
-            @show-error="handleError" @edit-item="handleEditItem" :canEditStatusOnly="userRole === 'trainee'" />
+            @show-error="handleError" @edit-item="handleEditItem" :canEditStatusOnly="userRole === 'trainee'"
+            />
 
         <AddJobForm v-model="showAddJobDialog" @job-added="handleJobAdded" />
         <EditJobForm v-model="showEditJobDialog" :jobData="selectedJob" @job-edited="handleJobEdited" />
@@ -63,7 +64,8 @@ export default {
                 { title: 'Auswählen', key: 'select', sortable: false, width: '60px' },
                 { title: 'id', key: 'id', sortable: true, align: 'start' },
                 { title: 'Titel', key: 'title', sortable: true },
-                { title: 'Reinigungsstart', key: 'cleaning_start', sortable: true },
+                { title: 'Arbeitszeit', key: 'cleaning_time', sortable: true },
+                { title: 'Auftragserfassung', key: 'created_at', sortable: true },
                 { title: 'Abholtermin', key: 'scheduled_at', sortable: true },
                 {
                     title: 'Status', key: 'status', sortable: true, editable: true, type: 'select', options: [
@@ -77,7 +79,7 @@ export default {
                 { title: 'Löschen', key: 'delete', sortable: false },
                 { title: 'Bearbeiten', key: 'edit', sortable: false }
             ],
-            jobFields: ["id", "title", "cleaning_start", "scheduled_at", "status", "services"],
+            jobFields: ["id", "title", "cleaning_time", "created_at", "scheduled_at", "status", "services"],
             // Filter-Daten
             selectedStatus: null,
             selectedCustomer: null,
@@ -364,156 +366,6 @@ export default {
 
     .jobs-page-sidebar-opened {
         margin-left: 260px;
-    }
-}
-</style>
-
-
-<style scoped>
-.jobs-page {
-    margin-left: 150px;
-    padding-right: 20px;
-    transition: margin-left 0.3s ease;
-    font-family: var(--font-family);
-}
-
-.search-wrapper {
-    position: relative;
-    z-index: 10;
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-.content-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-top: -80px;
-    z-index: 10;
-    position: relative;
-}
-
-.table-container {
-    width: 100%;
-}
-
-.search-input-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-.search-buttons {
-    display: flex;
-    align-items: center;
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    gap: 4px;
-    background: transparent;
-    border-radius: 6px;
-    padding: 2px;
-}
-
-.search-button {
-    min-width: 36px !important;
-    width: 36px;
-    height: 36px;
-    border-radius: 6px !important;
-    transition: all 0.2s ease;
-    background-color: transparent;
-}
-
-.search-button:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-}
-
-.search-button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.search-button .v-icon {
-    font-size: 25px;
-    color: #666;
-}
-
-.close-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 36px;
-    width: 36px;
-    height: 36px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background-color: transparent;
-}
-
-.close-button:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-}
-
-
-
-.table-container {
-    width: 100%;
-}
-
-.jobs-page-sidebar-opened {
-    margin-left: 330px;
-    transition: margin-left 0.3s ease;
-}
-
-/* Tablet Styles */
-@media only screen and (max-width: 1024px) {
-    .jobs-page {
-        margin-left: 120px;
-    }
-}
-
-/* Mobile Styles */
-@media only screen and (max-width: 768px) {
-    .jobs-page {
-        margin-left: 160px;
-        font-size: 12px;
-    }
-
-    .jobs-page-sidebar-opened {
-        margin-left: 260px;
-    }
-
-    .content-container {
-        flex-direction: column;
-    }
-
-    .search-input-container {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-
-    .search-buttons {
-        right: 6px;
-        gap: 2px;
-        padding: 1px;
-    }
-
-    .search-button,
-    .close-button {
-        min-width: 32px;
-        width: 32px;
-        height: 32px;
-        border-radius: 4px;
-    }
-
-    .search-button .v-icon {
-        font-size: 18px;
     }
 }
 </style>

@@ -1,41 +1,20 @@
 <template>
   <div class="calendar-container">
     <div class="calendar-page" :class="{ 'calendar-page-sidebar-opened': isSidebarOpen }">
-      <vue-cal
-        class="vuecal"
-        :events="events"
-        :time-from="8 * 60"
-        :time-to="20 * 60"
-        :time-step="30"
-        :active-view="activeView"
-        :key="activeView"
-        :selected-date="selectedDate"
-        :on-event-click="onEventClick"
-        :event-content-renderer="renderEventContent"
-        :cell-content-renderer="renderCellContent"
-        :min-event-width="100"
-        :min-cell-width="100"
-        :min-cell-height="100"
-        :snap-to-time="15"
-        :sticky-split-labels="true"
-        :hide-weekends="false"
-        :start-week-on-sunday="false"
-        :cell-click-hold="false"
-        :drag-to-create-event="false"
-        :event-duration-resizable="false"
-        :event-draggable="false"
-        :editable-events="{ title: false, drag: false, resize: false, create: false }"
-        :views="['month', 'week', 'day']"
-        :disable-views="['years', 'year']"
-        @view-change="updateView"
-        @ready="onCalendarReady"
-        @cell-click="onDayClick"
-      >
+      <vue-cal class="vuecal" locale="de" :events="events" :time-from="8 * 60" :time-to="20 * 60" :time-step="30"
+        :active-view="activeView" :key="activeView" :selected-date="selectedDate" :on-event-click="onEventClick"
+        :event-content-renderer="renderEventContent" :cell-content-renderer="renderCellContent" :min-event-width="100"
+        :min-cell-width="100" :min-cell-height="100" :snap-to-time="15" :sticky-split-labels="true"
+        :hide-weekends="false" :start-week-on-sunday="false" :cell-click-hold="false" :drag-to-create-event="false"
+        :event-duration-resizable="false" :event-draggable="false"
+        :editable-events="{ title: false, drag: false, resize: false, create: false }" :views="['month', 'week', 'day']"
+        :disable-views="['years', 'year']" @view-change="updateView" @ready="onCalendarReady" @cell-click="onDayClick">
         <template #event="{ event, view }">
           <div class="vuecal__event-title">{{ event.title }}</div>
           <div class="vuecal__event-content">{{ event.content }}</div>
         </template>
       </vue-cal>
+
 
       <!-- Legende für Status -->
       <div class="legend-container">
@@ -56,11 +35,8 @@
           <span class="legend-color im-rueckblick"></span>
           <span>Im Rückblick</span>
         </div>
-        <div class="legend-item">
-          <span class="legend-color pickup"></span>
-          <span>Abholung</span>
-        </div>
       </div>
+
 
       <!-- Event Dialog Komponente -->
       <EventDialog :event="selectedEvent" :visible="eventDialog" @close="closeEventDialog" />
@@ -68,12 +44,14 @@
   </div>
 </template>
 
+
 <script>
 import VueCal from 'vue-cal';
 import 'vue-cal/dist/vuecal.css';
 import axios from 'axios';
 import { mapState } from 'vuex';
 import EventDialog from './EventDialog.vue';
+
 
 export default {
   components: {
@@ -91,7 +69,7 @@ export default {
     };
   },
   mounted() {
-    this.fetchEvents(); // Will be called by @ready event
+    this.fetchEvents();
   },
   computed: {
     ...mapState(['isSidebarOpen']),
@@ -102,21 +80,14 @@ export default {
   methods: {
     fetchEvents(startDate, endDate) {
       axios.get('/api/jobs/calendar-events', {
-        
+
       })
         .then(response => {
           this.events = [];
 
           console.log("Fetched jobs:", response.data.items);
-          
+
           response.data.items.forEach(job => {
-            // Erstelle Reinigungstermin (falls vorhanden)
-            const cleaningEvent = this.createCleaningEvent(job);
-            if (cleaningEvent) {
-              this.events.push(cleaningEvent);
-            }
-            
-            // Erstelle Abholtermin (scheduled_at)
             const pickupEvent = this.createPickupEvent(job);
             if (pickupEvent) {
               this.events.push(pickupEvent);
@@ -128,23 +99,24 @@ export default {
         });
     },
 
-    createCleaningEvent(job) {
-      // Prüfe ob Reinigungstermin vorhanden ist
-      if (!job.cleaning_start || !job.cleaning_end) {
+    createPickupEvent(job) {
+      // scheduled_at ist der Abholtermin
+      if (!job.scheduled_at) {
         return null;
       }
 
-      const startTime = new Date(job.cleaning_start);
-      const endTime = new Date(job.cleaning_end);
+      const pickupStartTime = new Date(job.scheduled_at);
+      const pickupEndTime = new Date(pickupStartTime.getTime() + 30 * 60 * 1000); // 30 Minuten
+
       const eventClass = job.status.replace(/_/g, '-');
-      
-      console.log(`Cleaning Event - Start: ${startTime}, End: ${endTime}`);
-      
+
+      console.log(`Pickup Event - Start: ${pickupStartTime}, End: ${pickupEndTime}, Status: ${job.status}`);
+
       return {
-        start: startTime,
-        end: endTime,
-        title: `Reinigung ${job.title}`,
-        content: `Reinigung - ${job.description || 'Fahrzeugpflege'}`,
+        start: pickupStartTime,
+        end: pickupEndTime,
+        title: `${job.title}`,
+        content: `${job.customer.firstname} ${job.customer.lastname}`,
         status: job.status,
         email: job.customer ? job.customer.email : 'N/A',
         customer_firstname: job.customer ? job.customer.firstname : 'N/A',
@@ -156,39 +128,6 @@ export default {
         services_list: job.services ? job.services.map(service => service.title) : [],
         job_id: job.id,
         class: eventClass,
-        event_type: 'cleaning',
-        cleaning_start: job.cleaning_start,
-        cleaning_end: job.cleaning_end,
-      };
-    },
-
-    createPickupEvent(job) {
-      // scheduled_at ist der Abholtermin
-      if (!job.scheduled_at) {
-        return null;
-      }
-
-      const pickupStartTime = new Date(job.scheduled_at);
-      const pickupEndTime = new Date(pickupStartTime.getTime() + 30 * 60 * 1000); // 30 Minuten
-      
-      console.log(`Pickup Event - Start: ${pickupStartTime}, End: ${pickupEndTime}`);
-      
-      return {
-        start: pickupStartTime,
-        end: pickupEndTime,
-        title: `Abholung - ${job.customer.firstname} ${job.customer.lastname}`,
-        content: job.description || 'Fahrzeugabholung',
-        status: job.status,
-        email: job.customer ? job.customer.email : 'N/A',
-        customer_firstname: job.customer ? job.customer.firstname : 'N/A',
-        customer_lastname: job.customer ? job.customer.lastname : 'N/A',
-        customer_id: job.customer ? job.customer.id : null,
-        car_kennzeichen: job.car ? job.car.Kennzeichen : 'N/A',
-        car_make: job.car ? job.car.make : 'N/A',
-        car_model: job.car ? job.car.model : 'N/A',
-        services_list: job.services ? job.services.map(service => service.title) : [],
-        job_id: job.id,
-        class: 'pickup',
         event_type: 'pickup',
         scheduled_at: job.scheduled_at,
       };
@@ -208,7 +147,7 @@ export default {
     renderEventContent(event, view) {
       return `
         <div class="vuecal__event-title">${event.title}</div>
-        <div class="vuecal__event-content">${event.email}</div>
+        <div class="vuecal__event-content">${event.content}</div>
       `;
     },
 
@@ -237,6 +176,7 @@ export default {
 };
 </script>
 
+
 <style>
 .calendar-container {
   display: flex;
@@ -245,6 +185,7 @@ export default {
   padding: 20px;
   box-sizing: border-box;
 }
+
 
 .calendar-page {
   background-color: #ffffff;
@@ -259,10 +200,12 @@ export default {
   height: calc(100vh - 70px);
 }
 
+
 .calendar-page-sidebar-opened {
   margin-left: 320px;
   width: calc(100% - 340px);
 }
+
 
 .vuecal {
   height: calc(100vh - 250px);
@@ -272,6 +215,7 @@ export default {
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
+
 
 /* Responsive Design */
 @media (max-width: 1200px) {
@@ -291,6 +235,7 @@ export default {
     min-height: 500px;
   }
 }
+
 
 @media (max-width: 768px) {
   .calendar-container {
@@ -314,6 +259,7 @@ export default {
   }
 }
 
+
 /* VueCal Navigation Styles */
 .vuecal__menu {
   background-color: #f8f9fa !important;
@@ -323,12 +269,14 @@ export default {
   z-index: 1000 !important;
 }
 
+
 .vuecal__flex.vuecal__menu-buttons {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
   gap: 10px !important;
 }
+
 
 .vuecal__menu-button {
   padding: 10px 20px !important;
@@ -344,11 +292,13 @@ export default {
   z-index: 1001 !important;
 }
 
+
 .vuecal__menu-button:hover {
   background-color: #f8f9fa !important;
   border-color: #6c757d !important;
   transform: translateY(-1px) !important;
 }
+
 
 .vuecal__menu-button.vuecal__active {
   background-color: #007bff !important;
@@ -357,6 +307,7 @@ export default {
   box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3) !important;
 }
 
+
 /* Event Styles */
 .vuecal__event.ausstehend {
   background: linear-gradient(135deg, #ffcc80 0%, #ffb74d 100%);
@@ -364,11 +315,13 @@ export default {
   border-left: 4px solid #ff9800;
 }
 
+
 .vuecal__event.in-bearbeitung {
   background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
   color: #333;
   border-left: 4px solid #00bcd4;
 }
+
 
 .vuecal__event.abgeschlossen {
   background: linear-gradient(135deg, #a5d6a7 0%, #81c784 100%);
@@ -376,11 +329,13 @@ export default {
   border-left: 4px solid #4caf50;
 }
 
+
 .vuecal__event.im-rueckblick {
   background: linear-gradient(135deg, #ffecb3 0%, #ffe082 100%);
   color: #333;
   border-left: 4px solid #e9c455;
 }
+
 
 .vuecal__event.pickup {
   background: linear-gradient(135deg, #ce93d8 0%, #ba68c8 100%);
@@ -388,16 +343,19 @@ export default {
   border-left: 4px solid #9c27b0;
 }
 
+
 .vuecal__event-title {
   font-weight: 600;
   margin-bottom: 4px;
   font-size: 0.9em;
 }
 
+
 .vuecal__event-content {
   font-size: 0.8em;
   opacity: 0.9;
 }
+
 
 /* Legend Styles */
 .legend-container {
@@ -413,12 +371,14 @@ export default {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
+
 .legend-container h4 {
   margin: 0;
   color: #495057;
   font-size: 1.1em;
   font-weight: 600;
 }
+
 
 .legend-item {
   display: flex;
@@ -428,6 +388,7 @@ export default {
   color: #495057;
 }
 
+
 .legend-color {
   width: 16px;
   height: 16px;
@@ -436,25 +397,31 @@ export default {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
+
 .legend-color.ausstehend {
   background: linear-gradient(135deg, #ffcc80 0%, #ffb74d 100%);
 }
+
 
 .legend-color.in-bearbeitung {
   background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
 }
 
+
 .legend-color.im-rueckblick {
   background: linear-gradient(135deg, #ffecb3 0%, #ffe082 100%);
 }
+
 
 .legend-color.abgeschlossen {
   background: linear-gradient(135deg, #a5d6a7 0%, #81c784 100%);
 }
 
+
 .legend-color.pickup {
   background: linear-gradient(135deg, #ce93d8 0%, #ba68c8 100%);
 }
+
 
 /* Event Details Styles */
 .event-details {
@@ -469,6 +436,7 @@ export default {
   font-family: 'Rubik', sans-serif;
 }
 
+
 .event-details h3 {
   font-size: 1.5em;
   color: #212529;
@@ -478,6 +446,7 @@ export default {
   font-weight: 600;
 }
 
+
 .event-details p {
   font-size: 1em;
   line-height: 1.6;
@@ -485,10 +454,12 @@ export default {
   color: #495057;
 }
 
+
 .event-details p strong {
   color: #212529;
   font-weight: 600;
 }
+
 
 .event-details a {
   color: #007bff;
@@ -497,10 +468,12 @@ export default {
   font-weight: 500;
 }
 
+
 .event-details a:hover {
   color: #0056b3;
   text-decoration: underline;
 }
+
 
 .service-tag {
   display: inline-block;
@@ -516,9 +489,11 @@ export default {
   transition: background-color 0.2s ease;
 }
 
+
 .service-tag:hover {
   background-color: #dee2e6;
 }
+
 
 /* Event Count Badge */
 .event-count {
@@ -536,26 +511,31 @@ export default {
   box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
 }
 
+
 .vuecal__cell-date {
   font-size: 1.1em;
   font-weight: 600;
   color: #495057;
 }
 
+
 /* Scrollbar Styling */
 .vuecal::-webkit-scrollbar {
   width: 8px;
 }
+
 
 .vuecal::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 4px;
 }
 
+
 .vuecal::-webkit-scrollbar-thumb {
   background: #c1c1c1;
   border-radius: 4px;
 }
+
 
 .vuecal::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;

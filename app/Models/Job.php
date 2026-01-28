@@ -18,8 +18,7 @@ class Job extends Model
         'customer_id',
         'user_id',
         'status',
-        'cleaning_start',
-        'cleaning_end',
+        'cleaning_time',
         'scheduled_at',
         'trainer_id',
         'trainee_id',
@@ -57,8 +56,7 @@ class Job extends Model
 
     protected $casts = [
         'scheduled_at' => 'datetime',
-        'cleaning_start' => 'datetime',
-        'cleaning_end' => 'datetime',
+        'cleaning_time' => 'float',
     ];
 
     public function comments()

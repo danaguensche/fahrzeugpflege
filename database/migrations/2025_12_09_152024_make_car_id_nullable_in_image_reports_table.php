@@ -26,7 +26,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('image_reports', function (Blueprint $table) {
-            $table->dropForeign(['car_id']);  // ✅ Foreign Key zuerst droppen
+            $table->dropForeign(['car_id']);
             $table->dropColumn('car_id');
         });
     }
