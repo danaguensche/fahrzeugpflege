@@ -35,119 +35,259 @@
                         </InfoList>
 
                         <!-- Bearbeitungsmodus -->
-                        <div v-else>
-                            <v-row no-gutters class="mb-4">
-                                <v-col cols="12">
-                                    <div class="pa-4">
-                                        <InfoListEditMode
-                                            :personalInfoKeys="jobInfoKeys.filter(k => k !== 'Status' && k !== 'Abholtermin' && k !== 'trainee_id' && k !== 'Beschreibung')"
-                                            :labels="labels" :editedData="editedJobData"
-                                            @update:editedData="editedJobData = $event"
-                                            :getIconForField="getIconForField" :disabled="userRole === 'trainee'">
-                                        </InfoListEditMode>
-
-                                        <v-row no-gutters class="mb-4 ml-4">
-                                            <v-col cols="12">
-                                                <div class="d-flex align-center mb-1">
-                                                    <v-icon :icon="getIconForField('Beschreibung')" color="primary"
-                                                        class="mr-2"></v-icon>
-                                                    <span class="font-weight-medium scrollable">{{
-                                                        labels['Beschreibung'] }}</span>
-                                                </div>
-                                                <v-textarea class="w-50 scrollable"
-                                                    v-model="editedJobData['Beschreibung']" variant="outlined"
-                                                    density="comfortable" auto-grow :disabled="userRole === 'trainee'"
-                                                    maxlength="65000" :counter="65000">
-                                                </v-textarea>
-                                            </v-col>
-                                        </v-row>
-                                    </div>
-                                </v-col>
-                            </v-row>
-
-                            <!-- cleaning time -->
-                            <v-text-field v-model="editedJobData.cleaning_time" type="number"
-                                :label="labels.cleaning_time" variant="outlined" density="comfortable"
-                                hide-details="auto" class="mt-4 w-50 ms-4"
-                                :prepend-inner-icon="getIconForField('cleaning_time')"
+                        <div v-else class="edit-mode-container">
+                            <!-- ID (read-only) -->
+                            <div class="field-wrapper">
+                                <v-text-field
+                                    v-model="editedJobData.id"
+                                    :label="labels.id"
+                                    :prepend-inner-icon="getIconForField('id')"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    hide-details="auto"
+                                    readonly
+                                    disabled
                                 >
-                            </v-text-field>
+                                </v-text-field>
+                            </div>
+
+                            <!-- Title -->
+                            <div class="field-wrapper">
+                                <v-text-field
+                                    v-model="editedJobData.Title"
+                                    :label="labels.Title"
+                                    :prepend-inner-icon="getIconForField('Title')"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    hide-details="auto"
+                                    :disabled="userRole === 'trainee'"
+                                >
+                                </v-text-field>
+                            </div>
+
+                            <!-- Beschreibung -->
+                            <div class="field-wrapper">
+                                <v-textarea
+                                    v-model="editedJobData.Beschreibung"
+                                    :label="labels.Beschreibung"
+                                    :prepend-inner-icon="getIconForField('Beschreibung')"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    hide-details="auto"
+                                    auto-grow
+                                    :disabled="userRole === 'trainee'"
+                                    maxlength="65000"
+                                    :counter="65000"
+                                >
+                                </v-textarea>
+                            </div>
+
+                            <!-- Cleaning Time -->
+                            <div class="field-wrapper">
+                                <v-number-input
+                                    v-model="editedJobData.cleaning_time"
+                                    :max="99"
+                                    :min="0"
+                                    :step="0.25"
+                                    :precision="2"
+                                    :label="labels.cleaning_time"
+                                    :prepend-inner-icon="getIconForField('cleaning_time')"
+                                    density="comfortable"
+                                    variant="outlined"
+                                    control-variant="split"
+                                    hide-details="auto"
+                                    :maxLength="5"
+                                    :counter="5"
+                                >
+                                </v-number-input>
+                            </div>
 
                             <!-- Abholtermin -->
-                            <v-text-field :model-value="formatDateTimeForInput(editedJobData.Abholtermin)"
-                                @update:model-value="editedJobData.Abholtermin = $event" type="datetime-local"
-                                :label="labels.Abholtermin" variant="outlined" density="comfortable" hide-details="auto"
-                                class="mt-4 w-50 ms-4" :prepend-inner-icon="getIconForField('Abholtermin')"
-                                :disabled="userRole === 'trainee'">
-                            </v-text-field>
+                            <div class="field-wrapper">
+                                <v-text-field
+                                    :model-value="formatDateTimeForInput(editedJobData.Abholtermin)"
+                                    @update:model-value="editedJobData.Abholtermin = $event"
+                                    type="datetime-local"
+                                    :label="labels.Abholtermin"
+                                    :prepend-inner-icon="getIconForField('Abholtermin')"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    hide-details="auto"
+                                    :disabled="userRole === 'trainee'"
+                                >
+                                </v-text-field>
+                            </div>
 
-                            <v-select v-model="editedJobData.Status" :items="statuses" item-title="title"
-                                item-value="value" label="Status" variant="outlined" density="comfortable"
-                                hide-details="auto" class="mt-4 w-50 ms-4"
-                                :prepend-inner-icon="getIconForField('Status')">
-                            </v-select>
+                            <!-- Status -->
+                            <div class="field-wrapper">
+                                <v-select
+                                    v-model="editedJobData.Status"
+                                    :items="statuses"
+                                    item-title="title"
+                                    item-value="value"
+                                    :label="labels.Status"
+                                    :prepend-inner-icon="getIconForField('Status')"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    hide-details="auto"
+                                >
+                                </v-select>
+                            </div>
 
-
-                            <!-- Mitarbeiter zum Auftrag hinzufügen/ändern -->
-                            <v-autocomplete v-model="editedJobData.trainee" class="mt-4 w-50 ms-4" :items="trainees"
-                                item-title="full_name" item-value="id" label="Mitarbeiter"
-                                placeholder="Mitarbeiter auswählen oder suchen" prepend-inner-icon="mdi-toolbox"
-                                variant="outlined" density="comfortable" hide-details="auto" clearable
-                                :loading="traineesLoading" :search-input.sync="traineeSearch"
-                                @update:search-input="searchTrainees" return-object :disabled="userRole === 'trainee'">
-
-                                <template v-slot:item="{ props, item }">
-                                    <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                        :subtitle="item.raw.email"></v-list-item>
-                                </template>
-                                <template v-slot:selection="{ item }">
-                                    {{ item.raw.full_name }}
-                                </template>
-                            </v-autocomplete>
+                            <!-- Mitarbeiter -->
+                            <div class="field-wrapper">
+                                <v-autocomplete
+                                    v-model="editedJobData.trainee"
+                                    :items="trainees"
+                                    item-title="full_name"
+                                    item-value="id"
+                                    :label="labels.trainee"
+                                    placeholder="Mitarbeiter auswählen oder suchen"
+                                    :prepend-inner-icon="getIconForField('trainee_id')"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    hide-details="auto"
+                                    clearable
+                                    :loading="traineesLoading"
+                                    :search-input.sync="traineeSearch"
+                                    @update:search-input="searchTrainees"
+                                    return-object
+                                    :disabled="userRole === 'trainee'"
+                                >
+                                    <template v-slot:item="{ props, item }">
+                                        <v-list-item
+                                            v-bind="props"
+                                            :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                            :subtitle="item.raw.email"
+                                        >
+                                        </v-list-item>
+                                    </template>
+                                    <template v-slot:selection="{ item }">
+                                        {{ item.raw.full_name }}
+                                    </template>
+                                </v-autocomplete>
+                            </div>
                         </div>
                     </v-sheet>
 
                     <!-- Customer information -->
                     <v-sheet class="section-block">
                         <DefaultHeader :title="'Kundeninformation'"></DefaultHeader>
-                        <CustomerInfoList v-if="!editMode" :customer="jobDetails.data.customer"
-                            :customerId="jobDetails.data.customer_id" :labels="labels">
-                        </CustomerInfoList>
+                        
+                        <template v-if="!editMode">
+                            <template v-if="jobDetails.data.customer">
+                                <v-list class="bg-transparent">
+                                    <v-list-item>
+                                        <template v-slot:prepend>
+                                            <v-icon icon="mdi-account" color="primary" class="mr-2"></v-icon>
+                                        </template>
+                                        <v-list-item-title class="font-weight-medium">Name</v-list-item-title>
+                                        <v-list-item-subtitle class="mt-1 text-body-1">
+                                            <router-link
+                                                :to="`/kunden/kundendetails/${jobDetails.data.customer.id}`"
+                                                class="text-decoration-none text-primary">
+                                                {{ jobDetails.data.customer.firstname }} {{ jobDetails.data.customer.lastname }}
+                                            </router-link>
+                                        </v-list-item-subtitle>
+                                    </v-list-item>
+                                    <v-divider></v-divider>
 
-                        <v-autocomplete v-else v-model="editedJobData.customer" class="w-50 ms-4" :items="customers"
-                            item-title="full_name" item-value="id" label="Kunde"
-                            placeholder="Kunde auswählen oder suchen" prepend-inner-icon="mdi-account"
-                            variant="outlined" density="comfortable" hide-details="auto" clearable
-                            :loading="customersLoading" :search-input.sync="customerSearch"
-                            @update:search-input="searchCustomers" @update:model-value="onCustomerChange" return-object
-                            :disabled="userRole === 'trainee'">
+                                    <v-list-item>
+                                        <template v-slot:prepend>
+                                            <v-icon icon="mdi-email" color="primary" class="mr-2"></v-icon>
+                                        </template>
+                                        <v-list-item-title class="font-weight-medium">E-Mail</v-list-item-title>
+                                        <v-list-item-subtitle class="mt-1 text-body-1">
+                                            <span v-if="jobDetails.data.customer.email">{{ jobDetails.data.customer.email }}</span>
+                                            <span v-else class="text-grey">Nicht verfügbar</span>
+                                        </v-list-item-subtitle>
+                                    </v-list-item>
+                                    <v-divider></v-divider>
 
-                            <template v-slot:item="{ props, item }">
-                                <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                    :subtitle="item.raw.email">
+                                    <v-list-item>
+                                        <template v-slot:prepend>
+                                            <v-icon icon="mdi-phone" color="primary" class="mr-2"></v-icon>
+                                        </template>
+                                        <v-list-item-title class="font-weight-medium">Telefon</v-list-item-title>
+                                        <v-list-item-subtitle class="mt-1 text-body-1">
+                                            <span v-if="jobDetails.data.customer.phone">{{ jobDetails.data.customer.phone }}</span>
+                                            <span v-else class="text-grey">Nicht verfügbar</span>
+                                        </v-list-item-subtitle>
+                                    </v-list-item>
+                                    <v-divider></v-divider>
+
+                                    <v-list-item>
+                                        <template v-slot:prepend>
+                                            <v-icon icon="mdi-map-marker" color="primary" class="mr-2"></v-icon>
+                                        </template>
+                                        <v-list-item-title class="font-weight-medium">Adresse</v-list-item-title>
+                                        <v-list-item-subtitle class="mt-1 text-body-1">
+                                            <span v-if="jobDetails.data.customer.address">{{ jobDetails.data.customer.address }}</span>
+                                            <span v-else class="text-grey">Nicht verfügbar</span>
+                                        </v-list-item-subtitle>
+                                    </v-list-item>
+                                </v-list>
+                            </template>
+                            <template v-else>
+                                <v-list-item>
+                                    <v-list-item-subtitle class="text-grey">
+                                        <div class="d-flex align-center justify-center pa-4">
+                                            <v-icon icon="mdi-account-off" color="grey-lighten-1" size="32" class="mr-2">
+                                            </v-icon>
+                                            <span>Kein Kunde zugeordnet</span>
+                                        </div>
+                                    </v-list-item-subtitle>
                                 </v-list-item>
                             </template>
+                        </template>
 
-                            <template v-slot:selection="{ item }">
-                                {{ item.raw.full_name }}
-                            </template>
-                        </v-autocomplete>
+                        <div v-else class="edit-mode-container">
+                            <div class="field-wrapper">
+                                <v-autocomplete
+                                    v-model="editedJobData.customer"
+                                    :items="customers"
+                                    item-title="full_name"
+                                    item-value="id"
+                                    label="Kunde"
+                                    placeholder="Kunde auswählen oder suchen"
+                                    prepend-inner-icon="mdi-account"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    hide-details="auto"
+                                    clearable
+                                    :loading="customersLoading"
+                                    :search-input.sync="customerSearch"
+                                    @update:search-input="searchCustomers"
+                                    @update:model-value="onCustomerChange"
+                                    return-object
+                                    :disabled="userRole === 'trainee'"
+                                >
+                                    <template v-slot:item="{ props, item }">
+                                        <v-list-item
+                                            v-bind="props"
+                                            :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                            :subtitle="item.raw.email"
+                                        >
+                                        </v-list-item>
+                                    </template>
 
-
+                                    <template v-slot:selection="{ item }">
+                                        {{ item.raw.full_name }}
+                                    </template>
+                                </v-autocomplete>
+                            </div>
+                        </div>
                     </v-sheet>
 
                     <!-- Fahrzeuginformationen (Wenn Fahrzeug zum Auftrag zugewiesen wurde)-->
                     <v-sheet class="section-block">
-
                         <DefaultHeader :title="'Fahrzeuginformationen'"></DefaultHeader>
 
                         <template v-if="!editMode">
                             <template v-if="jobDetails.data.car && jobDetails.data.car.Kennzeichen">
                                 <v-list class="bg-transparent">
                                     <template v-for="key in carInfoKeys" :key="key">
-                                        <v-list-item
-                                            v-if="jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
-
+                                        <v-list-item>
                                             <template v-slot:prepend>
                                                 <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
                                                 </v-icon>
@@ -166,13 +306,16 @@
                                                     </router-link>
                                                 </template>
                                                 <template v-else>
-                                                    {{ jobDetails.data.car[key] }}
+                                                    <span v-if="jobDetails.data.car[key] && jobDetails.data.car[key] !== ''">
+                                                        {{ jobDetails.data.car[key] }}
+                                                    </span>
+                                                    <span v-else class="text-grey">
+                                                        Nicht verfügbar
+                                                    </span>
                                                 </template>
                                             </v-list-item-subtitle>
                                         </v-list-item>
-                                        <v-divider
-                                            v-if="key !== carInfoKeys[carInfoKeys.length - 1] && jobDetails.data.car[key] !== undefined && jobDetails.data.car[key] !== null && jobDetails.data.car[key] !== ''">
-                                        </v-divider>
+                                        <v-divider v-if="key !== carInfoKeys[carInfoKeys.length - 1]"></v-divider>
                                     </template>
                                 </v-list>
                             </template>
@@ -191,31 +334,50 @@
                             </template>
                         </template>
 
-                        <v-autocomplete v-else class="w-50 ms-4" v-model="editedJobData.car" :items="availableCars"
-                            item-title="Kennzeichen" item-value="id" label="Fahrzeug"
-                            :placeholder="editedJobData.customer ? 'Fahrzeug für Kunde auswählen' : 'Zuerst Kunde auswählen'"
-                            prepend-inner-icon="mdi-car" variant="outlined" density="comfortable" hide-details="auto"
-                            clearable :loading="carsLoading" return-object
-                            :disabled="userRole === 'trainee' || !editedJobData.customer">
+                        <div v-else class="edit-mode-container">
+                            <div class="field-wrapper">
+                                <v-autocomplete
+                                    v-model="editedJobData.car"
+                                    :items="availableCars"
+                                    item-title="Kennzeichen"
+                                    item-value="id"
+                                    label="Fahrzeug"
+                                    :placeholder="editedJobData.customer ? 'Fahrzeug für Kunde auswählen' : 'Zuerst Kunde auswählen'"
+                                    prepend-inner-icon="mdi-car"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    hide-details="auto"
+                                    clearable
+                                    :loading="carsLoading"
+                                    return-object
+                                    :disabled="userRole === 'trainee' || !editedJobData.customer"
+                                >
+                                    <template v-slot:item="{ props, item }">
+                                        <v-list-item
+                                            v-bind="props"
+                                            :title="item.raw.Kennzeichen"
+                                            :subtitle="`${item.raw.Automarke} ${getCarOwnershipLabel(item.raw)}`"
+                                        >
+                                        </v-list-item>
+                                    </template>
 
-                            <template v-slot:item="{ props, item }">
-                                <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
-                                    :subtitle="`${item.raw.Automarke} ${getCarOwnershipLabel(item.raw)}`">
-                                </v-list-item>
-                            </template>
+                                    <template v-slot:selection="{ item }">
+                                        {{ item.raw.Kennzeichen }}
+                                    </template>
+                                </v-autocomplete>
+                            </div>
 
-                            <template v-slot:selection="{ item }">
-                                {{ item.raw.Kennzeichen }}
-                            </template>
-                        </v-autocomplete>
-
-                        <!-- Hinweis wenn Fahrzeug dem Kunden zugewiesen wird -->
-                        <v-alert v-if="editMode && editedJobData.car && editedJobData.customer && !isCarOwnedByCustomer && isAdminOrTrainer"
-                            type="info" variant="tonal" class="mt-3 w-50 ms-4">
-                            <v-icon start>mdi-information</v-icon>
-                            Das ausgewählte Fahrzeug wird automatisch dem Kunden zugewiesen.
-                        </v-alert>
-
+                            <!-- Hinweis wenn Fahrzeug dem Kunden zugewiesen wird -->
+                            <v-alert
+                                v-if="editedJobData.car && editedJobData.customer && !isCarOwnedByCustomer && isAdminOrTrainer && editedJobData.car.customer_id === null"
+                                type="info"
+                                variant="tonal"
+                                class="mt-3"
+                            >
+                                <v-icon start>mdi-information</v-icon>
+                                Das ausgewählte Fahrzeug wird automatisch dem Kunden zugewiesen.
+                            </v-alert>
+                        </div>
                     </v-sheet>
 
                     <!-- Dienstleistungen Anzeige -->
@@ -232,21 +394,36 @@
                             </span>
                         </div>
 
-                        <v-autocomplete v-else class="w-50 ms-4" v-model="editedJobData.services" :items="services"
-                            item-title="name" item-value="id" label="Dienstleistungen"
-                            placeholder="Dienstleistungen auswählen" prepend-inner-icon="mdi-briefcase"
-                            variant="outlined" density="comfortable" hide-details="auto" multiple chips clearable
-                            :loading="servicesLoading" return-object :disabled="userRole === 'trainee'">
+                        <div v-else class="edit-mode-container">
+                            <div class="field-wrapper">
+                                <v-autocomplete
+                                    v-model="editedJobData.services"
+                                    :items="services"
+                                    item-title="name"
+                                    item-value="id"
+                                    label="Dienstleistungen"
+                                    placeholder="Dienstleistungen auswählen"
+                                    prepend-inner-icon="mdi-briefcase"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    hide-details="auto"
+                                    multiple
+                                    chips
+                                    clearable
+                                    :loading="servicesLoading"
+                                    return-object
+                                    :disabled="userRole === 'trainee'"
+                                >
+                                    <template v-slot:chip="{ props, item }">
+                                        <v-chip v-bind="props" :text="item.raw.name"></v-chip>
+                                    </template>
 
-                            <template v-slot:chip="{ props, item }">
-                                <v-chip v-bind="props" :text="item.raw.name"></v-chip>
-                            </template>
-
-                            <template v-slot:item="{ props, item }">
-                                <v-list-item v-bind="props" :title="item.raw.name"></v-list-item>
-                            </template>
-
-                        </v-autocomplete>
+                                    <template v-slot:item="{ props, item }">
+                                        <v-list-item v-bind="props" :title="item.raw.name"></v-list-item>
+                                    </template>
+                                </v-autocomplete>
+                            </div>
+                        </div>
                     </v-sheet>
 
                     <!-- Metadaten -->
@@ -296,7 +473,6 @@ import SaveButton from "../../Details/SaveButton.vue";
 import InfoList from "../../Details/InfoList.vue";
 import InfoListEditMode from "../../Details/InfoListEditMode.vue";
 import DefaultHeader from "../../Details/DefaultHeader.vue";
-import CustomerInfoList from "../../Details/CustomerInfoList.vue";
 import CommentsSection from "./CommentsSection.vue";
 import ImageGallery from "../../CommonSlots/ImageGallery.vue";
 
@@ -317,7 +493,6 @@ export default {
         InfoList,
         InfoListEditMode,
         DefaultHeader,
-        CustomerInfoList,
         CommentsSection,
         ImageGallery
     },
@@ -404,6 +579,10 @@ export default {
             return this.editedJobData.car.customer_id === this.editedJobData.customer.id;
         },
 
+        isAdminOrTrainer() {
+            return this.userRole === 'admin' || this.userRole === 'trainer';
+        },
+
 
         images() {
             const img = this.jobDetails.data?.images;
@@ -456,11 +635,15 @@ export default {
             if (displayedData.Status) {
                 const foundStatus = this.statuses.find(s => s.value === displayedData.Status);
                 displayedData.Status = foundStatus ? foundStatus.title : displayedData.Status;
+            } else {
+                displayedData.Status = 'Nicht verfügbar';
             }
 
             // Datumsfelder formatieren
             if (displayedData.Abholtermin) {
                 displayedData.Abholtermin = this.formatDate(displayedData.Abholtermin);
+            } else {
+                displayedData.Abholtermin = 'Nicht verfügbar';
             }
 
             // Trainee anzeigen
@@ -469,11 +652,24 @@ export default {
             } else if (displayedData.trainee_id) {
                 displayedData.trainee_id = 'Mitarbeiter nicht gefunden';
             } else {
-                displayedData.trainee_id = 'Kein Mitarbeiter zugewiesen';
+                displayedData.trainee_id = 'Nicht verfügbar';
             }
 
-            if (displayedData.cleaningtime !== undefined && displayedData.cleaningtime !== null) {
-                displayedData.cleaningtime = `${displayedData.cleaningtime} Stunden`;
+            // Cleaning Time anzeigen
+            if (displayedData.cleaning_time !== undefined && displayedData.cleaning_time !== null && displayedData.cleaning_time !== '') {
+                displayedData.cleaning_time = `${displayedData.cleaning_time} Stunden`;
+            } else {
+                displayedData.cleaning_time = 'Nicht verfügbar';
+            }
+
+            // Titel anzeigen
+            if (!displayedData.Title || displayedData.Title === '') {
+                displayedData.Title = 'Nicht verfügbar';
+            }
+
+            // Beschreibung anzeigen
+            if (!displayedData.Beschreibung || displayedData.Beschreibung === '') {
+                displayedData.Beschreibung = 'Nicht verfügbar';
             }
 
             return displayedData;
@@ -1040,7 +1236,6 @@ export default {
     width: 100%;
     height: 99vh;
     margin-left: 110px;
-    /* padding: 20px; */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -1058,6 +1253,20 @@ export default {
     overflow-y: auto;
 }
 
+/* Einheitliches Layout für Bearbeitungsmodus */
+.edit-mode-container {
+    padding: 16px;
+}
+
+.field-wrapper {
+    margin-bottom: 16px;
+    max-width: 600px;
+}
+
+.field-wrapper:last-child {
+    margin-bottom: 0;
+}
+
 @media (max-width: 575.98px) {
     .card-container {
         padding: 10px;
@@ -1067,12 +1276,20 @@ export default {
     .card {
         font-size: 14px;
     }
+    
+    .field-wrapper {
+        max-width: 100%;
+    }
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
     .card-container {
         padding: 15px;
         height: calc(100vh - 30px);
+    }
+    
+    .field-wrapper {
+        max-width: 100%;
     }
 }
 

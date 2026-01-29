@@ -113,16 +113,13 @@
                                 </v-autocomplete>
                             </v-col>
                         </template>
-
-
+                        
                         <v-col cols="12" sm="6">
                             <v-number-input v-model="job.cleaning_time" :max="99" :min="0" :step="0.25" :precision="2"
                                 label="Arbeitszeit (Stunden)" density="comfortable" variant="outlined"
-                                control-variant="split" class="mb-3">
+                                control-variant="split" class="mb-3" :maxLength="5" :counter="5">
                             </v-number-input>
                         </v-col>
-
-
 
                         <v-col cols="12" sm="6">
                             <v-row dense>
