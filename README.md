@@ -26,30 +26,6 @@ https://github.com/user-attachments/assets/60441032-07d4-489c-89a3-6012fe431a16
 - **Datenbank**: MySQL  
 - **Speicher**: Laravel Storage für Bilder  
 
-## Installation
-
-```bash
-# Repository klonen
-git clone https://dac-gitea01.bbw-hof.de/dana.guensche/fahrzeugpflege-laravel-vue.git
-cd fahrzeugpflege-laravel
-
-# Abhängigkeiten installieren
-composer install
-npm install
-
-# .env-Datei erstellen
-cp .env.example .env
-
-# App-Key generieren
-php artisan key:generate
-
-# Datenbank konfigurieren & migrieren
-php artisan migrate --seed
-
-# Dev-Server starten
-php artisan serve
-npm run dev
-```
 
 **Genauere Anleitung und Informationen befinden sich im [Wiki](https://github.com/danaguensche/fahrzeugpflege/wiki). des Repositorys.**  
 
