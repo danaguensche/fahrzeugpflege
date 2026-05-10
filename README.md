@@ -53,13 +53,5 @@ npm run dev
 
 **Genauere Anleitung und Informationen befinden sich im [Wiki](https://github.com/danaguensche/fahrzeugpflege/wiki). des Repositorys.**  
 
-## Server  
 
-**Prodserver Web-01**  
-  
-Windows Server 2022 Standard  
-Webserver: IIS  
-IP: 172.17.100.5  
-URL: https://poliplan.bbw-hof.de/dashboard  
-TEST-URL: https://poliplan-test.bbw-hof.de/dashboard  
 
