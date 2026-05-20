@@ -4,7 +4,7 @@
 
 <script>
 import WidgetLayout from './WidgetLayout.vue';
-import axios from 'axios';
+import axios from 'axios'; //test
 
 export default {
     name: 'CustomersWidget',
