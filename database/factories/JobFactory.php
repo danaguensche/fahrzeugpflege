@@ -32,9 +32,8 @@ class JobFactory extends Factory
             'car_id' => \App\Models\Car::factory(),
             'customer_id' => \App\Models\Customer::factory(),
             'status' => fake()->randomElement(['ausstehend', 'in_bearbeitung', 'abgeschlossen', 'im_rueckblick']),
-            'cleaning_start' => $cleaningStart,
-            'cleaning_end' => $cleaningEnd,
             'scheduled_at' => $scheduledAt,
+            'cleaning_time' => fake()->numberBetween(0, 99),
         ];
     }
 }

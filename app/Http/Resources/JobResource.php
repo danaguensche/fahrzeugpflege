@@ -20,8 +20,6 @@ class JobResource extends JsonResource
             'id' => $this->id,
             'Title' => $this->title,
             'Beschreibung' => $this->description,
-            'cleaning_time' => $this->cleaning_time,
-            'cleaning_start' => $this->cleaning_start,
             'cleaning_end' => $this->cleaning_end,
             'Abholtermin' => $this->scheduled_at,
             'Status' => $this->status,

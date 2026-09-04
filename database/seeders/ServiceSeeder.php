@@ -14,7 +14,7 @@ class ServiceSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        
         $COUNT_WHEN_NO_FILE = 5;
 
         $seeding_values = Storage::disk('local')->get('/db_imported_data/data_services.txt');
