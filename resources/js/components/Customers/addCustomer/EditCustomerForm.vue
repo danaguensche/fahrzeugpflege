@@ -5,151 +5,81 @@
                 <v-icon class="mr-3" color="primary">mdi-account-edit</v-icon>
                 Kunde bearbeiten
             </v-card-title>
-            
+
             <v-divider></v-divider>
-            
+
             <v-card-text class="pa-6">
                 <v-form ref="form" v-model="valid" lazy-validation>
                     <v-row>
                         <v-col cols="12" sm="6">
-                            <v-text-field
-                                v-model="customer.id"
-                                label="ID"
-                                variant="outlined"
-                                density="comfortable"
-                                prepend-inner-icon="mdi-identifier"
-                                class="mb-3"
-                                disabled
-                            ></v-text-field>
+                            <v-text-field v-model="customer.id" label="ID" variant="outlined" density="comfortable"
+                                prepend-inner-icon="mdi-identifier" class="mb-3" disabled></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field
-                                v-model="customer.firstname"
-                                label="Vorname *"
-                                :rules="[v => !!v || 'Vorname ist erforderlich']"
-                                required
-                                variant="outlined"
-                                density="comfortable"
-                                prepend-inner-icon="mdi-account"
-                                class="mb-3"
-                                :maxlength="50"
-                                :counter="50"
-                            ></v-text-field>
+                            <v-text-field v-model="customer.firstname" label="Vorname *"
+                                :rules="[v => !!v || 'Vorname ist erforderlich']" required variant="outlined"
+                                density="comfortable" prepend-inner-icon="mdi-account" class="mb-3" :maxlength="50"
+                                :counter="50"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field
-                                v-model="customer.lastname"
-                                label="Nachname *"
-                                :rules="[v => !!v || 'Nachname ist erforderlich']"
-                                required
-                                variant="outlined"
-                                density="comfortable"
-                                prepend-inner-icon="mdi-account"
-                                class="mb-3"
-                                :maxlength="50"
-                                :counter="50"
-                            ></v-text-field>
+                            <v-text-field v-model="customer.lastname" label="Nachname *"
+                                :rules="[v => !!v || 'Nachname ist erforderlich']" required variant="outlined"
+                                density="comfortable" prepend-inner-icon="mdi-account" class="mb-3" :maxlength="50"
+                                :counter="50"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field
-                                v-model="customer.email"
-                                label="E-Mail *"
-                                :rules="emailRules"
-                                required
-                                variant="outlined"
-                                density="comfortable"
-                                prepend-inner-icon="mdi-email"
-                                class="mb-3"
-                                type="email"
-                            ></v-text-field>
+                            <v-text-field v-model="customer.email" label="E-Mail *" :rules="emailRules"
+                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-email" class="mb-3"
+                                type="email"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field
-                                v-model="customer.phonenumber"
-                                label="Telefonnummer"
-                                :rules="phoneRules"
-                                required
-                                variant="outlined"
-                                density="comfortable"
-                                prepend-inner-icon="mdi-phone"
-                                class="mb-3"
-                            ></v-text-field>
+                            <v-text-field v-model="customer.phonenumber" label="Telefonnummer" :rules="phoneRules"
+                                required variant="outlined" density="comfortable" prepend-inner-icon="mdi-phone"
+                                class="mb-3"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field
-                                v-model="customer.addressline"
-                                label="Straße und Hausnummer"
-                                variant="outlined"
-                                density="comfortable"
-                                prepend-inner-icon="mdi-home"
-                                class="mb-3"
-                                :maxlength="100"
-                            ></v-text-field>
+                            <v-text-field v-model="customer.addressline" label="Straße und Hausnummer"
+                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-home" class="mb-3"
+                                :maxlength="100"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field
-                                v-model="customer.postalcode"
-                                label="PLZ"
-                                :rules="postalCodeRules"
-                                variant="outlined"
-                                density="comfortable"
-                                prepend-inner-icon="mdi-mailbox"
-                                class="mb-3"
-                                :maxlength="5"
-                            ></v-text-field>
+                            <v-text-field v-model="customer.postalcode" label="PLZ" :rules="postalCodeRules"
+                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-mailbox" class="mb-3"
+                                :maxlength="5"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field
-                                v-model="customer.city"
-                                label="Stadt"
-                                variant="outlined"
-                                density="comfortable"
-                                prepend-inner-icon="mdi-city"
-                                class="mb-3"
-                                :maxlength="50"
-                            ></v-text-field>
+                            <v-text-field v-model="customer.city" label="Stadt" variant="outlined" density="comfortable"
+                                prepend-inner-icon="mdi-city" class="mb-3" :maxlength="50"></v-text-field>
                         </v-col>
                     </v-row>
                 </v-form>
             </v-card-text>
-            
+
             <v-divider></v-divider>
 
             <!-- Buttons -->
             <v-card-actions class="pa-6 pt-4">
                 <v-spacer></v-spacer>
-                <v-btn 
-                    variant="outlined" 
-                    color="grey" 
-                    @click="closeDialog"
-                    class="mr-3">
+                <v-btn variant="outlined" color="grey" @click="closeDialog" class="mr-3">
                     <v-icon start>mdi-close</v-icon>
                     Abbrechen
                 </v-btn>
 
-                <v-btn 
-                    variant="elevated" 
-                    color="primary" 
-                    @click="saveCustomer"
-                    :loading="loading">
+                <v-btn variant="elevated" color="primary" @click="saveCustomer" :loading="loading">
                     <v-icon start>mdi-content-save</v-icon>
                     Speichern
                 </v-btn>
             </v-card-actions>
         </v-card>
-        
-        <SnackBar 
-            v-if="snackbar.show" 
-            :text="snackbar.text" 
-            :color="snackbar.color" 
-            @close="snackbar.show = false"/>
+
+        <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false" />
     </v-dialog>
 </template>
 
@@ -159,11 +89,11 @@ import SnackBar from '../../Details/SnackBar.vue';
 
 export default {
     name: 'EditCustomerForm',
-    
+
     components: {
         SnackBar,
     },
-    
+
     props: {
         modelValue: Boolean,
         customerData: {
@@ -190,8 +120,7 @@ export default {
             },
             originalId: null,
             emailRules: [
-                v => !!v || 'E-Mail ist erforderlich',
-                v => /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
+                v => !v || /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
             ],
             phoneRules: [
                 v => !v || /^[0-9+\-\s()]{6,}$/.test(v) || 'Ungültige Telefonnummer'
@@ -279,7 +208,7 @@ export default {
                 } catch (error) {
                     console.error('Error updating customer:', error);
                     this.showSnackbar(
-                        error.response?.data?.message || 'Fehler beim Aktualisieren des Kunden', 
+                        error.response?.data?.message || 'Fehler beim Aktualisieren des Kunden',
                         'error'
                     );
                 } finally {
@@ -287,7 +216,7 @@ export default {
                 }
             }
         },
-        
+
         resetForm() {
             if (this.$refs.form) {
                 this.$refs.form.reset();
@@ -305,7 +234,7 @@ export default {
             };
             this.originalId = null;
         },
-        
+
         showSnackbar(text, color = 'success') {
             this.snackbar = {
                 show: true,

@@ -47,7 +47,7 @@ class CustomerDetailsController extends CustomerController
                 'company' => 'nullable|string|max:255',
                 'firstname' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
-                'email' => ['required', 'email', Rule::unique('customers', 'email')->ignore($id)],
+                'email' => ['nullable', 'email', Rule::unique('customers', 'email')->ignore($id)],
                 'phonenumber' => 'nullable|string',
                 'addressline' => 'nullable|string',
                 'postalcode' => 'nullable|string',

@@ -36,9 +36,8 @@
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="customer.email" label="E-Mail *" :rules="[v => !!v || 'E-Mail ist erforderlich',
-                            v => /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
-                            ]" required variant="outlined" density="comfortable" prepend-inner-icon="mdi-email"
+                            <v-text-field v-model="customer.email" label="E-Mail" :rules="[v => !v || /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
+                            ]" variant="outlined" density="comfortable" prepend-inner-icon="mdi-email"
                                 type="email" class="mb-3" :maxlength="60" :counter="60"></v-text-field>
                         </v-col>
 
