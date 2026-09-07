@@ -6,10 +6,10 @@
     <SidebarState></SidebarState>
 
     <ReduceButton v-if="isSidebarOpen" @click="toggleSidebar" class="reduce-button">
-      <img class="arrow" src="../../../img/sidebar-img/arrow-icon.png" alt="Close">
+      <v-icon>mdi-chevron-left</v-icon>
     </ReduceButton>
     <ExpandButton v-else @click="toggleSidebar" class="expand-button">
-      <img class="arrow" src="../../../img/sidebar-img/arrow-icon-mirrored.png" alt="Open">
+      <v-icon>mdi-chevron-right</v-icon>
     </ExpandButton>
   </div>
 </template>
