@@ -4,52 +4,79 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\JobResource;
 use App\Models\Job;
+use App\Models\Customer;
+use App\Models\Car;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class JobController extends Controller
 {
     public function store(Request $request)
     {
+        try {
+            $validatedData = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'car_id' => 'required|exists:cars,id',
+                'customer_id' => 'required|exists:customers,id',
+                'user_id' => 'nullable|exists:users,id',
+                'status' => 'required|string',
+                'cleaning_time' => 'nullable|numeric|min:0',
+                'scheduled_at' => 'nullable|date',
+                'service_ids' => 'required|array',
+                'service_ids.*' => 'exists:services,id',
+                'trainee_id' => 'nullable|exists:users,id',
+                'images' => 'nullable|array',
+                'images.*' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
+            ]);
 
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'car_id' => 'required|exists:cars,id',
-            'customer_id' => 'required|exists:customers,id',
-            'user_id' => 'nullable|exists:users,id',
-            'status' => 'required|string',
-            'scheduled_at' => 'nullable|date',
-            'service_ids' => 'required|array',
-            'service_ids.*' => 'exists:services,id',
-            'trainee_id' => 'nullable|exists:users,id',
-            'images' => 'nullable|array',
-            'images.*' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
-        ]);
-
-        $user = auth()->user();
-        if (!$user) {
-            // Handle unauthenticated user, e.g., throw an exception or return an error response
-            abort(401, 'Unauthenticated.');
-        }
-        $job = Job::create(array_merge($validatedData, ['trainer_id' => $user->id]));
-        $job->services()->sync($request->input('service_ids'));
-
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('jobs', 'public');
-
-                $job->images()->create([
-                    'path' => $path,
-                ]);
+            $user = auth()->user();
+            if (!$user) {
+                abort(401, 'Unauthenticated.');
             }
+
+            DB::beginTransaction();
+
+            $job = Job::create(array_merge($validatedData, ['trainer_id' => $user->id]));
+            $job->services()->sync($request->input('service_ids'));
+
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $path = $image->store('jobs', 'public');
+                    $job->images()->create([
+                        'path' => $path,
+                        'user_id' => $user->id,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            $job->load(['services', 'images', 'car', 'customer']);
+
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'job_id' => $job->id,
+                    'title' => $job->title,
+                    'status' => $job->status,
+                ]);
+
+            return response()->json([
+                'message' => 'Job erfolgreich gespeichert',
+                'job' => $job,
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Fehler beim Speichern des Jobs: ' . $e->getMessage());
+            return response()->json(['error' => 'Fehler beim Speichern des Jobs'], 500);
         }
-
-        $job->load(['services', 'images']);
-
-        return response()->json($job, 201);
     }
 
     public function index(Request $request)
@@ -64,29 +91,28 @@ class JobController extends Controller
 
         $query = Job::with(['customer', 'car', 'services', 'trainer', 'trainee', 'images']);
 
-        // Filter by user role
         /** @var \App\Models\User|null $user */
         $user = auth()->user();
         if ($user && $user->role === 'trainee') {
             $query->where('trainee_id', $user->id);
         }
 
-        // Filtering by status
-        if ($request->has('status') && $request->input('status') !== '') {
-            $query->where('status', $request->input('status'));
+        if ($request->has('status')) {
+            $statusInput = $request->input('status');
+            $statuses = is_array($statusInput) ? $statusInput : array_filter(explode(',', $statusInput));
+            if (!empty($statuses)) {
+                $query->whereIn('status', $statuses);
+            }
         }
 
-        // Filtering by car_id
         if ($request->has('car_id') && $request->input('car_id') !== '') {
             $query->where('car_id', $request->input('car_id'));
         }
 
-        // Filtering by customer_id
         if ($request->has('customer_id') && $request->input('customer_id') !== '') {
             $query->where('customer_id', $request->input('customer_id'));
         }
 
-        // Filtering by user_id (for trainer/admin to filter by specific trainee)
         if ($user && $user->role !== 'trainee' && $request->has('user_id') && $request->input('user_id') !== '') {
             $query->where('user_id', $request->input('user_id'));
         }
@@ -115,25 +141,65 @@ class JobController extends Controller
         ]);
     }
 
-
     public function search(Request $request)
     {
-        $searchQuery = $request->input('query');
-        $itemsPerPage = $request->input('itemsPerPage', 10);
-        $sortBy = $request->input('sortBy', 'id');
-        $sortDesc = $request->input('sortDesc', 'true') === 'true';
+        $maxPerPage = 100;
+        try {
+            $searchQuery = $request->input('query', '');
+            $itemsPerPage = min((int) $request->input('itemsPerPage', 10), $maxPerPage);
+            $page = $request->input('page', 1);
+            $sortBy = $request->input('sortBy', 'id');
+            $sortDesc = $request->input('sortDesc', 'true') === 'true';
 
-        $query = Job::where('title', 'like', '%' . $searchQuery . '%')
-            ->orWhere('description', 'like', '%' . $searchQuery . '%');
+            $allowedSortFields = ['id', 'title', 'description', 'scheduled_at', 'status'];
 
-        $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
+            if (empty(trim($searchQuery))) {
+                return response()->json([
+                    'items' => [],
+                    'total' => 0,
+                ]);
+            }
 
-        $jobs = $query->paginate($itemsPerPage);
+            $query = Job::with(['customer', 'car', 'services', 'trainer', 'trainee', 'images']);
 
-        return response()->json([
-            'items' => $jobs->items(),
-            'total' => $jobs->total(),
-        ]);
+            $query->where(function ($q) use ($searchQuery) {
+                $searchTerm = '%' . $searchQuery . '%';
+                $q->where('title', 'like', $searchTerm)
+                    ->orWhere('description', 'like', $searchTerm)
+                    ->orWhere('status', 'like', $searchTerm);
+
+                if (is_numeric($searchQuery)) {
+                    $q->orWhere('id', '=', (int)$searchQuery);
+                }
+            });
+
+            if ($request->has('status')) {
+                $statusInput = $request->input('status');
+                $statuses = is_array($statusInput) ? $statusInput : array_filter(explode(',', $statusInput));
+                if (!empty($statuses)) {
+                    $query->whereIn('status', $statuses);
+                }
+            }
+
+            if (in_array($sortBy, $allowedSortFields)) {
+                $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
+            }
+
+            $total = $query->count();
+            $jobs = $query->skip(($page - 1) * $itemsPerPage)->take($itemsPerPage)->get();
+
+            return response()->json([
+                'items' => $jobs,
+                'total' => $total,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in job search: ' . $e->getMessage());
+            return response()->json([
+                'items' => [],
+                'total' => 0,
+                'error' => 'Error during search'
+            ], 500);
+        }
     }
 
     public function show(Job $job)
@@ -143,112 +209,463 @@ class JobController extends Controller
 
     public function update(Request $request, Job $job)
     {
-        $user = auth()->user();
+        try {
+            $user = auth()->user();
 
-        if ($user && $user->role === 'trainee') {
-            Log::info('JobController@update: Trainee user detected.', ['user_id' => $user->id, 'job_user_id' => $job->user_id, 'job_id' => $job->id]);
-            // Trainee can only update status for their own jobs
-            if ($job->trainee_id !== $user->id) {
-                Log::error('JobController@update: Trainee attempting to update job not assigned to them.', ['user_id' => $user->id, 'job_trainee_id' => $job->trainee_id, 'job_id' => $job->id]);
-                abort(403, 'Unauthorized action. You can only update your own jobs.');
+            if ($user && $user->role === 'trainee') {
+                if ($job->trainee_id !== $user->id) {
+                    abort(403, 'Unauthorized action. You can only update your own jobs.');
+                }
+
+                $allowedFields = ['status', 'cleaning_time'];
+                $requestFields = array_keys($request->all());
+                $diff = array_diff($requestFields, $allowedFields);
+
+                if (!empty($diff)) {
+                    abort(403, 'Unauthorized action. Trainees can only update job status.');
+                }
+
+                $validatedData = $request->validate([
+                    'status' => 'required|string',
+                    'cleaning_time' => 'nullable|numeric|min:0|max:99',
+                ]);
+
+                $job->update($validatedData);
+
+                activity()
+                    ->causedBy($user)
+                    ->withProperties([
+                        'job_id' => $job->id,
+                        'title' => $job->title,
+                        'status' => $job->status,
+                    ])
+                    ->log('Auftrag bearbeitet: ' . $job->title . ' mit Status ' . $job->status . ' von ' . $user->firstname . ' ' . $user->lastname);
+
+                return response()->json([
+                    'message' => 'Job Status erfolgreich aktualisiert',
+                    'job' => $job->load('services')
+                ]);
+            } else {
+                DB::beginTransaction();
+
+                if ($request->has('scheduled_at') && $request->input('scheduled_at') === '') {
+                    $request->merge(['scheduled_at' => null]);
+                }
+
+                $validatedData = $request->validate([
+                    'title' => 'sometimes|required|string|max:255',
+                    'description' => 'nullable|string',
+                    'trainee_id' => 'nullable|exists:users,id',
+                    'car_id' => 'sometimes|required|exists:cars,id',
+                    'customer_id' => 'sometimes|required|exists:customers,id',
+                    'status' => 'sometimes|required|string',
+                    'cleaning_time' => 'nullable|numeric|min:0',
+                    'scheduled_at' => 'nullable|date',
+                    'services' => 'nullable|array',
+                    'services.*.id' => 'required|exists:services,id',
+                    'images' => 'nullable|array',
+                    'images.*' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
+                ]);
+
+                if (isset($validatedData['car_id']) && isset($validatedData['customer_id'])) {
+                    $car = Car::find($validatedData['car_id']);
+
+                    if ($car && is_null($car->customer_id)) {
+                        $car->customer_id = $validatedData['customer_id'];
+                        $saved = $car->save();
+
+                        Log::info('Car assigned to customer during job update', [
+                            'car_id' => $car->id,
+                            'customer_id' => $validatedData['customer_id'],
+                            'job_id' => $job->id,
+                            'saved' => $saved,
+                            'car_customer_id_after' => $car->fresh()->customer_id
+                        ]);
+                    } else {
+                        Log::info('Car assignment skipped in update', [
+                            'car_id' => $validatedData['car_id'] ?? null,
+                            'car_found' => $car !== null,
+                            'car_customer_id' => $car?->customer_id,
+                            'already_assigned' => $car && !is_null($car->customer_id)
+                        ]);
+                    }
+                }
+
+                $job->update($validatedData);
+
+                if ($request->has('services')) {
+                    $serviceIds = collect($request->input('services'))->pluck('id')->toArray();
+                    $job->services()->sync($serviceIds);
+                }
+
+                if ($request->hasFile('images')) {
+                    foreach ($request->file('images') as $image) {
+                        $path = $image->store('jobs', 'public');
+                        $job->images()->create([
+                            'path' => $path,
+                            'user_id' => $user->id,
+                        ]);
+                    }
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'message' => 'Job erfolgreich aktualisiert',
+                    'job' => $job->load(['services', 'images', 'customer', 'car', 'trainee'])
+                ]);
             }
-
-            // Validate that only 'status' is being updated
-            $allowedFields = ['status'];
-            Log::info('JobController@update: Request all for trainee.', ['request_all' => $request->all()]);
-            $requestFields = array_keys($request->all());
-            Log::info('JobController@update: Trainee update request fields.', ['request_fields' => $requestFields]);
-            $diff = array_diff($requestFields, $allowedFields);
-
-            if (!empty($diff)) {
-                Log::error('JobController@update: Trainee attempting to update fields other than status.', ['user_id' => $user->id, 'job_id' => $job->id, 'attempted_fields' => $requestFields]);
-                abort(403, 'Unauthorized action. Trainees can only update job status.');
-            }
-
-            $validatedData = $request->validate([
-                'status' => 'required|string',
-            ]);
-
-            $job->update($validatedData);
-
-            Log::info('Job trainee_id after update', ['trainee_id' => $job->trainee_id]);
-
-            return response()->json($job->load('services'));
-        } else { // Admin or Trainer
-            // Convert empty string for scheduled_at to null
-            if ($request->has('scheduled_at') && $request->input('scheduled_at') === '') {
-                $request->merge(['scheduled_at' => null]);
-            }
-
-            $validatedData = $request->validate([
-                'title' => 'sometimes|required|string|max:255',
-                'description' => 'nullable|string',
-                'trainee_id' => 'nullable|exists:users,id',
-                'car_id' => 'sometimes|required|exists:cars,id',
-                'customer_id' => 'sometimes|required|exists:customers,id',
-                'status' => 'sometimes|required|string',
-                'scheduled_at' => 'nullable|date',
-                'services' => 'nullable|array',
-                'services.*.id' => 'required|exists:services,id',
-            ]);
-
-            $job->update($validatedData);
-
-            Log::info('Job trainee_id after update', ['trainee_id' => $job->trainee_id]);
-
-            if ($request->has('services')) {
-                $serviceIds = collect($request->input('services'))->pluck('id')->toArray();
-                $job->services()->sync($serviceIds);
-            }
-
-            Log::info('JobController@update payload', $request->all());
-            return response()->json($job->load('services'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Fehler beim Aktualisieren des Jobs: ' . $e->getMessage());
+            return response()->json(['error' => 'Fehler beim Aktualisieren des Jobs'], 500);
         }
     }
 
     public function destroy(Job $job)
     {
-        $job->delete();
+        try {
+            DB::beginTransaction();
 
-        foreach ($job->images as $image) {
-            $imagePath = str_replace('storage/', '', $image->path);
-            if (Storage::disk('public')->exists($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
+            foreach ($job->images as $image) {
+                $imagePath = str_replace('storage/', '', $image->path);
+                if (Storage::disk('public')->exists($imagePath)) {
+                    Storage::disk('public')->delete($imagePath);
+                }
+                $image->delete();
             }
-            $image->delete();
+
+            $job->delete();
+
+            DB::commit();
+
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'job_id' => $job->id,
+                    'title' => $job->title,
+                    'status' => $job->status,
+                ])
+                ->log('Auftrag gelöscht: ' . $job->title . ' mit Status ' . $job->status . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Job und alle zugehörigen Bilder wurden gelöscht.'
+            ], 204);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Fehler beim Löschen des Jobs: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler beim Löschen des Jobs.'
+            ], 500);
         }
-
-        return response()->json(null, 204);
     }
-
-
 
     public function destroyMultiple(Request $request)
     {
         try {
             $validated = $request->validate([
                 'ids' => 'required|array',
-                'ids.*' => 'integer|exists:customers,id'
+                'ids.*' => 'integer'
             ]);
+
+            DB::beginTransaction();
+
+            $jobs = Job::whereIn('id', $validated['ids'])->with('images')->get();
+
+            if ($jobs->isEmpty()) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Keine Jobs gefunden.'
+                ], 404);
+            }
+
+            foreach ($jobs as $job) {
+                foreach ($job->images as $image) {
+                    $imagePath = str_replace('storage/', '', $image->path);
+                    if (Storage::disk('public')->exists($imagePath)) {
+                        Storage::disk('public')->delete($imagePath);
+                    }
+                    $image->delete();
+                }
+            }
 
             Job::destroy($validated['ids']);
 
+            DB::commit();
+
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'job_ids' => $validated['ids'],
+                    'count' => count($jobs),
+                ])
+                ->log('Mehrere Aufträge gelöscht: ' . count($jobs) . ' Jobs von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Jobs wurden erfolgreich gelöscht.'
+                'message' => count($jobs) . ' Jobs wurden erfolgreich gelöscht.'
             ], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Validierungsfehler',
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Fehler beim Löschen mehrerer Jobs: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Fehler beim Löschen der Jobs'
             ], 500);
         }
+    }
+
+    public function deleteImage(Request $request, Job $job, $imageId)
+    {
+        try {
+            $image = $job->images()->findOrFail($imageId);
+
+            $imagePath = str_replace('storage/', '', $image->path);
+            if (Storage::disk('public')->exists($imagePath)) {
+                Storage::disk('public')->delete($imagePath);
+            }
+
+            $image->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Bild erfolgreich gelöscht.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Löschen des Bildes: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler beim Löschen des Bildes.'
+            ], 500);
+        }
+    }
+
+    public function addImages(Request $request, Job $job)
+    {
+        try {
+            $validatedData = $request->validate([
+                'images' => 'required|array',
+                'images.*' => 'required|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
+            ]);
+
+            $user = auth()->user();
+            if (!$user) {
+                abort(401, 'Unauthenticated.');
+            }
+
+            DB::beginTransaction();
+
+            $addedImages = [];
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('jobs', 'public');
+
+                $imageData = [
+                    'path' => $path,
+                    'user_id' => $user->id,
+                ];
+
+                $newImage = $job->images()->create($imageData);
+                $addedImages[] = $newImage;
+            }
+
+            DB::commit();
+
+            activity()
+                ->causedBy($user)
+                ->withProperties([
+                    'job_id' => $job->id,
+                    'title' => $job->title,
+                    'status' => $job->status,
+                    'added_images_count' => count($addedImages),
+                ])
+                ->log('Bilder hinzugefügt zum Auftrag: ' . $job->title . ' von ' . auth()->user()->firstname . ' ' . auth()->user()->lastname);
+
+            return response()->json([
+                'success' => true,
+                'message' => count($addedImages) . ' Bilder erfolgreich hinzugefügt.',
+                'images' => $addedImages
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validierungsfehler',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Fehler beim Hinzufügen der Bilder: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler beim Hinzufügen der Bilder.'
+            ], 500);
+        }
+    }
+
+    public function getOpenJobsCount()
+    {
+        try {
+            $user = auth()->user();
+            if (!$user) {
+                abort(401, 'Unauthenticated.');
+            }
+
+            $query = Job::query();
+
+            if ($user->role === 'trainee') {
+                $query->where('trainee_id', $user->id);
+            }
+
+            $openStatusList = ['ausstehend'];
+            $openJobsCount = $query->whereIn('status', $openStatusList)->count();
+
+            return response()->json([
+                'count' => $openJobsCount
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Abrufen der offenen Aufträge: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Fehler beim Abrufen der offenen Aufträge'
+            ], 500);
+        }
+    }
+
+    public function getTodayJobsCount()
+    {
+        try {
+            $user = auth()->user();
+            if (!$user) {
+                abort(401, 'Unauthenticated.');
+            }
+
+            $today = Carbon::today();
+            $query = Job::query();
+
+            if ($user->role === 'trainee') {
+                $query->where('trainee_id', $user->id);
+            }
+
+            $todayJobsCount = $query->whereDate('scheduled_at', $today)->count();
+
+            return response()->json([
+                'count' => $todayJobsCount,
+                'date' => $today->format('Y-m-d')
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Abrufen der heutigen Aufträge: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Fehler beim Abrufen der heutigen Aufträge'
+            ], 500);
+        }
+    }
+
+    public function getAvailableCars(Request $request)
+    {
+        try {
+            $cars = Car::whereNull('customer_id')
+                ->orderBy('license_plate')
+                ->get();
+
+            return response()->json([
+                'cars' => $cars
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Abrufen verfügbarer Fahrzeuge: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Fehler beim Abrufen verfügbarer Fahrzeuge'
+            ], 500);
+        }
+    }
+
+    /**
+     * Gibt nur Fahrzeuge zurück, die dem ausgewählten Kunden zugewiesen sind
+     */
+    public function getCarsForCustomer($customerId)
+    {
+        $customer = Customer::with('cars')->findOrFail($customerId);
+
+        $cars = Car::where('customer_id', $customerId)->get();
+
+        return response()->json([
+            'cars' => $cars
+        ]);
+    }
+
+    public function getCalendarEvents(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            if (!$user) {
+                abort(401, 'Unauthenticated.');
+            }
+
+            $query = Job::with(['customer', 'car', 'services', 'trainer', 'trainee']);
+
+            if ($user->role === 'trainee') {
+                $query->where('trainee_id', $user->id);
+            }
+
+            if ($request->has('start') && $request->has('end')) {
+                $start = Carbon::parse($request->input('start'));
+                $end = Carbon::parse($request->input('end'));
+
+                $query->where(function ($q) use ($start, $end) {
+                    $q->whereBetween('scheduled_at', [$start, $end]);
+                });
+            }
+
+            $jobs = $query->orderBy('scheduled_at', 'asc')->get();
+
+            return response()->json([
+                'items' => $jobs,
+                'total' => $jobs->count(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Fehler beim Abrufen der Kalender-Events: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Fehler beim Abrufen der Kalender-Events',
+                'items' => [],
+                'total' => 0
+            ], 500);
+        }
+    }
+
+    public function assignToCar(Request $request, $jobId)
+    {
+        \Log::info('=== ASSIGN TO CAR ===');
+        \Log::info('Job ID:', ['job_id' => $jobId]);
+        \Log::info('Request all:', $request->all());
+
+        $validated = $request->validate([
+            'image_ids' => 'required|array',
+            'image_ids.*' => 'exists:image_reports,id',
+            'car_id' => 'required|exists:cars,id'
+        ]);
+
+        $job = Job::findOrFail($jobId);
+
+        $updatedCount = $job->images()
+            ->whereIn('id', $validated['image_ids'])
+            ->update(['car_id' => $validated['car_id']]);
+
+        \Log::info('Updated count:', ['count' => $updatedCount]);
+
+        return response()->json([
+            'message' => 'Bilder erfolgreich dem Fahrzeug zugewiesen',
+            'updated_count' => $updatedCount
+        ]);
     }
 }

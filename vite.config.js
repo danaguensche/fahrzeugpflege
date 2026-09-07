@@ -21,7 +21,7 @@ export default defineConfig({
         },
     },
     build: {
-        outDir: 'public/build', 
+        outDir: 'public/build',
         assetsDir: 'assets',
         rollupOptions: {
             output: {
@@ -32,9 +32,5 @@ export default defineConfig({
         },
     },
 
-    // server: {
-    //     cors: true,
-    //     host: '172.17.100.242',
-    //     port: 8082
-    // },
+
 });

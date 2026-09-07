@@ -7,30 +7,24 @@
         <template v-else>
             <!-- Header -->
             <v-card class="card">
-                <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon"></Header>
+                <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon">
+                </Header>
 
-                <!-- Image Gallery with Upload functionality -->
-                <ImageGallery 
-                    :images="images" 
-                    :editMode="editMode"
-                    :canEdit="isAdminOrTrainer"
+                <!-- Image Gallery with Upload functionality (IMMER editierbar, für alle) -->
+                <ImageGallery :apiHeaders="apiHeaders" :images="carImages" :editMode="true"
                     :uploadUrl="`/api/cars/cardetails/${$route.params.kennzeichen}/images`"
                     :deleteUrlTemplate="'/api/images/{imageId}'"
                     :replaceUrlTemplate="`/api/cars/${$route.params.kennzeichen}/images/{imageId}`"
-                    :entityId="$route.params.kennzeichen"
-                    uploadDialogTitle="Fahrzeugbilder hochladen"
-                    @images-uploaded="handleImagesUploaded"
-                    @image-deleted="handleImageDeleted"
-                    @image-replaced="handleImageReplaced"
-                    @success="showSuccessMessage"
-                    @error="showErrorMessage"
+                    :entityId="$route.params.kennzeichen" uploadDialogTitle="Fahrzeugbilder hochladen"
+                    @images-uploaded="handleImagesUploaded" @image-deleted="handleImageDeleted"
+                    @image-replaced="handleImageReplaced" @success="showSuccessMessage" @error="showErrorMessage"
                     @loading="setImageLoading">
                 </ImageGallery>
 
-                <!-- Fahrzeug information -->
+                <!-- Fahrzeug informationen -->
                 <v-card-text class="px-4 pt-4 pb-0">
                     <v-sheet>
-                        <InformationHeader :title="'Fahrzeuginformationen'" :editMode="editMode" v-if="isAdminOrTrainer">
+                        <InformationHeader :title="'Fahrzeuginformationen'" :editMode="editMode">
                         </InformationHeader>
 
                         <!-- Ansichtsmodus -->
@@ -39,51 +33,66 @@
                         </InfoList>
 
                         <!-- Bearbeitungsmodus -->
-                        <InfoListEditMode v-else :personalInfoKeys="vehicleInfoKeys" :labels="labels"
-                            :editedData="editedCarData" :getIconForField="getIconForField">
-                        </InfoListEditMode>
+                        <template v-else>
+                            <v-row class="pa-4">
+                                <!-- Standard Felder (außer Fahrzeugklasse) -->
+                                <template v-for="key in vehicleInfoKeys.filter(k => k !== 'Fahrzeugklasse')" :key="key">
+                                    <v-col cols="12" sm="8">
+                                        <v-text-field v-if="key !== 'Sonstiges'" v-model="editedCarData[key]"
+                                            :label="labels[key]" :prepend-inner-icon="getIconForField(key)"
+                                            variant="outlined" density="comfortable" hide-details="auto"
+                                            :readonly="key === 'id' || !isAdminOrTrainer"
+                                            :disabled="!isAdminOrTrainer"></v-text-field>
+                                        <v-textarea v-if="key === 'Sonstiges'" class="w-100"
+                                            v-model="editedCarData[key]" variant="outlined" density="comfortable"
+                                            :height="150" maxlength="65000" :counter="65000"
+                                            :disabled="!isAdminOrTrainer">
+                                        </v-textarea>
+                                    </v-col>
+                                </template>
+
+                                <!-- Fahrzeugklasse Dropdown -->
+                                <v-col cols="12" sm="8">
+                                    <v-autocomplete v-model="editedCarData.Fahrzeugklasse" :items="carGroups"
+                                        item-title="title" item-value="title" label="Fahrzeugklasse"
+                                        placeholder="Fahrzeugklasse auswählen oder suchen"
+                                        prepend-inner-icon="mdi-car-multiple" variant="outlined" density="comfortable"
+                                        hide-details="auto" clearable :loading="carGroupsLoading"
+                                        :disabled="!isAdminOrTrainer" @update:search="searchCarGroups"></v-autocomplete>
+                                </v-col>
+                            </v-row>
+                        </template>
                     </v-sheet>
 
                     <!-- Customer information -->
                     <v-sheet>
-                        <DefaultHeader :title="'Kundeninformation'"></DefaultHeader>
-                        <CustomerInfoList v-if="!editMode" :customer="carDetails.data.customer" :customerId="carDetails.data.customer_id"
-                            :labels="labels">
-                        </CustomerInfoList>
+                        <v-col cols="12" sm="8">
+                            <DefaultHeader :title="'Kundeninformation'"></DefaultHeader>
 
-                        <v-autocomplete
-                            v-else-if="isAdminOrTrainer"
-                            v-model="editedCarData.customer"
-                            :items="customers"
-                            item-title="full_name"
-                            item-value="id"
-                            label="Kunde"
-                            placeholder="Kunde auswählen oder suchen"
-                            prepend-inner-icon="mdi-account"
-                            variant="outlined"
-                            density="comfortable"
-                            hide-details="auto"
-                            clearable
-                            :loading="customersLoading"
-                            :search-input.sync="customerSearch"
-                            @update:search-input="searchCustomers"
-                            return-object
-                        >
-                            <template v-slot:item="{ props, item }">
-                                <v-list-item
-                                    v-bind="props"
-                                    :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                    :subtitle="item.raw.email"
-                                ></v-list-item>
-                            </template>
-                            <template v-slot:selection="{ item }">
-                                {{ item.raw.email }}
-                            </template>
-                        </v-autocomplete>
+                            <CustomerInfoList v-if="!editMode" :customer="carDetails.data.customer"
+                                :customerId="carDetails.data.customer_id" :labels="labels">
+                            </CustomerInfoList>
 
-                        <!-- Button wird nur angezeigt wenn noch kein Kunde eingetragen wurde -->
+                            <!-- Kunde auswählen nur für Admin/Trainer -->
+                            <v-autocomplete v-else-if="isAdminOrTrainer" v-model="editedCarData.customer"
+                                :items="customers" item-title="full_name" item-value="id" label="Kunde"
+                                placeholder="Kunde auswählen oder suchen" prepend-inner-icon="mdi-account"
+                                variant="outlined" density="comfortable" hide-details="auto" clearable
+                                :loading="customersLoading" :search-input.sync="customerSearch"
+                                @update:search-input="searchCustomers" return-object>
+                                <template v-slot:item="{ props, item }">
+                                    <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                        :subtitle="item.raw.email">
+                                    </v-list-item>
+                                </template>
+                                <template v-slot:selection="{ item }">
+                                    {{ item.raw.email }}
+                                </template>
+                            </v-autocomplete>
+                        </v-col>
+
                         <v-btn class="mt-4" color="primary"
-                            v-if="(!carDetails.data.customer || carDetails.data.customer === 0) && isAdminOrTrainer"
+                            v-if="isAdminOrTrainer && (!carDetails.data.customer || carDetails.data.customer === 0)"
                             @click="openCustomerAddDialog">
                             Kunde hinzufügen
                         </v-btn>
@@ -100,21 +109,22 @@
                     <v-spacer></v-spacer>
 
                     <!-- Bearbeitungsmodus Aktionen -->
-                    <template v-if="editMode && isAdminOrTrainer">
+                    <template v-if="editMode">
                         <CancelButton :cancelEdit="cancelEdit"></CancelButton>
-                        <SaveButton :saveData="saveCarData"></SaveButton>
+                        <SaveButton v-if="isAdminOrTrainer" :saveData="saveCarData"></SaveButton>
                     </template>
 
                     <!-- Ansichtsmodus Aktionen -->
                     <template v-else>
-                        <EditButton :switchEditMode="switchEditMode" v-if="isAdminOrTrainer"></EditButton>
-                        <PrintButton></PrintButton>
+                        <!-- EditButton nur für Admin/Trainer -->
+                        <EditButton v-if="isAdminOrTrainer" :switchEditMode="switchEditMode">
+                        </EditButton>
                     </template>
                 </v-card-actions>
             </v-card>
         </template>
 
-        <!-- Kunde hinzufügen Dialog -->
+        <!-- Kunde hinzufügen Dialog (nur geöffnet, wenn Admin/Trainer) -->
         <CustomerAddDialog ref="customerAddDialog" @customer-added="handleCustomerAdded"
             @customer-selected="handleCustomerSelected" @error="handleCustomerAddError">
         </CustomerAddDialog>
@@ -134,7 +144,6 @@ import InformationHeader from "../../Details/InformationHeader.vue";
 import Header from "../../Details/Header.vue";
 import BackButton from "../../CommonSlots/BackButton.vue";
 import SnackBar from "../../Details/SnackBar.vue";
-import PrintButton from "../../CommonSlots/PrintButton.vue";
 import EditButton from "../../Details/EditButton.vue";
 import MetaData from "../../Details/MetaData.vue";
 import CancelButton from "../../Details/CancelButton.vue";
@@ -154,7 +163,6 @@ export default {
         Header,
         BackButton,
         SnackBar,
-        PrintButton,
         EditButton,
         MetaData,
         CancelButton,
@@ -177,6 +185,7 @@ export default {
                     },
                 }
             },
+            carImages: [],
             editedCarData: {},
             headerTitle: "Fahrzeugdetails",
             headerIcon: "mdi-car",
@@ -202,6 +211,9 @@ export default {
             customersLoading: false,
             customerSearch: null,
             customerSearchTimeout: null,
+            carGroups: [],
+            carGroupsLoading: false,
+            carGroupSearchTimeout: null,
             snackbar: {
                 show: false,
                 text: '',
@@ -210,11 +222,16 @@ export default {
         };
     },
     computed: {
+        apiHeaders() {
+            const token = localStorage.getItem('api_token') || this.$store.state.auth.token;
+            return token ? {
+                'Authorization': `Bearer ${token}`
+            } : {};
+        },
         ...mapGetters('auth', ['isAdminOrTrainer']),
         vehicleInfoKeys() {
             return ['id', 'Kennzeichen', 'Fahrzeugklasse', 'Automarke', 'Typ', 'Farbe', 'Sonstiges'];
         },
-        // Add this computed property to safely handle customer display
         customerDisplay() {
             const customer = this.carDetails.data?.customer;
             if (!customer || customer.id === 0) {
@@ -222,8 +239,6 @@ export default {
             }
             return `${customer.firstname} ${customer.lastname}`;
         },
-        
-        // Add this to safely handle customer ID
         customerIdDisplay() {
             const customerId = this.carDetails.data?.customer_id;
             if (!customerId || customerId === 0) {
@@ -231,32 +246,7 @@ export default {
             }
             return customerId;
         },
-        images() {
-            const img = this.carDetails.data?.images;
-            console.log("Raw images data:", img);
 
-            if (!img) {
-                return [];
-            }
-
-            const mapImage = (image) => {
-                if (image && image.id) {
-                    return {
-                        id: image.id,
-                        path: image.path, // Keep path for consistency if needed
-                        url: image.url
-                    };
-                }
-                return null;
-            };
-
-            if (Array.isArray(img)) {
-                return img.filter(Boolean).map(mapImage).filter(Boolean);
-            }
-
-            const singleImage = mapImage(img);
-            return singleImage ? [singleImage] : [];
-        },
         formattedCreatedAt() {
             return this.formatDate(this.carDetails.data?.created_at);
         },
@@ -267,7 +257,9 @@ export default {
     async mounted() {
         try {
             await this.getCar();
-            await this.fetchCustomers(); 
+            await this.fetchCustomers();
+            await this.fetchCarGroups();
+            await this.loadAllImages();
         } catch (error) {
             this.error = error.message;
             this.showSnackbar(error.message, 'error');
@@ -276,6 +268,24 @@ export default {
         }
     },
     methods: {
+
+        async loadAllImages() {
+            try {
+
+                const response = await axios.get(
+                    `/api/cars/${this.$route.params.kennzeichen}/all-images`
+                );
+
+                console.table(response.data.images); 
+                // Setze die Bilder
+                this.carImages = response.data.images || [];
+
+            } catch (error) {
+                console.error('Error loading all images:', error);
+                console.error('Error response:', error.response?.data);
+            }
+        },
+
         formatDate(dateString) {
             if (!dateString) return 'Unbekannt';
 
@@ -326,10 +336,21 @@ export default {
         },
 
         switchEditMode() {
+            if (!this.isAdminOrTrainer) {
+                this.showSnackbar('Sie haben keine Berechtigung, Daten zu bearbeiten', 'error');
+                return;
+            }
             this.editMode = !this.editMode;
 
             if (this.editMode) {
                 this.editedCarData = { ...this.carDetails.data };
+                if (this.carDetails.data.customer) {
+                    this.editedCarData.customer = {
+                        id: this.carDetails.data.customer.id,
+                        full_name: `${this.carDetails.data.customer.firstname} ${this.carDetails.data.customer.lastname}`,
+                        email: this.carDetails.data.customer.email
+                    };
+                }
             }
         },
 
@@ -353,28 +374,28 @@ export default {
         },
 
         async saveCarData() {
+            if (!this.isAdminOrTrainer) {
+                this.showSnackbar('Sie haben keine Berechtigung, Änderungen zu speichern', 'error');
+                return;
+            }
+
             this.saveLoading = true;
             this.error = null;
 
             try {
-                // Prepare data for submission
                 const dataToSubmit = { ...this.editedCarData };
-                
-                // Handle customer_id - convert empty/null values to null
+
                 if (dataToSubmit.customer) {
                     dataToSubmit.customer_id = dataToSubmit.customer.id;
                 } else {
                     dataToSubmit.customer_id = null;
                 }
 
-                console.log('Submitting car data:', dataToSubmit);
-
                 await axios.put(
                     `/api/cars/cardetails/${this.$route.params.kennzeichen}`,
                     dataToSubmit
                 );
 
-                // Reload the car details
                 const { data } = await axios.get(
                     `/api/cars/cardetails/${this.$route.params.kennzeichen}`
                 );
@@ -385,17 +406,16 @@ export default {
             } catch (error) {
                 console.error('Error saving car data:', error);
                 console.error('Error response:', error.response?.data);
-                
+
                 let errorMessage = "Fehler beim Speichern der Fahrzeugdaten";
-                
+
                 if (error.response?.data?.message) {
                     errorMessage = error.response.data.message;
                 } else if (error.response?.data?.errors) {
-                    // Handle validation errors
                     const validationErrors = Object.values(error.response.data.errors).flat();
                     errorMessage = validationErrors.join(', ');
                 }
-                
+
                 this.showSnackbar(errorMessage, 'error');
             } finally {
                 this.saveLoading = false;
@@ -412,17 +432,17 @@ export default {
 
         // Image Gallery Event Handlers
         async handleImagesUploaded(response) {
-            // Reload car details to get updated images
-            await this.getCar();
+            await this.loadAllImages();
         },
 
+
         async handleImageDeleted(imageId) {
-            // Reload car details to get updated images
+            this.loadAllImages();
             await this.getCar();
         },
 
         async handleImageReplaced(data) {
-            // Reload car details to get updated images
+            this.loadAllImages();
             await this.getCar();
         },
 
@@ -440,6 +460,10 @@ export default {
 
         // Customer Dialog Methods
         openCustomerAddDialog() {
+            if (!this.isAdminOrTrainer) {
+                this.showSnackbar('Sie haben keine Berechtigung, einen Kunden hinzuzufügen', 'error');
+                return;
+            }
             if (this.$refs.customerAddDialog) {
                 this.$refs.customerAddDialog.open();
             }
@@ -492,10 +516,8 @@ export default {
         // Customer Search Methods
         async fetchCustomers(query = '') {
             this.customersLoading = true;
-            console.log('Fetching customers with query:', query);
             try {
                 const response = await axios.get(`/api/customers/search?query=${query}`);
-                console.log('Customer API response:', response.data);
                 this.customers = response.data.data.map(customer => ({
                     id: customer.id,
                     firstname: customer.firstname,
@@ -503,7 +525,6 @@ export default {
                     full_name: `${customer.firstname} ${customer.lastname}`,
                     email: customer.email
                 }));
-                console.log('Mapped customers:', this.customers);
             } catch (error) {
                 console.error('Error fetching customers:', error.response || error);
                 this.showSnackbar('Fehler beim Laden der Kunden', 'error');
@@ -513,12 +534,37 @@ export default {
         },
 
         searchCustomers(query) {
-            // Debounce the search to avoid too many API calls
             if (this.customerSearchTimeout) {
                 clearTimeout(this.customerSearchTimeout);
             }
             this.customerSearchTimeout = setTimeout(() => {
                 this.fetchCustomers(query);
+            }, 300);
+        },
+
+        // Car Group Search Methods
+        async fetchCarGroups(query = '') {
+            this.carGroupsLoading = true;
+            try {
+                const response = await axios.get(`/api/cargroups/search?query=${query}`);
+                this.carGroups = response.data.data.map(group => ({
+                    id: group.id,
+                    title: group.title,
+                }));
+            } catch (error) {
+                console.error('Error fetching car groups:', error);
+                this.showSnackbar('Fehler beim Laden der Fahrzeugklassen', 'error');
+            } finally {
+                this.carGroupsLoading = false;
+            }
+        },
+
+        searchCarGroups(query) {
+            if (this.carGroupSearchTimeout) {
+                clearTimeout(this.carGroupSearchTimeout);
+            }
+            this.carGroupSearchTimeout = setTimeout(() => {
+                this.fetchCarGroups(query);
             }, 300);
         }
     },
@@ -527,75 +573,75 @@ export default {
 
 <style scoped>
 .card-container {
-  width: 100%;
-  height: calc(100vh - 40px);
-  padding: 20px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
+    width: 100%;
+    height: 99vh;
+    margin-left: 110px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 .card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
 @media (max-width: 575.98px) {
-  .card-container {
-    padding: 10px;
-    height: calc(100vh - 20px);
-  }
+    .card-container {
+        padding: 10px;
+        height: calc(100vh - 20px);
+    }
 
-  .card {
-    font-size: 14px;
-  }
+    .card {
+        font-size: 14px;
+    }
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
-  .card-container {
-    padding: 15px;
-    height: calc(100vh - 30px);
-  }
+    .card-container {
+        padding: 15px;
+        height: calc(100vh - 30px);
+    }
 }
 
 @media (min-width: 768px) and (max-width: 991.98px) {
-  .card-container {
-    max-width: calc(100% - 80px);
-  }
+    .card-container {
+        max-width: calc(100% - 50px);
+    }
 }
 
 @media (min-width: 992px) and (max-width: 1199.98px) {
-  .card-container {
-    max-width: calc(100% - 250px);
-  }
+    .card-container {
+        max-width: calc(100% - 150px);
+    }
 }
 
 @media (min-width: 1200px) {
-  .card-container {
-    max-width: calc(100% - 280px);
-  }
+    .card-container {
+        max-width: calc(100% - 180px);
+    }
 }
 
 @media (max-width: 767.98px) {
-  .v-card-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    .v-card-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-  .v-card-actions button {
-    margin-bottom: 8px;
-    width: 100%;
-  }
+    .v-card-actions button {
+        margin-bottom: 8px;
+        width: 100%;
+    }
 
-  .v-spacer {
-    display: none;
-  }
+    .v-spacer {
+        display: none;
+    }
 }
 </style>

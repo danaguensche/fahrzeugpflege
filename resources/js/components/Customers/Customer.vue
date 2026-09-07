@@ -3,36 +3,51 @@
         <div class="search-wrapper">
             <div class="search-input-container">
                 <Search :context="searchContext" v-model="searchText" @clearSearch="clearSearch" />
+
                 <div class="search-buttons">
                     <v-btn :icon="true" :prepend-icon="'mdi-magnify'" class="search-button" variant="text"
                         @click="searchCustomers">
                         <v-icon>mdi-magnify</v-icon>
                     </v-btn>
+
                     <CloseButton :isVisible="searchText.length > 0" class="close-button" @close="clearSearch">
                     </CloseButton>
                 </div>
             </div>
         </div>
 
-        <div class="content-container">
-            <DefaultButton @click="openAddCustomerDialog">Kunde hinzufügen</DefaultButton>
-        </div>
+        <!-- Kundendaten Tabelle -->
+        <DataTable 
+            ref="dataTable"
+            :buttonFunction="openAddCustomerDialog" 
+            addButtonLabel="Kunde Hinzufügen" 
+            :searchString="searchText" 
+            :isSearchActive="isSearchActive" 
+            endpoint="customers"
+            :headers="filteredCustomerHeaders" 
+            :fields="customerFields" 
+            :fieldRules="fieldRules[field] || []" 
+            itemKey="id"
+            detailsPage="kundendetails" 
+            detailsUrlBasePath="kunden" 
+            :useExternalEdit="true"
+            @itemsDeleted="handleItemsDeleted"
+            @show-error="handleError"
+            @edit-item="handleEditItem" />
 
-        <DataTable :searchString="searchText" :isSearchActive="isSearchActive" endpoint="customers"
-            :headers="customerHeaders" :fields="customerFields" itemKey="id" detailsPage="kundendetails"
-            detailsUrlBasePath="kunden" @itemsDeleted="handleItemsDeleted" @show-error="handleError" />
         <AddCustomerForm v-model="showAddCustomerDialog" @customer-added="handleCustomerAdded" />
-
+        <EditCustomerForm v-model="showEditCustomerDialog" :customerData="selectedCustomer" @customer-edited="handleCustomerEdited" />
     </div>
 </template>
 
 <script>
+import { mapState, mapGetters } from 'vuex';
 import CloseButton from '../CommonSlots/CloseButton.vue';
 import Search from '../CommonSlots/Searchbar.vue';
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
 import DataTable from '../Table/DataTable.vue';
 import AddCustomerForm from './addCustomer/AddCustomerForm.vue';
-import { mapState } from 'vuex';
+import EditCustomerForm from './addCustomer/EditCustomerForm.vue';
 
 export default {
     name: "Customer",
@@ -43,15 +58,31 @@ export default {
         DefaultButton,
         AddCustomerForm,
         DataTable,
+        EditCustomerForm
     },
 
     data() {
         return {
             showAddCustomerDialog: false,
+            showEditCustomerDialog: false,
+            selectedCustomer: null,
             searchContext: "Suchen Sie nach einem Kunden...",
             searchText: '',
             isSearchActive: false,
             searchDebounceTimer: null,
+            fieldRules: {
+                email: [
+                    v => !!v || 'E-Mail ist erforderlich',
+                    v => /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
+                ],
+                phonenumber: [
+                    v => !!v || 'Telefonnummer ist erforderlich',
+                    v => /^[0-9+\-\s()]{6,}$/.test(v) || 'Ungültige Telefonnummer'
+                ],
+                postalcode: [
+                    v => /^[0-9]{5}$/.test(v) || 'Ungültige PLZ'
+                ]
+            },
             customerHeaders: [
                 { title: 'Auswählen', key: 'select', sortable: false, width: '60px' },
                 { title: 'ID', key: 'id', sortable: true, align: 'start' },
@@ -71,6 +102,19 @@ export default {
 
     computed: {
         ...mapState(['isSidebarOpen']),
+        ...mapGetters('auth', ['isAdminOrTrainer']),
+        
+        filteredCustomerHeaders() {
+            if (this.isAdminOrTrainer) {
+                return this.customerHeaders;
+            } else {
+                return this.customerHeaders.filter(header => 
+                    header.key !== 'delete' && 
+                    header.key !== 'edit' && 
+                    header.key !== 'select'
+                );
+            }
+        }
     },
 
     watch: {
@@ -83,26 +127,41 @@ export default {
     },
 
     methods: {
-
         openAddCustomerDialog() {
             this.showAddCustomerDialog = true;
         },
 
         handleCustomerAdded() {
             this.showAddCustomerDialog = false;
+            // Tabelle neu laden nach Hinzufügen
+            if (this.$refs.dataTable) {
+                this.$refs.dataTable.refresh();
+            }
+        },
+
+        handleEditItem(item) {
+            this.selectedCustomer = { ...item };
+            this.showEditCustomerDialog = true;
+        },
+
+        handleCustomerEdited() {
+            this.showEditCustomerDialog = false;
+            this.selectedCustomer = null;
+            // Tabelle neu laden nach Bearbeiten
+            if (this.$refs.dataTable) {
+                this.$refs.dataTable.refresh();
+            }
         },
 
         handleItemsDeleted() {
-            // Wird von DataTable emittiert nach erfolgreichem Löschen
             console.log('Customers deleted, table will refresh automatically');
         },
 
         handleError(message) {
             console.error('Error from DataTable:', message);
-            // Hier können Sie eine Toast-Nachricht oder ähnliches anzeigen
         },
 
-        //Search Handling
+        // Search Handling
         clearSearch() {
             this.searchText = '';
             this.isSearchActive = false;
@@ -119,7 +178,6 @@ export default {
                 return;
             }
 
-            // Debounce für 300ms
             this.searchDebounceTimer = setTimeout(() => {
                 this.isSearchActive = true;
             }, 300);
@@ -162,7 +220,6 @@ export default {
     justify-content: space-between;
     width: 100%;
     margin-top: -80px;
-    z-index: 5;
     position: relative;
 }
 
@@ -230,8 +287,6 @@ export default {
 .close-button:hover {
     background-color: rgba(0, 0, 0, 0.04);
 }
-
-
 
 .table-container {
     width: 100%;

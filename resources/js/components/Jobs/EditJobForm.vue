@@ -1,0 +1,460 @@
+<template>
+    <v-dialog v-model="showDialogLocal" persistent max-width="700px">
+        <v-card class="pa-2">
+            <v-card-title class="headline pa-6 pb-4">
+                <v-icon class="mr-3" color="primary">mdi-briefcase-edit</v-icon>
+                Auftrag bearbeiten
+            </v-card-title>
+
+            <v-divider></v-divider>
+
+            <v-card-text class="pa-6">
+                <v-form ref="form" v-model="valid" lazy-validation>
+                    <v-row>
+                        <!-- ID (nicht editierbar) -->
+                        <v-col cols="12" sm="6">
+                            <v-text-field v-model="job.id" label="ID" variant="outlined" density="comfortable"
+                                prepend-inner-icon="mdi-identifier" disabled class="mb-3">
+                            </v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <v-text-field v-model="job.title" label="Titel *"
+                                :rules="[v => !!v || 'Titel ist erforderlich']" required variant="outlined"
+                                density="comfortable" prepend-inner-icon="mdi-format-title" class="mb-3"
+                                :maxlength="100" :counter="100">
+                            </v-text-field>
+                        </v-col>
+
+                        <v-col cols="12">
+                            <v-textarea v-model="job.description" label="Beschreibung" variant="outlined"
+                                density="comfortable" prepend-inner-icon="mdi-text" class="mb-3" :maxlength="65000"
+                                :counter="65000">
+                            </v-textarea>
+                        </v-col>
+
+
+
+
+                        <!-- Services -->
+                        <v-col cols="12">
+                            <v-autocomplete v-model="job.services" :items="services" item-title="name" item-value="id"
+                                label="Dienstleistungen *" placeholder="Dienstleistungen auswählen"
+                                prepend-inner-icon="mdi-briefcase" variant="outlined" density="comfortable" multiple
+                                chips clearable :loading="servicesLoading" return-object
+                                :rules="[v => v && v.length > 0 || 'Mindestens eine Dienstleistung ist erforderlich']"
+                                required class="mb-3">
+
+                                <template v-slot:chip="{ props, item }">
+                                    <v-chip v-bind="props" :text="item.raw.name"></v-chip>
+                                </template>
+                                <template v-slot:item="{ props, item }">
+                                    <v-list-item v-bind="props" :title="item.raw.name" class="pa-3"></v-list-item>
+                                </template>
+                            </v-autocomplete>
+                        </v-col>
+
+                        <!-- Status -->
+                        <v-col cols="12" sm="6">
+                            <v-select v-model="job.status" :items="jobStatuses" label="Status *"
+                                :rules="[v => !!v || 'Status ist erforderlich']" required variant="outlined"
+                                density="comfortable" prepend-inner-icon="mdi-information" class="mb-3">
+                            </v-select>
+                        </v-col>
+
+                        <!-- Trainee (nur für Admin/Trainer) -->
+                        <template v-if="!isTrainee">
+                            <v-col cols="12" sm="6">
+                                <v-autocomplete v-model="job.trainee" :items="trainees" item-title="full_name"
+                                    item-value="id" label="Auszubildender" placeholder="Auszubildenden auswählen"
+                                    prepend-inner-icon="mdi-account-school" variant="outlined" density="comfortable"
+                                    clearable :loading="traineesLoading" return-object class="mb-3">
+
+                                    <template v-slot:item="{ props, item }">
+                                        <v-list-item v-bind="props"
+                                            :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                            :subtitle="item.raw.email" class="pa-3">
+                                        </v-list-item>
+                                    </template>
+                                    <template v-slot:selection="{ item }">
+                                        {{ item.raw.firstname }} {{ item.raw.lastname }}
+                                    </template>
+                                </v-autocomplete>
+                            </v-col>
+                        </template>
+
+                        <v-col cols="12" sm="6">
+                            <v-number-input v-model="job.cleaning_time" :max="99" :min="0" :step="0.25" :precision="2"
+                                label="Arbeitszeit (Stunden)" density="comfortable" variant="outlined"
+                                control-variant="split" class="mb-3">
+                            </v-number-input>
+                        </v-col>
+
+                        <!-- Abholtermin -->
+                        <v-col cols="12" sm="6">
+                            <v-row dense>
+                                <v-col sm="8">
+                                    <v-text-field v-model="scheduled_at_date" label="Abholtermin *" type="date"
+                                        variant="outlined" density="comfortable" class="mb-3"
+                                        :rules="[v => !!v || 'Abholtermin ist erforderlich']" required>
+                                    </v-text-field>
+                                </v-col>
+                                <v-col sm="4">
+                                    <v-text-field v-model="scheduled_at_time" label="Uhrzeit *" type="time"
+                                        variant="outlined" density="comfortable" class="mb-3"
+                                        :rules="[v => !!v || 'Abholzeit ist erforderlich']" required>
+                                    </v-text-field>
+                                </v-col>
+                            </v-row>
+                        </v-col>
+                    </v-row>
+                </v-form>
+            </v-card-text>
+
+            <v-divider></v-divider>
+
+            <v-card-actions class="pa-6 pt-4">
+                <v-spacer></v-spacer>
+                <v-btn variant="outlined" color="grey" @click="closeDialog" class="mr-3">
+                    <v-icon start>mdi-close</v-icon>
+                    Abbrechen
+                </v-btn>
+                <v-btn variant="elevated" color="primary" @click="saveJob" :loading="loading">
+                    <v-icon start>mdi-content-save</v-icon>
+                    Speichern
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+
+        <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false" />
+    </v-dialog>
+</template>
+
+<script>
+import axios from 'axios';
+import SnackBar from '../Details/SnackBar.vue';
+import { mapState } from 'vuex';
+
+export default {
+    name: 'EditJobForm',
+
+    components: {
+        SnackBar,
+    },
+
+    props: {
+        modelValue: Boolean,
+        jobData: {
+            type: Object,
+            default: null,
+        },
+    },
+
+    emits: ['update:modelValue', 'job-edited'],
+
+    data() {
+        return {
+            valid: true,
+            loading: false,
+            originalId: null,
+            job: {
+                id: null,
+                title: '',
+                description: '',
+                services: [],
+                status: 'ausstehend',
+                trainee: null,
+                cleaning_time: null,
+            },
+            // Datum&Zeit-Felder
+            scheduled_at_date: null,
+            scheduled_at_time: null,
+            // Dropdown-Daten
+            trainees: [],
+            services: [],
+            jobStatuses: [
+                { title: 'Ausstehend', value: 'ausstehend' },
+                { title: 'In Bearbeitung', value: 'in_bearbeitung' },
+                { title: 'im Rückblick', value: 'im_rueckblick' },
+                { title: 'Abgeschlossen', value: 'abgeschlossen' },
+            ],
+            // Loading-States
+            servicesLoading: false,
+            traineesLoading: false,
+            // Snackbar
+            snackbar: {
+                show: false,
+                text: '',
+                color: 'success',
+            },
+        };
+    },
+
+    computed: {
+        ...mapState('auth', ['userRole']),
+
+        isTrainee() {
+            return this.userRole === 'trainee';
+        },
+
+        showDialogLocal: {
+            get() {
+                return this.modelValue;
+            },
+            set(value) {
+                this.$emit('update:modelValue', value);
+            },
+        },
+    },
+
+    watch: {
+        modelValue: {
+            async handler(val) {
+                if (val && this.jobData) {
+                    // Dropdown
+                    await this.fetchInitialData();
+                    await this.getFullFormData();
+                }
+            },
+            immediate: false,
+        },
+    },
+
+    methods: {
+        async fetchFullJobData(jobId) {
+            try {
+                const response = await axios.get(`/api/jobs/${jobId}`);
+                return response.data.data || response.data;
+            } catch (error) {
+                console.error('Error fetching full job data:', error);
+                return null;
+            }
+        },
+
+        // Formulardaten
+        async getFullFormData() {
+            if (!this.jobData) return;
+
+            this.originalId = this.jobData.id;
+
+            const fullJobData = await this.fetchFullJobData(this.jobData.id);
+            const data = fullJobData || this.jobData;
+
+            console.log('Full job data:', data);
+            this.job.id = data.id;
+            this.job.title = data.title || '';
+            this.job.description = data.description || '';
+            this.job.status = data.status || 'ausstehend';
+            this.job.cleaning_time = data.cleaning_time || null;
+
+            this.parseDateTimeFields(data);
+            this.setServices(data);
+            await this.setTrainee(data);
+        },
+
+
+        parseDateTimeFields(data) {
+            // scheduled_at
+            if (data.scheduled_at) {
+                try {
+                    const scheduledAt = new Date(data.scheduled_at);
+                    if (!isNaN(scheduledAt.getTime())) {
+                        this.scheduled_at_date = scheduledAt.toISOString().split('T')[0];
+                        this.scheduled_at_time = scheduledAt.toTimeString().slice(0, 5);
+                    }
+                } catch (e) {
+                    console.error('Error parsing scheduled_at:', e);
+                }
+            }
+        },
+
+        setServices(data) {
+            if (data.services && Array.isArray(data.services)) {
+                this.job.services = data.services.map(s => {
+                    // Prüfe ob Service bereits in der Liste ist
+                    const existingService = this.services.find(srv => srv.id === s.id);
+                    if (existingService) {
+                        return existingService;
+                    }
+                    // Service zur Liste hinzufügen
+                    const newService = {
+                        id: s.id,
+                        name: s.name || s.title,
+                    };
+                    this.services.push(newService);
+                    return newService;
+                });
+            }
+        },
+
+        async setTrainee(data) {
+            let traineeId = null;
+            let traineeObj = null;
+
+            if (data.trainee && typeof data.trainee === 'object') {
+                traineeObj = data.trainee;
+                traineeId = traineeObj.id;
+            } else if (data.trainee_id) {
+                traineeId = data.trainee_id;
+            }
+
+            if (traineeId && !this.isTrainee) {
+                let existingTrainee = this.trainees.find(t => t.id === traineeId);
+
+                if (!existingTrainee && traineeObj) {
+                    existingTrainee = {
+                        id: traineeObj.id,
+                        firstname: traineeObj.firstname,
+                        lastname: traineeObj.lastname,
+                        full_name: `${traineeObj.firstname} ${traineeObj.lastname}`,
+                        email: traineeObj.email,
+                    };
+                    this.trainees.push(existingTrainee);
+                } else if (!existingTrainee) {
+                    try {
+                        const response = await axios.get(`/api/users/${traineeId}`);
+                        const trainee = response.data.data || response.data;
+                        existingTrainee = {
+                            id: trainee.id,
+                            firstname: trainee.firstname,
+                            lastname: trainee.lastname,
+                            full_name: `${trainee.firstname} ${trainee.lastname}`,
+                            email: trainee.email,
+                        };
+                        this.trainees.push(existingTrainee);
+                    } catch (error) {
+                        console.error('Error loading trainee:', error);
+                    }
+                }
+
+                if (existingTrainee) {
+                    this.job.trainee = existingTrainee;
+                }
+            }
+        },
+
+        closeDialog() {
+            this.$emit('update:modelValue', false);
+            this.resetForm();
+        },
+
+        combineDateTime(date, time) {
+            if (!date) return null;
+            if (!time) return `${date}T00:00:00`;
+            return `${date}T${time}:00`;
+        },
+
+        async saveJob() {
+            const { valid } = await this.$refs.form.validate();
+            if (!valid) return;
+
+            this.loading = true;
+            try {
+                const jobData = {
+                    title: this.job.title,
+                    description: this.job.description,
+                    status: this.job.status,
+                    service_ids: this.job.services ? this.job.services.map(s => s.id) : [],
+                    trainee_id: this.job.trainee ? this.job.trainee.id : null,
+                    cleaning_time: this.job.cleaning_time,
+                    scheduled_at: this.combineDateTime(this.scheduled_at_date, this.scheduled_at_time),
+                };
+
+                await axios.put(`/api/jobs/${this.originalId}`, jobData);
+                this.$emit('job-edited');
+                this.showSnackbar('Auftrag erfolgreich aktualisiert', 'success');
+                this.closeDialog();
+            } catch (error) {
+                console.error('Error updating job:', error);
+                this.showSnackbar(
+                    error.response?.data?.message || 'Fehler beim Aktualisieren des Auftrags',
+                    'error'
+                );
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async fetchServices() {
+            this.servicesLoading = true;
+            try {
+                const response = await axios.get('/api/services');
+                this.services = response.data.data.map(service => ({
+                    id: service.id,
+                    name: service.name,
+                }));
+            } catch (error) {
+                console.error('Error fetching services:', error);
+            } finally {
+                this.servicesLoading = false;
+            }
+        },
+
+        async fetchTrainees() {
+            if (this.isTrainee) return;
+
+            this.traineesLoading = true;
+            try {
+                const response = await axios.get('/api/users/trainees');
+                this.trainees = response.data.data.map(trainee => ({
+                    id: trainee.id,
+                    firstname: trainee.firstname,
+                    lastname: trainee.lastname,
+                    full_name: `${trainee.firstname} ${trainee.lastname}`,
+                    email: trainee.email,
+                }));
+            } catch (error) {
+                console.error('Error fetching trainees:', error);
+            } finally {
+                this.traineesLoading = false;
+            }
+        },
+
+        async fetchInitialData() {
+            await Promise.all([
+                this.fetchServices(),
+                this.fetchTrainees(),
+            ]);
+        },
+
+        resetForm() {
+            if (this.$refs.form) {
+                this.$refs.form.reset();
+                this.$refs.form.resetValidation();
+            }
+            this.job = {
+                id: null,
+                title: '',
+                description: '',
+                services: [],
+                status: 'ausstehend',
+                trainee: null,
+                cleaning_time: null,
+            };
+            this.scheduled_at_date = null;
+            this.scheduled_at_time = null;
+            this.originalId = null;
+        },
+
+        showSnackbar(text, color = 'success') {
+            this.snackbar = { show: true, text, color };
+        },
+    },
+};
+</script>
+
+
+<style scoped>
+.v-dialog {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.v-card {
+    border-radius: 12px;
+}
+
+.v-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+</style>

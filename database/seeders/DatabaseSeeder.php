@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\Job;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -15,15 +17,12 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             CarGroupSeeder::class,
-            CarGroupSubgroupSeeder::class,
             ServiceSeeder::class,
-            PriceConditionSeeder::class,
-            ServicePricingSeeder::class,
-            ExtraChargeSeeder::class,
             CarSeeder::class,
             CustomerSeeder::class,
-            OrderSeeder::class,
-            OrderExtraChargeSeeder::class
+            JobSeeder::class,
+            JobServiceSeeder::class,
+            AllowedUsernameSeeder::class,
         ]);
     }
 }

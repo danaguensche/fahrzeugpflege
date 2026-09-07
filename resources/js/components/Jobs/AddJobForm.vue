@@ -3,67 +3,85 @@
         <v-card class="pa-2">
             <v-card-title class="headline pa-6 pb-4">
                 <v-icon class="mr-3" color="primary">mdi-briefcase-plus</v-icon>
-                Neue Aufgabe hinzufügen
+                Neuen Auftrag hinzufügen
             </v-card-title>
 
             <v-divider></v-divider>
 
+            <!-- Formular Felder mit Validierung -->
+
             <v-card-text class="pa-6">
                 <v-form ref="form" v-model="valid" lazy-validation>
+
                     <v-row>
                         <v-col cols="12">
-                            <v-text-field v-model="job.title" label="Titel"
+                            <v-text-field v-model="job.title" label="Titel *"
                                 :rules="[v => !!v || 'Titel ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-format-title" class="mb-3"></v-text-field>
+                                density="comfortable" prepend-inner-icon="mdi-format-title" class="mb-3"
+                                :maxlength="100" :counter="100">
+                            </v-text-field>
                         </v-col>
 
                         <v-col cols="12">
                             <v-textarea v-model="job.description" label="Beschreibung" variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-text" class="mb-3"></v-textarea>
+                                density="comfortable" prepend-inner-icon="mdi-text" class="mb-3" :maxlength="65000"
+                                :counter="65000"></v-textarea>
                         </v-col>
 
+                        <!-- Kunde zuerst auswählen -->
                         <v-col cols="12" sm="6">
-                            <v-autocomplete v-model="job.car" :items="cars" item-title="Kennzeichen" item-value="id"
-                                label="Fahrzeug" placeholder="Fahrzeug auswählen oder suchen"
+                            <v-autocomplete v-model="job.customer" :items="customers" item-title="full_name"
+                                item-value="id" label="Kunde *" placeholder="Kunde auswählen"
+                                prepend-inner-icon="mdi-account" variant="outlined" density="comfortable" clearable
+                                :loading="customersLoading" return-object
+                                :rules="[v => !!v || 'Kunde ist erforderlich']" required class="mb-3"
+                                @update:model-value="onCustomerChange">
+
+                                <template v-slot:item="{ props, item }">
+                                    <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
+                                        :subtitle="item.raw.email" class="pa-3">
+                                    </v-list-item>
+                                </template>
+                                <template v-slot:selection="{ item }">
+                                    {{ item.raw.firstname }} {{ item.raw.lastname }}
+                                </template>
+                            </v-autocomplete>
+                        </v-col>
+
+                        <!-- Fahrzeuge basierend auf Kundenauswahl (Es werden die Fahrzeuge angezeigt die zum Kunden gehören/noch nicht zugewiesen wurden)-->
+                        <v-col cols="12" sm="6">
+                            <v-autocomplete v-model="job.car" :items="availableCars" item-title="Kennzeichen"
+                                item-value="id" label="Fahrzeug *"
+                                :placeholder="job.customer ? 'Fahrzeug für Kunde auswählen' : 'Zuerst Kunde auswählen'"
                                 prepend-inner-icon="mdi-car" variant="outlined" density="comfortable" clearable
-                                :loading="carsLoading" @update:search="searchCars" return-object
+                                :loading="carsLoading" return-object :disabled="!job.customer"
                                 :rules="[v => !!v || 'Fahrzeug ist erforderlich']" required class="mb-3">
+
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
-                                        :subtitle="item.raw.Automarke" class="pa-3"></v-list-item>
+                                        :subtitle="`${item.raw.Automarke}`"
+                                        class="pa-3">
+                                    </v-list-item>
                                 </template>
+
                                 <template v-slot:selection="{ item }">
                                     {{ item.raw.Kennzeichen }}
                                 </template>
                             </v-autocomplete>
                         </v-col>
 
-                        <v-col cols="12" sm="6">
-                            <v-autocomplete v-model="job.customer" :items="customers" item-title="full_name"
-                                item-value="id" label="Kunde" placeholder="Kunde auswählen oder suchen"
-                                prepend-inner-icon="mdi-account" variant="outlined" density="comfortable" clearable
-                                :loading="customersLoading" @update:search="searchCustomers" return-object
-                                :rules="[v => !!v || 'Kunde ist erforderlich']" required class="mb-3">
-                                <template v-slot:item="{ props, item }">
-                                    <v-list-item v-bind="props" :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                        :subtitle="item.raw.email" class="pa-3"></v-list-item>
-                                </template>
-                                <template v-slot:selection="{ item }">
-                                    {{ item.raw.email }}
-                                </template>
-                            </v-autocomplete>
-                        </v-col>
-
                         <v-col cols="12">
                             <v-autocomplete v-model="job.services" :items="services" item-title="name" item-value="id"
-                                label="Dienstleistungen" placeholder="Dienstleistungen auswählen"
+                                label="Dienstleistungen *" placeholder="Dienstleistungen auswählen"
                                 prepend-inner-icon="mdi-briefcase" variant="outlined" density="comfortable" multiple
                                 chips clearable :loading="servicesLoading" return-object
                                 :rules="[v => v && v.length > 0 || 'Mindestens eine Dienstleistung ist erforderlich']"
                                 required class="mb-3">
+
                                 <template v-slot:chip="{ props, item }">
                                     <v-chip v-bind="props" :text="item.raw.name"></v-chip>
                                 </template>
+
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item v-bind="props" :title="item.raw.name" class="pa-3"></v-list-item>
                                 </template>
@@ -73,13 +91,8 @@
                         <v-col cols="12" sm="6">
                             <v-select v-model="job.status" :items="jobStatuses" label="Status"
                                 :rules="[v => !!v || 'Status ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-information" class="mb-3"></v-select>
-                        </v-col>
-
-                        <v-col cols="12" sm="6">
-                            <v-text-field v-model="job.scheduled_at" label="Abholtermin" type="datetime-local"
-                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-calendar-clock"
-                                class="mb-3"></v-text-field>
+                                density="comfortable" prepend-inner-icon="mdi-information" class="mb-3">
+                            </v-select>
                         </v-col>
 
                         <template v-if="!isTrainee">
@@ -91,14 +104,48 @@
                                     <template v-slot:item="{ props, item }">
                                         <v-list-item v-bind="props"
                                             :title="`${item.raw.firstname} ${item.raw.lastname}`"
-                                            :subtitle="item.raw.email" class="pa-3"></v-list-item>
+                                            :subtitle="item.raw.email" class="pa-3">
+                                        </v-list-item>
                                     </template>
                                     <template v-slot:selection="{ item }">
-                                        {{ item.raw.email }}
+                                        {{ item.raw.firstname }} {{ item.raw.lastname }}
                                     </template>
                                 </v-autocomplete>
                             </v-col>
                         </template>
+                        
+                        <v-col cols="12" sm="6">
+                            <v-number-input v-model="job.cleaning_time" :max="99" :min="0" :step="0.25" :precision="2"
+                                label="Arbeitszeit (Stunden)" density="comfortable" variant="outlined"
+                                control-variant="split" class="mb-3" :maxLength="5" :counter="5">
+                            </v-number-input>
+                        </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <v-row dense>
+                                <v-col sm="8">
+                                    <v-text-field v-model="scheduled_at_date" label="Abholtermin *" type="date"
+                                        variant="outlined" density="comfortable" class="mb-3"
+                                        :rules="[v => !!v || 'Abholtermin ist erforderlich']" required>
+                                    </v-text-field>
+                                </v-col>
+
+                                <v-col sm="4">
+                                    <v-text-field v-model="scheduled_at_time" label="Uhrzeit *" type="time"
+                                        variant="outlined" density="comfortable" class="mb-3"
+                                        :rules="[v => !!v || 'Abholzeit ist erforderlich']" required>
+                                    </v-text-field>
+                                </v-col>
+                            </v-row>
+                        </v-col>
+
+                        <!-- Fahrzeug zum Kunden zufügen falls das noch nicht gemacht wurde -->
+                        <v-col cols="12" v-if="job.car && job.customer && !isCarOwnedByCustomer">
+                            <v-alert type="info" variant="tonal" class="mb-3">
+                                <v-icon start>mdi-information</v-icon>
+                                Das ausgewählte Fahrzeug wird automatisch dem Kunden zugewiesen.
+                            </v-alert>
+                        </v-col>
 
                     </v-row>
                 </v-form>
@@ -106,6 +153,7 @@
 
             <v-divider></v-divider>
 
+            <!-- Aktions Buttons zum Abbrechen oder Speichern -->
             <v-card-actions class="pa-6 pt-4">
                 <v-spacer></v-spacer>
                 <v-btn variant="outlined" color="grey" @click="closeDialog" class="mr-3">
@@ -146,12 +194,15 @@ export default {
                 customer: null,
                 services: [],
                 status: 'ausstehend',
+                cleaning_time: null,
                 scheduled_at: null,
                 trainee: null,
             },
+            scheduled_at_date: null,
+            scheduled_at_time: null,
             trainees: [],
-            cars: [],
             customers: [],
+            availableCars: [], // Fahrzeuge für den ausgewählten Kunden
             services: [],
             jobStatuses: [
                 { title: 'Ausstehend', value: 'ausstehend' },
@@ -160,9 +211,7 @@ export default {
                 { title: 'Abgeschlossen', value: 'abgeschlossen' },
             ],
             carsLoading: false,
-            carSearchTimeout: null,
             customersLoading: false,
-            customerSearchTimeout: null,
             servicesLoading: false,
             traineesLoading: false,
             jobsLoading: false,
@@ -193,6 +242,12 @@ export default {
                 this.$emit('update:modelValue', value);
             },
         },
+
+        // Prüft ob das ausgewählte Auto bereits dem Kunden gehört
+        isCarOwnedByCustomer() {
+            if (!this.job.car || !this.job.customer) return false;
+            return this.job.car.customer_id === this.job.customer.id;
+        }
     },
     watch: {
         modelValue(val) {
@@ -206,6 +261,13 @@ export default {
             this.$emit('update:modelValue', false);
             this.resetForm();
         },
+
+        combineDateTime(date, time) {
+            if (!date) return null;
+            if (!time) return `${date}T00:00:00`;
+            return `${date}T${time}:00`;
+        },
+
         async saveJob() {
             const { valid } = await this.$refs.form.validate();
             if (valid) {
@@ -216,7 +278,11 @@ export default {
                         car_id: this.job.car ? this.job.car.id : null,
                         customer_id: this.job.customer ? this.job.customer.id : null,
                         service_ids: this.job.services ? this.job.services.map(s => s.id) : [],
-                        trainee_id: this.isTrainee ? this.$store.state.auth.userId : (this.job.trainee ? this.job.trainee.id : null),                    };
+                        trainee_id: this.isTrainee ? this.$store.state.auth.userId : (this.job.trainee ? this.job.trainee.id : null),
+                        assign_car_to_customer: true,
+                        cleaning_time: this.job.cleaning_time || null,
+                        scheduled_at: this.combineDateTime(this.scheduled_at_date, this.scheduled_at_time),
+                    };
                     delete jobData.car;
                     delete jobData.customer;
                     delete jobData.services;
@@ -234,30 +300,7 @@ export default {
                 }
             }
         },
-        async fetchCars(query = '') {
-            this.carsLoading = true;
-            try {
-                const response = await axios.get(`/api/cars/search?query=${query}`);
-                this.cars = response.data.data.map(car => ({
-                    id: car.id,
-                    Kennzeichen: car.Kennzeichen,
-                    Automarke: car.Automarke,
-                }));
-            } catch (error) {
-                console.error('Error fetching cars:', error);
-                this.showSnackbar('Fehler beim Laden der Fahrzeuge', 'error');
-            } finally {
-                this.carsLoading = false;
-            }
-        },
-        searchCars(query) {
-            if (this.carSearchTimeout) {
-                clearTimeout(this.carSearchTimeout);
-            }
-            this.carSearchTimeout = setTimeout(() => {
-                this.fetchCars(query);
-            }, 300);
-        },
+
         async fetchCustomers(query = '') {
             this.customersLoading = true;
             try {
@@ -276,14 +319,37 @@ export default {
                 this.customersLoading = false;
             }
         },
-        searchCustomers(query) {
-            if (this.customerSearchTimeout) {
-                clearTimeout(this.customerSearchTimeout);
+
+
+        async onCustomerChange(customer) {
+            this.job.car = null;
+            this.availableCars = [];
+
+            if (customer) {
+                console.log('Customer ID:', customer.id);
+                await this.fetchCarsForCustomer(customer.id);
             }
-            this.customerSearchTimeout = setTimeout(() => {
-                this.fetchCustomers(query);
-            }, 300);
         },
+
+        async fetchCarsForCustomer(customerId) {
+            this.carsLoading = true;
+            try {
+                const response = await axios.get(`/api/jobs/cars-for-customer/${customerId}`);
+                this.availableCars = response.data.cars.map(car => ({
+                    id: car.id,
+                    Kennzeichen: car.Kennzeichen,
+                    Automarke: car.Automarke,
+                    customer_id: car.customer_id
+                }));
+            } catch (error) {
+                console.error('Error fetching cars for customer:', error);
+                this.showSnackbar('Fehler beim Laden der Fahrzeuge', 'error');
+            } finally {
+                this.carsLoading = false;
+            }
+        },
+
+
         async fetchTrainees() {
             this.traineesLoading = true;
             try {
@@ -302,6 +368,7 @@ export default {
                 this.traineesLoading = false;
             }
         },
+
         async fetchServices() {
             this.servicesLoading = true;
             try {
@@ -317,8 +384,8 @@ export default {
                 this.servicesLoading = false;
             }
         },
+
         async fetchInitialData() {
-            this.fetchCars();
             this.fetchCustomers();
             this.fetchServices();
 
@@ -339,9 +406,15 @@ export default {
                 customer: null,
                 services: [],
                 status: 'ausstehend',
+                cleaning_time: null,
                 scheduled_at: null,
+                trainee: null,
             };
+            this.scheduled_at_date = null;
+            this.scheduled_at_time = null;
+            this.availableCars = [];
         },
+
         showSnackbar(text, color = 'success') {
             this.snackbar = {
                 show: true,

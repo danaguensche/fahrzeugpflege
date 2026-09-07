@@ -1,5 +1,6 @@
 <template>
     <div class="jobs-page" :class="{ 'jobs-page-sidebar-opened': isSidebarOpen }">
+
         <div class="search-wrapper">
             <div class="search-input-container">
                 <Search :context="searchContext" v-model="searchText" @clearSearch="clearSearch" />
@@ -14,17 +15,16 @@
             </div>
         </div>
 
-        <div class="content-container">
-            <DefaultButton @click="openAddJobDialog">Auftrag hinzufügen</DefaultButton>
-        </div>
-
-        <DataTable ref="jobDataTable" :searchString="searchText" :isSearchActive="isSearchActive" endpoint="jobs"
-            :headers="filteredJobHeaders" :fields="jobFields" itemKey="id" detailsPage="jobdetails"
-            detailsUrlBasePath="auftraege" deleteKey="ids" @itemsDeleted="handleJobsDeleted"
-            @show-error="handleError" :canEditStatusOnly="userRole === 'trainee'" />
+        <!-- Auftragsdaten Tabelle -->
+        <DataTable ref="jobDataTable" :isFilterable="true" :buttonFunction="openAddJobDialog"
+            addButtonLabel="Auftrag Hinzufügen" :searchString="searchText" :isSearchActive="isSearchActive"
+            endpoint="jobs" :headers="filteredJobHeaders" :fields="jobFields" itemKey="id" detailsPage="jobdetails"
+            detailsUrlBasePath="auftraege" deleteKey="ids" :useExternalEdit="true" @itemsDeleted="handleJobsDeleted"
+            @show-error="handleError" @edit-item="handleEditItem" :canEditStatusOnly="userRole === 'trainee'"
+            />
 
         <AddJobForm v-model="showAddJobDialog" @job-added="handleJobAdded" />
-
+        <EditJobForm v-model="showEditJobDialog" :jobData="selectedJob" @job-edited="handleJobEdited" />
     </div>
 </template>
 
@@ -34,6 +34,7 @@ import { mapState } from 'vuex';
 import Search from '../CommonSlots/Searchbar.vue';
 import CloseButton from '../CommonSlots/CloseButton.vue';
 import AddJobForm from './AddJobForm.vue';
+import EditJobForm from './EditJobForm.vue';
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
 
 export default {
@@ -43,21 +44,28 @@ export default {
         Search,
         CloseButton,
         AddJobForm,
+        EditJobForm,
         DefaultButton
     },
 
     data() {
         return {
-            //Search
+            // Search
             searchContext: "Suchen Sie nach einem Auftrag...",
             searchText: '',
             isSearchActive: false,
             searchDebounceTimer: null,
+            // Dialoge
+            showAddJobDialog: false,
+            showEditJobDialog: false,
+            selectedJob: null,
+            // Headers und Fields
             jobHeaders: [
                 { title: 'Auswählen', key: 'select', sortable: false, width: '60px' },
                 { title: 'id', key: 'id', sortable: true, align: 'start' },
                 { title: 'Titel', key: 'title', sortable: true },
-                { title: 'Beschreibung', key: 'description', sortable: true },
+                { title: 'Arbeitszeit', key: 'cleaning_time', sortable: true },
+                { title: 'Auftragserfassung', key: 'created_at', sortable: true },
                 { title: 'Abholtermin', key: 'scheduled_at', sortable: true },
                 {
                     title: 'Status', key: 'status', sortable: true, editable: true, type: 'select', options: [
@@ -71,8 +79,8 @@ export default {
                 { title: 'Löschen', key: 'delete', sortable: false },
                 { title: 'Bearbeiten', key: 'edit', sortable: false }
             ],
-            jobFields: ["id", "title", "description", "scheduled_at", "status", "services"],
-            showAddJobDialog: false,
+            jobFields: ["id", "title", "cleaning_time", "created_at", "scheduled_at", "status", "services"],
+            // Filter-Daten
             selectedStatus: null,
             selectedCustomer: null,
             selectedCar: null,
@@ -105,26 +113,14 @@ export default {
         },
         activeFilters() {
             const filters = {};
-            if (this.selectedStatus) {
-                filters.status = this.selectedStatus;
-            }
-            if (this.selectedCustomer) {
-                filters.customer_id = this.selectedCustomer.id;
-            }
-            if (this.selectedCar) {
-                filters.car_id = this.selectedCar.id;
-            }
-            if (this.selectedUser) {
-                filters.user_id = this.selectedUser.id;
-            }
-            if (this.startDate) {
-                filters.start = this.startDate;
-            }
-            if (this.endDate) {
-                filters.end = this.endDate;
-            }
+            if (this.selectedStatus) filters.status = this.selectedStatus;
+            if (this.selectedCustomer) filters.customer_id = this.selectedCustomer.id;
+            if (this.selectedCar) filters.car_id = this.selectedCar.id;
+            if (this.selectedUser) filters.user_id = this.selectedUser.id;
+            if (this.startDate) filters.start = this.startDate;
+            if (this.endDate) filters.end = this.endDate;
             return filters;
-        }
+        },
     },
 
     watch: {
@@ -141,6 +137,38 @@ export default {
             this.$refs.jobDataTable.loadItems();
         },
 
+        // Dialog-Handler
+        openAddJobDialog() {
+            this.showAddJobDialog = true;
+        },
+
+        handleJobAdded() {
+            this.showAddJobDialog = false;
+            this.$refs.jobDataTable.loadItems();
+        },
+
+        handleEditItem(item) {
+            this.selectedJob = { ...item };
+            this.showEditJobDialog = true;
+        },
+
+        handleJobEdited() {
+            this.showEditJobDialog = false;
+            this.selectedJob = null;
+            if (this.$refs.jobDataTable) {
+                this.$refs.jobDataTable.refresh();
+            }
+        },
+
+        handleJobsDeleted() {
+            console.log('Jobs deleted, table will refresh automatically');
+        },
+
+        handleError(message) {
+            console.error('Error from JobTable:', message);
+        },
+
+        // Fetch-Methoden
         async fetchCustomers(query = '') {
             this.customersLoading = true;
             try {
@@ -160,9 +188,7 @@ export default {
         },
 
         searchCustomers(query) {
-            if (this.customerSearchTimeout) {
-                clearTimeout(this.customerSearchTimeout);
-            }
+            if (this.customerSearchTimeout) clearTimeout(this.customerSearchTimeout);
             this.customerSearchTimeout = setTimeout(() => {
                 this.fetchCustomers(query);
             }, 300);
@@ -185,9 +211,7 @@ export default {
         },
 
         searchCars(query) {
-            if (this.carSearchTimeout) {
-                clearTimeout(this.carSearchTimeout);
-            }
+            if (this.carSearchTimeout) clearTimeout(this.carSearchTimeout);
             this.carSearchTimeout = setTimeout(() => {
                 this.fetchCars(query);
             }, 300);
@@ -195,7 +219,6 @@ export default {
 
         async fetchUsers(query = '') {
             this.usersLoading = true;
-            console.log('Fetching users with role:', this.userRole);
             try {
                 const response = await axios.get(`/api/users/search?query=${query}`);
                 this.users = response.data.data.map(user => ({
@@ -213,34 +236,13 @@ export default {
         },
 
         searchUsers(query) {
-            if (this.userSearchTimeout) {
-                clearTimeout(this.userSearchTimeout);
-            }
+            if (this.userSearchTimeout) clearTimeout(this.userSearchTimeout);
             this.userSearchTimeout = setTimeout(() => {
                 this.fetchUsers(query);
             }, 300);
         },
 
-        openAddJobDialog() {
-            this.showAddJobDialog = true;
-        },
-
-        handleJobAdded() {
-            this.showAddJobDialog = false;
-            this.$refs.jobDataTable.loadItems();
-        },
-
-        handleJobsDeleted() {
-            // Wird von JobsTable emittiert nach erfolgreichem Löschen
-            console.log('Jobs deleted, table will refresh automatically');
-        },
-
-        handleError(message) {
-            console.error('Error from JobTable:', message);
-            // Hier können Sie eine Toast-nachricht oder ähnliches anzeigen
-        },
-
-        //Search Handling
+        // Search Handling
         clearSearch() {
             this.searchText = '';
             this.isSearchActive = false;
@@ -248,16 +250,11 @@ export default {
         },
 
         handleSearchInput(newValue) {
-            if (this.searchDebounceTimer) {
-                clearTimeout(this.searchDebounceTimer);
-            }
-
+            if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
             if (!newValue?.trim()) {
                 this.clearSearch();
                 return;
             }
-
-            // Debounce für 300ms
             this.searchDebounceTimer = setTimeout(() => {
                 this.isSearchActive = true;
             }, 300);
@@ -276,8 +273,8 @@ export default {
             }
         }
     },
+
     mounted() {
-        console.log('Jobs.vue mounted. userRole:', this.userRole);
         this.fetchCustomers();
         this.fetchCars();
         if (this.userRole !== 'trainee') {
@@ -288,6 +285,7 @@ export default {
 </script>
 
 <style scoped>
+/* ... dein bestehender Style bleibt unverändert ... */
 .jobs-page {
     margin-left: 150px;
     padding-right: 20px;
@@ -300,20 +298,6 @@ export default {
     z-index: 10;
     width: 100%;
     margin-bottom: 10px;
-}
-
-.content-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-top: -80px;
-    z-index: 10;
-    position: relative;
-}
-
-.table-container {
-    width: 100%;
 }
 
 .search-input-container {
@@ -349,53 +333,31 @@ export default {
     background-color: rgba(0, 0, 0, 0.04);
 }
 
-.search-button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
 .search-button .v-icon {
     font-size: 25px;
     color: #666;
 }
 
 .close-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     min-width: 36px;
     width: 36px;
     height: 36px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.2s ease;
     background-color: transparent;
-}
-
-.close-button:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-}
-
-
-
-.table-container {
-    width: 100%;
 }
 
 .jobs-page-sidebar-opened {
     margin-left: 330px;
-    transition: margin-left 0.3s ease;
 }
 
-/* Tablet Styles */
 @media only screen and (max-width: 1024px) {
     .jobs-page {
         margin-left: 120px;
     }
 }
 
-/* Mobile Styles */
 @media only screen and (max-width: 768px) {
     .jobs-page {
         margin-left: 160px;
@@ -404,34 +366,6 @@ export default {
 
     .jobs-page-sidebar-opened {
         margin-left: 260px;
-    }
-
-    .content-container {
-        flex-direction: column;
-    }
-
-    .search-input-container {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-
-    .search-buttons {
-        right: 6px;
-        gap: 2px;
-        padding: 1px;
-    }
-
-    .search-button,
-    .close-button {
-        min-width: 32px;
-        width: 32px;
-        height: 32px;
-        border-radius: 4px;
-    }
-
-    .search-button .v-icon {
-        font-size: 18px;
     }
 }
 </style>

@@ -1,5 +1,8 @@
 <template>
     <div class="sidebar-container">
+        <div class="sidebar-logo">
+            <img src="../../../img/sidebar-img/Logo_poliplan_stacklogo.png" class="logo-image" alt="PoliPlan Logo">
+        </div>
         <div v-for="(menuitem, index) in filteredMenuItems" :key="menuitem.id"
             :class="['sidebar-button', { 'profile-spacing': menuitem.name === 'Profil' }]">
             <div class="sidebar-buttons-wrapper">
@@ -135,6 +138,21 @@ export default {
 }
 </script>
 <style scoped>
+
+.sidebar-logo {
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+.logo-image {
+    width: 60px;
+    height: auto;
+    user-select: none;
+}
+
 .sidebar-container,
 .sidebar-container.closed {
     transition: width 0.3s ease;

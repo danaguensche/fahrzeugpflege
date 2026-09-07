@@ -15,10 +15,13 @@
         </div>
 
         <div class="table-container">
-            <DataTable :searchString="searchText" :isSearchActive="isSearchActive" endpoint="users"
+            <DataTable :buttonFunction="openAddUserDialog" addButtonLabel="Benutzer hinzufügen" :searchString="searchText" :isSearchActive="isSearchActive" endpoint="users"
                 :headers="userHeaders" :fields="userFields" itemKey="id" detailsPage="userdetails"
                 detailsUrlBasePath="user" deleteKey="id" @itemsDeleted="handleItemsDeleted" @show-error="handleError" :dataCleaner="cleanUserData" />
         </div>
+
+        <AddUserForm v-model="showAddUserDialog" @user-added="handleUserAdded" />
+
     </div>
 </template>
 
@@ -28,22 +31,28 @@ import DataTable from '../Table/DataTable.vue';
 import Search from '../CommonSlots/Searchbar.vue';
 import CloseButton from '../CommonSlots/CloseButton.vue';
 import { mapState } from 'vuex';
+import DefaultButton from '../CommonSlots/DefaultButton.vue';
+import AddUserForm from './addUser/AddUserForm.vue';
 
 export default {
     name: 'Users',
     components: {
         DataTable,
         Search,
-        CloseButton
+        CloseButton,
+        DefaultButton,
+        AddUserForm
     },
     data() {
         return {
+            showAddUserDialog: false,
+            isSearchActive: false,
+            searchDebounceTimer: null,
             userHeaders: [
                 { title: 'Auswählen', key: 'select', sortable: false, width: '60px' },
-                { title: 'ID', key: 'id' },
                 { title: 'Vorname', key: 'firstname' },
                 { title: 'Nachname', key: 'lastname' },
-                { title: 'Email', key: 'email' },
+                { title: 'Benutzername', key: 'username' },
                 { title: 'Telefon', key: 'phonenumber' },
                 { title: 'Straße und Hausnummer', key: 'addressline' },
                 { title: 'PLZ', key: 'postalcode' },
@@ -62,10 +71,9 @@ export default {
                 { title: 'Bearbeiten', key: 'edit', sortable: false, width: '60px' }
             ],
             userFields: [
-                'id',
                 'firstname',
                 'lastname',
-                'email',
+                'username',
                 'phonenumber',
                 'addressline',
                 'postalcode',
@@ -91,8 +99,9 @@ export default {
     },
 
     methods: {
+
         cleanUserData(userData){
-            const fields = ['firstname', 'lastname', 'email', 'phonenumber', 'addressline', 'postalcode', 'city'];
+            const fields = ['firstname', 'lastname', 'username', 'phonenumber', 'addressline', 'postalcode', 'city'];
             const cleanedData = {...userData};
 
             fields.forEach(field => {
@@ -116,6 +125,7 @@ export default {
                     return 'grey';
             }
         },
+        
         handleUserAdded() {
             this.showAddUserDialog = false;
         },
@@ -125,13 +135,11 @@ export default {
         },
 
         handleItemsDeleted() {
-            // Wird von DataTable emittiert nach erfolgreichem Löschen
             console.log('Users deleted, table will refresh automatically');
         },
 
         handleError(message) {
             console.error('Error from DataTable:', message);
-            // Hier können Sie eine Toast-Nachricht oder ähnliches anzeigen
         },
 
         //Search Handling
@@ -262,8 +270,6 @@ export default {
 .close-button:hover {
     background-color: rgba(0, 0, 0, 0.04);
 }
-
-
 
 .table-container {
     width: 100%;

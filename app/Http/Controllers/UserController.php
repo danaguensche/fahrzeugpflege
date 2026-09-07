@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Http\Requests\StoreAllowedUsernameRequest;
 
 class UserController extends Controller
 {
@@ -18,15 +20,26 @@ class UserController extends Controller
      * @param StoreUserRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(StoreUserRequest $request)
-    {
-        $validatedData = $request->validated();
-        $user = User::create($validatedData);
-        return response()->json([
-            'message' => 'Benutzer erfolgreich erstellt',
-            'user' => new UserResource($user)
-        ], 201);
-    }
+
+
+     public function store(StoreAllowedUsernameRequest $request)
+     {
+         $validatedData = $request->validated();
+     
+         DB::table('allowed_usernames')->insert([
+             'username' => $validatedData['username'],
+             'role' => $validatedData['role'],
+             'claimed' => false,
+             'created_at' => now(),
+             'updated_at' => now(),
+         ]);
+     
+         return response()->json([
+             'message' => 'Benutzername erfolgreich freigegeben',
+         ], 201);
+     }
+     
+    
 
     /**
      * Get the authenticated user.
@@ -83,25 +96,37 @@ class UserController extends Controller
             if ($id) {
                 // An admin or trainer is updating a specific user.
                 $user = User::findOrFail($id);
+                $validatedData = $request->validate([
+                    'firstname' => 'sometimes|string|max:255',
+                    'lastname' => 'sometimes|string|max:255',
+                    'phonenumber' => 'nullable|string|max:255',
+                    'addressline' => 'nullable|string|max:255',
+                    'postalcode' => 'nullable|string|max:255',
+                    'city' => 'nullable|string|max:255',
+                    'role' => 'required|string|in:admin,trainer,trainee',
+                    'password' => 'nullable|string|min:8',
+                    
+                ]);
             } else {
                 // A user is updating their own profile.
                 $user = Auth::user();
+                $validatedData = $request->validate([
+                    'firstname' => 'sometimes|string|max:255',
+                    'lastname' => 'sometimes|string|max:255',
+                    'phonenumber' => 'nullable|string|max:255',
+                    'addressline' => 'nullable|string|max:255',
+                    'postalcode' => 'nullable|string|max:255',
+                    'city' => 'nullable|string|max:255',
+                    'password' => 'nullable|string|min:8',
+                    
+                ]);
             }
 
             if (!$user) {
                 return response()->json(['message' => 'Benutzer nicht gefunden'], 404);
             }
 
-            $validatedData = $request->validate([
-                'firstname' => 'sometimes|string|max:255',
-                'lastname' => 'sometimes|string|max:255',
-                'phonenumber' => 'nullable|string|max:255',
-                'addressline' => 'nullable|string|max:255',
-                'postalcode' => 'nullable|string|max:255',
-                'city' => 'nullable|string|max:255',
-                'role' => 'sometimes|in:admin,trainer,trainee',
-                'password' => 'nullable|string|min:8',
-            ]);
+            
 
             if (isset($validatedData['password'])) {
                 $validatedData['password'] = Hash::make($validatedData['password']);
@@ -131,7 +156,7 @@ class UserController extends Controller
         $users = User::where(function ($queryBuilder) use ($searchQuery) {
             $queryBuilder->where('firstname', 'like', '%' . $searchQuery . '%')
                          ->orWhere('lastname', 'like', '%' . $searchQuery . '%')
-                         ->orWhere('email', 'like', '%' . $searchQuery . '%');
+                         ->orWhere('username', 'like', '%' . $searchQuery . '%');
         })->get();
 
         return response()->json([
@@ -176,5 +201,24 @@ class UserController extends Controller
         User::whereIn('id', $ids)->delete();
 
         return response()->json(['message' => 'Benutzer erfolgreich gelöscht']);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        $validatedData = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if (!Hash::check($validatedData['current_password'], $user->password)) {
+            return response()->json(['message' => 'Aktuelles Passwort ist falsch'], 400);
+        }
+
+        $user->password = Hash::make($validatedData['new_password']);
+        $user->save();
+
+        return response()->json(['message' => 'Passwort erfolgreich geändert']);
     }
 }

@@ -11,6 +11,7 @@ class CustomerSeeder extends Seeder
     /**
      * Run the database seeds.
      */
+    
     public function run(): void
     {
         Customer::factory()
@@ -22,7 +23,6 @@ class CustomerSeeder extends Seeder
             ->count((25))
             ->hasCars(2)
             ->create();
-
         Customer::factory()
             ->count((25))
             ->hasCars(1)

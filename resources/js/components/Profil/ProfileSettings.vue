@@ -54,9 +54,11 @@
                         <span class="font-weight-medium">{{ labels[key] }}</span>
                       </div>
                       <v-text-field v-model="editedUserData[key]" variant="outlined" density="comfortable"
-                        hide-details="auto" :readonly="key === 'email'" :disabled="key === 'email'"
-                        :hint="key === 'email' ? 'E-Mail kann nicht geändert werden' : ''"
-                        :persistent-hint="key === 'email'"></v-text-field>
+                        hide-details="auto" :readonly="key === 'username'" :disabled="key === 'username'"
+                        :hint="key === 'username' ? 'Benutzername kann nicht geändert werden.' : ''"
+                        :rules="fieldRules[key]" :maxlength="key === 'phonenumber' ? 16 : key === 'postalcode' ? 5 : 50"
+                        :counter="key === 'phonenumber' ? 16 : key === 'postalcode' ? 5 : 50" class="w-50"
+                        :persistent-hint="key === 'username'"></v-text-field>
                     </v-col>
                   </v-row>
                 </template>
@@ -115,7 +117,7 @@
                         </span>
                       </div>
                       <v-text-field v-model="editedUserData[key]" variant="outlined" density="comfortable"
-                        hide-details="auto" class="w-50">
+                        hide-details="auto" class="w-50" :rules="fieldRules[key]">
                       </v-text-field>
                     </v-col>
                   </v-row>
@@ -156,15 +158,15 @@
                     <v-text-field v-model="passwordData.currentPassword"
                       :append-icon="showCurrentPassword ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showCurrentPassword ? 'text' : 'password'" label="Aktuelles Passwort" variant="outlined"
-                      density="comfortable" :rules="[rules.required]"
-                      @click:append="showCurrentPassword = !showCurrentPassword">
+                      density="comfortable" :rules="[passwordRules.required]"
+                      @click:append="showCurrentPassword = !showCurrentPassword" autocomplete="off">
                     </v-text-field>
                   </v-col>
                   <v-col cols="12" md="6">
                     <v-text-field v-model="passwordData.newPassword"
                       :append-icon="showNewPassword ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showNewPassword ? 'text' : 'password'" label="Neues Passwort" variant="outlined"
-                      density="comfortable" :rules="[rules.required, rules.min]"
+                      density="comfortable" :rules="[passwordRules.required, passwordRules.min]"
                       @click:append="showNewPassword = !showNewPassword">
                     </v-text-field>
                   </v-col>
@@ -172,7 +174,8 @@
                     <v-text-field v-model="passwordData.confirmPassword"
                       :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showConfirmPassword ? 'text' : 'password'" label="Neues Passwort bestätigen"
-                      variant="outlined" density="comfortable" :rules="[rules.required, rules.passwordMatch]"
+                      variant="outlined" density="comfortable"
+                      :rules="[passwordRules.required, passwordRules.passwordMatch]"
                       @click:append="showConfirmPassword = !showConfirmPassword">
                     </v-text-field>
                   </v-col>
@@ -234,22 +237,38 @@ export default {
   data() {
     return {
       loading: true,
-      userId: null,
       userData: {},
       editedUserData: {},
       editMode: false,
       saveLoading: false,
+      fieldRules: {
+        firstname: [
+          v => !v || v === 'Nicht verfügbar' || /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(v) || 'Bitte einen gültigen Vornamen eingeben'
+        ],
+        lastname: [
+          v => !v || v === 'Nicht verfügbar' || /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(v) || 'Bitte einen gültigen Nachnamen eingeben'
+        ],
+        postalcode: [
+          v => !v || v === 'Nicht verfügbar' || /^\d{5}$/.test(v) || 'Bitte eine gültige PLZ eingeben'
+        ],
+        phonenumber: [
+          v => !v || v === 'Nicht verfügbar' || /^\+?[0-9\s\-()]{7,15}$/.test(v) || 'Bitte eine gültige Telefonnummer eingeben'
+        ],
+        city: [
+          v => !v || v === 'Nicht verfügbar' || /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(v) || 'Bitte einen gültigen Ort eingeben'
+        ],
+        addressline: []
+      },
       labels: {
-        firstName: "Vorname",
-        lastName: "Nachname",
-        phoneNumber: "Telefonnummer",
-        email: "E-Mail",
-        addressLine: "Straße und Hausnummer",
-        postalCode: "PLZ",
+        firstname: "Vorname",
+        lastname: "Nachname",
+        phonenumber: "Telefonnummer",
+        username: "Benutzername",
+        addressline: "Straße und Hausnummer",
+        postalcode: "PLZ",
         city: "Ort"
       },
       error: null,
-      // Passwort-Änderung
       passwordData: {
         currentPassword: '',
         newPassword: '',
@@ -260,12 +279,6 @@ export default {
       showCurrentPassword: false,
       showNewPassword: false,
       showConfirmPassword: false,
-      rules: {
-        required: v => !!v || 'Dieses Feld ist erforderlich',
-        min: v => v.length >= 8 || 'Mindestens 8 Zeichen erforderlich',
-        passwordMatch: v => v === this.passwordData.newPassword || 'Passwörter stimmen nicht überein'
-      },
-      // Snackbar
       snackbar: {
         show: false,
         text: '',
@@ -276,20 +289,17 @@ export default {
 
   computed: {
     personalInfoKeys() {
-      return ['firstName', 'lastName', 'phoneNumber', 'email'];
+      return ['firstname', 'lastname', 'phonenumber', 'username'];
     },
     addressInfoKeys() {
-      return ['addressLine', 'postalCode', 'city'];
-    }
-  },
-
-  async created() {
-    // Sicherstellen, dass die initial notwendigen Daten vorhanden sind
-    if (!this.userData) {
-      this.userData = {};
-    }
-    if (!this.editedUserData) {
-      this.editedUserData = {};
+      return ['addressline', 'postalcode', 'city'];
+    },
+    passwordRules() {
+      return {
+        required: v => !!v || 'Dieses Feld ist erforderlich',
+        min: v => v.length >= 8 || 'Mindestens 8 Zeichen erforderlich',
+        passwordMatch: v => v === this.passwordData.newPassword || 'Passwörter stimmen nicht überein'
+      };
     }
   },
 
@@ -297,7 +307,6 @@ export default {
     try {
       await this.getUser();
     } catch (error) {
-      console.error("Fehler beim Laden der Komponente:", error);
       this.error = error.message;
       this.showSnackbar(error.message, 'error');
     } finally {
@@ -309,32 +318,24 @@ export default {
     async getUser() {
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          console.error("Kein Token gefunden!");
-          throw new Error("Kein Authentifizierungs-Token gefunden");
-        }
+        if (!token) throw new Error("Kein Authentifizierungs-Token gefunden");
 
-        const response = await axios.get("http://localhost:8000/api/users/me", {
+        const response = await axios.get("/api/users/me", {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        console.log("API-Antwort:", response.data);
         this.userData = {
-          firstName: response.data.data.firstName || "",
-          lastName: response.data.data.lastName || "",
-          phoneNumber: response.data.data.phoneNumber || "",
-          email: response.data.data.email || "",
-          addressLine: response.data.data.addressLine || "",
-          postalCode: response.data.data.postalCode || "",
+          firstname: response.data.data.firstname || "",
+          lastname: response.data.data.lastname || "",
+          phonenumber: response.data.data.phonenumber || "",
+          username: response.data.data.username || "",
+          addressline: response.data.data.addressline || "",
+          postalcode: response.data.data.postalcode || "",
           city: response.data.data.city || ""
         };
 
-        // Kopie für Bearbeitungsmodus erstellen
         this.editedUserData = { ...this.userData };
-
-        console.log("Benutzerdaten geladen:", this.userData);
       } catch (error) {
-        console.error("Fehler beim Laden der Benutzerdaten:", error);
         this.error = error.response?.data?.message || error.message;
         throw error;
       }
@@ -342,68 +343,65 @@ export default {
 
     getIconForField(key) {
       const iconMap = {
-        firstName: "mdi-account",
-        lastName: "mdi-account-details",
-        email: "mdi-email",
-        phoneNumber: "mdi-phone",
-        addressLine: "mdi-map-marker",
-        postalCode: "mdi-mail",
+        firstname: "mdi-account",
+        lastname: "mdi-account-details",
+        username: "mdi-account",
+        phonenumber: "mdi-phone",
+        addressline: "mdi-map-marker",
+        postalcode: "mdi-mail",
         city: "mdi-city"
       };
-
       return iconMap[key] || "mdi-information-outline";
     },
 
     switchEditMode() {
       this.editMode = !this.editMode;
-
       if (this.editMode) {
-        // Daten für die Bearbeitung kopieren
         this.editedUserData = { ...this.userData };
       }
     },
 
     cancelEdit() {
       this.editMode = false;
-      // Änderungen verwerfen und auf Original zurücksetzen
       this.editedUserData = { ...this.userData };
     },
 
     async saveUserData() {
+      // Validiere beide Formulare
+      const personalValid = await this.$refs.personalInfoForm.validate();
+      const addressValid = await this.$refs.addressInfoForm.validate();
+
+      if (!personalValid.valid || !addressValid.valid) {
+        this.showSnackbar('Bitte fülle alle Felder korrekt aus.', 'error');
+        return;
+      }
+
       this.saveLoading = true;
       this.error = null;
 
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error("Kein Authentifizierungs-Token gefunden");
-        }
+        if (!token) throw new Error("Kein Authentifizierungs-Token gefunden");
 
         const dataToSend = {
-          firstname: this.editedUserData.firstName,
-          lastname: this.editedUserData.lastName,
-          phonenumber: this.editedUserData.phoneNumber,
-          addressline: this.editedUserData.addressLine,
-          postalcode: this.editedUserData.postalCode,
+          firstname: this.editedUserData.firstname,
+          lastname: this.editedUserData.lastname,
+          phonenumber: this.editedUserData.phonenumber,
+          addressline: this.editedUserData.addressline,
+          postalcode: this.editedUserData.postalcode,
           city: this.editedUserData.city
         };
-        await axios.put(
-          "http://localhost:8000/api/users/me",
-          dataToSend,
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
-        );
 
-        // Aktualisierte Daten übernehmen
+        console.log("Daten zum Senden:", dataToSend);
+        await axios.put("/api/users/me", dataToSend, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
         this.userData = { ...this.editedUserData };
-
-        // Bearbeitungsmodus beenden
         this.editMode = false;
 
         this.showSnackbar('Daten erfolgreich gespeichert', 'success');
       } catch (error) {
-        console.error("Fehler beim Speichern der Benutzerdaten:", error);
         const errorMessage = error.response?.data?.message || "Fehler beim Speichern der Benutzerdaten";
         this.showSnackbar(errorMessage, 'error');
       } finally {
@@ -411,18 +409,10 @@ export default {
       }
     },
 
-    goBack() {
-      try {
-        this.$router.back();
-      } catch (e) {
-        console.error("Fehler beim Navigieren zurück:", e);
-        // Fallback, falls $router.back() nicht funktioniert
-        window.history.back();
-      }
-    },
-
     async changePassword() {
-      if (!this.$refs.passwordForm.validate()) {
+      const validation = await this.$refs.passwordForm.validate();
+      if (!validation.valid) {
+        this.showSnackbar('Bitte fülle alle Felder korrekt aus.', 'error');
         return;
       }
 
@@ -430,31 +420,24 @@ export default {
 
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error("Kein Authentifizierungs-Token gefunden");
-        }
+        if (!token) throw new Error("Kein Authentifizierungs-Token gefunden");
 
-        await axios.post("http://localhost:8000/api/users/change-password",
-          {
-            currentPassword: this.passwordData.currentPassword,
-            newPassword: this.passwordData.newPassword
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
-        );
+        await axios.post("/api/users/change-password", {
+          current_password: this.passwordData.currentPassword,
+          new_password: this.passwordData.newPassword,
+          new_password_confirmation: this.passwordData.confirmPassword
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
-        // Passwort-Formular zurücksetzen
         this.passwordData = {
           currentPassword: '',
           newPassword: '',
           confirmPassword: ''
         };
         this.$refs.passwordForm.reset();
-
         this.showSnackbar('Passwort erfolgreich geändert', 'success');
       } catch (error) {
-        console.error("Fehler beim Ändern des Passworts:", error);
         const errorMessage = error.response?.data?.message || "Fehler beim Ändern des Passworts";
         this.showSnackbar(errorMessage, 'error');
       } finally {
@@ -463,19 +446,27 @@ export default {
     },
 
     showSnackbar(text, color = 'success') {
-      this.snackbar.text = text;
-      this.snackbar.color = color;
-      this.snackbar.show = true;
+      this.snackbar = { text, color, show: true };
+    },
+
+    goBack() {
+      try {
+        this.$router.back();
+      } catch {
+        window.history.back();
+      }
     }
   }
 };
 </script>
 
+
 <style scoped>
 .card-container {
   width: 100%;
-  height: calc(100vh - 40px);
-  padding: 20px;
+  height: 99vh;
+  margin-left: 110px;
+  /* padding: 20px; */
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -497,7 +488,6 @@ export default {
   .card-container {
     padding: 10px;
     height: calc(100vh - 20px);
-
   }
 
   .card {
@@ -514,25 +504,20 @@ export default {
 
 @media (min-width: 768px) and (max-width: 991.98px) {
   .card-container {
-    max-width: calc(100% - 80px);
+    max-width: calc(100% - 50px);
   }
 }
 
 @media (min-width: 992px) and (max-width: 1199.98px) {
   .card-container {
-    max-width: calc(100% - 250px);
+    max-width: calc(100% - 150px);
   }
 }
 
 @media (min-width: 1200px) {
   .card-container {
-    max-width: calc(100% - 280px);
+    max-width: calc(100% - 180px);
   }
-}
-
-.v-card-text {
-  flex: 1;
-  overflow-y: auto;
 }
 
 @media (max-width: 767.98px) {

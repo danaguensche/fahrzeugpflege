@@ -3,15 +3,22 @@
         <!-- Header with control buttons -->
         <div class="header">
             <!-- Data Update Button -->
-            <RefreshButton class="refresh-button" @refresh="loadItems" :loading="isRefreshing"></RefreshButton>
-            <div class="spacer"></div>
+            <DefaultButton @click="buttonFunction" v-if="isAdminOrTrainer">{{ addButtonLabel }}</DefaultButton>
+            <div class="small-spacer"></div>
 
+            <RefreshButton class="refresh-button" @refresh="loadItems" :loading="isRefreshing"></RefreshButton>
+
+            <div class="spacer"></div>
             <!-- Button group for vehicle operations -->
+
+            <FilterButton v-if="isFilterable" v-model="statusFilters" @filter-change="handleStatusFilterChange" />
+            <div class="small-spacer"></div>
             <div class="button-group" v-if="isAdminOrTrainer || canEditStatusOnly">
                 <ConfirmButton class="confirm-button" @click="confirmEditItem" :disabled="!editItemId">
                     Bestätigen
                 </ConfirmButton>
-                <CancelButton class="cancel-button" @click="cancelEdit">Abbrechen</CancelButton>
+                <CancelButton class="cancel-button" :disabled="editItemId === null" @click="cancelEdit">Abbrechen
+                </CancelButton>
                 <DeleteButton class="delete-button" :disabled="selectedItems.length === 0"
                     @click="confirmDeleteSelectedItems" v-if="isAdminOrTrainer">
                     Löschen
@@ -44,41 +51,72 @@
                                 <template v-if="editItemId === item[itemKey]">
                                     <!-- Kennzeichen - link only, not editable -->
                                     <template v-if="field === itemKey">
-                                        <a
-                                            :href="`/${detailsUrlBasePath}/${detailsPage}/${item[field] ? item[field].toString().replace(/\s/g, '+') : ''}`">
+                                        <router-link
+                                            :to="`/${detailsUrlBasePath}/${detailsPage}/${item[field] ? encodeURIComponent(item[field]) : ''}`">
                                             {{ editItem[field] || '' }}
-                                        </a>
+                                        </router-link>
                                     </template>
                                     <!-- Services field - not editable -->
                                     <template v-else-if="field === 'services'">
                                         <span v-for="(service, index) in item[field]" :key="service.id">
                                             {{ service.title }}{{ index < item[field].length - 1 ? ', ' : '' }} </span>
                                     </template>
-                                    <!-- The rest of the fields are editable -->
-                                    <template v-else>
+                                    <!-- cleaning_time - editierbar für alle -->
+                                    <template v-else-if="field === 'cleaning_time'">
+                                        <v-text-field v-model.number="editItem[field]" :rules="[
+                                            v => v === null || v === '' || v >= 0 || 'Arbeitszeit muss positiv sein',
+                                            v => v === null || v === '' || v <= 99 || 'Maximal 99 Stunden',
+                                            v => v === null || v === '' || /^\d+(\.\d{1,2})?$/.test(v) || 'Max. 2 Dezimalstellen'
+                                        ]" density="compact" variant="outlined" type="number" step="0.25" min="0"
+                                            max="99" suffix="Std." class="mt-5">
+                                        </v-text-field>
+
+                                    </template>
+
+
+                                    <!-- Status field - always editable with dropdown -->
+                                    <template v-else-if="field === 'status'">
+                                        <v-select v-model="editItem[field]" :items="getHeader(field).options"
+                                            item-title="title" item-value="value"
+                                            :rules="Array.isArray(fieldRules) ? fieldRules : []"
+                                            :error-messages="fieldErrors[field]" density="compact"
+                                            variant="outlined"></v-select>
+                                    </template>
+                                    <!-- The rest of the fields - only editable for admin/trainer -->
+                                    <template v-else-if="!canEditStatusOnly">
                                         <template v-if="getHeader(field).type === 'select'">
                                             <v-select v-model="editItem[field]" :items="getHeader(field).options"
-                                                item-title="title" item-value="value" :rules="getFieldRules(field)"
+                                                item-title="title" item-value="value"
+                                                :rules="Array.isArray(fieldRules) ? fieldRules : []"
                                                 :error-messages="fieldErrors[field]" density="compact"
-                                                :disabled="canEditStatusOnly && field !== 'status'"></v-select>
+                                                variant="outlined"></v-select>
                                         </template>
                                         <template v-else>
-                                            <v-text-field v-model="editItem[field]" :rules="getFieldRules(field)"
+                                            <v-text-field v-model="editItem[field]"
+                                                :rules="Array.isArray(fieldRules) ? fieldRules : []"
                                                 :error-messages="fieldErrors[field]" density="compact"
-                                                :type="field === 'scheduled_at' ? 'datetime-local' : 'text'"
-                                                :disabled="canEditStatusOnly && field !== 'status'">
+                                                variant="outlined"
+                                                :type="['scheduled_at', 'created_at'].includes(field) ? 'datetime-local' : 'text'"
+                                                class="mt-5">
                                             </v-text-field>
                                         </template>
+                                    </template>
+                                    <!-- For trainees: show read-only text for non-status fields -->
+                                    <template v-else>
+                                        <span v-if="field === 'scheduled_at' || field === 'created_at'">
+                                            {{ formatDateTime(item[field]) }}
+                                        </span>
+                                        <span v-else>{{ item[field] || '' }}</span>
                                     </template>
                                 </template>
 
                                 <!-- View Mode -->
                                 <template v-else>
                                     <!-- Kennzeichen as link -->
-                                    <a v-if="field === itemKey"
-                                        :href="`/${detailsUrlBasePath}/${detailsPage}/${item[field] ? item[field].toString().replace(/\s/g, '+') : ''}`">
+                                    <router-link v-if="field === itemKey"
+                                        :to="`/${detailsUrlBasePath}/${detailsPage}/${item[field] ? encodeURIComponent(item[field]) : ''}`">
                                         {{ item[field] || '' }}
-                                    </a>
+                                    </router-link>
                                     <!-- The rest of the fields as plain text -->
                                     <span v-else-if="field === 'services'">
                                         <template v-if="Array.isArray(item[field]) && item[field].length > 0">
@@ -93,7 +131,8 @@
                                     <span v-else-if="field === 'status'">
                                         {{ getStatusTitle(item[field]) }}
                                     </span>
-                                    <span v-else-if="field === 'scheduled_at'">
+
+                                    <span v-else-if="field === 'scheduled_at' || field === 'created_at'">
                                         {{ formatDateTime(item[field]) }}
                                     </span>
                                     <span v-else>{{ item[field] || '' }}</span>
@@ -109,12 +148,10 @@
                             </td>
 
                             <!-- Edit/Save button -->
-                            <td class="table-icon fixed-width"
-                                v-if="isAdminOrTrainer || (canEditStatusOnly && item.status)">
-                                <v-btn variant="plain" icon
-                                    @click="editItemId === item[itemKey] ? saveItem() : editItemDetails(item)">
+                            <td class="table-icon fixed-width" v-if="isAdminOrTrainer || canEditStatusOnly">
+                                <v-btn variant="plain" icon @click="handleEditClick(item)">
                                     <v-icon>{{ editItemId === item[itemKey] ? 'mdi-content-save' : 'mdi-pencil'
-                                        }}</v-icon>
+                                    }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
@@ -148,11 +185,31 @@ import CancelButton from '../CommonSlots/CancelButton.vue';
 import DeleteButton from '../CommonSlots/DeleteButton.vue';
 import Pagination from '../CommonSlots/Pagination.vue';
 import { data } from 'autoprefixer';
+import { fi } from 'vuetify/locale';
+import DefaultButton from '../CommonSlots/DefaultButton.vue';
+import FilterButton from './FilterButton.vue';
 
 export default {
     name: "DataTable",
 
     props: {
+        isFilterable: {
+            type: Boolean,
+            default: false
+        },
+        fieldRules: {
+            type: Object,
+            default: () => ({})
+        },
+        addButtonLabel: {
+            type: String,
+            default: 'Hinzufügen'
+        },
+        buttonFunction: {
+            type: Function,
+            default: null
+        },
+
         endpoint: {
             type: String,
             required: true
@@ -199,7 +256,13 @@ export default {
             default: null
         },
 
+        useExternalEdit: {
+            type: Boolean,
+            default: false
+        }
     },
+
+    emits: ['itemsDeleted', 'show-error', 'edit-item'],
 
     components: {
         ConfirmButton,
@@ -207,11 +270,14 @@ export default {
         DeleteButton,
         RefreshButton,
         VuetifyAlert,
-        Pagination
+        Pagination,
+        DefaultButton,
+        FilterButton
     },
 
     data() {
         return {
+            statusFilters: [],
             isRefreshing: false,
             items: [],
             selectedItems: [],
@@ -248,6 +314,12 @@ export default {
         },
         pageItems() {
             return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        },
+        filteredItems() {
+            if (this.statusFilters.length === 0) {
+                return this.items;
+            }
+            return this.items.filter(item => this.statusFilters.includes(item.status));
         }
     },
 
@@ -271,11 +343,36 @@ export default {
     },
 
     mounted() {
-        console.log('DataTable.vue mounted');
         this.loadItems();
     },
 
     methods: {
+
+        handleEditClick(item) {
+            // Bei externem Editing nur für Admin/Trainer
+            if (this.useExternalEdit && !this.canEditStatusOnly) {
+                this.$emit('edit-item', { ...item });
+            } else {
+                // Inline-Editing für alle (Trainees nur Status)
+                if (this.editItemId === item[this.itemKey]) {
+                    this.saveItem();
+                } else {
+                    this.editItemDetails(item);
+                }
+            }
+        },
+
+        refresh() {
+            this.loadItems();
+        },
+
+        handleStatusFilterChange(selectedStatuses) {
+            this.statusFilters = selectedStatuses;
+            this.options.page = 1;
+
+            this.loadItems();
+        },
+
         handleSearchChange(searchValue) {
             if (this.searchDebounceTimer) {
                 clearTimeout(this.searchDebounceTimer);
@@ -310,6 +407,10 @@ export default {
                     sortDesc: this.options.sortBy.length > 0 ? this.options.sortBy[0].order === 'desc' : true
                 };
 
+                if (this.statusFilters.length > 0) {
+                    params.status = this.statusFilters.join(',');
+                }
+
                 const response = await axios.get(`/api/${this.endpoint}/search`, { params });
                 let items = [];
                 let total = 0;
@@ -332,15 +433,6 @@ export default {
 
             } catch (error) {
                 console.error(`[DataTable] Error during search for ${this.endpoint}:`, error);
-                if (error.response) {
-                    console.error('Response data:', error.response.data);
-                    console.error('Response status:', error.response.status);
-                    console.error('Response headers:', error.response.headers);
-                } else if (error.request) {
-                    console.error('Request data:', error.request);
-                } else {
-                    console.error('Error message:', error.message);
-                }
                 this.items = [];
                 this.totalItems = 0;
                 this.$emit('show-error', `Error when searching for ${this.endpoint}`);
@@ -397,10 +489,6 @@ export default {
             else {
                 this.loadItems();
             }
-        },
-
-        getFieldRules(field) {
-            return [value => !!value || `${field} is required`];
         },
 
         getHeader(field) {
@@ -509,8 +597,15 @@ export default {
             try {
                 let payload = {};
                 if (this.canEditStatusOnly) {
-                    payload = { status: this.editItem.status };
-                } else {
+                    payload = {
+                        status: this.editItem.status,
+                        cleaning_time: this.editItem.cleaning_time === '' || this.editItem.cleaning_time === undefined
+                            ? null
+                            : this.editItem.cleaning_time
+                    };
+                }
+                else {
+                    // Admin/Trainer senden alle Felder
                     this.fields.forEach(field => {
                         payload[field] = this.editItem[field];
                     });
@@ -538,8 +633,13 @@ export default {
             try {
                 let payload = {};
                 if (this.canEditStatusOnly) {
-                    payload = { status: this.editItem.status };
-                } else {
+                    payload = {
+                        status: this.editItem.status,
+                        cleaning_time: this.editItem.cleaning_time
+                    };
+                }
+                else {
+                    // Admin/Trainer senden alle Felder
                     this.fields.forEach(field => {
                         payload[field] = this.editItem[field];
                     });
@@ -549,6 +649,9 @@ export default {
                     payload = this.dataCleaner(payload);
                 }
 
+                if (payload.scheduled_at) {
+                    payload.scheduled_at = this.formatDateForBackend(payload.scheduled_at);
+                }
                 await axios.put(`/api/${this.endpoint}/${this.editItemId}`, payload);
                 this.cancelEdit();
 
@@ -559,6 +662,30 @@ export default {
                 }
             } catch (error) {
                 this.$emit('show-error', `Error when saving item`);
+            }
+        },
+
+        //Funktion aus JobDetails
+        formatDateForBackend(dateString) {
+            if (!dateString) return null;
+            try {
+                if (dateString.includes('T') && !dateString.includes('Z') && dateString.length === 16) {
+                    return dateString + ':00';
+                }
+                const date = new Date(dateString);
+                if (!isNaN(date.getTime())) {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    const seconds = String(date.getSeconds()).padStart(2, '0');
+                    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                }
+                return null;
+            } catch (e) {
+                console.error('Invalid date:', dateString, e);
+                return null;
             }
         },
 
@@ -587,21 +714,17 @@ export default {
                     params.sortDesc = true;
                 }
 
+                // Status-Filter hinzufügen
+                if (this.statusFilters.length > 0) {
+                    params['status[]'] = this.statusFilters
+                }
+
                 const response = await axios.get(`/api/${this.endpoint}`, { params });
                 this.items = response.data.items || response.data || [];
                 this.totalItems = response.data.total || response.data.totalItems || this.items.length;
                 console.log(`[DataTable] Data loaded successfully for ${this.endpoint}. Total items: ${this.totalItems}`);
             } catch (error) {
                 console.error(`[DataTable] Error during data loading for ${this.endpoint}:`, error);
-                if (error.response) {
-                    console.error('Response data:', error.response.data);
-                    console.error('Response status:', error.response.status);
-                    console.error('Response headers:', error.response.headers);
-                } else if (error.request) {
-                    console.error('Request data:', error.request);
-                } else {
-                    console.error('Error message:', error.message);
-                }
                 this.items = [];
                 this.totalItems = 0;
                 this.$emit('show-error', `Error during data loading for ${this.endpoint}`);
@@ -639,9 +762,12 @@ export default {
         if (this.searchDebounceTimer) {
             clearTimeout(this.searchDebounceTimer);
         }
+
     }
+
 }
 </script>
+
 <style scoped>
 .button-group {
     display: flex;
@@ -656,6 +782,10 @@ export default {
     margin-bottom: 16px;
     padding: 8px 0;
     margin-right: 20px;
+}
+
+.small-spacer {
+    width: 12px;
 }
 
 .spacer {
@@ -806,15 +936,6 @@ export default {
 
 :deep(.mdi-content-save) {
     color: #4caf50;
-}
-
-:deep(.v-text-field) {
-    margin: 0;
-    padding: 0;
-}
-
-:deep(.v-text-field .v-input__control) {
-    min-height: 36px;
 }
 
 :deep(.v-checkbox) {

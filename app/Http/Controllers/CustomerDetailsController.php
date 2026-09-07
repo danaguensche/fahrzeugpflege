@@ -13,8 +13,21 @@ class CustomerDetailsController extends CustomerController
     {
         $customer = Customer::with(['cars', 'auftraege'])->where('id', $id)->first();
 
+        $perPage = 1;
+
+        $auftraege = $customer->auftraege()->paginate($perPage);
+
         if ($customer !== null) {
-            return new CustomerResource($customer);
+            $customerResource = new CustomerResource($customer);
+            return response()->json([
+                'success' => true,
+                'customer' => $customerResource,
+                'auftraege' => $auftraege,
+                'last_page' => $auftraege->lastPage(),
+                'total' => $auftraege->total(),
+                'current_page' => $auftraege->currentPage(),
+                'per_page' => $auftraege->perPage(),
+            ]);
         } else {
             return response()->json([
                 'success' => false,
@@ -35,11 +48,11 @@ class CustomerDetailsController extends CustomerController
                 'firstname' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
                 'email' => ['required', 'email', Rule::unique('customers', 'email')->ignore($id)],
-                'phonenumber' => 'required|string',
-                'addressline' => 'required|string',
-                'postalcode' => 'required|string',
-                'city' => 'required|string',
-                'notes' => 'nullable|text'
+                'phonenumber' => 'nullable|string',
+                'addressline' => 'nullable|string',
+                'postalcode' => 'nullable|string',
+                'city' => 'nullable|string',
+                'notes' => 'nullable|string'
             ]);
 
             $updated = $customer->update($validatedData);

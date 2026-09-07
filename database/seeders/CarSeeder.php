@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use App\Models\CarGroup;
@@ -12,6 +13,5 @@ class CarSeeder extends Seeder
         Car::factory()
             ->count(10)
             ->create();
-
     }
 }

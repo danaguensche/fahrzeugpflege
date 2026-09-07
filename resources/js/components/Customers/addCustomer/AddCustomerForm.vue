@@ -1,6 +1,7 @@
 <template>
     <v-dialog v-model="showDialogLocal" persistent max-width="700px">
         <v-card class="pa-2">
+
             <v-card-title class="headline pa-6 pb-4">
                 <v-icon class="mr-3" color="primary">mdi-account-plus</v-icon>
                 Neuen Kunden hinzufügen
@@ -9,65 +10,81 @@
             <v-divider></v-divider>
 
             <v-card-text class="pa-6">
+
+                <!-- Formular Felder  -->
+
                 <v-form ref="form" v-model="valid" lazy-validation>
                     <v-row>
+
                         <v-col cols="12">
                             <v-text-field v-model="customer.company" label="Firma" variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-office-building"
-                                class="mb-3"></v-text-field>
+                                density="comfortable" prepend-inner-icon="mdi-office-building" class="mb-3"
+                                :maxlength="50" :counter="50"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="customer.firstname" label="Vorname"
+                            <v-text-field v-model="customer.firstname" label="Vorname *"
                                 :rules="[v => !!v || 'Vorname ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-account" class="mb-3"></v-text-field>
+                                density="comfortable" prepend-inner-icon="mdi-account" class="mb-3" :maxlength="50"
+                                :counter="50"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="customer.lastname" label="Nachname"
+                            <v-text-field v-model="customer.lastname" label="Nachname *"
                                 :rules="[v => !!v || 'Nachname ist erforderlich']" required variant="outlined"
-                                density="comfortable" class="mb-3"></v-text-field>
+                                density="comfortable" class="mb-3" :maxlength="50" :counter="50"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="customer.email" label="E-Mail"
-                                :rules="[v => !!v || 'E-Mail ist erforderlich']" required variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-email" type="email"
-                                class="mb-3"></v-text-field>
+                            <v-text-field v-model="customer.email" label="E-Mail *" :rules="[v => !!v || 'E-Mail ist erforderlich',
+                            v => /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
+                            ]" required variant="outlined" density="comfortable" prepend-inner-icon="mdi-email"
+                                type="email" class="mb-3" :maxlength="60" :counter="60"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="customer.phonenumber" label="Telefonnummer" variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-phone" type="tel"
-                                class="mb-3"></v-text-field>
+                            <v-text-field v-model="customer.phonenumber"
+                                :rules="[v => !v || /^[0-9+\-\s()]{6,}$/.test(v) || 'Ungültige Telefonnummer']"
+                                label="Telefonnummer" variant="outlined" density="comfortable"
+                                prepend-inner-icon="mdi-phone" type="tel" class="mb-3" :maxlength="16"
+                                :counter="16"></v-text-field>
                         </v-col>
 
                         <v-col cols="12">
                             <v-text-field v-model="customer.addressline" label="Straße und Hausnummer"
                                 variant="outlined" density="comfortable" prepend-inner-icon="mdi-home"
-                                class="mb-3"></v-text-field>
+                                class="mb-3" :maxlength="50"
+                                :counter="50"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="4">
-                            <v-text-field v-model="customer.postalcode" label="Postleitzahl" variant="outlined"
-                                density="comfortable" prepend-inner-icon="mdi-mailbox" class="mb-3"></v-text-field>
+                            <v-text-field v-model="customer.postalcode" label="Postleitzahl" :rules="[
+                                v => !v || /^[0-9]{5}$/.test(v) || 'Ungültige Postleitzahl']" variant="outlined"
+                                density="comfortable" prepend-inner-icon="mdi-mailbox" class="mb-3" :maxlength="5"
+                                :counter="5"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="8">
                             <v-text-field v-model="customer.city" label="Stadt" variant="outlined" density="comfortable"
-                                prepend-inner-icon="mdi-city" class="mb-3"></v-text-field>
+                                prepend-inner-icon="mdi-city" class="mb-3" :maxlength="50"
+                                :counter="50"></v-text-field>
                         </v-col>
 
-                        <v-col cols="12">
+                        <!-- Fahrzeug hinzufügen (mit Suche und Autovervollständigung) -->
+                        <v-col cols="12" v-if="showCarField">
                             <v-autocomplete v-model="customer.car" :items="cars" item-title="Kennzeichen"
                                 item-value="id" label="Fahrzeug" placeholder="Fahrzeug auswählen oder suchen"
                                 prepend-inner-icon="mdi-car" variant="outlined" density="comfortable" clearable
                                 :loading="carsLoading" @update:search="searchCars" return-object class="mb-3"
                                 @update:modelValue="(val) => val && loadFullCarDetails(val.Kennzeichen)">
+
+                                <!-- Anzeige des Fahrzeuges im Feld (Kennzeichen + Automarke) -->
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
-                                        :subtitle="item.raw.Automarke" class="pa-3"></v-list-item>
+                                        :subtitle="item.raw.Automarke" class="pa-3">
+                                    </v-list-item>
                                 </template>
+
                                 <template v-slot:selection="{ item }">
                                     {{ item.raw.Kennzeichen }}
                                 </template>
@@ -79,6 +96,7 @@
 
             <v-divider></v-divider>
 
+            <!-- Aktionen (Speichern und Abbrechen) -->
             <v-card-actions class="pa-6 pt-4">
                 <v-spacer></v-spacer>
                 <v-btn variant="outlined" color="grey" @click="closeDialog" class="mr-3">
@@ -92,21 +110,31 @@
             </v-card-actions>
         </v-card>
 
-        <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false" />
+        <!-- Snackbar außerhalb der v-card platzieren -->
     </v-dialog>
+    
+    <!-- Vuetify Snackbar direkt verwenden -->
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" location="bottom" :timeout="5000">
+        {{ snackbar.text }}
+        <template v-slot:actions>
+            <v-btn color="white" variant="text" @click="snackbar.show = false">
+                Schließen
+            </v-btn>
+        </template>
+    </v-snackbar>
 </template>
 
 <script>
 import axios from 'axios';
-import SnackBar from '../../Details/SnackBar.vue';
 
 export default {
     name: 'AddCustomerForm',
-    components: {
-        SnackBar,
-    },
     props: {
         modelValue: Boolean,
+        showCarField: {
+            type: Boolean,
+            default: true,
+        },
     },
     data() {
         return {
@@ -169,7 +197,7 @@ export default {
                     lastname: this.customer.lastname,
                     email: this.customer.email || '',
                     phonenumber: this.customer.phonenumber || '',
-                    adressline: this.customer.adressline || '',
+                    addressline: this.customer.addressline || '',
                     postalcode: this.customer.postalcode || '',
                     city: this.customer.city || '',
                 };
@@ -187,19 +215,45 @@ export default {
                 this.showSnackbar('Kunde erfolgreich hinzugefügt', 'success');
                 this.closeDialog();
             } catch (error) {
-                console.error('Fehler beim Speichern:', error.response?.data?.errors || error);
-                this.showSnackbar(error.response?.data?.message || 'Fehler beim Speichern des Kunden', 'error');
+                console.error('Fehler beim Speichern:', error.response?.data || error);
+                
+                let errorMessage = 'Fehler beim Speichern des Kunden';
+                
+                if (error.response && error.response.data) {
+                    const data = error.response.data;
+                    
+                    if (data.errors) {
+                        console.log('Errors gefunden:', data.errors);
+                        
+                        if (data.errors.email) {
+                            const emailError = data.errors.email;
+                            errorMessage = Array.isArray(emailError) ? emailError[0] : emailError;
+                            console.log('Email-Fehler:', errorMessage);
+                        } else {
+                            // Ersten verfügbaren Fehler nehmen
+                            const firstErrorKey = Object.keys(data.errors)[0];
+                            const firstError = data.errors[firstErrorKey];
+                            errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
+                        }
+                    } 
+                    // Alternativ nach message suchen
+                    else if (data.message) {
+                        errorMessage = data.message;
+                    }
+                }
+                
+                console.log('Finale Fehlermeldung:', errorMessage);
+                this.showSnackbar(errorMessage, 'error');
             } finally {
                 this.customersLoading = false;
             }
         },
 
-
         async fetchCars(query = '') {
             this.carsLoading = true;
             try {
-                const response = await axios.get(`/api/cars/search?query=${query}`);
-                this.cars = response.data.data.map(car => ({
+                const response = await axios.get(`/api/cars/search-available?query=${query}`);
+                this.cars = response.data.map(car => ({
                     id: car.id,
                     Kennzeichen: car.Kennzeichen,
                     Automarke: car.Automarke,
@@ -244,11 +298,13 @@ export default {
         },
 
         showSnackbar(text, color = 'success') {
+            console.log('showSnackbar aufgerufen:', text, color);
             this.snackbar = {
                 show: true,
                 text,
                 color,
             };
+            console.log('Snackbar state:', this.snackbar);
         },
 
         async assignCarToCustomer(car, customerId) {
@@ -284,9 +340,6 @@ export default {
                 this.showSnackbar('Fahrzeugdetails konnten nicht geladen werden', 'error');
             }
         }
-
-
-
     },
 };
 </script>

@@ -7,6 +7,7 @@
 
     <!-- Vollständige Ansicht der Daten wenn loading false ist -->
     <template v-else>
+
       <!-- Header der Karte -->
       <v-card class="card">
         <Header :title="headerTitle" :switchEditMode="switchEditMode" :icon="headerIcon">
@@ -18,12 +19,10 @@
             <InformationHeader :title="'Persönliche Informationen'" :editMode="editMode" :icon="headerIcon"
               :getIconForField="getIconForField">
             </InformationHeader>
-
             <!-- Ansichtsmodus -->
             <InfoList v-if="!editMode" :details="customerDetails" :labels="labels" :infoKeys="personalInfoKeys"
               :getIconForField="getIconForField">
             </InfoList>
-
             <!-- Bearbeitungsmodus -->
             <InfoListEditMode v-else :personalInfoKeys="personalInfoKeys" :labels="labels"
               :editedData="editedCustomerData" :getIconForField="getIconForField">
@@ -33,13 +32,13 @@
           <!-- Adressinformationen -->
           <v-sheet>
             <DefaultHeader :title="'Adressinformationen'"></DefaultHeader>
+
             <!-- Ansichtsmodus -->
             <v-list class="bg-transparent" v-if="!editMode">
               <template v-for="key in addressInfoKeys" :key="key">
                 <v-list-item v-if="customerDetails.data[key] !== undefined">
                   <template v-slot:prepend>
-                    <v-icon :icon="getIconForField(key)" color="primary" class="mr-2">
-                    </v-icon>
+                    <v-icon :icon="getIconForField(key)" color="primary" class="mr-2"></v-icon>
                   </template>
 
                   <v-list-item-title class="font-weight-medium">
@@ -55,8 +54,7 @@
                     </template>
                   </v-list-item-subtitle>
                 </v-list-item>
-                <v-divider v-if="key !== addressInfoKeys[addressInfoKeys.length - 1]">
-                </v-divider>
+                <v-divider v-if="key !== addressInfoKeys[addressInfoKeys.length - 1]"></v-divider>
               </template>
             </v-list>
 
@@ -83,24 +81,27 @@
             </div>
           </v-sheet>
 
-          <!-- Fahrzeuge --> 
+          <!-- Fahrzeuge -->
           <v-sheet>
             <HeaderWithChip :customerDetails="customerDetails"></HeaderWithChip>
             <CarList v-if="customerDetails.data.cars && customerDetails.data.cars.length > 0"
               :cars="customerDetails.data.cars" :edit-mode="editMode" @delete-car="deleteCar">
             </CarList>
+
             <!-- Wenn keine Fahrzeuge vorhanden sind -->
             <template v-else>
               <v-list-item>
                 <v-list-item-subtitle class="text-grey">
                   <div class="d-flex align-center justify-center pa-4">
-                    <v-icon icon="mdi-car-off" color="grey-lighten-1" size="32" class="mr-2">
-                    </v-icon>
+                    <v-icon icon="mdi-car-off" color="grey-lighten-1" size="32" class="mr-2"></v-icon>
                     <span>Keine Fahrzeuge zugeordnet</span>
                   </div>
                 </v-list-item-subtitle>
               </v-list-item>
             </template>
+
+
+            <!-- Fahrzeug hinzufügen Button -->
             <v-btn class="mt-4" color="primary" @click="openCarAddDialog">
               Fahrzeug hinzufügen
             </v-btn>
@@ -108,21 +109,23 @@
 
           <!-- Fahrzeug hinzufügen Dialog -->
           <CarAddDialog ref="carAddDialog" :kundeId="$route.params.id" @car-added="handleNewCar"
-            @car-assigned="handleCarAssigned" @car-selected="handleCarSelected" @error="handleCarAddError">
+            @car-assigned="handleCarAssigned" @error="handleCarAddError">
           </CarAddDialog>
 
           <!-- Auftragsinformationen -->
           <v-sheet>
             <DefaultHeader :title="'Auftragsinformationen'"></DefaultHeader>
-            <template v-if="customerDetails.data.auftraege && customerDetails.data.auftraege.length > 0">
-              <div v-for="auftrag in customerDetails.data.auftraege" :key="auftrag.id" class="mb-4 pa-4">
+
+            <template v-if="customerDetails.auftraege.data && customerDetails.auftraege.data.length > 0">
+              <div v-for="auftrag in customerDetails.auftraege.data" :key="auftrag.id" class="mb-4 pa-4">
                 <v-list class="bg-transparent">
                   <v-list-item>
                     <template v-slot:prepend>
                       <v-icon icon="mdi-identifier" color="primary" class="mr-2"></v-icon>
                     </template>
                     <v-list-item-title class="font-weight-medium">
-                      <router-link :to="`/auftraege/jobdetails/${auftrag.id}`" class="text-decoration-none text-primary">
+                      <router-link :to="`/auftraege/jobdetails/${auftrag.id}`"
+                        class="text-decoration-none text-primary">
                         Auftrag ID: {{ auftrag.id }}
                       </router-link>
                     </v-list-item-title>
@@ -137,15 +140,19 @@
                         {{ labels[key] || key }}
                       </v-list-item-title>
                       <v-list-item-subtitle class="mt-1 text-body-1">
-                        <template v-if="auftrag[key] === null || auftrag[key] === ''">
-                          <span class="text-grey">Keine Daten vorhanden</span>
-                        </template>
-                        <template v-else-if="key === 'Abholtermin'">
+                        <span v-if="auftrag[key] === null || auftrag[key] === '' || auftrag[key] === undefined"
+                          class="text-grey">
+                          Keine Daten vorhanden
+                        </span>
+                        <span v-else-if="key === 'scheduled_at'">
                           {{ formatDate(auftrag[key]) }}
-                        </template>
-                        <template v-else-if="key === 'Status'">
-                          {{ statusOptions.find(option => option.value === auftrag[key])?.title || auftrag[key] }}
-                        </template>
+                        </span>
+                        <span v-else-if="key === 'status'">
+                          {{statusOptions.find(option => option.value === auftrag[key])?.title || auftrag[key]}}
+                        </span>
+                        <span v-else>
+                          {{ auftrag[key] }}
+                        </span>
                       </v-list-item-subtitle>
                     </v-list-item>
                     <v-divider v-if="key !== auftragInfoKeys[auftragInfoKeys.length - 1]"></v-divider>
@@ -153,6 +160,8 @@
                 </v-list>
               </div>
             </template>
+
+            <!-- Keine Aufträge vorhanden -->
             <template v-else>
               <v-list-item>
                 <v-list-item-subtitle class="text-grey">
@@ -164,6 +173,12 @@
               </v-list-item>
             </template>
           </v-sheet>
+
+          <!-- Paginierung für Aufträge-->
+          <div class="text-center">
+            <v-pagination v-model="page" :length="customerDetails.auftraege.last_page" @update:model-value="loadPage"
+              :total-visible="5"></v-pagination>
+          </div>
 
           <!-- Metadaten -->
           <MetaData :labels="labels" :formattedCreatedAt="formattedCreatedAt" :formattedUpdatedAt="formattedUpdatedAt">
@@ -183,11 +198,19 @@
           <!-- Ansichtsmodus Aktionen -->
           <template v-else>
             <EditButton :switchEditMode="switchEditMode"></EditButton>
-            <PrintButton></PrintButton>
           </template>
         </v-card-actions>
       </v-card>
     </template>
+
+    <VuetifyAlert v-model="showDeleteAlert"
+      :alertHeading="carToDelete ? `Fahrzeug ${carToDelete.Kennzeichen} entfernen` : 'Fahrzeug entfernen'"
+      alertParagraph="Möchten Sie das Fahrzeug wirklich vom Kunden entfernen? Das Fahrzeug wird dabei nicht gelöscht."
+      alertCloseButton="Abbrechen" alertOkayButton="Fahrzeug entfernen" alertTypeClass="alertTypeConfirmation"
+      @confirmation="confirmDeleteCar" @close="cancelDeleteCar">
+    </VuetifyAlert>
+
+
 
     <!-- Snackbar für Benachrichtigungen -->
     <SnackBar v-if="snackbar.show" :text="snackbar.text" :color="snackbar.color" @close="snackbar.show = false">
@@ -205,7 +228,6 @@ import MetaData from '../../Details/MetaData.vue';
 import SnackBar from "../../Details/SnackBar.vue";
 import BackButton from '../../CommonSlots/BackButton.vue';
 import EditButton from '../../Details/EditButton.vue';
-import PrintButton from '../../CommonSlots/PrintButton.vue';
 import CancelButton from '../../Details/CancelButton.vue';
 import SaveButton from '../../Details/SaveButton.vue';
 import InfoList from "../../Details/InfoList.vue";
@@ -214,6 +236,7 @@ import DefaultHeader from "../../Details/DefaultHeader.vue";
 import HeaderWithChip from "../../Details/HeaderWithChip.vue";
 import CarList from "../../Details/CarList.vue";
 import CarAddDialog from "./CarAddDialog.vue";
+import VuetifyAlert from "../../Alerts/VuetifyAlert.vue";
 
 export default {
   name: "Details",
@@ -226,7 +249,6 @@ export default {
     SnackBar,
     BackButton,
     EditButton,
-    PrintButton,
     CancelButton,
     SaveButton,
     InfoList,
@@ -235,9 +257,12 @@ export default {
     HeaderWithChip,
     CarList,
     CarAddDialog,
+    VuetifyAlert
   },
   data() {
     return {
+      showDeleteAlert: false,
+      carToDelete: null,
       headerTitle: "Kundendetails",
       headerIcon: "mdi-account",
       editMode: false,
@@ -260,10 +285,10 @@ export default {
         cars: "Fahrzeuge",
         created_at: "Erstellt am",
         updated_at: "Zuletzt aktualisiert am",
-        Title: "Titel",
-        Beschreibung: "Beschreibung",
-        Abholtermin: "Abholtermin",
-        Status: "Status",
+        title: "Titel",
+        description: "Beschreibung",
+        scheduled_at: "Abholtermin",
+        status: "Status",
       },
       loading: true,
       error: null,
@@ -278,10 +303,13 @@ export default {
         { title: 'im Rückblick', value: 'im_rueckblick' },
         { title: 'Abgeschlossen', value: 'abgeschlossen' },
       ],
+      page: 1,
+      perPage: 1
     };
   },
 
   computed: {
+
     personalInfoKeys() {
       return ['id', 'company', 'firstname', 'lastname', 'email', 'phonenumber', 'notes'];
     },
@@ -291,7 +319,7 @@ export default {
     },
 
     auftragInfoKeys() {
-      return ['Title', 'Beschreibung', 'Abholtermin', 'Status'];
+      return ['title', 'description', 'scheduled_at', 'status'];
     },
 
     formattedCreatedAt() {
@@ -300,7 +328,27 @@ export default {
 
     formattedUpdatedAt() {
       return this.formatDate(this.customerDetails.data?.updated_at);
-    }
+    },
+
+    totalPages() {
+      return this.customerDetails?.auftraege?.last_page || 1;
+    },
+
+    currentPage() {
+      return this.customerDetails?.auftraege?.current_page || 1;
+    },
+
+    totalAuftraege() {
+      return this.customerDetails?.auftraege?.total || 0;
+    },
+
+    hasNextPage() {
+      return this.currentPage < this.totalPages;
+    },
+
+    hasPrevPage() {
+      return this.currentPage > 1;
+    },
   },
 
   async mounted() {
@@ -308,9 +356,15 @@ export default {
       await this.getCustomer();
     } catch (error) {
       this.error = error.message;
-      this.showSnackbar(error.message, 'error');
+      this.showSnackbar(error.message, 'Kundendaten konnten nicht geladen werden');
     } finally {
       this.loading = false;
+    }
+  },
+
+  watch: {
+    page(newPage) {
+      this.loadPage(newPage);
     }
   },
 
@@ -331,23 +385,50 @@ export default {
       }
     },
 
-    async getCustomer() {
+    async loadPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        await this.getCustomer(page);
+      }
+    },
+
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.page = page;
+      }
+    },
+
+    nextPage() {
+      if (this.page < this.totalPages) {
+        this.page++;
+      }
+    },
+
+    prevPage() {
+      if (this.page > 1) {
+        this.page--;
+      }
+    },
+
+    async getCustomer(page = 1) {
       try {
         if (!this.$route?.params?.id) {
           throw new Error("Keine Kunden-ID angegeben");
         }
 
         const { data } = await axios.get(
-          `/api/customer/customerdetails/${this.$route.params.id}`
+          `/api/customer/customerdetails/${this.$route.params.id}?page=${page}`
         );
 
         if (!data) {
           throw new Error("Keine Daten vom Server erhalten");
         }
 
-        this.customerDetails = data;
-        this.customerDetails.data.jobs = data.jobs; 
-        this.editedCustomerData = { ...this.customerDetails.data };
+        this.customerDetails = {
+          data: data.customer,
+          auftraege: data.auftraege
+        };
+        this.page = page;
+        this.editedCustomerData = { ...data.customer };
       } catch (error) {
         this.error = error.response?.data?.message || error.message;
         this.showSnackbar("Fehler beim Laden der Kundendetails: " + this.error, 'error');
@@ -377,12 +458,12 @@ export default {
         addressline: "mdi-map-marker",
         postalcode: "mdi-mail",
         city: "mdi-city",
-        
+
         cars: "mdi-car-multiple",
-        Title: "mdi-format-title",
-        Beschreibung: "mdi-text-box-outline",
-        Abholtermin: "mdi-calendar",
-        Status: "mdi-check-circle-outline"
+        title: "mdi-format-title",
+        description: "mdi-text-box-outline",
+        scheduled_at: "mdi-calendar",
+        status: "mdi-check-circle-outline"
       };
 
       return iconMap[key] || "mdi-information-outline";
@@ -406,26 +487,40 @@ export default {
       this.error = null;
 
       try {
+        const payload = {
+          company: this.editedCustomerData.company,
+          firstname: this.editedCustomerData.firstname,
+          lastname: this.editedCustomerData.lastname,
+          email: this.editedCustomerData.email,
+          phonenumber: this.editedCustomerData.phonenumber,
+          notes: this.editedCustomerData.notes,
+          addressline: this.editedCustomerData.addressline,
+          postalcode: this.editedCustomerData.postalcode,
+          city: this.editedCustomerData.city,
+        };
+
         await axios.put(
           `/api/customer/customerdetails/${this.$route.params.id}`,
-          this.editedCustomerData
+          payload,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+            }
+          }
         );
 
-        // Aktualisieren der Kundendaten nach erfolgreicher Speicherung
-        const { data } = await axios.get(
-          `/api/customer/customerdetails/${this.$route.params.id}`
-        );
-
-        this.customerDetails = data;
         this.editMode = false;
-        this.showSnackbar("Kundendaten erfolgreich gespeichert", 'success');
+        this.showSnackbar("Kundendaten erfolgreich gespeichert", "success");
+        await this.getCustomer(this.page); // neu laden, um aktuelle Daten zu sehen
       } catch (error) {
         const errorMessage = error.response?.data?.message || "Fehler beim Speichern der Kundendaten";
-        this.showSnackbar(errorMessage, 'error');
+        this.showSnackbar(errorMessage, "error");
       } finally {
         this.saveLoading = false;
       }
     },
+
 
     openCarAddDialog() {
       if (this.$refs.carAddDialog) {
@@ -452,7 +547,6 @@ export default {
         console.log('Sende Anfrage an:', endpoint);
         console.log('Mit Payload:', JSON.stringify(requestPayload));
 
-        // Setze explizite Header
         const response = await axios.put(
           endpoint,
           requestPayload,
@@ -519,23 +613,35 @@ export default {
       }
     },
 
-    handleCarSelected(car) {
-      // Dieser Handler wird aufgerufen, wenn ein Auto aus der Liste ausgewählt wurde
-      console.log('Auto ausgewählt:', car);
+    deleteCar(car) {
+      // Speichere das zu löschende Fahrzeug und öffne den Alert
+      this.carToDelete = car;
+      this.showDeleteAlert = true;
     },
 
-    async deleteCar(car) {
-      if (confirm(`Möchten Sie das Fahrzeug ${car.Kennzeichen} wirklich von diesem Kunden entfernen?`)) {
-        try {
-          await axios.delete(`/api/customer/${this.$route.params.id}/car/${car.id}`);
-          this.showSnackbar('Fahrzeug erfolgreich vom Kunden entfernt', 'success');
-          await this.getCustomer(); // Refresh customer details
-        } catch (error) {
-          const errorMessage = error.response?.data?.message || "Fehler beim Entfernen des Fahrzeugs";
-          this.showSnackbar(errorMessage, 'error');
-        }
+    async confirmDeleteCar() {
+      if (!this.carToDelete) return;
+
+      try {
+        await axios.delete(`/api/customer/${this.$route.params.id}/car/${this.carToDelete.id}`);
+        this.showSnackbar('Fahrzeug erfolgreich vom Kunden entfernt', 'success');
+        await this.getCustomer(this.page);
+      } catch (error) {
+        const errorMessage = error.response?.data?.message || "Fehler beim Entfernen des Fahrzeugs";
+        this.showSnackbar(errorMessage, 'error');
+      } finally {
+        this.showDeleteAlert = false;
+        this.carToDelete = null;
       }
+    },
+
+    cancelDeleteCar() {
+      // Schließe den Alert ohne zu löschen
+      this.showDeleteAlert = false;
+      this.carToDelete = null;
     }
+
+
   }
 }
 </script>
@@ -543,8 +649,9 @@ export default {
 <style scoped>
 .card-container {
   width: 100%;
-  height: calc(100vh - 40px);
-  padding: 20px;
+  height: 99vh;
+  margin-left: 110px;
+  /* padding: 20px; */
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -582,25 +689,20 @@ export default {
 
 @media (min-width: 768px) and (max-width: 991.98px) {
   .card-container {
-    max-width: calc(100% - 80px);
+    max-width: calc(100% - 50px);
   }
 }
 
 @media (min-width: 992px) and (max-width: 1199.98px) {
   .card-container {
-    max-width: calc(100% - 250px);
+    max-width: calc(100% - 150px);
   }
 }
 
 @media (min-width: 1200px) {
   .card-container {
-    max-width: calc(100% - 280px);
+    max-width: calc(100% - 180px);
   }
-}
-
-.v-card-text {
-  flex: 1;
-  overflow-y: auto;
 }
 
 @media (max-width: 767.98px) {

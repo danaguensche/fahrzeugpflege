@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -22,7 +21,7 @@ class User extends Authenticatable implements CanResetPassword
     protected $fillable = [
         'firstname',
         'lastname',
-        'email',
+        'username',
         'password',
         'phonenumber',
         'addressline',
@@ -43,30 +42,22 @@ class User extends Authenticatable implements CanResetPassword
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-
     public function toSearchableArray()
     {
         return [
             'id' => $this->id,
             'firstname' => $this->firstname,
             'lastname' => $this->lastname,
-            'email' => $this->email,
+            'username' => $this->username,
             'phonenumber' => $this->phonenumber,
             'addressline' => $this->addressline,
             'postalcode' => $this->postalcode,
             'city' => $this->city
         ];
+    }
+
+    public function getAuthIdentifier()
+    {
+        return 'username';
     }
 }

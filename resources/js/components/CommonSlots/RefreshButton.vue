@@ -1,5 +1,5 @@
 <template>
-    <v-btn :disabled="loading" class="bg-blue-grey-darken-2 border-0" append-icon="mdi-refresh" text="Update" variant="outlined" @click="refresh"></v-btn>
+    <v-btn :disabled="loading" class="bg-blue-grey-darken-3 border-0" append-icon="mdi-refresh" text="Update" variant="outlined" @click="refresh"></v-btn>
 </template>
 
 <script>
@@ -19,8 +19,3 @@ export default {
 }
 </script>
 
-<style scoped>
-
-.button {
-}
-</style>
