@@ -15,7 +15,7 @@
         </div>
 
         <div class="table-container">
-            <DataTable :buttonFunction="openAddUserDialog" addButtonLabel="Benutzer hinzufügen" :searchString="searchText" :isSearchActive="isSearchActive" endpoint="users"
+            <DataTable :buttonFunction="openAddUserDialog" confirmButton="true" cancelButton="true" addButtonLabel="Benutzer hinzufügen" :searchString="searchText" :isSearchActive="isSearchActive" endpoint="users"
                 :headers="userHeaders" :fields="userFields" itemKey="id" detailsPage="userdetails"
                 detailsUrlBasePath="user" deleteKey="id" @itemsDeleted="handleItemsDeleted" @show-error="handleError" :dataCleaner="cleanUserData" />
         </div>

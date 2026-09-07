@@ -14,10 +14,10 @@
             <FilterButton v-if="isFilterable" v-model="statusFilters" @filter-change="handleStatusFilterChange" />
             <div class="small-spacer"></div>
             <div class="button-group" v-if="isAdminOrTrainer || canEditStatusOnly">
-                <ConfirmButton class="confirm-button" @click="confirmEditItem" :disabled="!editItemId">
+                <ConfirmButton v-if="confirmButton" class="confirm-button" @click="confirmEditItem" :disabled="!editItemId">
                     Bestätigen
                 </ConfirmButton>
-                <CancelButton class="cancel-button" :disabled="editItemId === null" @click="cancelEdit">Abbrechen
+                <CancelButton class="cancel-button" v-if="cancelButton" :disabled="editItemId === null" @click="cancelEdit">Abbrechen
                 </CancelButton>
                 <DeleteButton class="delete-button" :disabled="selectedItems.length === 0"
                     @click="confirmDeleteSelectedItems" v-if="isAdminOrTrainer">
@@ -151,7 +151,7 @@
                             <td class="table-icon fixed-width" v-if="isAdminOrTrainer || canEditStatusOnly">
                                 <v-btn variant="plain" icon @click="handleEditClick(item)">
                                     <v-icon>{{ editItemId === item[itemKey] ? 'mdi-content-save' : 'mdi-pencil'
-                                    }}</v-icon>
+                                        }}</v-icon>
                                 </v-btn>
                             </td>
                         </tr>
@@ -193,6 +193,16 @@ export default {
     name: "DataTable",
 
     props: {
+        cancelButton: {
+            type: Boolean,
+            default: false
+        },
+
+        confirmButton: {
+            type: Boolean,
+            default: false
+        },
+
         isFilterable: {
             type: Boolean,
             default: false
