@@ -59,7 +59,7 @@
 
                                 <template v-slot:item="{ props, item }">
                                     <v-list-item v-bind="props" :title="item.raw.Kennzeichen"
-                                        :subtitle="`${item.raw.Automarke} ${getCarOwnershipLabel(item.raw)}`"
+                                        :subtitle="`${item.raw.Automarke}`"
                                         class="pa-3">
                                     </v-list-item>
                                 </template>
@@ -337,8 +337,8 @@ export default {
                 const response = await axios.get(`/api/jobs/cars-for-customer/${customerId}`);
                 this.availableCars = response.data.cars.map(car => ({
                     id: car.id,
-                    Kennzeichen: car.Kennzeichen || car.license_plate,
-                    Automarke: car.Automarke || car.brand,
+                    Kennzeichen: car.Kennzeichen,
+                    Automarke: car.Automarke,
                     customer_id: car.customer_id
                 }));
             } catch (error) {
@@ -349,15 +349,6 @@ export default {
             }
         },
 
-
-        getCarOwnershipLabel(car) {
-            if (!car.customer_id) {
-                return '(verfügbar)';
-            } else if (this.job.customer && car.customer_id === this.job.customer.id) {
-                return '(bereits zugewiesen)';
-            }
-            return '';
-        },
 
         async fetchTrainees() {
             this.traineesLoading = true;

@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\JobResource;
 use App\Models\Job;
+use App\Models\Customer;
+use App\Models\Car;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-use \App\Models\Customer;
-use \App\Models\Car;
 
 class JobController extends Controller
 {
@@ -31,7 +31,6 @@ class JobController extends Controller
                 'trainee_id' => 'nullable|exists:users,id',
                 'images' => 'nullable|array',
                 'images.*' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
-                'assign_car_to_customer' => 'boolean'
             ]);
 
             $user = auth()->user();
@@ -43,20 +42,6 @@ class JobController extends Controller
 
             $job = Job::create(array_merge($validatedData, ['trainer_id' => $user->id]));
             $job->services()->sync($request->input('service_ids'));
-
-            // Automatische Fahrzeug-Zuweisung
-            $assignCar = $request->input('assign_car_to_customer', true);
-            if ($assignCar) {
-                $car = \App\Models\Car::find($validatedData['car_id']);
-                if ($car && (!$car->customer_id || $car->customer_id == 0)) {
-                    $car->update(['customer_id' => $validatedData['customer_id']]);
-                    Log::info('Fahrzeug automatisch dem Kunden zugewiesen', [
-                        'car_id' => $car->id,
-                        'customer_id' => $validatedData['customer_id'],
-                        'job_id' => $job->id
-                    ]);
-                }
-            }
 
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
@@ -78,14 +63,11 @@ class JobController extends Controller
                     'job_id' => $job->id,
                     'title' => $job->title,
                     'status' => $job->status,
-                    'car_assigned' => $assignCar
-                ])
-                ->log('Auftrag erstellt: ' . $job->title . ' mit Status ' . $job->status . ' von ' . $user->firstname . ' ' . $user->lastname);
+                ]);
 
             return response()->json([
                 'message' => 'Job erfolgreich gespeichert',
                 'job' => $job,
-                'car_assigned' => $assignCar
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
@@ -96,7 +78,6 @@ class JobController extends Controller
             return response()->json(['error' => 'Fehler beim Speichern des Jobs'], 500);
         }
     }
-
 
     public function index(Request $request)
     {
@@ -109,41 +90,29 @@ class JobController extends Controller
         $allowedSortFields = ['id', 'title', 'description', 'scheduled_at', 'status'];
 
         $query = Job::with(['customer', 'car', 'services', 'trainer', 'trainee', 'images']);
-    
-        // Filter by user role
+
         /** @var \App\Models\User|null $user */
         $user = auth()->user();
         if ($user && $user->role === 'trainee') {
             $query->where('trainee_id', $user->id);
         }
 
-        // Filtering by status - MULTIPLE VALUES SUPPORT
         if ($request->has('status')) {
             $statusInput = $request->input('status');
-
-            // Handle both array and comma-separated string
-            if (is_array($statusInput)) {
-                $statuses = $statusInput;
-            } else {
-                $statuses = array_filter(explode(',', $statusInput));
-            }
-
+            $statuses = is_array($statusInput) ? $statusInput : array_filter(explode(',', $statusInput));
             if (!empty($statuses)) {
                 $query->whereIn('status', $statuses);
             }
         }
 
-        // Filtering by car_id
         if ($request->has('car_id') && $request->input('car_id') !== '') {
             $query->where('car_id', $request->input('car_id'));
         }
 
-        // Filtering by customer_id
         if ($request->has('customer_id') && $request->input('customer_id') !== '') {
             $query->where('customer_id', $request->input('customer_id'));
         }
 
-        // Filtering by user_id (for trainer/admin to filter by specific trainee)
         if ($user && $user->role !== 'trainee' && $request->has('user_id') && $request->input('user_id') !== '') {
             $query->where('user_id', $request->input('user_id'));
         }
@@ -184,7 +153,6 @@ class JobController extends Controller
 
             $allowedSortFields = ['id', 'title', 'description', 'scheduled_at', 'status'];
 
-            // If the query is empty, return an empty result
             if (empty(trim($searchQuery))) {
                 return response()->json([
                     'items' => [],
@@ -200,29 +168,19 @@ class JobController extends Controller
                     ->orWhere('description', 'like', $searchTerm)
                     ->orWhere('status', 'like', $searchTerm);
 
-                // Search by ID if the query is numeric
                 if (is_numeric($searchQuery)) {
                     $q->orWhere('id', '=', (int)$searchQuery);
                 }
             });
 
-            // Filtering by status
             if ($request->has('status')) {
                 $statusInput = $request->input('status');
-
-                // Handle both array and comma-separated string
-                if (is_array($statusInput)) {
-                    $statuses = $statusInput;
-                } else {
-                    $statuses = array_filter(explode(',', $statusInput));
-                }
-
+                $statuses = is_array($statusInput) ? $statusInput : array_filter(explode(',', $statusInput));
                 if (!empty($statuses)) {
                     $query->whereIn('status', $statuses);
                 }
             }
 
-            // Apply sorting
             if (in_array($sortBy, $allowedSortFields)) {
                 $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
             }
@@ -255,7 +213,6 @@ class JobController extends Controller
             $user = auth()->user();
 
             if ($user && $user->role === 'trainee') {
-                // Trainee darf nur Status updaten
                 if ($job->trainee_id !== $user->id) {
                     abort(403, 'Unauthorized action. You can only update your own jobs.');
                 }
@@ -273,22 +230,6 @@ class JobController extends Controller
                     'cleaning_time' => 'nullable|numeric|min:0|max:99',
                 ]);
 
-                // Fahrzeug dem Kunden zuweisen, falls es noch keinen Kunden hat
-                if (isset($validatedData['car_id']) && isset($validatedData['customer_id'])) {
-                    $car = Car::find($validatedData['car_id']);
-
-                    if ($car && !$car->customer_id) {
-                        $car->customer_id = $validatedData['customer_id'];
-                        $car->save();
-
-                        Log::info('Car assigned to customer during job update', [
-                            'car_id' => $car->id,
-                            'customer_id' => $validatedData['customer_id'],
-                            'job_id' => $id
-                        ]);
-                    }
-                }
-
                 $job->update($validatedData);
 
                 activity()
@@ -304,7 +245,7 @@ class JobController extends Controller
                     'message' => 'Job Status erfolgreich aktualisiert',
                     'job' => $job->load('services')
                 ]);
-            } else { // Admin oder Trainer
+            } else {
                 DB::beginTransaction();
 
                 if ($request->has('scheduled_at') && $request->input('scheduled_at') === '') {
@@ -326,7 +267,6 @@ class JobController extends Controller
                     'images.*' => 'nullable|image|max:16384|mimes:jpeg,png,jpg,gif,svg',
                 ]);
 
-                // Fahrzeug dem Kunden zuweisen, falls es noch keinen Kunden hat
                 if (isset($validatedData['car_id']) && isset($validatedData['customer_id'])) {
                     $car = Car::find($validatedData['car_id']);
 
@@ -343,9 +283,9 @@ class JobController extends Controller
                         ]);
                     } else {
                         Log::info('Car assignment skipped in update', [
-                            'car_id' => isset($validatedData['car_id']) ? $validatedData['car_id'] : null,
+                            'car_id' => $validatedData['car_id'] ?? null,
                             'car_found' => $car !== null,
-                            'car_customer_id' => $car ? $car->customer_id : null,
+                            'car_customer_id' => $car?->customer_id,
                             'already_assigned' => $car && !is_null($car->customer_id)
                         ]);
                     }
@@ -353,13 +293,11 @@ class JobController extends Controller
 
                 $job->update($validatedData);
 
-                // Services aktualisieren
                 if ($request->has('services')) {
                     $serviceIds = collect($request->input('services'))->pluck('id')->toArray();
                     $job->services()->sync($serviceIds);
                 }
 
-                // Neue Bilder hochladen
                 if ($request->hasFile('images')) {
                     foreach ($request->file('images') as $image) {
                         $path = $image->store('jobs', 'public');
@@ -386,12 +324,12 @@ class JobController extends Controller
             return response()->json(['error' => 'Fehler beim Aktualisieren des Jobs'], 500);
         }
     }
+
     public function destroy(Job $job)
     {
         try {
             DB::beginTransaction();
 
-            // Delete all associated images from storage and database
             foreach ($job->images as $image) {
                 $imagePath = str_replace('storage/', '', $image->path);
                 if (Storage::disk('public')->exists($imagePath)) {
@@ -437,7 +375,6 @@ class JobController extends Controller
 
             DB::beginTransaction();
 
-            // Get jobs with images
             $jobs = Job::whereIn('id', $validated['ids'])->with('images')->get();
 
             if ($jobs->isEmpty()) {
@@ -448,7 +385,6 @@ class JobController extends Controller
                 ], 404);
             }
 
-            // Delete all associated images from storage and database
             foreach ($jobs as $job) {
                 foreach ($job->images as $image) {
                     $imagePath = str_replace('storage/', '', $image->path);
@@ -491,9 +427,7 @@ class JobController extends Controller
             ], 500);
         }
     }
-    /**
-     * Delete a single image from a job
-     */
+
     public function deleteImage(Request $request, Job $job, $imageId)
     {
         try {
@@ -519,9 +453,6 @@ class JobController extends Controller
         }
     }
 
-    /**
-     * Add new images to existing job
-     */
     public function addImages(Request $request, Job $job)
     {
         try {
@@ -594,7 +525,6 @@ class JobController extends Controller
 
             $query = Job::query();
 
-            // Filter based on user role
             if ($user->role === 'trainee') {
                 $query->where('trainee_id', $user->id);
             }
@@ -624,12 +554,10 @@ class JobController extends Controller
             $today = Carbon::today();
             $query = Job::query();
 
-            // Filter based on user role
             if ($user->role === 'trainee') {
-                // Trainee sees only their assigned jobs
                 $query->where('trainee_id', $user->id);
             }
-            // Count jobs scheduled for today
+
             $todayJobsCount = $query->whereDate('scheduled_at', $today)->count();
 
             return response()->json([
@@ -662,21 +590,20 @@ class JobController extends Controller
         }
     }
 
+    /**
+     * Gibt nur Fahrzeuge zurück, die dem ausgewählten Kunden zugewiesen sind
+     */
     public function getCarsForCustomer($customerId)
     {
         $customer = Customer::with('cars')->findOrFail($customerId);
 
-        $cars = Car::where(function ($query) use ($customerId) {
-            $query->where('customer_id', $customerId)
-                ->orWhereNull('customer_id');
-        })->get();
+        $cars = Car::where('customer_id', $customerId)->get();
 
         return response()->json([
             'cars' => $cars
         ]);
     }
 
-    //Kalender Events abrufen -> problem war, dass immer nur 20 events abgerufen wurden wegen pagination
     public function getCalendarEvents(Request $request)
     {
         try {
@@ -687,7 +614,6 @@ class JobController extends Controller
 
             $query = Job::with(['customer', 'car', 'services', 'trainer', 'trainee']);
 
-            // Filter by user role
             if ($user->role === 'trainee') {
                 $query->where('trainee_id', $user->id);
             }
@@ -731,8 +657,7 @@ class JobController extends Controller
 
         $job = Job::findOrFail($jobId);
 
-        // Nur Bilder updaten, die zum Job gehören
-        $updatedCount = $job->images()  // Assuming Job has images() relation to images_reports
+        $updatedCount = $job->images()
             ->whereIn('id', $validated['image_ids'])
             ->update(['car_id' => $validated['car_id']]);
 
