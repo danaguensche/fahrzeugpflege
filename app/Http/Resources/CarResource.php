@@ -15,7 +15,7 @@ class CarResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [ 
+        return [
             'id' => $this->id,
             'Kennzeichen' => $this->Kennzeichen,
             'customer_id' => $this->customer_id,
@@ -26,18 +26,17 @@ class CarResource extends JsonResource
             'Typ' => $this->Typ,
             'Farbe' => $this->Farbe,
             'Sonstiges' => $this->Sonstiges,
+            'customer_name' => $this->customer ? $this->customer->firstname . ' ' . $this->customer->lastname : '',
             'images' => $this->images->map(fn($img) => [
                 'id' => $img->id,
                 'url' => asset('storage/' . $img->path)
             ]),
-            'customer' => $this->whenLoaded('customer', function () {
-                return [
-                    'id' => $this->customer->id,
-                    'firstname' => $this->customer->firstname,
-                    'lastname' => $this->customer->lastname,
-                    'email' => $this->customer->email,
-                ];
-            }),
+            'customer' => $this->customer ? [
+                'id' => $this->customer->id,
+                'firstname' => $this->customer->firstname,
+                'lastname' => $this->customer->lastname,
+                'email' => $this->customer->email,
+            ] : null,
         ];
     }
 }

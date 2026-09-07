@@ -57,9 +57,11 @@ export default {
             searchText: '',
             isSearchActive: false,
             searchDebounceTimer: null,
+            customerName: '',
             carHeaders: [
                 { title: 'Auswählen', key: 'select', sortable: false, width: '60px' },
                 { title: 'Kennzeichen', key: 'Kennzeichen', sortable: true, align: 'start' },
+                { title: 'Kunde', key: 'customer_name', sortable: true },
                 { title: 'Fahrzeugklasse', key: 'Fahrzeugklasse', sortable: true },
                 { title: 'Automarke', key: 'Automarke', sortable: true },
                 { title: 'Typ', key: 'Typ', sortable: true },
@@ -67,7 +69,7 @@ export default {
                 { title: 'Löschen', key: 'delete', sortable: false, width: '60px' },
                 { title: 'Bearbeiten', key: 'edit', sortable: false, width: '60px' }
             ],
-            carFields: ["Kennzeichen", "Fahrzeugklasse", "Automarke", "Typ", "Farbe"]
+            carFields: ["Kennzeichen", "customer_name", "Fahrzeugklasse", "Automarke", "Typ", "Farbe"]
         }
     },
 
@@ -93,6 +95,7 @@ export default {
     },
 
     methods: {
+
         handleCarAdded() {
             this.showAddCarDialog = false;
         },

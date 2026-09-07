@@ -307,7 +307,8 @@ export default {
             alertParagraph: '',
             alertOkayButton: '',
             confirmAction: null,
-            searchDebounceTimer: null
+            searchDebounceTimer: null,
+            customerName: ''
         };
     },
 
@@ -330,7 +331,8 @@ export default {
                 return this.items;
             }
             return this.items.filter(item => this.statusFilters.includes(item.status));
-        }
+        }, 
+
     },
 
     watch: {
@@ -707,7 +709,6 @@ export default {
 
         async loadItems() {
             this.loading = true;
-            console.log(`[DataTable] Loading started for ${this.endpoint}.`);
 
             try {
                 const params = {
@@ -732,7 +733,6 @@ export default {
                 const response = await axios.get(`/api/${this.endpoint}`, { params });
                 this.items = response.data.items || response.data || [];
                 this.totalItems = response.data.total || response.data.totalItems || this.items.length;
-                console.log(`[DataTable] Data loaded successfully for ${this.endpoint}. Total items: ${this.totalItems}`);
             } catch (error) {
                 console.error(`[DataTable] Error during data loading for ${this.endpoint}:`, error);
                 this.items = [];
@@ -773,7 +773,7 @@ export default {
             clearTimeout(this.searchDebounceTimer);
         }
 
-    }
+    },
 
 }
 </script>
