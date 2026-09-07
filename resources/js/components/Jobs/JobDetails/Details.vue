@@ -554,10 +554,10 @@ export default {
             traineeSearch: null,
             traineeSearchTimeout: null,
             statuses: [
-                { title: 'Ausstehend', value: 'ausstehend' },
-                { title: 'In Bearbeitung', value: 'in_bearbeitung' },
+                { title: 'ausstehend', value: 'ausstehend' },
+                { title: 'in Bearbeitung', value: 'in_bearbeitung' },
                 { title: 'im Rückblick', value: 'im_rueckblick' },
-                { title: 'Abgeschlossen', value: 'abgeschlossen' },
+                { title: 'abgeschlossen', value: 'abgeschlossen' },
             ],
             snackbar: {
                 show: false,
