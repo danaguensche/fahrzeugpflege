@@ -122,16 +122,12 @@
                         <template v-slot:prepend>
                             <v-icon color="primary">mdi-clock</v-icon>
                         </template>
-                        <v-list-item-title class="font-weight-medium">Zeitraum</v-list-item-title>
+                        <v-list-item-title class="font-weight-medium">Abholdatum</v-list-item-title>
                         <v-list-item-subtitle>
                             <div class="d-flex align-center flex-wrap">
                                 <div class="d-flex align-center mr-4 mb-1">
                                     <v-icon small color="success" class="mr-2">mdi-play</v-icon>
                                     <span>{{ formatDateTime(event.start) }}</span>
-                                </div>
-                                <div class="d-flex align-center">
-                                    <v-icon small color="error" class="mr-2">mdi-stop</v-icon>
-                                    <span>{{ formatDateTime(event.end) }}</span>
                                 </div>
                             </div>
                         </v-list-item-subtitle>
