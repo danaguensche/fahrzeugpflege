@@ -1,5 +1,4 @@
 <template>
-    <MainSidebar></MainSidebar>
     <Page></Page>
 
 </template>
@@ -7,13 +6,11 @@
 
 
 import Page from '../Cars/CarDetails/Page.vue';
-import MainSidebar from '../sidebar/MainSidebar.vue';
 
 
 export default {
     name: "CalendarPage",
     components: {
-        MainSidebar,
         Page
 
     },
