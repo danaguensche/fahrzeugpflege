@@ -184,8 +184,6 @@ import ConfirmButton from '../CommonSlots/ConfirmButton.vue';
 import CancelButton from '../CommonSlots/CancelButton.vue';
 import DeleteButton from '../CommonSlots/DeleteButton.vue';
 import Pagination from '../CommonSlots/Pagination.vue';
-import { data } from 'autoprefixer';
-import { fi } from 'vuetify/locale';
 import DefaultButton from '../CommonSlots/DefaultButton.vue';
 import FilterButton from './FilterButton.vue';
 

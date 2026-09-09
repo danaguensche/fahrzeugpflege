@@ -17,19 +17,23 @@ use App\Http\Controllers\JobController;
 use Spatie\Activitylog\Models\Activity;
 use App\Http\Controllers\ImageController;
 
-
 // Auth Routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/me', [UserController::class, 'me']);
     Route::put('/users/me', [UserController::class, 'update']);
-
-    // Users Routes (restricted for trainee)
+    Route::post('/users/change-password', [UserController::class, 'changePassword']);
+    Route::get('/users/trainees', [UserController::class, 'getTrainees']);
     Route::middleware(CheckRole::class . ':trainer,admin')->group(function () {
         Route::get('/users', [UserController::class, 'index']);
         Route::get('/users/search', [UserController::class, 'search']);
-        Route::put('/users/{id}', [UserController::class, 'update']);
-        Route::get('/users/trainees', [UserController::class, 'getTrainees']);
+    });
+
+    // Only admins may create, update, or delete users
+    Route::middleware(CheckRole::class . ':admin')->group(function () {
         Route::post('/users', [UserController::class, 'store']);
+        Route::put('/users/{id}', [UserController::class, 'update']);
+        Route::delete('/users/{id}', [UserController::class, 'destroy']);
+        Route::delete('/users', [UserController::class, 'destroyMultiple']);
     });
 
     //Dashboard Routes
@@ -42,17 +46,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/jobs/calendar-events', [JobController::class, 'getCalendarEvents']);
     
     //Activity Log Routes
-
     Route::get('/activities', function () {
         return Activity::with('causer')
             ->latest()
             ->take(10)
             ->get();
-    });
-
-    Route::middleware(CheckRole::class . ':admin')->group(function () {
-        Route::delete('users/{id}', [UserController::class, 'destroy']);
-        Route::delete('users', [UserController::class, 'destroyMultiple']);
     });
 
     // Cars Routes (View only for trainee, full access for trainer/admin)
@@ -107,7 +105,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/jobs/search', [JobController::class, 'search']);
         Route::get('/jobs', [JobController::class, 'index']);
         Route::get('/jobs/{job}', [JobController::class, 'show']);
-        Route::put('/jobs/{job}', [JobController::class, 'update']); // Moved outside of role middleware
+        Route::put('/jobs/{job}', [JobController::class, 'update']);
         Route::get('/jobs/jobdetails/{id}', [JobDetailsController::class, 'details']);
         Route::put('/jobs/jobdetails/{id}', [JobDetailsController::class, 'update']);
         Route::delete('jobs/{job}/images/{imageId}', [JobController::class, 'deleteImage']);
@@ -119,11 +117,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/jobs/{id}', [JobController::class, 'update']);
     });
 
-
-    //User Routes
-    Route::get('/users/search', [UserController::class, 'search']);
-    Route::put('/users/{id}', [UserController::class, 'update']);
-    Route::post('/users/change-password', [UserController::class, 'changePassword']);
 
     // Comment Routes
     Route::get('/orders/{order}/comments', [App\Http\Controllers\CommentController::class, 'index']);
@@ -139,7 +132,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware(CheckRole::class . ':trainer,admin,trainee')->group(function () {
         Route::post('/jobs', [JobController::class, 'store']);
-        // Route::put('/jobs/{job}', [App\Http\Controllers\JobController::class, 'update']); // Moved outside
         Route::delete('/jobs/{job}', [JobController::class, 'destroy']);
         Route::delete('jobs', [JobController::class, 'destroyMultiple']);
     });

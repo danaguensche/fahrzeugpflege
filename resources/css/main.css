@@ -38,6 +38,7 @@
 body {
     background-image: url("public\images\background.png") no-repeat center center fixed;
     padding: 0px;
+    overflow-y: hidden !important;
 }
 
 .rubik-font {

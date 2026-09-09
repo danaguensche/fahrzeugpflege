@@ -24,5 +24,6 @@ export default {
   background-repeat: no-repeat;
   background-position: center;
   height: 100vh;
+  overflow-y: hidden!important;
 }
 </style>

@@ -92,9 +92,13 @@ class UserController extends Controller
      */
     public function update(Request $request, $id = null)
     {
+        if ($id !== null && $request->user()?->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
         try {
-            if ($id) {
-                // An admin or trainer is updating a specific user.
+            if ($id !== null) {
+                // An admin is updating a specific user.
                 $user = User::findOrFail($id);
                 $validatedData = $request->validate([
                     'firstname' => 'sometimes|string|max:255',
@@ -130,6 +134,16 @@ class UserController extends Controller
 
             if (isset($validatedData['password'])) {
                 $validatedData['password'] = Hash::make($validatedData['password']);
+            }
+
+            if (
+                $id !== null
+                && (int) $id === (int) $request->user()->id
+                && $validatedData['role'] !== 'admin'
+            ) {
+                return response()->json([
+                    'message' => 'Die eigene Administratorrolle kann nicht entfernt werden.',
+                ], 422);
             }
 
             $user->update($validatedData);
