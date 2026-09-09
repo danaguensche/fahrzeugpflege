@@ -37,8 +37,8 @@
 
                         <v-col cols="12" sm="6">
                             <v-text-field v-model="customer.email" label="E-Mail" :rules="[v => !v || /.+@.+\..+/.test(v) || 'Ungültige E-Mail-Adresse'
-                            ]" variant="outlined" density="comfortable" prepend-inner-icon="mdi-email"
-                                type="email" class="mb-3" :maxlength="60" :counter="60"></v-text-field>
+                            ]" variant="outlined" density="comfortable" prepend-inner-icon="mdi-email" type="email"
+                                class="mb-3" :maxlength="60" :counter="60"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="6">
@@ -51,9 +51,8 @@
 
                         <v-col cols="12">
                             <v-text-field v-model="customer.addressline" label="Straße und Hausnummer"
-                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-home"
-                                class="mb-3" :maxlength="50"
-                                :counter="50"></v-text-field>
+                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-home" class="mb-3"
+                                :maxlength="50" :counter="50"></v-text-field>
                         </v-col>
 
                         <v-col cols="12" sm="4">
@@ -65,8 +64,7 @@
 
                         <v-col cols="12" sm="8">
                             <v-text-field v-model="customer.city" label="Stadt" variant="outlined" density="comfortable"
-                                prepend-inner-icon="mdi-city" class="mb-3" :maxlength="50"
-                                :counter="50"></v-text-field>
+                                prepend-inner-icon="mdi-city" class="mb-3" :maxlength="50" :counter="50"></v-text-field>
                         </v-col>
 
                         <!-- Fahrzeug hinzufügen (mit Suche und Autovervollständigung) -->
@@ -111,7 +109,7 @@
 
         <!-- Snackbar außerhalb der v-card platzieren -->
     </v-dialog>
-    
+
     <!-- Vuetify Snackbar direkt verwenden -->
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" location="bottom" :timeout="5000">
         {{ snackbar.text }}
@@ -215,33 +213,29 @@ export default {
                 this.closeDialog();
             } catch (error) {
                 console.error('Fehler beim Speichern:', error.response?.data || error);
-                
+
                 let errorMessage = 'Fehler beim Speichern des Kunden';
-                
+
                 if (error.response && error.response.data) {
                     const data = error.response.data;
-                    
+
                     if (data.errors) {
-                        console.log('Errors gefunden:', data.errors);
-                        
+
                         if (data.errors.email) {
                             const emailError = data.errors.email;
                             errorMessage = Array.isArray(emailError) ? emailError[0] : emailError;
-                            console.log('Email-Fehler:', errorMessage);
                         } else {
                             // Ersten verfügbaren Fehler nehmen
                             const firstErrorKey = Object.keys(data.errors)[0];
                             const firstError = data.errors[firstErrorKey];
                             errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
                         }
-                    } 
+                    }
                     // Alternativ nach message suchen
                     else if (data.message) {
                         errorMessage = data.message;
                     }
                 }
-                
-                console.log('Finale Fehlermeldung:', errorMessage);
                 this.showSnackbar(errorMessage, 'error');
             } finally {
                 this.customersLoading = false;
@@ -297,13 +291,11 @@ export default {
         },
 
         showSnackbar(text, color = 'success') {
-            console.log('showSnackbar aufgerufen:', text, color);
             this.snackbar = {
                 show: true,
                 text,
                 color,
             };
-            console.log('Snackbar state:', this.snackbar);
         },
 
         async assignCarToCustomer(car, customerId) {

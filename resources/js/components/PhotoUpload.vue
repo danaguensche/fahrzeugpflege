@@ -59,7 +59,6 @@ const uploadFiles = async () => {
     if (props.carId) formData.append('car_id', props.carId);
     if (props.jobId) formData.append('job_id', props.jobId);
 
-    console.log('Uploading with job ID:', props.jobId);
 
     try {
       await axios.post('/api/images', formData, {

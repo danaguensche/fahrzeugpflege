@@ -64,8 +64,6 @@ export default {
     },
     computed: {
         resolvedDetails() {
-            console.log('Details prop:', this.details);
-            // Check if details has a 'data' property, if so, use it. Otherwise, use details directly.
             return this.details && this.details.data ? this.details.data : this.details;
         }
     }

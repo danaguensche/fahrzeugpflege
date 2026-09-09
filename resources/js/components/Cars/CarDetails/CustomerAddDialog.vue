@@ -240,7 +240,6 @@ export default {
       this.isSaving = true;
 
       try {
-        console.log('Neuer Kunde:', this.newCustomer);
         const response = await axios.post('/api/customers', this.newCustomer);
 
         if (response.data) {

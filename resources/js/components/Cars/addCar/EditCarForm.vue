@@ -161,7 +161,6 @@ export default {
             try {
                 const response = await axios.get(`/api/cars/${encodeURIComponent(this.carData.Kennzeichen)}`);
                 fullCarData = response.data.data || response.data;
-                console.log('Full car data:', fullCarData);
             } catch (error) {
                 console.error('Error fetching full car data:', error);
             }
@@ -236,7 +235,6 @@ export default {
             }
 
             this.car.customer = existingCustomer;
-            console.log('Customer set:', this.car.customer);
         },
 
         closeDialog() {

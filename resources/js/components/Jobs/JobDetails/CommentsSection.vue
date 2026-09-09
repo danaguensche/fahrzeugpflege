@@ -158,7 +158,6 @@ export default {
 
             this.loading = true;
             try {
-                console.log(this.jobId)
                 const response = await axios.post(`/api/orders/${this.jobId}/comments`, {
                     text: this.newCommentText,
                 });

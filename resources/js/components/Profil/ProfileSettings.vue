@@ -392,7 +392,6 @@ export default {
           city: this.editedUserData.city
         };
 
-        console.log("Daten zum Senden:", dataToSend);
         await axios.put("/api/users/me", dataToSend, {
           headers: { Authorization: `Bearer ${token}` }
         });

@@ -326,7 +326,6 @@ export default {
             this.availableCars = [];
 
             if (customer) {
-                console.log('Customer ID:', customer.id);
                 await this.fetchCarsForCustomer(customer.id);
             }
         },

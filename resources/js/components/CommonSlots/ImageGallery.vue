@@ -406,8 +406,6 @@ export default {
     setTimeout(() => this.closeImageUploadDialog(), 500);
 
 } catch (error) {
-    console.log('Error uploading/assigning images:', error);
-    console.log('Error response:', error.response?.data);
     const errorMessage = error.response?.data?.message || 'Fehler beim Hochladen der Bilder';
     this.handleImageUploadError(errorMessage);
     this.$emit('error', errorMessage);

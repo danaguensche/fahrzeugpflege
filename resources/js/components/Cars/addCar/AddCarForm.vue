@@ -250,7 +250,6 @@ export default {
             this.carGroupsLoading = true;
             try {
                 const response = await axios.get(`/api/cargroups/search?query=${query}`);
-                console.log(response.data);
                 this.carGroups = response.data.data.map(group => ({
                     id: group.id,
                     title: group.title,

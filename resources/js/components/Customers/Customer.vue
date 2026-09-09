@@ -153,10 +153,6 @@ export default {
             }
         },
 
-        handleItemsDeleted() {
-            console.log('Customers deleted, table will refresh automatically');
-        },
-
         handleError(message) {
             console.error('Error from DataTable:', message);
         },

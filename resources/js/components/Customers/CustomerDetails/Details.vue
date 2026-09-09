@@ -544,9 +544,6 @@ export default {
 
         const endpoint = `/api/cars/cardetails/${newCar.car.Kennzeichen}`;
 
-        console.log('Sende Anfrage an:', endpoint);
-        console.log('Mit Payload:', JSON.stringify(requestPayload));
-
         const response = await axios.put(
           endpoint,
           requestPayload,
@@ -558,8 +555,6 @@ export default {
             }
           }
         );
-
-        console.log('Server-Antwort:', response.data);
 
         // Refresh car details to get the latest data
         await this.getCustomer();

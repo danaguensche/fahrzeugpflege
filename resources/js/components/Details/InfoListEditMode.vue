@@ -76,11 +76,7 @@ export default {
         },
 
         mounted(){
-            labels.forEach(key => {
-                console.log(`${key}: ${labels[key]}`);
-                
-            });
-            console.log('')
+
         }
     },
 

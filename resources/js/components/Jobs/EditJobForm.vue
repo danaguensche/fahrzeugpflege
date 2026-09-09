@@ -240,7 +240,6 @@ export default {
             const fullJobData = await this.fetchFullJobData(this.jobData.id);
             const data = fullJobData || this.jobData;
 
-            console.log('Full job data:', data);
             this.job.id = data.id;
             this.job.title = data.title || '';
             this.job.description = data.description || '';

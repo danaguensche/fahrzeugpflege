@@ -407,7 +407,6 @@ export default {
             }
 
             this.loading = true;
-            console.log(`[DataTable] Search started for ${this.endpoint} with query: ${query}.`);
             try {
                 const params = {
                     query: query.trim(),
@@ -439,7 +438,6 @@ export default {
                 this.items = items;
                 this.totalItems = total;
                 this.options.page = page;
-                console.log(`[DataTable] Search completed for ${this.endpoint}. Found ${this.totalItems} items.`);
 
             } catch (error) {
                 console.error(`[DataTable] Error during search for ${this.endpoint}:`, error);
@@ -448,7 +446,6 @@ export default {
                 this.$emit('show-error', `Error when searching for ${this.endpoint}`);
             } finally {
                 this.loading = false;
-                console.log(`[DataTable] Search finished for ${this.endpoint}.`);
             }
         },
 
@@ -738,7 +735,6 @@ export default {
                 this.$emit('show-error', `Error during data loading for ${this.endpoint}`);
             } finally {
                 this.loading = false;
-                console.log(`[DataTable] Loading finished for ${this.endpoint}.`);
             }
         },
 

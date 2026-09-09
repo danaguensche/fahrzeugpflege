@@ -117,10 +117,6 @@ export default {
             this.showAddCarDialog = true;
         },
 
-        handleItemsDeleted() {
-            console.log('Cars deleted, table will refresh automatically');
-        },
-
         handleError(message) {
             console.error('Error from DataTable:', message);
         },

@@ -586,8 +586,6 @@ export default {
 
         images() {
             const img = this.jobDetails.data?.images;
-            console.log("Raw images data:", img);
-
             if (!img) {
                 return [];
             }
@@ -1192,10 +1190,8 @@ export default {
 
         async fetchTrainees(query = '') {
             this.traineesLoading = true;
-            console.log('fetchTrainees called with query:', query);
             try {
                 const response = await axios.get(`/api/users/search?query=${query}`);
-                console.log('Response:', response.data);
                 this.trainees = response.data.data.map(trainee => ({
                     id: trainee.id,
                     firstname: trainee.firstname,

@@ -281,9 +281,7 @@ export default {
         }
     },
     methods: {
-        getImageUrl(image) {
-            //console.log('Getting image URL for:', image);
-            
+        getImageUrl(image) {            
             // Handle different image formats
             if (typeof image === 'string') {
                 // If it's already a URL, return as is
@@ -333,16 +331,12 @@ export default {
             this.replaceIndex = null;
         },
 
-        onReplaceFileChange(event) {
-            console.log('File change event triggered:', event);
-            
+        onReplaceFileChange(event) {            
             this.replacePreview = null;
             
             const file = event ? event.target.files[0] : null;
 
-            if (file && file instanceof File) {
-                console.log('Valid file selected:', file.name, file.size, file.type);
-                
+            if (file && file instanceof File) {                
                 const isValidSize = file.size < 10000000; // 10MB
                 const isValidType = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type);
 
@@ -367,17 +361,14 @@ export default {
                 this.replaceFile = file; // Assign the file here
                 this.createReplacePreview(file);
             } else {
-                console.log('No file selected or invalid file');
                 this.replaceFile = null; // Ensure replaceFile is null if no valid file
                 this.replacePreview = null;
             }
         },
 
         createReplacePreview(file) {
-            console.log('Creating preview for:', file.name);
             const reader = new FileReader();
             reader.onload = (e) => {
-                console.log('Preview created successfully');
                 this.replacePreview = e.target.result;
             };
             reader.onerror = (e) => {
@@ -387,11 +378,6 @@ export default {
         },
 
         replaceImage() {
-            console.log('Replace image called with:', {
-                file: this.replaceFile,
-                index: this.replaceIndex,
-                image: this.images[this.replaceIndex]
-            });
             
             if (this.replaceFile && this.replaceIndex !== null) {
                 this.$emit('replace-image', this.replaceIndex, this.replaceFile);
@@ -408,10 +394,6 @@ export default {
             if (this.deleteIndex === null) return;
 
             const imageToDelete = this.images[this.deleteIndex];
-            console.log('Attempting to delete image:', {
-                index: this.deleteIndex,
-                image: imageToDelete,
-            });
 
             if (imageToDelete && imageToDelete.id) {
                 this.$emit('delete-image', imageToDelete.id);

@@ -160,10 +160,6 @@ export default {
             }
         },
 
-        handleJobsDeleted() {
-            console.log('Jobs deleted, table will refresh automatically');
-        },
-
         handleError(message) {
             console.error('Error from JobTable:', message);
         },

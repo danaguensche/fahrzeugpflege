@@ -158,13 +158,8 @@ export default {
 
         async fetchCars(query = '') {
             this.carsLoading = true;
-            try {
-                console.log('Fetching cars with query:', query);
-                
-                const response = await axios.get(`/api/cars/search-available?query=${encodeURIComponent(query)}`);
-                
-                console.log('API Response:', response.data);
-                
+            try {                
+                const response = await axios.get(`/api/cars/search-available?query=${encodeURIComponent(query)}`);                
                 let carsData;
                 if (response.data.data) {
                     carsData = response.data.data;
@@ -179,9 +174,7 @@ export default {
                     Kennzeichen: car.Kennzeichen || car.kennzeichen || '',
                     Automarke: car.Automarke || car.automarke || '',
                 }));
-                
-                console.log('Processed cars:', this.cars);
-                
+                                
                 if (this.cars.length === 0 && query) {
                     this.showSnackbar('Keine Fahrzeuge gefunden', 'info');
                 }
@@ -195,9 +188,7 @@ export default {
             }
         },
 
-        searchCars(query) {
-            console.log('Search triggered with:', query); 
-            
+        searchCars(query) {            
             if (this.carSearchTimeout) {
                 clearTimeout(this.carSearchTimeout);
             }
@@ -209,7 +200,6 @@ export default {
 
         handleCarSelection(selectedCar) {
             if (selectedCar) {
-                console.log('Car selected:', selectedCar);
                 this.loadFullCarDetails(selectedCar.Kennzeichen);
             }
         },
@@ -218,7 +208,6 @@ export default {
             try {
                 const response = await axios.get(`/api/cars/${encodeURIComponent(kennzeichen)}`);
                 this.customer.car = response.data.data || response.data;
-                console.log('Full car details loaded:', this.customer.car);
             } catch (error) {
                 console.error('Fehler beim Laden der Fahrzeugdetails:', error);
                 this.showSnackbar('Fahrzeugdetails konnten nicht geladen werden', 'error');
@@ -285,8 +274,6 @@ export default {
                     Farbe: car.Farbe || null,
                     Sonstiges: car.Sonstiges || null
                 };
-
-                console.log('Assigning car to customer:', requestPayload); // Debug
                 
                 await axios.put(`/api/cars/cardetails/${encodeURIComponent(car.Kennzeichen)}`, requestPayload);
                 

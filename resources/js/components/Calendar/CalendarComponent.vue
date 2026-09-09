@@ -84,9 +84,6 @@ export default {
       })
         .then(response => {
           this.events = [];
-
-          console.log("Fetched jobs:", response.data.items);
-
           response.data.items.forEach(job => {
             const pickupEvent = this.createPickupEvent(job);
             if (pickupEvent) {
@@ -109,8 +106,6 @@ export default {
       const pickupEndTime = new Date(pickupStartTime.getTime() + 30 * 60 * 1000); // 30 Minuten
 
       const eventClass = job.status.replace(/_/g, '-');
-
-      console.log(`Pickup Event - Start: ${pickupStartTime}, End: ${pickupEndTime}, Status: ${job.status}`);
 
       return {
         start: pickupStartTime,

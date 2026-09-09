@@ -134,10 +134,6 @@ export default {
             this.showAddUserDialog = true;
         },
 
-        handleItemsDeleted() {
-            console.log('Users deleted, table will refresh automatically');
-        },
-
         handleError(message) {
             console.error('Error from DataTable:', message);
         },

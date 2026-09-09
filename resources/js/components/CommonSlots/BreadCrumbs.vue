@@ -31,7 +31,6 @@ export default {
         }
     },
     mounted() {
-        console.log('Component mounted, links:', this.links);
     }
 }
 </script>
