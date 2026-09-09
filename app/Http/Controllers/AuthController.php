@@ -54,7 +54,6 @@ class AuthController extends Controller
                 'role' => $user->role,
             ],
             'token' => $token,
-            'redirect' => '/dashboard'
         ]);
     }
 

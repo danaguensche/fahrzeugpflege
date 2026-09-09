@@ -12,18 +12,13 @@ use App\Http\Controllers\CarSearchController;
 use App\Http\Controllers\JobDetailsController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ImageReportController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Middleware\CheckRole;
 use App\Http\Controllers\JobController;
-use App\Http\Controllers\CommentController;
 use Spatie\Activitylog\Models\Activity;
 use App\Http\Controllers\ImageController;
 
 
 // Auth Routes
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/me', [UserController::class, 'me']);
     Route::put('/users/me', [UserController::class, 'update']);

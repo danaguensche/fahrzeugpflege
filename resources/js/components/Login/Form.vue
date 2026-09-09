@@ -45,8 +45,8 @@
                                     </v-col>
 
                                     <v-col cols="12">
-                                        <v-text-field v-model="formData.username" label="Benutzername *"
-                                            required variant="outlined" density="comfortable"
+                                        <v-text-field v-model="formData.username" label="Benutzername *" required
+                                            variant="outlined" density="comfortable"
                                             prepend-inner-icon="mdi-account-circle" class="mb-6" type="text"
                                             autocomplete="username" :disabled="loading">
                                         </v-text-field>
@@ -57,17 +57,17 @@
                         </v-expand-transition>
 
                         <v-col cols="12" v-if="isRegistered">
-                            <v-text-field v-model="formData.username" label="Benutzername" required
-                                variant="outlined" density="comfortable" prepend-inner-icon="mdi-account-circle" class="mb-3"
-                                type="text" autocomplete="username" :disabled="loading">
+                            <v-text-field v-model="formData.username" label="Benutzername" required variant="outlined"
+                                density="comfortable" prepend-inner-icon="mdi-account-circle" class="mb-3" type="text"
+                                autocomplete="username" :disabled="loading">
                             </v-text-field>
                         </v-col>
 
                         <v-slide-y-transition mode="out-in">
                             <v-col v-if="isRegistered" key="login-password" cols="12">
-                                <v-text-field v-model="formData.password" label="Passwort"
-                                    required variant="outlined" density="comfortable" prepend-inner-icon="mdi-lock"
-                                    class="mb-3" :type="showPassword ? 'text' : 'password'"
+                                <v-text-field v-model="formData.password" label="Passwort" required variant="outlined"
+                                    density="comfortable" prepend-inner-icon="mdi-lock" class="mb-3"
+                                    :type="showPassword ? 'text' : 'password'"
                                     :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                                     @click:append-inner="showPassword = !showPassword"
                                     :autocomplete="isRegistered ? 'current-password' : 'new-password'"
@@ -260,33 +260,27 @@ export default {
         },
 
         async handleSuccessfulAuth(data) {
-            const { token, user, redirect } = data;
+            const { token, user } = data;
 
-            // Standard-Rolle trainee
             if (user && !user.role) {
                 user.role = 'trainee';
             }
 
-            try {
-                await this.$store.dispatch('auth/login', {
-                    token,
-                    role: user?.role || 'trainee',
-                    id: user?.id || ''
-                });
-            } catch (error) {
-                console.error('Store update failed:', error);
-            }
+            await this.$store.dispatch('auth/login', {
+                token,
+                role: user?.role || 'trainee',
+                id: user?.id || '',
+            });
 
-            // Axios Standard-Header setzen
             if (this.$http?.defaults?.headers?.common) {
                 this.$http.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             }
+
             this.$emit('auth-success', { user, token });
-            if (redirect) {
-                window.location.href = redirect;
-            } else {
-                this.$router?.push('/dashboard');
-            }
+
+            const targetRoute = this.$route.query.redirect || '/dashboard';
+
+            this.$router.push(targetRoute);
         },
 
         handleAuthError(error) {
@@ -337,9 +331,11 @@ export default {
 }
 
 input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0px 1000px white inset !important; /* Hintergrund überschreiben */
+    -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+    /* Hintergrund überschreiben */
     box-shadow: 0 0 0px 1000px white inset !important;
-    -webkit-text-fill-color: #000 !important; /* Textfarbe */
+    -webkit-text-fill-color: #000 !important;
+    /* Textfarbe */
 }
 
 input:-webkit-autofill:focus {
@@ -354,14 +350,14 @@ input:autofill {
 
 /* Firefox */
 input:autofill {
-    background-color: white !important;  /* Hintergrundfarbe */
-    color: #000 !important;              /* Textfarbe */
+    background-color: white !important;
+    /* Hintergrundfarbe */
+    color: #000 !important;
+    /* Textfarbe */
 }
 
 /* Für den Fall, dass Firefox einen Rahmen setzt */
 input:autofill {
     box-shadow: 0 0 0px 1000px white inset !important;
 }
-
-
 </style>
