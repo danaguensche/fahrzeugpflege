@@ -18,12 +18,4 @@ export default {
 <style>
 @import url("../../css/main.css");
 
-.app {
-  background-image: url('../../../public/images/background5.jpg');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  height: 100vh;
-  overflow-y: hidden!important;
-}
 </style>

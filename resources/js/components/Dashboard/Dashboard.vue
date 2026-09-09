@@ -96,7 +96,6 @@ import AddJobForm from '../Jobs/AddJobForm.vue';
 import { mapState, mapGetters } from 'vuex';
 import OpenJobsWidget from './Widgets/OpenJobsWidget.vue';
 import WidgetLayout from './Widgets/WidgetLayout.vue';
-import axios from 'axios';
 import CarsWidget from './Widgets/CarsWidget.vue';
 import CustomersWidget from './Widgets/CustomersWidget.vue';
 import TodaysJobsWidget from './Widgets/TodaysJobsWidget.vue';
@@ -162,7 +161,7 @@ export default {
     font-family: var(--font-family);
     margin-left: 150px;
     height: 100vh;
-    overflow: hidden;
+    overflow: hidden !important;
 }
 
 .dashboard-page-sidebar-opened {
@@ -175,7 +174,7 @@ export default {
     height: 100vh;
     padding: 16px;
     gap: 16px;
-    overflow: hidden;
+    overflow: hidden !important;
 }
 
 .widgets-row {
@@ -262,7 +261,7 @@ export default {
         height: 100dvh;
         padding: 8px;
         gap: 8px;
-        overflow-y: auto;
+        overflow-y: hidden;
         grid-template-rows: auto auto auto;
     }
 

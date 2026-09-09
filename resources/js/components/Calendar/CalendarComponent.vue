@@ -198,6 +198,7 @@ export default {
   max-width: 100%;
   margin-right: auto;
   height: calc(100vh - 70px);
+  overflow: hidden !important;
 }
 
 
