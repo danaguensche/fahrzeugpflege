@@ -281,10 +281,9 @@ export default {
 </script>
 
 <style scoped>
-/* ... dein bestehender Style bleibt unverändert ... */
 .jobs-page {
     margin-left: 150px;
-    padding-right: 20px;
+    padding-right: 50px;
     transition: margin-left 0.3s ease;
     font-family: var(--font-family);
 }

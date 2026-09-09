@@ -31,8 +31,8 @@ export default {
 .content-area {
   flex-grow: 1;
   padding-left: 30%; 
-  overflow-y: auto;
   padding: 20px;
   transition: padding-left 0.6s ease;
+  width: 100%;
 }
 </style>
