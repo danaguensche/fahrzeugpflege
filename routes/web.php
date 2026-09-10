@@ -7,7 +7,7 @@ Route::get('/', function () {
     return view('app');
 });
 
-Route::post('/login', [AuthController::class, 'loginPost'])->name('login.post');
+Route::post('/login', [AuthController::class, 'loginPost'])->name('login.post')->middleware('throttle:login');
 Route::post('/signup', [AuthController::class, 'signupPost'])->name('signup.post');
 Route::post('/logout', [AuthController::class, 'logout'])
     ->name('logout')

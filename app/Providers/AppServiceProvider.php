@@ -1,12 +1,14 @@
 <?php
 
 namespace App\Providers;
-use App\Services\Filesystem;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Sanctum\Sanctum;
 use Laravel\Sanctum\PersonalAccessToken;
 use Illuminate\Routing\Router;
+use Illuminate\Http\Request;
+use Illuminate\Cache\RateLimiting\Limit;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -29,10 +31,11 @@ class AppServiceProvider extends ServiceProvider
             return new class($translator, $data, $rules, $messages) extends \Illuminate\Validation\Validator {
             };
         });
-    
-        header('Content-Type: application/json');
-        header('X-Requested-With: XMLHttpRequest');
-        header('Access-Control-Allow-Headers: Authorization');
+
+        RateLimiter::for('login', function(Request $request) {
+            return Limit::perMinute(5)
+                ->by($request->ip());
+        });
 
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
     }
