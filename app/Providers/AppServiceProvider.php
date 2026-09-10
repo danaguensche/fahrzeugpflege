@@ -32,10 +32,12 @@ class AppServiceProvider extends ServiceProvider
             };
         });
 
-        RateLimiter::for('login', function(Request $request) {
-            return Limit::perMinute(5)
-                ->by($request->ip());
-        });
+        $authLimiter = function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
+        };
+
+        RateLimiter::for('login', $authLimiter);
+        RateLimiter::for('signup', $authLimiter);
 
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
     }

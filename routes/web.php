@@ -8,7 +8,7 @@ Route::get('/', function () {
 });
 
 Route::post('/login', [AuthController::class, 'loginPost'])->name('login.post')->middleware('throttle:login');
-Route::post('/signup', [AuthController::class, 'signupPost'])->name('signup.post');
+Route::post('/signup', [AuthController::class, 'signupPost'])->name('signup.post')->middleware('throttle:signup');
 Route::post('/logout', [AuthController::class, 'logout'])
     ->name('logout')
     ->middleware('auth:sanctum');
