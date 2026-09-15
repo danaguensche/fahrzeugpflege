@@ -1,0 +1,123 @@
+
+Ref: users.username - allowed_usernames.username
+
+Table allowed_usernames {
+  id bigint(20) [PK]
+  username varchar(255) [unique]
+  claimed boolean
+  role varchar(255)
+}
+
+Table users {
+  id bigint
+  username varchar [unique]
+  firstname varchar
+  lastname varchar
+  phonenumber varchar(20)
+  addressline varchar
+  postalcode varchar
+  city varchar
+  password varchar
+  api_token varchar(80)
+  role enum('trainee', 'trainer', 'admin' )
+}
+
+Table auftraege {
+  id bigint(20) [PK]
+  trainer_id bigint(20)
+  trainee_id bigint(20)
+  title varchar(255)
+  description text
+  status varchar(255)
+  scheduled_at timestamp
+  customer_id bigint(20)
+  car_id bigint(20)
+  cleaning_time double
+}
+
+Ref: auftraege.customer_id > customers.id
+Ref: auftraege.car_id > cars.id
+Ref: auftraege.trainer_id > users.id
+Ref: auftraege.trainee_id > users.id
+
+Table cars {
+  id bigint(20) [PK]
+  Kennzeichen text
+  Fahrzeugklasse varchar (255)
+  Automarke text
+  Typ text
+  Farbe text
+  Sonstiges text
+  customer_id bigint(20)
+}
+
+Ref: cars.Fahrzeugklasse > car_groups.id
+Ref: cars.customer_id > customers.id
+
+Table car_groups {
+  id bigint(20) [PK]
+  title varchar(50)
+}
+
+Table comments {
+  id bigint(20) [PK]
+  job_id bigint(20)
+  user_id bigint(20)
+  order_id bigint(20)
+  comment_text text 
+}
+
+Ref: comments.job_id > auftraege.id
+Ref: comments.user_id > users.id
+
+Table customers {
+  id bigint(20) [PK]
+  company varchar
+  firstname varchar
+  lastname varchar
+  email varchar
+  phonenumber varchar
+  addressline varchar
+  postalcode varchar
+  city varchar
+  notes varchar
+} 
+
+Table images {
+  id bigint [PK]
+  job_id bigint
+  car_id bigint
+  path varchar
+}
+
+Ref: images.job_id > auftraege.id
+Ref: images.car_id > cars.id
+
+Table image_reports {
+  id bigint [PK]
+  job_id bigint
+  car_id bigint
+  user_id bigint
+  path varchar
+  file_name varchar
+  file_size bigint
+  mime_type varchar
+}
+
+Ref: image_reports.user_id > users.id
+Ref: image_reports.job_id > auftraege.id
+Ref: image_reports.car_id > cars.id
+
+Table job_service {
+  id bigint [PK]
+  job_id bigint
+  service_id bigint
+}
+
+Ref: job_service.job_id > auftraege.id
+Ref: job_service.service_id > services.id
+
+Table services {
+  id bigint [PK]
+  title varchar
+}

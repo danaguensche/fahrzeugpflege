@@ -1,0 +1,145 @@
+Table allowed_usernames {
+  id bigint [pk, increment]
+  username varchar(255) [unique, not null]
+  claimed boolean [not null, default: false]
+  role varchar(20) [not null]
+}
+
+Table users {
+  id bigint [pk, increment]
+  username varchar(255) [unique, not null]
+  firstname varchar(100) [not null]
+  lastname varchar(100) [not null]
+  phonenumber varchar(30)
+  addressline varchar(255)
+  postalcode varchar(10)
+  city varchar(100)
+  password varchar(255) [not null]
+  api_token varchar(80) [unique]
+  role enum('trainee', 'trainer', 'admin') [not null]
+}
+
+Ref: users.username - allowed_usernames.username
+
+
+Table customers {
+  id bigint [pk, increment]
+  company varchar(255)
+  firstname varchar(100)
+  lastname varchar(100)
+  email varchar(255)
+  phonenumber varchar(30)
+  addressline varchar(255)
+  postalcode varchar(10)
+  city varchar(100)
+  notes text
+}
+
+Table car_groups {
+  id bigint [pk, increment]
+  title varchar(50) [not null, unique]
+}
+
+Table cars {
+  id bigint [pk, increment]
+  kennzeichen varchar(20) [not null, unique]
+  fahrzeugklasse_id bigint [not null]
+  automarke varchar(100)
+  typ varchar(100)
+  farbe varchar(50)
+  sonstiges text
+  customer_id bigint [not null]
+}
+
+Ref: cars.fahrzeugklasse_id > car_groups.id
+Ref: cars.customer_id > customers.id
+
+
+Table auftraege {
+  id bigint [pk, increment]
+  trainer_id bigint
+  trainee_id bigint
+  title varchar(255) [not null]
+  description text
+  status varchar(30) [not null]
+  scheduled_at timestamp
+  customer_id bigint [not null]
+  car_id bigint [not null]
+  cleaning_time decimal(8,2)
+
+  indexes {
+    trainer_id
+    trainee_id
+    customer_id
+    car_id
+    status
+    scheduled_at
+  }
+}
+
+Ref: auftraege.customer_id > customers.id
+Ref: auftraege.car_id > cars.id
+Ref: auftraege.trainer_id > users.id
+Ref: auftraege.trainee_id > users.id
+
+
+Table comments {
+  id bigint [pk, increment]
+  job_id bigint [not null]
+  user_id bigint [not null]
+  comment_text text [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: comments.job_id > auftraege.id
+Ref: comments.user_id > users.id
+
+
+Table images {
+  id bigint [pk, increment]
+  job_id bigint [not null]
+  car_id bigint [not null]
+  path varchar(500) [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: images.job_id > auftraege.id
+Ref: images.car_id > cars.id
+
+
+Table image_reports {
+  id bigint [pk, increment]
+  job_id bigint [not null]
+  car_id bigint [not null]
+  user_id bigint [not null]
+  path varchar(500) [not null]
+  file_name varchar(255) [not null]
+  file_size bigint
+  mime_type varchar(100)
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: image_reports.user_id > users.id
+Ref: image_reports.job_id > auftraege.id
+Ref: image_reports.car_id > cars.id
+
+
+Table services {
+  id bigint [pk, increment]
+  title varchar(255) [not null, unique]
+}
+
+Table job_service {
+  job_id bigint [not null]
+  service_id bigint [not null]
+
+  indexes {
+    (job_id, service_id) [pk]
+  }
+}
+
+Ref: job_service.job_id > auftraege.id
+Ref: job_service.service_id > services.id
