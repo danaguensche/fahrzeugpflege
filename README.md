@@ -28,5 +28,9 @@ https://github.com/user-attachments/assets/60441032-07d4-489c-89a3-6012fe431a16
 
 **Genauere Anleitung und Informationen befinden sich im [Wiki](https://github.com/danaguensche/fahrzeugpflege/wiki). des Repositorys.**  
 
+## Datenbank
+
+![erm](dokumentation/ERM/Fahrzeugpflege_ERM.png)
+
 
 
