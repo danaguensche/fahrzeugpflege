@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginUserRequest;
+use App\Http\Requests\RegisterUserRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -58,18 +59,9 @@ class AuthController extends Controller
     }
 
 
-    public function signupPost(Request $request)
+    public function signupPost(RegisterUserRequest $request)
     {
-        $request->validate([
-            "firstname"   => "required|string|max:30",
-            "lastname"    => "required|string|max:30",
-            "username"    => "required|string|max:255|unique:users,username|exists:allowed_usernames,username",
-            "password"    => "required|string|min:8|confirmed",
-            "phoneNumber" => "nullable|string|max:20",
-            "addressLine" => "nullable|string|max:255",
-            "postalCode"  => "nullable|string|max:10",
-            "city"        => "nullable|string|max:255",
-        ]);
+        $request->validated();
     
         $allowed = DB::table('allowed_usernames')
             ->where('username', $request->username)
