@@ -30,7 +30,7 @@ https://github.com/user-attachments/assets/60441032-07d4-489c-89a3-6012fe431a16
 
 ## Datenbank
 
-![erm](dokumentation/ERM/Fahrzeugpflege_ERM.png)
+![erm](dokumentation/ERM/Fahrzeugpflege-reworked.png)
 
 
 
